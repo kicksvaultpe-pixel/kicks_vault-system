@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KICKZ — Sistema de Gestión</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --black: #0a0a0a; --dark: #111111; --card: #1a1a1a; --border: #2a2a2a;
+    --accent: #e8ff00; --accent2: #ff4d00; --green: #00e676; --red: #ff1744;
+    --text: #f0f0f0; --muted: #666;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--black); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; }
+
+  nav {
+    background:var(--dark); border-bottom:1px solid var(--border);
+    padding:0 16px; position:sticky; top:0; z-index:100;
+    display:flex; align-items:center; justify-content:space-between; height:56px;
+  }
+  .logo { font-family:'Bebas Neue'; font-size:26px; letter-spacing:2px; color:var(--accent); }
+  .nav-tabs { display:flex; gap:2px; overflow-x:auto; scrollbar-width:none; }
+  .nav-tabs::-webkit-scrollbar { display:none; }
+  .tab-btn {
+    padding:8px 14px; border:none; background:none; color:var(--muted);
+    font-family:'DM Sans'; font-size:12px; font-weight:500; cursor:pointer;
+    border-radius:6px; white-space:nowrap; transition:all .2s;
+  }
+  .tab-btn.active { background:var(--accent); color:var(--black); font-weight:600; }
+  .tab-btn:not(.active):hover { color:var(--text); background:var(--border); }
+
+  .view { display:none; padding:16px; max-width:900px; margin:0 auto; }
+  .view.active { display:block; }
+
+  .page-title { font-family:'Bebas Neue'; font-size:32px; letter-spacing:2px; margin-bottom:16px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:12px; }
+  .card-title { font-family:'Bebas Neue'; font-size:18px; letter-spacing:1px; color:var(--accent); margin-bottom:12px; }
+
+  .stats { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:16px; }
+  @media(min-width:600px) { .stats { grid-template-columns:repeat(4,1fr); } }
+  .stat { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px; }
+  .stat-label { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; }
+  .stat-value { font-family:'Bebas Neue'; font-size:28px; letter-spacing:1px; margin-top:4px; }
+  .stat-value.green { color:var(--green); } .stat-value.red { color:var(--red); }
+  .stat-value.yellow { color:var(--accent); } .stat-value.orange { color:var(--accent2); }
+
+  .form-grid { display:grid; grid-template-columns:1fr; gap:10px; }
+  @media(min-width:500px) { .form-grid.cols2 { grid-template-columns:1fr 1fr; } }
+  label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.8px; display:block; margin-bottom:4px; }
+  input, select, textarea {
+    width:100%; background:var(--black); border:1px solid var(--border); border-radius:8px;
+    padding:10px 12px; color:var(--text); font-family:'DM Sans'; font-size:14px;
+    outline:none; transition:border .2s;
+  }
+  input:focus, select:focus, textarea:focus { border-color:var(--accent); }
+  select option { background:var(--dark); }
+  textarea { resize:vertical; min-height:70px; }
+
+  .btn {
+    padding:10px 20px; border:none; border-radius:8px; font-family:'DM Sans';
+    font-size:13px; font-weight:600; cursor:pointer; transition:all .15s;
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  .btn:disabled { opacity:.5; cursor:not-allowed; }
+  .btn-primary { background:var(--accent); color:var(--black); }
+  .btn-primary:hover:not(:disabled) { filter:brightness(1.1); transform:translateY(-1px); }
+  .btn-danger { background:var(--accent2); color:white; }
+  .btn-ghost { background:var(--border); color:var(--text); }
+  .btn-ghost:hover { background:#333; }
+  .btn-green { background:var(--green); color:var(--black); }
+  .btn-green:hover:not(:disabled) { filter:brightness(1.1); }
+  .btn-sm { padding:6px 12px; font-size:11px; }
+
+  .table-wrap { overflow-x:auto; border-radius:10px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { background:#161616; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:1px; padding:10px 12px; text-align:left; }
+  td { padding:10px 12px; border-top:1px solid var(--border); vertical-align:middle; }
+  tr:hover td { background:#1e1e1e; }
+
+  .badge { display:inline-block; padding:3px 8px; border-radius:20px; font-size:10px; font-weight:600; }
+  .badge-green { background:rgba(0,230,118,.15); color:var(--green); }
+  .badge-red { background:rgba(255,23,68,.15); color:var(--red); }
+  .badge-yellow { background:rgba(232,255,0,.15); color:var(--accent); }
+  .badge-orange { background:rgba(255,77,0,.15); color:var(--accent2); }
+
+  .alert { padding:12px 14px; border-radius:8px; font-size:13px; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+  .alert-warn { background:rgba(255,77,0,.15); border:1px solid rgba(255,77,0,.3); color:var(--accent2); }
+  .alert-success { background:rgba(0,230,118,.1); border:1px solid rgba(0,230,118,.2); color:var(--green); }
+  .alert-info { background:rgba(232,255,0,.08); border:1px solid rgba(232,255,0,.2); color:var(--accent); }
+
+  .flujo-row { display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); }
+  .flujo-row:last-child { border-bottom:none; }
+  .flujo-info { flex:1; }
+  .flujo-desc { font-size:13px; font-weight:500; }
+  .flujo-meta { font-size:11px; color:var(--muted); margin-top:2px; }
+  .flujo-amount { font-family:'Bebas Neue'; font-size:20px; }
+  .flujo-amount.pos { color:var(--green); } .flujo-amount.neg { color:var(--red); }
+
+  .chart-bar-wrap { display:flex; flex-direction:column; gap:8px; }
+  .chart-bar-row { display:flex; align-items:center; gap:8px; }
+  .chart-bar-label { font-size:11px; color:var(--muted); width:80px; text-align:right; }
+  .chart-bar-bg { flex:1; background:var(--border); border-radius:4px; height:22px; overflow:hidden; }
+  .chart-bar-fill { height:100%; border-radius:4px; transition:width 1s ease; display:flex; align-items:center; padding:0 8px; font-size:11px; font-weight:600; color:var(--black); min-width:40px; }
+
+  .section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .count-badge { background:var(--border); border-radius:20px; padding:3px 10px; font-size:11px; color:var(--muted); }
+  .empty { text-align:center; padding:40px 20px; color:var(--muted); }
+  .empty-icon { font-size:40px; margin-bottom:8px; }
+  .profit-tag { font-size:11px; padding:2px 7px; border-radius:4px; font-weight:600; }
+
+  /* Loading spinner */
+  .spinner { display:inline-block; width:16px; height:16px; border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .6s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .loading-overlay { text-align:center; padding:40px; color:var(--muted); }
+
+  #toast {
+    position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(100px);
+    background:var(--accent); color:var(--black); padding:10px 20px; border-radius:8px;
+    font-weight:600; font-size:13px; z-index:999; transition:transform .3s; max-width:90vw; text-align:center;
+  }
+  #toast.show { transform:translateX(-50%) translateY(0); }
+  #toast.error { background:var(--red); color:white; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">KICKZ</div>
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="showView('dashboard',this)">📊 Dashboard</button>
+    <button class="tab-btn" onclick="showView('inventario',this)">📦 Inventario</button>
+    <button class="tab-btn" onclick="showView('compra',this)">🛒 Compra</button>
+    <button class="tab-btn" onclick="showView('venta',this)">💸 Venta</button>
+    <button class="tab-btn" onclick="showView('flujo',this)">💰 Flujo de Caja</button>
+  </div>
+</nav>
+
+<!-- DASHBOARD -->
+<div id="view-dashboard" class="view active">
+  <div class="page-title">Panel General</div>
+  <div class="stats" id="stats-row">
+    <div class="stat"><div class="stat-label">Balance</div><div class="stat-value"><div class="spinner"></div></div></div>
+    <div class="stat"><div class="stat-label">Ingresos</div><div class="stat-value"><div class="spinner"></div></div></div>
+    <div class="stat"><div class="stat-label">Invertido</div><div class="stat-value"><div class="spinner"></div></div></div>
+    <div class="stat"><div class="stat-label">En Stock</div><div class="stat-value"><div class="spinner"></div></div></div>
+  </div>
+  <div id="stock-alerts"></div>
+  <div class="card">
+    <div class="card-title">Ventas por Categoría</div>
+    <div class="chart-bar-wrap" id="chart-cats"><div class="loading-overlay"><div class="spinner"></div></div></div>
+  </div>
+  <div class="card">
+    <div class="section-header">
+      <div class="card-title" style="margin:0">Últimas Transacciones</div>
+      <button class="btn btn-ghost btn-sm" onclick="showView('flujo', document.querySelectorAll('.tab-btn')[4])">Ver todas →</button>
+    </div>
+    <div id="recent-transactions"><div class="loading-overlay"><div class="spinner"></div></div></div>
+  </div>
+</div>
+
+<!-- INVENTARIO -->
+<div id="view-inventario" class="view">
+  <div class="page-title">Inventario</div>
+  <div class="card">
+    <div class="section-header">
+      <div class="card-title" style="margin:0">Productos</div>
+      <span class="count-badge" id="inv-count">...</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Producto</th><th>Cat.</th><th>Talla</th><th>Stock</th><th>Costo</th><th>Precio</th><th>Margen</th><th>Estado</th></tr>
+        </thead>
+        <tbody id="inv-table"><tr><td colspan="8" style="text-align:center;padding:30px"><div class="spinner"></div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- COMPRA -->
+<div id="view-compra" class="view">
+  <div class="page-title">Registrar Compra</div>
+  <div class="card">
+    <div class="card-title">Nueva Compra</div>
+    <div class="form-grid cols2">
+      <div><label>Producto / Nombre</label><input type="text" id="c-nombre" placeholder="Ej: Air Jordan 1 Chicago"></div>
+      <div><label>Categoría</label>
+        <select id="c-cat">
+          <option value="Sneakers">👟 Sneakers</option>
+          <option value="Ropa">👕 Ropa</option>
+          <option value="Accesorios">🧢 Accesorios</option>
+        </select>
+      </div>
+      <div><label>Talla / SKU</label><input type="text" id="c-talla" placeholder="Ej: US 10 / M / Único"></div>
+      <div><label>Cantidad</label><input type="number" id="c-qty" value="1" min="1"></div>
+      <div><label>Costo unitario ($)</label><input type="number" id="c-costo" placeholder="0.00" step="0.01"></div>
+      <div><label>Precio de venta ($)</label><input type="number" id="c-precio" placeholder="0.00" step="0.01"></div>
+      <div><label>Proveedor / Fuente</label><input type="text" id="c-proveedor" placeholder="Ej: StockX, particular..."></div>
+      <div><label>Fecha</label><input type="date" id="c-fecha"></div>
+    </div>
+    <div style="margin-top:10px"><label>Notas (opcional)</label><textarea id="c-notas" placeholder="Condición, detalles, etc."></textarea></div>
+    <div style="margin-top:14px">
+      <button class="btn btn-primary" id="btn-compra" onclick="registrarCompra()">✓ Registrar Compra</button>
+    </div>
+  </div>
+</div>
+
+<!-- VENTA -->
+<div id="view-venta" class="view">
+  <div class="page-title">Registrar Venta</div>
+  <div class="card">
+    <div class="card-title">Nueva Venta</div>
+    <div class="form-grid cols2">
+      <div><label>Seleccionar Producto</label>
+        <select id="v-producto" onchange="autoFillVenta()">
+          <option value="">— Elegir producto —</option>
+        </select>
+      </div>
+      <div><label>Cantidad</label><input type="number" id="v-qty" value="1" min="1" oninput="calcGanancia()"></div>
+      <div><label>Precio de venta ($)</label><input type="number" id="v-precio" placeholder="0.00" step="0.01" oninput="calcGanancia()"></div>
+      <div><label>Canal de venta</label>
+        <select id="v-canal">
+          <option>Instagram</option><option>WhatsApp</option><option>StockX</option>
+          <option>GOAT</option><option>Presencial</option><option>Otro</option>
+        </select>
+      </div>
+      <div><label>Comprador (opcional)</label><input type="text" id="v-comprador" placeholder="Nombre o usuario"></div>
+      <div><label>Fecha</label><input type="date" id="v-fecha"></div>
+    </div>
+    <div id="v-ganancia-preview" style="margin-top:12px;padding:12px;background:var(--black);border-radius:8px;display:none">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px">PREVIEW DE GANANCIA</div>
+      <div style="display:flex;gap:20px">
+        <div><div style="font-size:11px;color:var(--muted)">Costo</div><div id="pv-costo" style="font-family:'Bebas Neue';font-size:20px;color:var(--red)"></div></div>
+        <div><div style="font-size:11px;color:var(--muted)">Venta</div><div id="pv-venta" style="font-family:'Bebas Neue';font-size:20px;color:var(--accent)"></div></div>
+        <div><div style="font-size:11px;color:var(--muted)">Ganancia</div><div id="pv-ganancia" style="font-family:'Bebas Neue';font-size:20px;color:var(--green)"></div></div>
+      </div>
+    </div>
+    <div style="margin-top:14px">
+      <button class="btn btn-green" id="btn-venta" onclick="registrarVenta()">✓ Registrar Venta</button>
+    </div>
+  </div>
+</div>
+
+<!-- FLUJO DE CAJA -->
+<div id="view-flujo" class="view">
+  <div class="page-title">Flujo de Caja</div>
+  <div class="stats" style="grid-template-columns:repeat(3,1fr)" id="flujo-stats"></div>
+  <div class="card" style="padding:12px">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <select id="f-filtro" onchange="renderFlujo()" style="width:auto;flex:1">
+        <option value="all">Todas las transacciones</option>
+        <option value="ingreso">Solo ingresos</option>
+        <option value="gasto">Solo gastos</option>
+      </select>
+      <button class="btn btn-ghost btn-sm" onclick="exportCSV()">⬇ Exportar CSV</button>
+    </div>
+  </div>
+  <div class="card"><div id="flujo-list"><div class="loading-overlay"><div class="spinner"></div></div></div></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ==================== SUPABASE ====================
+const SUPABASE_URL = 'https://erpkxogskfrtfttawapg.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_qgRu9snBNMnDpQ3o9UOR4A_HAzXUhA1';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ==================== CACHE ====================
+let cache = { inventario: [], transacciones: [], ventas: [] };
+
+// ==================== INIT ====================
+async function init() {
+  setTodayDates();
+  await loadAll();
+  render();
+}
+
+async function loadAll() {
+  try {
+    const [inv, txs, ven] = await Promise.all([
+      db.from('inventario').select('*').order('created_at', { ascending: false }),
+      db.from('transacciones').select('*').order('fecha', { ascending: false }),
+      db.from('ventas').select('*').order('created_at', { ascending: false })
+    ]);
+    if (inv.error) throw inv.error;
+    if (txs.error) throw txs.error;
+    if (ven.error) throw ven.error;
+    cache.inventario = inv.data || [];
+    cache.transacciones = txs.data || [];
+    cache.ventas = ven.data || [];
+  } catch(e) {
+    toastMsg('⚠️ Error conectando a Supabase: ' + e.message, true);
+  }
+}
+
+// ==================== VIEWS ====================
+function showView(v, btn) {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('view-' + v).classList.add('active');
+  if(btn) btn.classList.add('active');
+  render();
+}
+
+function render() {
+  renderDashboard();
+  renderInventario();
+  renderVentaSelect();
+  renderFlujo();
+}
+
+// ==================== DASHBOARD ====================
+function renderDashboard() {
+  const ingresos = cache.transacciones.filter(t=>t.tipo==='ingreso').reduce((s,t)=>s+parseFloat(t.monto),0);
+  const gastos = cache.transacciones.filter(t=>t.tipo==='gasto').reduce((s,t)=>s+parseFloat(t.monto),0);
+  const balance = ingresos - gastos;
+  const totalStock = cache.inventario.reduce((s,i)=>s+i.stock,0);
+
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat"><div class="stat-label">Balance</div><div class="stat-value ${balance>=0?'green':'red'}">${fmt(balance)}</div></div>
+    <div class="stat"><div class="stat-label">Ingresos</div><div class="stat-value green">${fmt(ingresos)}</div></div>
+    <div class="stat"><div class="stat-label">Invertido</div><div class="stat-value red">${fmt(gastos)}</div></div>
+    <div class="stat"><div class="stat-label">En Stock</div><div class="stat-value yellow">${totalStock} pcs</div></div>
+  `;
+
+  const bajos = cache.inventario.filter(i => i.stock <= 1);
+  const alertBox = document.getElementById('stock-alerts');
+  alertBox.innerHTML = bajos.length > 0
+    ? bajos.map(i=>`<div class="alert alert-warn">⚠️ Stock bajo: <strong>${i.nombre}</strong> (${i.stock} unidad${i.stock===1?'':'es'})</div>`).join('')
+    : '<div class="alert alert-success">✓ Todo el inventario tiene stock suficiente</div>';
+
+  // Chart por categoría
+  const catGroup = {};
+  cache.ventas.forEach(v => {
+    const item = cache.inventario.find(i=>i.nombre===v.producto);
+    const cat = item ? item.categoria : 'Otro';
+    catGroup[cat] = (catGroup[cat]||0) + parseFloat(v.precio_venta);
+  });
+  const maxVal = Math.max(...Object.values(catGroup), 1);
+  const colors = { Sneakers:'#e8ff00', Ropa:'#ff4d00', Accesorios:'#00e676' };
+  document.getElementById('chart-cats').innerHTML = Object.entries(catGroup).length
+    ? Object.entries(catGroup).map(([cat,val])=>`
+        <div class="chart-bar-row">
+          <div class="chart-bar-label">${cat}</div>
+          <div class="chart-bar-bg">
+            <div class="chart-bar-fill" style="width:${val/maxVal*100}%;background:${colors[cat]||'#888'}">${fmt(val)}</div>
+          </div>
+        </div>`).join('')
+    : '<div style="color:var(--muted);font-size:13px">Sin ventas registradas aún</div>';
+
+  const recent = cache.transacciones.slice(0, 6);
+  document.getElementById('recent-transactions').innerHTML = recent.length
+    ? recent.map(t=>`
+        <div class="flujo-row">
+          <div style="margin-right:10px;font-size:18px">${t.tipo==='ingreso'?'💚':'🔴'}</div>
+          <div class="flujo-info">
+            <div class="flujo-desc">${t.descripcion}</div>
+            <div class="flujo-meta">${t.fecha} · ${t.categoria||''}${t.ganancia?` · <span style="color:var(--green)">+${fmt(t.ganancia)} ganancia</span>`:''}</div>
+          </div>
+          <div class="flujo-amount ${t.tipo==='ingreso'?'pos':'neg'}">${t.tipo==='ingreso'?'+':'-'}${fmt(t.monto)}</div>
+        </div>`).join('')
+    : '<div class="empty"><div class="empty-icon">📭</div>Sin transacciones aún</div>';
+}
+
+// ==================== INVENTARIO ====================
+function renderInventario() {
+  const rows = cache.inventario;
+  document.getElementById('inv-count').textContent = rows.length + ' items';
+  document.getElementById('inv-table').innerHTML = rows.length
+    ? rows.map(i => {
+        const margen = i.precio > 0 ? Math.round((i.precio - i.costo) / i.precio * 100) : 0;
+        const estado = i.stock === 0
+          ? '<span class="badge badge-red">Sin stock</span>'
+          : i.stock === 1
+            ? '<span class="badge badge-orange">Stock bajo</span>'
+            : '<span class="badge badge-green">Disponible</span>';
+        return `<tr>
+          <td><strong>${i.nombre}</strong>${i.notas?`<br><span style="font-size:11px;color:var(--muted)">${i.notas}</span>`:''}</td>
+          <td><span class="badge badge-yellow">${i.categoria}</span></td>
+          <td>${i.talla||'—'}</td>
+          <td><strong>${i.stock}</strong></td>
+          <td>${fmt(i.costo)}</td>
+          <td>${fmt(i.precio)}</td>
+          <td><span class="profit-tag" style="background:rgba(0,230,118,.15);color:var(--green)">${margen}%</span></td>
+          <td>${estado}</td>
+        </tr>`;
+      }).join('')
+    : '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:30px">Sin productos. Registra una compra primero.</td></tr>';
+}
+
+// ==================== COMPRA ====================
+async function registrarCompra() {
+  const nombre = document.getElementById('c-nombre').value.trim();
+  const categoria = document.getElementById('c-cat').value;
+  const talla = document.getElementById('c-talla').value.trim();
+  const qty = parseInt(document.getElementById('c-qty').value) || 1;
+  const costo = parseFloat(document.getElementById('c-costo').value) || 0;
+  const precio = parseFloat(document.getElementById('c-precio').value) || 0;
+  const proveedor = document.getElementById('c-proveedor').value.trim();
+  const fecha = document.getElementById('c-fecha').value;
+  const notas = document.getElementById('c-notas').value.trim();
+
+  if (!nombre || !costo) { toastMsg('⚠️ Completa nombre y costo', true); return; }
+
+  const btn = document.getElementById('btn-compra');
+  btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> Guardando...';
+
+  try {
+    // Check si existe
+    const existing = cache.inventario.find(i => i.nombre === nombre && i.talla === talla);
+
+    let invId;
+    if (existing) {
+      const { error } = await db.from('inventario').update({ stock: existing.stock + qty, costo, precio }).eq('id', existing.id);
+      if (error) throw error;
+      invId = existing.id;
+    } else {
+      const { data, error } = await db.from('inventario').insert({ nombre, categoria, talla, stock: qty, costo, precio, proveedor, fecha, notas }).select().single();
+      if (error) throw error;
+      invId = data.id;
+    }
+
+    // Transacción
+    const { error: txErr } = await db.from('transacciones').insert({
+      tipo: 'gasto',
+      descripcion: `Compra: ${nombre}${talla ? ' (' + talla + ')' : ''}`,
+      monto: costo * qty,
+      categoria,
+      fecha,
+      referencia_id: invId
+    });
+    if (txErr) throw txErr;
+
+    await loadAll();
+    render();
+    toastMsg('✓ Compra registrada en Supabase');
+    ['c-nombre','c-talla','c-costo','c-precio','c-proveedor','c-notas'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('c-qty').value = 1;
+  } catch(e) {
+    toastMsg('⚠️ Error: ' + e.message, true);
+  } finally {
+    btn.disabled = false; btn.innerHTML = '✓ Registrar Compra';
+  }
+}
+
+// ==================== VENTA ====================
+function renderVentaSelect() {
+  const sel = document.getElementById('v-producto');
+  const disponibles = cache.inventario.filter(i => i.stock > 0);
+  sel.innerHTML = '<option value="">— Elegir producto —</option>' +
+    disponibles.map(i => `<option value="${i.id}" data-costo="${i.costo}" data-precio="${i.precio}">
+      ${i.nombre}${i.talla ? ' — ' + i.talla : ''} (${i.stock} disp.) · Sugerido: ${fmt(i.precio)}
+    </option>`).join('');
+}
+
+function autoFillVenta() {
+  const sel = document.getElementById('v-producto');
+  const opt = sel.options[sel.selectedIndex];
+  if (opt && opt.dataset.precio) {
+    document.getElementById('v-precio').value = opt.dataset.precio;
+    calcGanancia();
+  }
+}
+
+function calcGanancia() {
+  const sel = document.getElementById('v-producto');
+  const opt = sel.options[sel.selectedIndex];
+  const qty = parseInt(document.getElementById('v-qty').value) || 1;
+  const precio = parseFloat(document.getElementById('v-precio').value) || 0;
+  if (!opt || !opt.dataset.costo || !precio) { document.getElementById('v-ganancia-preview').style.display = 'none'; return; }
+  const costo = parseFloat(opt.dataset.costo) * qty;
+  const venta = precio * qty;
+  const ganancia = venta - costo;
+  document.getElementById('v-ganancia-preview').style.display = 'block';
+  document.getElementById('pv-costo').textContent = fmt(costo);
+  document.getElementById('pv-venta').textContent = fmt(venta);
+  document.getElementById('pv-ganancia').textContent = fmt(ganancia);
+  document.getElementById('pv-ganancia').style.color = ganancia >= 0 ? 'var(--green)' : 'var(--red)';
+}
+
+async function registrarVenta() {
+  const idProd = parseInt(document.getElementById('v-producto').value);
+  const item = cache.inventario.find(i => i.id === idProd);
+  const qty = parseInt(document.getElementById('v-qty').value) || 1;
+  const precio = parseFloat(document.getElementById('v-precio').value) || 0;
+  const canal = document.getElementById('v-canal').value;
+  const comprador = document.getElementById('v-comprador').value.trim();
+  const fecha = document.getElementById('v-fecha').value;
+
+  if (!item) { toastMsg('⚠️ Selecciona un producto', true); return; }
+  if (!precio) { toastMsg('⚠️ Ingresa el precio de venta', true); return; }
+  if (item.stock < qty) { toastMsg('⚠️ Stock insuficiente', true); return; }
+
+  const ganancia = (precio - item.costo) * qty;
+  const btn = document.getElementById('btn-venta');
+  btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> Guardando...';
+
+  try {
+    // Descontar stock
+    const { error: invErr } = await db.from('inventario').update({ stock: item.stock - qty }).eq('id', item.id);
+    if (invErr) throw invErr;
+
+    // Registrar venta
+    const { error: venErr } = await db.from('ventas').insert({
+      inventario_id: item.id,
+      producto: item.nombre,
+      cantidad: qty,
+      precio_venta: precio,
+      costo_unitario: item.costo,
+      ganancia,
+      canal,
+      comprador,
+      fecha
+    });
+    if (venErr) throw venErr;
+
+    // Flujo de caja
+    const { error: txErr } = await db.from('transacciones').insert({
+      tipo: 'ingreso',
+      descripcion: `Venta: ${item.nombre}${item.talla ? ' (' + item.talla + ')' : ''}`,
+      monto: precio * qty,
+      categoria: item.categoria,
+      canal,
+      ganancia,
+      fecha,
+      referencia_id: item.id
+    });
+    if (txErr) throw txErr;
+
+    await loadAll();
+    render();
+    toastMsg(`✓ Venta registrada — Ganancia: ${fmt(ganancia)}`);
+    document.getElementById('v-producto').value = '';
+    document.getElementById('v-precio').value = '';
+    document.getElementById('v-qty').value = 1;
+    document.getElementById('v-comprador').value = '';
+    document.getElementById('v-ganancia-preview').style.display = 'none';
+  } catch(e) {
+    toastMsg('⚠️ Error: ' + e.message, true);
+  } finally {
+    btn.disabled = false; btn.innerHTML = '✓ Registrar Venta';
+  }
+}
+
+// ==================== FLUJO ====================
+function renderFlujo() {
+  const filtro = document.getElementById('f-filtro').value;
+  let txs = filtro === 'all' ? cache.transacciones : cache.transacciones.filter(t => t.tipo === filtro);
+
+  const ingresos = cache.transacciones.filter(t=>t.tipo==='ingreso').reduce((s,t)=>s+parseFloat(t.monto),0);
+  const gastos = cache.transacciones.filter(t=>t.tipo==='gasto').reduce((s,t)=>s+parseFloat(t.monto),0);
+  const balance = ingresos - gastos;
+
+  document.getElementById('flujo-stats').innerHTML = `
+    <div class="stat"><div class="stat-label">Balance Total</div><div class="stat-value ${balance>=0?'green':'red'}">${fmt(balance)}</div></div>
+    <div class="stat"><div class="stat-label">Total Ingresos</div><div class="stat-value green">${fmt(ingresos)}</div></div>
+    <div class="stat"><div class="stat-label">Total Gastos</div><div class="stat-value red">${fmt(gastos)}</div></div>
+  `;
+
+  document.getElementById('flujo-list').innerHTML = txs.length
+    ? txs.map(t => `
+        <div class="flujo-row">
+          <div style="margin-right:10px;font-size:18px">${t.tipo==='ingreso'?'💚':'🔴'}</div>
+          <div class="flujo-info">
+            <div class="flujo-desc">${t.descripcion}</div>
+            <div class="flujo-meta">${t.fecha} · ${t.categoria||''}${t.canal?' · '+t.canal:''}${t.ganancia?` · <span style="color:var(--green)">+${fmt(t.ganancia)} ganancia</span>`:''}</div>
+          </div>
+          <div class="flujo-amount ${t.tipo==='ingreso'?'pos':'neg'}">${t.tipo==='ingreso'?'+':'-'}${fmt(t.monto)}</div>
+        </div>`).join('')
+    : '<div class="empty"><div class="empty-icon">💸</div>Sin transacciones</div>';
+}
+
+// ==================== UTILS ====================
+function fmt(n) { return '$' + parseFloat(n||0).toLocaleString('es', { minimumFractionDigits:0, maximumFractionDigits:0 }); }
+
+function setTodayDates() {
+  const today = new Date().toISOString().split('T')[0];
+  ['c-fecha','v-fecha'].forEach(id => { const el = document.getElementById(id); if(el) el.value = today; });
+}
+
+function toastMsg(msg, isError=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = isError ? 'error show' : 'show';
+  setTimeout(() => t.className = '', 3000);
+}
+
+function exportCSV() {
+  const rows = [['Fecha','Tipo','Descripción','Monto','Categoría','Canal','Ganancia']];
+  cache.transacciones.forEach(t => rows.push([t.fecha, t.tipo, t.descripcion, t.monto, t.categoria||'', t.canal||'', t.ganancia||'']));
+  const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type:'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'flujo-caja-kickz.csv';
+  a.click();
+  toastMsg('✓ CSV exportado');
+}
+
+init();
+</script>
+</body>
+</html>
