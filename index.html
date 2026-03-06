@@ -252,6 +252,15 @@ input[list] { cursor: text; }
 .cs-selected-item{background:rgba(200,255,0,.06);border:1px solid rgba(200,255,0,.2);border-radius:8px;padding:10px 14px;font-size:13px;display:flex;justify-content:space-between;align-items:center}
 .cs-selected-item button{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:16px;padding:0 4px}
 .cs-selected-item button:hover{color:var(--red)}
+.cs-item{display:grid;grid-template-columns:1fr 180px 110px 32px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+.cs-item:last-child{border-bottom:none}
+.cs-item-info{font-size:12px}
+.cs-item-info strong{font-size:13px;color:var(--text)}
+.cs-item-info span{color:var(--muted2)}
+.cs-item input[type="text"]{background:var(--bg);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;color:var(--text);font-size:12px;width:100%}
+.cs-item input[type="number"]{background:var(--bg);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;color:var(--accent);font-family:"Archivo Black";font-size:13px;width:100%;-moz-appearance:textfield}
+.cs-item-remove{background:none;border:none;color:#555;cursor:pointer;font-size:16px;text-align:center}
+.cs-item-remove:hover{color:var(--red)}
 /* MISC */
 .empty-state{text-align:center;padding:50px 20px;color:var(--muted2)}
 .empty-icon{font-size:36px;margin-bottom:10px;opacity:.5}
@@ -540,43 +549,48 @@ input[list] { cursor: text; }
 
   <!-- ── COSTO ── -->
   <div id="form-costo" class="form-panel">
-    <div class="card">
-      <div class="card-label">Costo adicional por producto</div>
+    <!-- Encabezado global -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-label">Configuración global</div>
       <div class="form-grid g2">
-        <!-- Buscador de producto -->
-        <div class="field span2">
-          <label>Buscar producto</label>
-          <input type="text" id="cs-buscar" placeholder="Código, marca, silueta, colorway..."
-            autocomplete="off" oninput="buscarProductoCosto()">
+        <div class="field">
+          <label>Concepto global</label>
+          <input type="text" id="cs-concepto-global" placeholder="DHL / ADUANA / LIMPIEZA..."
+            oninput="csActualizarConceptos()">
         </div>
-        <!-- Tabla resultados -->
-        <div class="field span2" id="cs-resultados-wrap" style="display:none">
-          <div class="cs-tabla-wrap">
-            <table class="cs-tabla">
-              <thead><tr>
-                <th>Código</th><th>Marca</th><th>Silueta</th><th>Colorway</th><th>Talla</th><th>P. Final</th>
-              </tr></thead>
-              <tbody id="cs-resultados-body"></tbody>
-            </table>
-          </div>
-        </div>
-        <!-- Producto seleccionado -->
-        <div class="field span2" id="cs-seleccionado-wrap" style="display:none">
-          <div id="cs-seleccionado-info" class="cs-selected-item"></div>
-          <input type="hidden" id="cs-producto">
-        </div>
-        <div class="field span2"><label>Concepto</label>
-          <input type="text" id="cs-concepto" placeholder="DHL / ADUANA / LIMPIEZA / REPARACION">
-        </div>
-        <div class="field"><label>Monto S/.</label>
-          <input type="number" id="cs-soles" placeholder="0.00" step="0.01">
-        </div>
-        <div class="field"><label>Fecha</label>
+        <div class="field">
+          <label>Fecha</label>
           <input type="date" id="cs-fecha">
         </div>
       </div>
     </div>
-    <button class="btn btn-purple" id="btn-costo" onclick="registrarCosto()">✓ Agregar Costo</button>
+
+    <!-- Buscador agregar producto -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-label">Agregar producto a la lista</div>
+      <div class="field" style="margin-bottom:8px">
+        <input type="text" id="cs-buscar" placeholder="Código, marca, silueta, colorway..."
+          autocomplete="off" oninput="buscarProductoCosto()">
+      </div>
+      <div id="cs-resultados-wrap" style="display:none">
+        <div class="cs-tabla-wrap">
+          <table class="cs-tabla">
+            <thead><tr>
+              <th>Código</th><th>Marca</th><th>Silueta</th><th>Colorway</th><th>Talla</th><th>P. Final</th><th></th>
+            </tr></thead>
+            <tbody id="cs-resultados-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de productos con costos -->
+    <div class="card" id="cs-lista-wrap" style="display:none;margin-bottom:12px">
+      <div class="card-label">Productos en esta asignación <span id="cs-lista-count" style="color:var(--accent)"></span></div>
+      <div id="cs-lista-body"></div>
+    </div>
+
+    <button class="btn btn-purple" id="btn-costo" onclick="registrarCosto()" style="display:none">✓ Registrar costos</button>
   </div>
 </div>
 
@@ -1474,76 +1488,130 @@ async function registrarPago(){
 }
 
 // ── REGISTRAR COSTO ──
+// Lista de productos para costo múltiple [{codigo, nombre, talla, concepto, soles}]
+let costoLista=[];
+
 function buscarProductoCosto(){
   const q=(document.getElementById('cs-buscar').value||'').toLowerCase().trim();
   const wrap=document.getElementById('cs-resultados-wrap');
   const body=document.getElementById('cs-resultados-body');
   if(!q){wrap.style.display='none';return;}
+  const yaAgregados=new Set(costoLista.map(x=>x.codigo));
   const res=inventarioCache.filter(p=>
-    p.estado!=='CANCELADO'&&p.estado!=='VENDIDO'&&(
+    p.estado!=='CANCELADO'&&p.estado!=='VENDIDO'&&
+    !yaAgregados.has(p.codigo_producto)&&(
       (p.codigo_producto||'').toLowerCase().includes(q)||
       (p.marca||'').toLowerCase().includes(q)||
       (p.silueta||'').toLowerCase().includes(q)||
       (p.colorway||'').toLowerCase().includes(q)
     )
-  ).slice(0,20);
+  ).slice(0,15);
   if(!res.length){
-    body.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted2);padding:14px">Sin resultados</td></tr>';
+    body.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted2);padding:12px">Sin resultados</td></tr>';
     wrap.style.display='';return;
   }
   body.innerHTML=res.map(p=>`
-    <tr onclick="seleccionarProductoCosto('${p.codigo_producto}')">
+    <tr onclick="csAgregarProducto('${p.codigo_producto}')">
       <td><span class="td-code">${p.codigo_producto}</span></td>
       <td>${p.marca||'—'}</td>
       <td style="color:var(--muted2)">${p.silueta||'—'}</td>
       <td style="color:var(--muted2)">${p.colorway||'—'}</td>
       <td><strong>${p.talla||'—'}</strong></td>
       <td style="color:var(--accent)">${fmt(p.precio_final||p.precio_compra_soles||0)}</td>
+      <td><span style="color:var(--accent);font-size:11px">+ Agregar</span></td>
     </tr>`).join('');
   wrap.style.display='';
 }
 
-function seleccionarProductoCosto(codigo){
+function csAgregarProducto(codigo){
+  if(costoLista.find(x=>x.codigo===codigo)) return;
   const p=inventarioCache.find(x=>x.codigo_producto===codigo);
   if(!p) return;
-  document.getElementById('cs-producto').value=codigo;
   const nombre=[p.marca,p.silueta,p.colorway].filter(Boolean).join(' ');
-  document.getElementById('cs-seleccionado-info').innerHTML=
-    `<span>✓ <strong>${codigo}</strong> — ${nombre} <span style="color:var(--muted2)">(${p.talla||'—'})</span> <span style="color:var(--accent)">${fmt(p.precio_final||0)}</span></span>
-     <button onclick="limpiarSeleccionCosto()">✕</button>`;
-  document.getElementById('cs-seleccionado-wrap').style.display='';
-  document.getElementById('cs-resultados-wrap').style.display='none';
+  const conceptoGlobal=document.getElementById('cs-concepto-global').value||'';
+  costoLista.push({codigo, nombre, talla:p.talla||'—', concepto:conceptoGlobal, soles:''});
   document.getElementById('cs-buscar').value='';
+  document.getElementById('cs-resultados-wrap').style.display='none';
+  csRenderLista();
+}
+
+function csActualizarConceptos(){
+  const global=document.getElementById('cs-concepto-global').value||'';
+  // Solo actualiza ítems que no han sido personalizados
+  costoLista.forEach((item,i)=>{
+    const el=document.getElementById('cs-concepto-'+i);
+    if(el&&el.dataset.custom!=='1') el.value=global;
+  });
+}
+
+function csConceptoChange(i, val){
+  const el=document.getElementById('cs-concepto-'+i);
+  if(el) el.dataset.custom='1';
+  costoLista[i].concepto=val;
+}
+
+function csRenderLista(){
+  const wrap=document.getElementById('cs-lista-wrap');
+  const body=document.getElementById('cs-lista-body');
+  const btn=document.getElementById('btn-costo');
+  if(!costoLista.length){
+    wrap.style.display='none'; btn.style.display='none'; return;
+  }
+  wrap.style.display=''; btn.style.display='';
+  document.getElementById('cs-lista-count').textContent='('+costoLista.length+')';
+  btn.textContent='✓ Registrar '+costoLista.length+' costo'+(costoLista.length>1?'s':'');
+  body.innerHTML=costoLista.map((item,i)=>`
+    <div class="cs-item">
+      <div class="cs-item-info">
+        <strong>${item.codigo}</strong>
+        <span> — ${item.nombre} (${item.talla})</span>
+      </div>
+      <input type="text" id="cs-concepto-${i}" value="${item.concepto}"
+        placeholder="Concepto..."
+        oninput="csConceptoChange(${i}, this.value)">
+      <input type="number" id="cs-soles-${i}" value="${item.soles}"
+        placeholder="S/. 0.00" step="0.01"
+        oninput="costoLista[${i}].soles=this.value">
+      <button class="cs-item-remove" onclick="csQuitarProducto(${i})">✕</button>
+    </div>`).join('');
+}
+
+function csQuitarProducto(i){
+  costoLista.splice(i,1);
+  csRenderLista();
 }
 
 function limpiarSeleccionCosto(){
-  document.getElementById('cs-producto').value='';
-  document.getElementById('cs-seleccionado-wrap').style.display='none';
+  costoLista=[];
   document.getElementById('cs-buscar').value='';
+  document.getElementById('cs-concepto-global').value='';
+  csRenderLista();
 }
 
 async function registrarCosto(){
-  const codProd=document.getElementById('cs-producto').value;
-  const concepto=document.getElementById('cs-concepto').value.trim();
-  const soles=parseFloat(document.getElementById('cs-soles').value)||0;
-  if(!codProd){toast('Selecciona un producto','warn');return;}
-  if(!concepto){toast('Ingresa el concepto','warn');return;}
-  if(!soles){toast('Ingresa el monto en S/.','warn');return;}
-  const btn=document.getElementById('btn-costo');setLoading(btn,true);
+  if(!costoLista.length){toast('Agrega al menos un producto','warn');return;}
+  const fecha=document.getElementById('cs-fecha').value;
+  // Validar que todos tengan monto
+  const sinMonto=costoLista.filter(x=>!parseFloat(x.soles));
+  if(sinMonto.length){toast('Falta monto en: '+sinMonto.map(x=>x.codigo).join(', '),'warn');return;}
+  const sinConcepto=costoLista.filter(x=>!x.concepto.trim());
+  if(sinConcepto.length){toast('Falta concepto en: '+sinConcepto.map(x=>x.codigo).join(', '),'warn');return;}
+  const btn=document.getElementById('btn-costo');
+  setLoading(btn,true);
   try{
-    const{error}=await db.from('costos').insert({
-      codigo_producto:codProd,concepto,
-      costo_soles:soles,
-      fecha:document.getElementById('cs-fecha').value
-    });
+    const inserts=costoLista.map(item=>({
+      codigo_producto:item.codigo,
+      concepto:item.concepto.trim(),
+      costo_soles:parseFloat(item.soles),
+      fecha
+    }));
+    const{error}=await db.from('costos').insert(inserts);
     if(error)throw error;
-    toast('✓ Costo agregado — precio final actualizado','ok');
-    document.getElementById('cs-concepto').value='';
-    document.getElementById('cs-soles').value='';
+    toast('✓ '+inserts.length+' costo'+(inserts.length>1?'s registrados':'registrado'),'ok');
     limpiarSeleccionCosto();
     await loadInventario();
   }catch(e){toast('Error: '+e.message,'err');}
-  finally{setLoading(btn,false,'✓ Agregar Costo');}
+  finally{setLoading(btn,false);}
 }
 
 // ── GENERAR CODIGO ──
