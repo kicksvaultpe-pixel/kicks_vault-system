@@ -141,7 +141,7 @@ tbody tr:hover td{background:#1a1a1a}
 .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
 .stats5{grid-template-columns:repeat(2,1fr)}
 @media(min-width:700px){.stats5{grid-template-columns:repeat(3,1fr)}}
-@media(min-width:1100px){.stats5{grid-template-columns:repeat(5,1fr)}}
+@media(min-width:1100px){.stats5{grid-template-columns:repeat(4,1fr) 1.6fr}}
 .stat-label{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:10px}
 /* fila normal */
 .sg-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0}
@@ -153,19 +153,19 @@ tbody tr:hover td{background:#1a1a1a}
 /* fila total */
 .sg-row-tot{display:flex;justify-content:space-between;align-items:center;padding:5px 0}
 .sg-lbl-tot{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2)}
-.sg-val-tot{font-family:"Archivo Black";font-size:22px;color:var(--text)}
+.sg-val-tot{font-family:"Archivo Black";font-size:18px;color:var(--text)}
 .sg-val-tot.green{color:var(--green)}.sg-val-tot.accent{color:var(--accent)}.sg-val-tot.red{color:var(--red)}
 /* compras mes */
-.sg-mes-head{display:grid;grid-template-columns:1fr 30px 82px;gap:0 6px;padding:0 0 6px;border-bottom:1px solid var(--border)}
-.sg-mes-row{display:grid;grid-template-columns:1fr 30px 82px;gap:0 6px;padding:5px 0;align-items:center}
-.sg-mes-row-tot{display:grid;grid-template-columns:1fr 30px 82px;gap:0 6px;padding:6px 0;align-items:center}
+.sg-mes-head{display:grid;grid-template-columns:1fr 28px 76px;gap:0 4px;padding:0 0 6px;border-bottom:1px solid var(--border)}
+.sg-mes-row{display:grid;grid-template-columns:1fr 28px 76px;gap:0 4px;padding:5px 0;align-items:center}
+.sg-mes-row-tot{display:grid;grid-template-columns:1fr 28px 76px;gap:0 4px;padding:6px 0;align-items:center}
 .sg-h{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);text-align:right}
 .sg-h:first-child{text-align:left}
 .sg-mc{font-size:12px;color:var(--muted2)}
 .sg-mc-tot{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2)}
-.sg-mn{font-family:"Archivo Black";font-size:15px;color:var(--text);text-align:right;white-space:nowrap}
+.sg-mn{font-family:"Archivo Black";font-size:13px;color:var(--text);text-align:right;white-space:nowrap}
 .sg-mn.accent{color:var(--accent)}
-.sg-mn-tot{font-family:"Archivo Black";font-size:18px;color:var(--text);text-align:right;white-space:nowrap}
+.sg-mn-tot{font-family:"Archivo Black";font-size:18px;color:var(--text);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sg-mn-tot.red{color:var(--red)}
 .stat-val{font-family:"Archivo Black";font-size:22px;margin-top:3px}
 .stat-sub{font-size:10px;color:var(--muted2);margin-top:2px}
