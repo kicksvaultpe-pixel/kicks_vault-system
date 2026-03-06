@@ -261,6 +261,10 @@ input[list] { cursor: text; }
 .cs-item input[type="number"]{background:var(--bg);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;color:var(--accent);font-family:"Archivo Black";font-size:13px;width:100%;-moz-appearance:textfield}
 .cs-item-remove{background:none;border:none;color:#555;cursor:pointer;font-size:16px;text-align:center}
 .cs-item-remove:hover{color:var(--red)}
+/* OC TOGGLE */
+.oc-toggle{background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:6px 14px;font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--muted2);cursor:pointer;transition:all .15s}
+.oc-toggle.active{background:rgba(200,255,0,.1);border-color:rgba(200,255,0,.4);color:var(--accent)}
+.oc-toggle:hover:not(.active){border-color:var(--accent);color:var(--text)}
 /* MISC */
 .empty-state{text-align:center;padding:50px 20px;color:var(--muted2)}
 .empty-icon{font-size:36px;margin-bottom:10px;opacity:.5}
@@ -441,26 +445,67 @@ input[list] { cursor: text; }
       </div>
       <!-- OC -->
       <div style="border-top:1px solid var(--border);margin-top:14px;padding-top:14px">
-        <div class="card-label" style="margin-bottom:10px">Orden de Compra</div>
-        <div class="form-grid g3">
-          <div class="field">
-            <label>Tipo</label>
-            <select id="cp-oc-tipo">
-              <option value="LOCAL">🏪 Local</option>
-              <option value="IMPORTACION">✈️ Importación</option>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div class="card-label" style="margin:0">Orden de Compra</div>
+          <!-- Badge OC activa -->
+          <div id="cp-oc-badge" style="display:none;background:rgba(200,255,0,.1);border:1px solid rgba(200,255,0,.3);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;color:var(--accent);display:none;align-items:center;gap:6px">
+            <span>⬤</span><span id="cp-oc-badge-txt"></span>
+          </div>
+        </div>
+
+        <!-- Toggle Nueva / Existente -->
+        <div style="display:flex;gap:6px;margin-bottom:12px">
+          <button type="button" id="oc-btn-nueva" class="oc-toggle active" onclick="ocSetMode('nueva')">✦ Nueva OC</button>
+          <button type="button" id="oc-btn-existente" class="oc-toggle" onclick="ocSetMode('existente')">↗ Agregar a existente</button>
+        </div>
+
+        <!-- NUEVA OC -->
+        <div id="oc-panel-nueva">
+          <div class="form-grid g3">
+            <div class="field">
+              <label>Tipo</label>
+              <select id="cp-oc-tipo">
+                <option value="IMPORTACION">✈️ Importación</option>
+                <option value="LOCAL">🏪 Local</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Código (auto)</label>
+              <input type="text" id="cp-oc-nueva" placeholder="OC-001" readonly
+                style="color:var(--accent);font-family:'Archivo Black'">
+            </div>
+            <div class="field">
+              <label>Notas (proveedor, URL...)</label>
+              <input type="text" id="cp-oc-notas" placeholder="Nike SNKRS, Goat...">
+            </div>
+          </div>
+        </div>
+
+        <!-- EXISTENTE OC -->
+        <div id="oc-panel-existente" style="display:none">
+          <div class="field" style="margin-bottom:10px">
+            <label>Seleccionar OC</label>
+            <select id="cp-oc-select" onchange="ocExistenteChange()">
+              <option value="">— Seleccionar OC —</option>
             </select>
           </div>
-          <div class="field">
-            <label>OC</label>
-            <select id="cp-oc-select" onchange="csOCSelectChange()">
-              <option value="NUEVA">+ Nueva OC</option>
-            </select>
+          <!-- Mini card info OC -->
+          <div id="oc-info-card" style="display:none;background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:12px 14px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <span id="oc-info-codigo" style="font-family:'Archivo Black';font-size:15px;color:var(--accent)"></span>
+              <span id="oc-info-tipo" style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted2)"></span>
+            </div>
+            <div style="display:flex;gap:16px">
+              <div><div style="font-size:9px;color:var(--muted2);letter-spacing:1px">PRODUCTOS</div><div id="oc-info-prods" style="font-family:'Archivo Black';font-size:18px;color:var(--text)">—</div></div>
+              <div><div style="font-size:9px;color:var(--muted2);letter-spacing:1px">MONTO</div><div id="oc-info-monto" style="font-family:'Archivo Black';font-size:18px;color:var(--accent)">—</div></div>
+              <div><div style="font-size:9px;color:var(--muted2);letter-spacing:1px">CREADA</div><div id="oc-info-fecha" style="font-size:13px;color:var(--muted2);margin-top:4px">—</div></div>
+            </div>
           </div>
-          <div class="field" id="cp-oc-nueva-wrap">
-            <label>Código (auto)</label>
-            <input type="text" id="cp-oc-nueva" placeholder="OC-001" readonly
-              style="color:var(--accent);font-family:'Archivo Black'">
-          </div>
+        </div>
+
+        <!-- Contador sesión -->
+        <div id="oc-session-counter" style="display:none;margin-top:10px;font-size:11px;color:var(--muted2)">
+          Esta sesión: <span id="oc-session-count" style="color:var(--accent);font-weight:700">0</span> producto(s) en <span id="oc-session-codigo" style="color:var(--accent)"></span>
         </div>
       </div>
     </div>
@@ -927,27 +972,61 @@ document.addEventListener('click', e => {
 });
 
 // ── ORDENES DE COMPRA ──
-let ocCache=[];
+let ocCache=[], ocModo='nueva', ocSessionCodigo=null, ocSessionCount=0;
 
 async function loadOCs(){
   const{data}=await db.from('ordenes_compra').select('*').order('id',{ascending:false});
   ocCache=data||[];
-  renderOCSelect();
+  renderOCSelectExistente();
 }
 
-function renderOCSelect(){
+function renderOCSelectExistente(){
   const sel=document.getElementById('cp-oc-select');
   if(!sel) return;
-  const prev=sel.value;
-  sel.innerHTML='<option value="NUEVA">+ Nueva OC</option>'+
+  sel.innerHTML='<option value="">— Seleccionar OC —</option>'+
     ocCache.map(oc=>`<option value="${oc.codigo}">${oc.codigo} — ${oc.tipo} (${oc.estado})</option>`).join('');
-  sel.value=ocCache.find(o=>o.codigo===prev)?prev:'NUEVA';
-  csOCSelectChange();
 }
 
-function csOCSelectChange(){
-  const isNueva=document.getElementById('cp-oc-select').value==='NUEVA';
-  document.getElementById('cp-oc-nueva-wrap').style.display=isNueva?'':'none';
+function ocSetMode(modo){
+  ocModo=modo;
+  document.getElementById('oc-btn-nueva').className='oc-toggle'+(modo==='nueva'?' active':'');
+  document.getElementById('oc-btn-existente').className='oc-toggle'+(modo==='existente'?' active':'');
+  document.getElementById('oc-panel-nueva').style.display=modo==='nueva'?'':'none';
+  document.getElementById('oc-panel-existente').style.display=modo==='existente'?'':'none';
+}
+
+function ocExistenteChange(){
+  const cod=document.getElementById('cp-oc-select').value;
+  const card=document.getElementById('oc-info-card');
+  if(!cod){card.style.display='none';return;}
+  const oc=ocCache.find(o=>o.codigo===cod);
+  if(!oc){card.style.display='none';return;}
+  // Count products in this OC
+  const prods=inventarioCache.filter(p=>p.orden_compra===cod);
+  const monto=prods.reduce((s,p)=>s+parseFloat(p.precio_compra_soles||0),0);
+  const fecha=oc.fecha?oc.fecha.substring(2,10):'—';
+  document.getElementById('oc-info-codigo').textContent=oc.codigo;
+  document.getElementById('oc-info-tipo').textContent=(oc.tipo==='IMPORTACION'?'✈️ ':'🏪 ')+oc.tipo;
+  document.getElementById('oc-info-prods').textContent=prods.length+' uds';
+  document.getElementById('oc-info-monto').textContent=fmt(monto);
+  document.getElementById('oc-info-fecha').textContent=fecha;
+  card.style.display='';
+}
+
+function ocUpdateBadge(codigo){
+  const badge=document.getElementById('cp-oc-badge');
+  const txt=document.getElementById('cp-oc-badge-txt');
+  if(!codigo){badge.style.display='none';return;}
+  txt.textContent=codigo+' · '+ocSessionCount+' producto'+(ocSessionCount!==1?'s':'');
+  badge.style.display='flex';
+}
+
+function ocUpdateSessionCounter(codigo){
+  const wrap=document.getElementById('oc-session-counter');
+  if(!codigo){wrap.style.display='none';return;}
+  document.getElementById('oc-session-count').textContent=ocSessionCount;
+  document.getElementById('oc-session-codigo').textContent=codigo;
+  wrap.style.display='';
 }
 
 async function pregenOC(){
@@ -956,6 +1035,8 @@ async function pregenOC(){
   const el=document.getElementById('cp-oc-nueva');
   if(el&&data) el.value=data;
 }
+
+function csOCSelectChange(){}
 
 // ── TC GLOBAL ──
 let tcSaveTimer=null;
@@ -1476,21 +1557,24 @@ async function registrarCompra(){
     // OC logic for credito
     let ordenCompra=null;
     if(esCredito){
-      const ocSel=document.getElementById('cp-oc-select').value;
-      if(ocSel==='NUEVA'){
+      if(ocModo==='nueva'){
         const ocCod=document.getElementById('cp-oc-nueva').value;
         const ocTipo=document.getElementById('cp-oc-tipo').value;
-        // Create OC if not exists
+        const ocNotas=document.getElementById('cp-oc-notas').value.trim()||null;
         const{error:eOC}=await db.from('ordenes_compra').upsert({
           codigo:ocCod, tipo:ocTipo,
           fecha:document.getElementById('cp-fecha').value,
-          estado:'PENDIENTE'
+          estado:'PENDIENTE', notas:ocNotas
         },{onConflict:'codigo'});
         if(eOC) throw eOC;
         ordenCompra=ocCod;
+        // Switch to existente mode so next product joins same OC
+        if(ocSessionCodigo!==ocCod){ocSessionCodigo=ocCod;ocSessionCount=0;}
       } else {
-        ordenCompra=ocSel;
+        ordenCompra=document.getElementById('cp-oc-select').value||null;
+        if(ocSessionCodigo!==ordenCompra){ocSessionCodigo=ordenCompra;ocSessionCount=0;}
       }
+      if(ordenCompra) ocSessionCount++;
     }
 
     const{error}=await db.from('inventario').insert({
@@ -1518,7 +1602,11 @@ async function registrarCompra(){
     toast(`✓ ${cod} registrado${esCredito?' — ● PENDIENTE':''}`, 'ok');
     ['cp-marca','cp-silueta','cp-colorway','cp-talla','cp-usd','cp-soles','cp-pventa','cp-factura','cp-desc-factura','cp-comentarios','cp-soles-contado','cp-pventa-credito','cp-factura-credito','cp-comentarios-credito'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     document.getElementById('cp-tc').value='3.70';
-    await loadOCs(); pregenOC();
+    await loadOCs();
+    if(ocModo==='nueva'){ pregenOC(); }
+    else { ocExistenteChange(); }
+    ocUpdateBadge(ocSessionCodigo);
+    ocUpdateSessionCounter(ocSessionCodigo);
     document.getElementById('cp-preview').classList.remove('show');
     await loadInventario();
   }catch(e){toast('Error: '+e.message,'err');}
