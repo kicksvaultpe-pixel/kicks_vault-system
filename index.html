@@ -148,16 +148,23 @@ tbody tr:hover td{background:#1a1a1a}
 .sg-num{font-family:"Archivo Black";font-size:18px;color:var(--text)}
 .sg-num.accent{color:var(--accent)}.sg-num.green{color:var(--green)}
 .sg-num.red{color:var(--red)}
-.sg-tot{color:var(--text)!important;font-size:13px}
+.sg-tot{color:var(--text)!important;font-size:11px;font-weight:700;letter-spacing:.5px}
 .sg-cat.sg-tot{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted2)}
-.sg-big{font-family:"Archivo Black";font-size:26px;color:var(--text)}
+.sg-big{font-family:"Archivo Black";font-size:22px;color:var(--text)}
 .sg-big.accent{color:var(--accent)}.sg-big.green{color:var(--green)}.sg-big.red{color:var(--red)}
-.sg-row-2h{display:grid;grid-template-columns:1fr auto auto;gap:0 12px;padding:0 0 4px 0}
-.sg-row-2{display:grid;grid-template-columns:1fr auto auto;gap:0 12px;padding:4px 0}
-.sg-col-h{font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);min-width:40px;text-align:right}
+/* sg-row: label izq, número der — misma altura */
+.sg-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0}
+.sg-row .sg-num{font-size:16px}
+/* total row */
+.sg-divider{border-top:1px solid var(--border2);margin:7px 0}
+.sg-cat.sg-tot{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2)}
+/* compras mes: 3 columnas fijas */
+.sg-row-2h{display:grid;grid-template-columns:1fr 42px 90px;padding:0 0 4px}
+.sg-row-2{display:grid;grid-template-columns:1fr 42px 90px;padding:5px 0;align-items:center}
+.sg-row-2 .sg-num{text-align:right;font-size:15px}
+.sg-row-2 .sg-big{text-align:right;font-size:18px}
+.sg-col-h{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);text-align:right}
 .sg-cat2{font-size:12px;color:var(--muted2)}
-.sg-row-2 .sg-num{min-width:40px;text-align:right}
-.sg-row-2 .sg-big{min-width:40px;text-align:right}
 .stat-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted2)}
 .stat-val{font-family:'Archivo Black';font-size:22px;margin-top:3px;letter-spacing:-.5px}
 .stat-val.green{color:var(--green)}.stat-val.accent{color:var(--accent)}
@@ -570,7 +577,7 @@ input[list] { cursor: text; }
       <div class="sg-row"><span class="sg-cat">👟 Zapatillas</span><span class="sg-num accent" id="st-zap-val">—</span></div>
       <div class="sg-row"><span class="sg-cat">👕 Ropa &amp; Otros</span><span class="sg-num accent" id="st-ropa-val">—</span></div>
       <div class="sg-divider"></div>
-      <div class="sg-row"><span class="sg-cat sg-tot">Total</span><span class="sg-big accent" id="st-total-val">—</span></div>
+      <div class="sg-row"><span class="sg-cat sg-tot">Total</span><span class="sg-big" id="st-total-val">—</span></div>
     </div>
     <!-- COMPRAS DEL MES -->
     <div class="stat-card">
