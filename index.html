@@ -169,7 +169,17 @@ tbody tr:hover td{background:#1a1a1a}
 
 
 /* DATALIST native dropdown styling */
-input::-webkit-calendar-picker-indicator { display: none !important; }
+/* calendar picker visible */
+
+/* inputs with datalist look like selects */
+input[list] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+  cursor: pointer;
+}
+
 input[list] { cursor: text; }
 
 /* MISC */
@@ -298,11 +308,11 @@ input[list] { cursor: text; }
         </div>
         <div class="field" id="cp-usd-wrap">
           <label>Monto USD $</label>
-          <input type="number" id="cp-usd" placeholder="0.00" step="0.01" oninput="calcPrecio()">
+          <input type="number" id="cp-usd" placeholder="0.00" step="0.01" oninput="calcSolesCredito()">
         </div>
         <div class="field" id="cp-tc-wrap">
           <label>TC referencial</label>
-          <input type="number" id="cp-tc" value="3.70" step="0.001" oninput="calcPrecio()">
+          <input type="number" id="cp-tc" value="3.70" step="0.001" oninput="calcSolesCredito()">
         </div>
         <div class="field" id="cp-soles-wrap">
           <label id="cp-soles-label">S/. estimado</label>
@@ -576,10 +586,10 @@ function acFilter(inputId,listId,items){
 }
 
 function acSelect(inputId,listId,val){
-  document.getElementById(inputId).value=val;
-  document.getElementById(listId).classList.remove('open');
-  // trigger calc if needed
-  if(inputId==='cp-marca'||inputId==='cp-silueta'||inputId==='cp-colorway') calcPrecio();
+  const el=document.getElementById(inputId);
+  const lst=document.getElementById(listId);
+  if(el)el.value=val;
+  if(lst)lst.classList.remove('open');
 }
 
 function acKey(e,listId,inputId){
@@ -821,6 +831,15 @@ function fillClienteSelect(){
 }
 
 // ── CALCULOS ──
+function calcSolesCredito(){
+  const usd=parseFloat(document.getElementById('cp-usd').value)||0;
+  const tc=parseFloat(document.getElementById('cp-tc').value)||0;
+  if(usd>0&&tc>0){
+    document.getElementById('cp-soles').value=(Math.round(usd*tc*100)/100).toFixed(2);
+  }
+  calcPrecio();
+}
+
 function calcPrecio(){
   let pc=0;
   const pv=parseFloat(document.getElementById('cp-pventa').value)||0;
