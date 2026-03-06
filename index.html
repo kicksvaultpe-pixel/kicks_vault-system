@@ -150,6 +150,14 @@ tbody tr:hover td{background:#1a1a1a}
 .sg-num.red{color:var(--red)}
 .sg-tot{color:var(--text)!important;font-size:13px}
 .sg-cat.sg-tot{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted2)}
+.sg-big{font-family:"Archivo Black";font-size:26px;color:var(--text)}
+.sg-big.accent{color:var(--accent)}.sg-big.green{color:var(--green)}.sg-big.red{color:var(--red)}
+.sg-row-2h{display:grid;grid-template-columns:1fr auto auto;gap:0 12px;padding:0 0 4px 0}
+.sg-row-2{display:grid;grid-template-columns:1fr auto auto;gap:0 12px;padding:4px 0}
+.sg-col-h{font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);min-width:40px;text-align:right}
+.sg-cat2{font-size:12px;color:var(--muted2)}
+.sg-row-2 .sg-num{min-width:40px;text-align:right}
+.sg-row-2 .sg-big{min-width:40px;text-align:right}
 .stat-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted2)}
 .stat-val{font-family:'Archivo Black';font-size:22px;margin-top:3px;letter-spacing:-.5px}
 .stat-val.green{color:var(--green)}.stat-val.accent{color:var(--accent)}
@@ -535,42 +543,43 @@ input[list] { cursor: text; }
     <!-- TOTAL -->
     <div class="stat-card">
       <div class="stat-label">TOTAL</div>
-      <div class="sg-row"><span class="sg-cat">👟</span><span class="sg-num" id="st-zap-total">—</span></div>
-      <div class="sg-row"><span class="sg-cat">👕</span><span class="sg-num" id="st-ropa-total">—</span></div>
+      <div class="sg-row"><span class="sg-cat">👟 Zapatillas</span><span class="sg-num" id="st-zap-total">—</span></div>
+      <div class="sg-row"><span class="sg-cat">👕 Ropa &amp; Otros</span><span class="sg-num" id="st-ropa-total">—</span></div>
       <div class="sg-divider"></div>
-      <div class="sg-row"><span class="sg-cat sg-tot">Total</span><span class="sg-num sg-tot" id="st-total">—</span></div>
+      <div class="sg-row"><span class="sg-cat sg-tot">Total</span><span class="sg-big" id="st-total">—</span></div>
     </div>
     <!-- DISPONIBLES -->
     <div class="stat-card">
       <div class="stat-label">DISPONIBLES</div>
-      <div class="sg-row"><span class="sg-cat">👟</span><span class="sg-num green" id="st-zap-disp">—</span></div>
-      <div class="sg-row"><span class="sg-cat">👕</span><span class="sg-num green" id="st-ropa-disp">—</span></div>
+      <div class="sg-row"><span class="sg-cat">👟 Zapatillas</span><span class="sg-num green" id="st-zap-disp">—</span></div>
+      <div class="sg-row"><span class="sg-cat">👕 Ropa &amp; Otros</span><span class="sg-num green" id="st-ropa-disp">—</span></div>
       <div class="sg-divider"></div>
-      <div class="sg-row"><span class="sg-cat sg-tot">Total</span><span class="sg-num sg-tot green" id="st-disp">—</span></div>
+      <div class="sg-row"><span class="sg-cat sg-tot">Total</span><span class="sg-big green" id="st-disp">—</span></div>
     </div>
     <!-- VENDIDOS -->
     <div class="stat-card">
       <div class="stat-label">VENDIDOS</div>
-      <div class="sg-row"><span class="sg-cat">👟</span><span class="sg-num" id="st-zap-vend">—</span></div>
-      <div class="sg-row"><span class="sg-cat">👕</span><span class="sg-num" id="st-ropa-vend">—</span></div>
+      <div class="sg-row"><span class="sg-cat">👟 Zapatillas</span><span class="sg-num" id="st-zap-vend">—</span></div>
+      <div class="sg-row"><span class="sg-cat">👕 Ropa &amp; Otros</span><span class="sg-num" id="st-ropa-vend">—</span></div>
       <div class="sg-divider"></div>
-      <div class="sg-row"><span class="sg-cat sg-tot">Total</span><span class="sg-num sg-tot" id="st-vend">—</span></div>
+      <div class="sg-row"><span class="sg-cat sg-tot">Total</span><span class="sg-big" id="st-vend">—</span></div>
     </div>
     <!-- VALOR STOCK -->
     <div class="stat-card">
       <div class="stat-label">VALOR STOCK</div>
-      <div class="sg-row"><span class="sg-cat">👟</span><span class="sg-num accent" id="st-zap-val">—</span></div>
-      <div class="sg-row"><span class="sg-cat">👕</span><span class="sg-num accent" id="st-ropa-val">—</span></div>
+      <div class="sg-row"><span class="sg-cat">👟 Zapatillas</span><span class="sg-num accent" id="st-zap-val">—</span></div>
+      <div class="sg-row"><span class="sg-cat">👕 Ropa &amp; Otros</span><span class="sg-num accent" id="st-ropa-val">—</span></div>
       <div class="sg-divider"></div>
-      <div class="sg-row"><span class="sg-cat sg-tot">Total</span><span class="sg-num sg-tot accent" id="st-total-val">—</span></div>
+      <div class="sg-row"><span class="sg-cat sg-tot">Total</span><span class="sg-big accent" id="st-total-val">—</span></div>
     </div>
     <!-- COMPRAS DEL MES -->
     <div class="stat-card">
       <div class="stat-label">COMPRAS DEL MES</div>
-      <div class="sg-row"><span class="sg-cat">👟</span><span class="sg-num" id="st-mes-zap">—</span></div>
-      <div class="sg-row"><span class="sg-cat">👕</span><span class="sg-num" id="st-mes-ropa">—</span></div>
+      <div class="sg-row-2h"><span class="sg-cat2"></span><span class="sg-col-h">Uds</span><span class="sg-col-h">Monto</span></div>
+      <div class="sg-row-2"><span class="sg-cat2">👟 Zapatillas</span><span class="sg-num" id="st-mes-zap-uds">—</span><span class="sg-num accent" id="st-mes-zap-val">—</span></div>
+      <div class="sg-row-2"><span class="sg-cat2">👕 Ropa &amp; Otros</span><span class="sg-num" id="st-mes-ropa-uds">—</span><span class="sg-num accent" id="st-mes-ropa-val">—</span></div>
       <div class="sg-divider"></div>
-      <div class="sg-row"><span class="sg-cat sg-tot">S/.</span><span class="sg-num sg-tot red" id="st-mes-val">—</span></div>
+      <div class="sg-row-2"><span class="sg-cat sg-tot">Total</span><span class="sg-big" id="st-mes-uds-total">—</span><span class="sg-big red" id="st-mes-val">—</span></div>
     </div>
   </div>
 
@@ -981,8 +990,17 @@ function updateStats(){
     .filter(p=>p.fecha_compra&&p.fecha_compra.startsWith(mesActual))
     .reduce((s,p)=>s+parseFloat(p.total_costos||0),0);
   const montoMes=mesPagados.reduce((s,p)=>s+parseFloat(p.precio_compra_soles||0),0)+costosMes;
-  set('st-mes-zap', mesPagados.filter(p=>p.categoria==='ZAPATILLAS').length+' uds');
-  set('st-mes-ropa', mesPagados.filter(p=>p.categoria!=='ZAPATILLAS').length+' uds');
+  const mesZap=mesPagados.filter(p=>p.categoria==='ZAPATILLAS');
+  const mesRopa=mesPagados.filter(p=>p.categoria!=='ZAPATILLAS');
+  const costosMesZap=inventarioCache.filter(p=>p.fecha_compra&&p.fecha_compra.startsWith(mesActual)&&p.categoria==='ZAPATILLAS').reduce((s,p)=>s+parseFloat(p.total_costos||0),0);
+  const costosMesRopa=inventarioCache.filter(p=>p.fecha_compra&&p.fecha_compra.startsWith(mesActual)&&p.categoria!=='ZAPATILLAS').reduce((s,p)=>s+parseFloat(p.total_costos||0),0);
+  const montoZap=mesZap.reduce((s,p)=>s+parseFloat(p.precio_compra_soles||0),0)+costosMesZap;
+  const montoRopa=mesRopa.reduce((s,p)=>s+parseFloat(p.precio_compra_soles||0),0)+costosMesRopa;
+  set('st-mes-zap-uds', mesZap.length);
+  set('st-mes-zap-val', fmt(montoZap));
+  set('st-mes-ropa-uds', mesRopa.length);
+  set('st-mes-ropa-val', fmt(montoRopa));
+  set('st-mes-uds-total', mesPagados.length);
   set('st-mes-val', fmt(montoMes));
 }
 function set(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
