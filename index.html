@@ -167,6 +167,11 @@ tbody tr:hover td{background:#1a1a1a}
 .modal-close{background:none;border:none;color:var(--muted2);font-size:20px;cursor:pointer;line-height:1}
 .modal-close:hover{color:var(--text)}
 
+
+/* DATALIST native dropdown styling */
+input::-webkit-calendar-picker-indicator { display: none !important; }
+input[list] { cursor: text; }
+
 /* MISC */
 .empty-state{text-align:center;padding:50px 20px;color:var(--muted2)}
 .empty-icon{font-size:36px;margin-bottom:10px;opacity:.5}
@@ -227,35 +232,30 @@ tbody tr:hover td{background:#1a1a1a}
     <div class="card">
       <div class="card-label">Identificación del producto</div>
       <div class="form-grid g4">
-        <div class="field ac-wrap">
+        <div class="field">
           <label>Marca</label>
-          <input type="text" id="cp-marca" placeholder="NIKE" autocomplete="off"
-            oninput="acFilter('cp-marca','ac-marca',MARCAS)" onkeydown="acKey(event,'ac-marca','cp-marca')">
-          <div class="ac-list" id="ac-marca"></div>
+          <input type="text" id="cp-marca" placeholder="NIKE" list="dl-marcas" autocomplete="off">
         </div>
-        <div class="field ac-wrap">
+        <div class="field">
           <label>Silueta</label>
-          <input type="text" id="cp-silueta" placeholder="JORDAN 1" autocomplete="off"
-            oninput="acFilter('cp-silueta','ac-silueta',getSiluetas())" onkeydown="acKey(event,'ac-silueta','cp-silueta')">
-          <div class="ac-list" id="ac-silueta"></div>
+          <input type="text" id="cp-silueta" placeholder="JORDAN 1" list="dl-siluetas" autocomplete="off">
         </div>
-        <div class="field ac-wrap">
+        <div class="field">
           <label>Colorway</label>
-          <input type="text" id="cp-colorway" placeholder="CHICAGO" autocomplete="off"
-            oninput="acFilter('cp-colorway','ac-colorway',getColorways())" onkeydown="acKey(event,'ac-colorway','cp-colorway')">
-          <div class="ac-list" id="ac-colorway"></div>
+          <input type="text" id="cp-colorway" placeholder="CHICAGO" list="dl-colorways" autocomplete="off">
         </div>
-        <div class="field ac-wrap">
+        <div class="field">
           <label>Talla</label>
-          <input type="text" id="cp-talla" placeholder="8US / M / -" autocomplete="off"
-            oninput="acFilter('cp-talla','ac-talla',TALLAS)" onkeydown="acKey(event,'ac-talla','cp-talla')">
-          <div class="ac-list" id="ac-talla"></div>
+          <input type="text" id="cp-talla" placeholder="8US / M / -" list="dl-tallas" autocomplete="off">
         </div>
-        <div class="field ac-wrap">
+        <div class="field">
           <label>Categoría</label>
-          <input type="text" id="cp-cat" placeholder="ZAPATILLAS" autocomplete="off"
-            oninput="acFilter('cp-cat','ac-cat',CATEGORIAS)" onkeydown="acKey(event,'ac-cat','cp-cat')" value="ZAPATILLAS">
-          <div class="ac-list" id="ac-cat"></div>
+          <select id="cp-cat">
+            <option value="ZAPATILLAS">👟 Zapatillas</option>
+            <option value="ROPA">👕 Ropa</option>
+            <option value="ACCESORIOS">🧢 Accesorios</option>
+            <option value="OTROS">📦 Otros</option>
+          </select>
         </div>
         <div class="field"><label>Fecha de compra</label><input type="date" id="cp-fecha"></div>
 
@@ -363,31 +363,23 @@ tbody tr:hover td{background:#1a1a1a}
         </div>
         <div id="rv-pedido-wrap" style="display:none;grid-column:span 2">
           <div class="form-grid g3">
-            <div class="field ac-wrap">
+            <div class="field">
               <label>Marca</label>
-              <input type="text" id="rv-marca" placeholder="NIKE" autocomplete="off"
-                oninput="acFilter('rv-marca','ac-rv-marca',MARCAS)" onkeydown="acKey(event,'ac-rv-marca','rv-marca')">
-              <div class="ac-list" id="ac-rv-marca"></div>
+              <input type="text" id="rv-marca" placeholder="NIKE" list="dl-marcas" autocomplete="off">
             </div>
-            <div class="field ac-wrap">
+            <div class="field">
               <label>Silueta</label>
-              <input type="text" id="rv-silueta" placeholder="JORDAN 1" autocomplete="off"
-                oninput="acFilter('rv-silueta','ac-rv-silueta',getSiluetas())" onkeydown="acKey(event,'ac-rv-silueta','rv-silueta')">
-              <div class="ac-list" id="ac-rv-silueta"></div>
+              <input type="text" id="rv-silueta" placeholder="JORDAN 1" list="dl-siluetas" autocomplete="off">
             </div>
-            <div class="field ac-wrap">
+            <div class="field">
               <label>Colorway</label>
-              <input type="text" id="rv-colorway" placeholder="CHICAGO" autocomplete="off"
-                oninput="acFilter('rv-colorway','ac-rv-colorway',getColorways())" onkeydown="acKey(event,'ac-rv-colorway','rv-colorway')">
-              <div class="ac-list" id="ac-rv-colorway"></div>
+              <input type="text" id="rv-colorway" placeholder="CHICAGO" list="dl-colorways" autocomplete="off">
             </div>
           </div>
         </div>
-        <div class="field ac-wrap">
+        <div class="field">
           <label>Talla</label>
-          <input type="text" id="rv-talla" placeholder="8US / M" autocomplete="off"
-            oninput="acFilter('rv-talla','ac-rv-talla',TALLAS)" onkeydown="acKey(event,'ac-rv-talla','rv-talla')">
-          <div class="ac-list" id="ac-rv-talla"></div>
+          <input type="text" id="rv-talla" placeholder="8US / M" list="dl-tallas" autocomplete="off">
         </div>
         <div class="field"><label>Adelanto S/.</label><input type="number" id="rv-adelanto" placeholder="0.00" step="0.01"></div>
         <div class="field"><label>Canal</label>
@@ -475,11 +467,7 @@ tbody tr:hover td{background:#1a1a1a}
 
   <div class="table-toolbar">
     <input class="search-box" id="inv-search" type="text" placeholder="🔍  Marca, silueta, colorway, código..." oninput="filterInventario()">
-    <div class="field ac-wrap" style="min-width:120px">
-      <input class="filter-select" id="inv-talla-search" type="text" placeholder="Talla..." autocomplete="off"
-        oninput="acFilter('inv-talla-search','ac-inv-talla',TALLAS);filterInventario()" onkeydown="acKey(event,'ac-inv-talla','inv-talla-search')" style="border-radius:7px;padding:8px 12px">
-      <div class="ac-list" id="ac-inv-talla"></div>
-    </div>
+    <input class="filter-select" id="inv-talla-search" type="text" placeholder="Talla..." list="dl-tallas" autocomplete="off" oninput="filterInventario()" style="min-width:100px">
     <select class="filter-select" id="inv-estado" onchange="filterInventario()">
       <option value="">Todos</option>
       <option value="DISPONIBLE">Disponible</option>
@@ -691,6 +679,18 @@ async function loadInventario(){
   renderInventario(inventarioCache);
   updateStats();
   fillProductoSelects();
+  fillDataLists();
+}
+
+function fillDataLists(){
+  const marcas=[...new Set(inventarioCache.map(p=>p.marca).filter(Boolean))].sort();
+  const siluetas=[...new Set(inventarioCache.map(p=>p.silueta).filter(Boolean))].sort();
+  const colorways=[...new Set(inventarioCache.map(p=>p.colorway).filter(Boolean))].sort();
+  const extra=['NIKE','ADIDAS','JORDAN','YEEZY','SUPREME','NEW BALANCE','OFF-WHITE','ESSENTIALS','FEAR OF GOD','STONE ISLAND','PALACE','BAPE','STUSSY','PUMA','REEBOK','CONVERSE','VANS','ASICS','SALOMON'];
+  const allMarcas=[...new Set([...extra,...marcas])].sort();
+  document.getElementById('dl-marcas').innerHTML=allMarcas.map(m=>`<option value="${m}">`).join('');
+  document.getElementById('dl-siluetas').innerHTML=siluetas.map(s=>`<option value="${s}">`).join('');
+  document.getElementById('dl-colorways').innerHTML=colorways.map(c=>`<option value="${c}">`).join('');
 }
 
 async function loadClientes(){
@@ -1123,5 +1123,24 @@ function toast(msg,type='ok'){
 
 init();
 </script>
+
+<!-- DATALISTS -->
+<datalist id="dl-marcas"></datalist>
+<datalist id="dl-siluetas"></datalist>
+<datalist id="dl-colorways"></datalist>
+<datalist id="dl-tallas">
+  <option value="4US"><option value="4.5US"><option value="5US"><option value="5.5US">
+  <option value="6US"><option value="6.5US"><option value="7US"><option value="7.5US">
+  <option value="8US"><option value="8.5US"><option value="9US"><option value="9.5US">
+  <option value="10US"><option value="10.5US"><option value="11US"><option value="11.5US">
+  <option value="12US"><option value="13US"><option value="14US">
+  <option value="36EU"><option value="37EU"><option value="38EU"><option value="39EU">
+  <option value="40EU"><option value="41EU"><option value="42EU"><option value="43EU">
+  <option value="44EU"><option value="45EU"><option value="46EU">
+  <option value="4Y"><option value="4.5Y"><option value="5Y"><option value="5.5Y">
+  <option value="6Y"><option value="6.5Y"><option value="7Y">
+  <option value="XS"><option value="S"><option value="M"><option value="L">
+  <option value="XL"><option value="XXL"><option value="XXXL"><option value="-">
+</datalist>
 </body>
 </html>
