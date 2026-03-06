@@ -1,0 +1,37 @@
+-- =============================================
+-- KICKS VAULT — Seed Data (datos reales del Excel)
+-- Pega en: Supabase → SQL Editor → Run
+-- =============================================
+
+-- Ajustar secuencia para que los nuevos códigos no colisionen
+SELECT setval('seq_producto', 800);
+
+INSERT INTO inventario (codigo_producto, fecha_compra, marca, silueta, colorway, categoria, talla, precio_compra_soles, precio_final, estado) VALUES
+('P-00003', '2023-01-05', 'JORDAN',   '4',              'MIDNIGHT NAVY',          'ZAPATILLAS', '10US',   179.8,   179.8,   'DISPONIBLE'),
+('P-00005', '2023-06-08', 'ADIDAS',   'YEEZY 700 V2',   'TEPHRA',                 'ZAPATILLAS', '11US',   400.0,   400.0,   'DISPONIBLE'),
+('P-00006', '2023-06-08', 'ADIDAS',   'YEEZY FOAM RUNNER','CLAY TAUPE',           'ZAPATILLAS', '11US',   329.0,   329.0,   'DISPONIBLE'),
+('P-00007', '2023-11-12', 'NIKE',     'DUNK LOW',       'COURT PURPLE',           'ZAPATILLAS', '10US',   389.9,   389.9,   'DISPONIBLE'),
+('P-00010', '2023-12-28', 'NIKE',     'DUNK LOW',       'CHICAGO SPLIT',          'ZAPATILLAS', '7.5US',  447.92,  447.92,  'DISPONIBLE'),
+('P-00011', '2024-03-05', 'JORDAN',   '4',              'BRED REIMAGINED',        'ZAPATILLAS', '10.5US', 969.9,   969.9,   'DISPONIBLE'),
+('P-00012', '2024-03-07', 'NIKE',     'DUNK SB',        'COURT PURPLE',           'ZAPATILLAS', '10US',   460.0,   460.0,   'DISPONIBLE'),
+('P-00013', '2024-03-12', 'ADIDAS',   'YEEZY FOAM RUNNER','MX GRANITE',           'ZAPATILLAS', '11US',   329.0,   329.0,   'DISPONIBLE'),
+('P-00014', '2024-03-12', 'ADIDAS',   'YEEZY FOAM RUNNER','MX GRANITE',           'ZAPATILLAS', '11US',   329.0,   340.0,   'DISPONIBLE'),
+('P-00016', '2024-04-09', 'NIKE',     'DUNK SB',        'COURT PURPLE',           'ZAPATILLAS', '10US',   460.0,   460.0,   'DISPONIBLE'),
+('P-00017', '2024-05-05', 'NIKE',     'DUNK LOW',       'CHICAGO SPLIT',          'ZAPATILLAS', '7.5US',  447.2,   447.2,   'DISPONIBLE'),
+('P-00018', '2024-05-31', 'JORDAN',   '3',              'J BALVIN RIO',           'ZAPATILLAS', '10.5US', 1159.9,  1159.9,  'DISPONIBLE'),
+('P-00021', '2024-07-10', 'ADIDAS',   'YEEZY 700 V1',   'WASH ORANGE',            'ZAPATILLAS', '11.5US', 569.0,   569.0,   'DISPONIBLE'),
+('P-00022', '2024-07-11', 'ADIDAS',   'YEEZY 700 V1',   'WASH ORANGE',            'ZAPATILLAS', '10.5US', 569.4,   569.4,   'DISPONIBLE'),
+('P-00023', '2024-07-25', 'JORDAN',   '4',              'MILITARY BLACK',         'ZAPATILLAS', '10.5US', 540.0,   540.0,   'DISPONIBLE'),
+('P-00025', '2024-09-20', 'JORDAN',   '4',              'A MA MANIÉRE W.Y.W.S',   'ZAPATILLAS', '10US',   902.93,  1202.93, 'DISPONIBLE'),
+('P-00027', '2024-09-24', 'JORDAN',   '1 LOW',          'MOCHA',                  'ZAPATILLAS', '5.5Y',   520.0,   520.0,   'DISPONIBLE'),
+('P-00029', '2024-10-26', 'ADIDAS',   'GAZELLE',        'BAD BUNNY X MESSI',      'ZAPATILLAS', '8US',    649.0,   649.0,   'DISPONIBLE'),
+('P-00030', '2024-11-04', 'NIKE',     'DUNK LOW',       'CHICAGO SPLIT',          'ZAPATILLAS', '10US',   335.4,   335.4,   'DISPONIBLE'),
+('P-00032', '2024-11-22', 'ADIDAS',   'CAMPUS',         'BAD BUNNY CHALKY BROWN', 'ZAPATILLAS', '9.5US',  389.4,   389.4,   'DISPONIBLE'),
+-- Ropa
+('P-00141', '2025-02-01', 'KICKS VAULT', 'KIT DE LIMPIEZA', 'BASIC',   'ACCESORIOS', '-', 28.0,  28.0,  'DISPONIBLE'),
+('P-00142', '2025-02-01', 'KICKS VAULT', 'KIT DE LIMPIEZA', 'BASIC',   'ACCESORIOS', '-', 28.0,  28.0,  'DISPONIBLE'),
+('P-00143', '2025-02-01', 'KICKS VAULT', 'KIT DE LIMPIEZA', 'PREMIUM', 'ACCESORIOS', '-', 35.0,  35.0,  'DISPONIBLE'),
+('P-00144', '2025-02-01', 'KICKS VAULT', 'KIT DE LIMPIEZA', 'PREMIUM', 'ACCESORIOS', '-', 35.0,  35.0,  'DISPONIBLE'),
+('P-00146', '2025-02-01', 'KICKS VAULT', 'KIT DE LIMPIEZA', 'DELUXE',  'ACCESORIOS', '-', 45.5,  45.5,  'DISPONIBLE'),
+('P-00150', '2025-02-01', 'KICKS VAULT', 'PREMIUM CLEANER', '150ML',   'ACCESORIOS', '-', 17.5,  17.5,  'DISPONIBLE'),
+('P-00151', '2025-02-01', 'KICKS VAULT', 'PREMIUM CLEANER', '150ML',   'ACCESORIOS', '-', 17.5,  17.5,  'DISPONIBLE');
