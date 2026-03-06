@@ -157,6 +157,10 @@ tbody tr:hover td{background:#1a1a1a}
 
 /* DATALIST native dropdown styling */
 /* calendar picker visible */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(55%) sepia(0%) saturate(0%) brightness(90%);
+  cursor: pointer;
+}
 
 
 
@@ -570,12 +574,21 @@ input[list] { cursor: text; }
       <span class="combo-arrow">▼</span>
       <div class="combo-list" id="cl-inv-talla"></div>
     </div>
+    <div class="combo-wrap" style="min-width:130px">
+      <input type="text" id="inv-cat" placeholder="Categoría..." autocomplete="off"
+        oninput="comboFilter('inv-cat','cl-inv-cat');filterInventario()"
+        onfocus="comboOpen('inv-cat','cl-inv-cat')"
+        onkeydown="comboKey(event,'inv-cat','cl-inv-cat')">
+      <span class="combo-arrow">▼</span>
+      <div class="combo-list" id="cl-inv-cat"></div>
+    </div>
     <select class="filter-select" id="inv-estado" onchange="filterInventario()" style="min-width:130px">
       <option value="">Todos</option>
       <option value="DISPONIBLE">● Disponible</option>
       <option value="VENDIDO">● Vendido</option>
       <option value="PENDIENTE">● Pendiente pago</option>
     </select>
+    <button class="btn btn-ghost btn-sm" onclick="clearFiltros()" title="Limpiar filtros">✕ Limpiar</button>
     <button class="btn btn-ghost btn-sm" onclick="loadInventario()">↺</button>
   </div>
 
@@ -823,6 +836,7 @@ function fillDataLists(){
   comboSetData('cl-silueta', siluetas);  comboSetData('cl-rv-silueta', siluetas); comboSetData('cl-inv-silueta', siluetas);
   comboSetData('cl-colorway', colorways);comboSetData('cl-rv-colorway', colorways);comboSetData('cl-inv-colorway', colorways);
   comboSetData('cl-talla', TALLAS_ALL);  comboSetData('cl-rv-talla', TALLAS_ALL); comboSetData('cl-inv-talla', TALLAS_ALL);
+  comboSetData('cl-inv-cat', ['ZAPATILLAS','ROPA','ACCESORIOS','OTROS']);
 }
 
 async function loadClientes(){
@@ -917,6 +931,16 @@ function updateStats(){
 
 let sortCol=null,sortDir=1;
 
+function clearFiltros(){
+  ['inv-marca','inv-silueta','inv-colorway','inv-talla','inv-cat'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value='';
+  });
+  document.getElementById('inv-estado').value='';
+  sortCol=null; sortDir=1;
+  document.querySelectorAll('[id^="sort-"]').forEach(el=>el.textContent='');
+  renderInventario(inventarioCache);
+}
+
 function sortTable(col){
   if(sortCol===col)sortDir*=-1;else{sortCol=col;sortDir=1;}
   document.querySelectorAll('[id^="sort-"]').forEach(el=>el.textContent='');
@@ -932,6 +956,7 @@ function filterInventario(){
   const colorway=g('inv-colorway').toLowerCase();
   const talla=g('inv-talla').toLowerCase();
   const estado=g('inv-estado');
+  const cat=g('inv-cat').toUpperCase();
 
   let rows=inventarioCache.filter(p=>{
     const matchM=!marca||(p.marca||'').toLowerCase().includes(marca);
@@ -939,7 +964,8 @@ function filterInventario(){
     const matchC=!colorway||(p.colorway||'').toLowerCase().includes(colorway);
     const matchT=!talla||(p.talla||'').toLowerCase().includes(talla);
     const matchE=!estado||(estado==='PENDIENTE'?p.pago_estado==='PENDIENTE':p.estado===estado&&p.pago_estado!=='PENDIENTE');
-    return matchM&&matchS&&matchC&&matchT&&matchE;
+    const matchCat=!cat||(p.categoria||'').toUpperCase().includes(cat);
+    return matchM&&matchS&&matchC&&matchT&&matchE&&matchCat;
   });
 
   if(sortCol){
