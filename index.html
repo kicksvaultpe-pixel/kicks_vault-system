@@ -820,17 +820,20 @@ document.addEventListener('click', e => {
 });
 
 // ── TC GLOBAL ──
+let tcSaveTimer=null;
 function saveTCGlobal(val){
-  localStorage.setItem('kicks_tc', val);
-  const el=document.getElementById('cp-tc');
-  if(el) el.value=val;
+  ['cp-tc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=val;});
+  clearTimeout(tcSaveTimer);
+  tcSaveTimer=setTimeout(async()=>{
+    if(!val||isNaN(parseFloat(val)))return;
+    await db.from('configuracion')
+      .upsert({clave:'tipo_cambio',valor:String(val),updated_at:new Date().toISOString()});
+  },600);
 }
-function loadTCGlobal(){
-  const saved=localStorage.getItem('kicks_tc')||'3.70';
-  ['tc-global','cp-tc'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el) el.value=saved;
-  });
+async function loadTCGlobal(){
+  const{data}=await db.from('configuracion').select('valor').eq('clave','tipo_cambio').single();
+  const val=data?.valor||'3.70';
+  ['tc-global','cp-tc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=val;});
 }
 
 // ── INIT ──
