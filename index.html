@@ -7,11 +7,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--bg:#080808;--surface:#111;--card:#161616;--border:#222;--border2:#2a2a2a;--accent:#C8FF00;--accent2:#FF3D00;--green:#00E676;--red:#FF1744;--yellow:#FFD600;--text:#F2F2F2;--muted:#555;--muted2:#888;--radius:10px}
+:root{
+  --bg:#080808;--surface:#111;--card:#161616;--border:#222;--border2:#2a2a2a;
+  --accent:#C8FF00;--accent2:#FF3D00;--green:#00E676;--red:#FF1744;
+  --yellow:#FFD600;--orange:#FF6D00;--purple:#7C4DFF;
+  --text:#F2F2F2;--muted:#555;--muted2:#888;--radius:10px;
+}
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--text);font-family:'Archivo',sans-serif;min-height:100vh;font-size:14px}
-::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
-nav{position:sticky;top:0;z-index:200;background:rgba(8,8,8,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);height:52px;display:flex;align-items:center;padding:0 20px;gap:0}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:200;background:rgba(8,8,8,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);height:52px;display:flex;align-items:center;padding:0 20px}
 .nav-logo{font-family:'Archivo Black';font-size:17px;letter-spacing:3px;color:var(--accent);margin-right:28px;white-space:nowrap}
 .nav-logo span{color:var(--muted2)}
 .nav-tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;flex:1}
@@ -20,13 +29,17 @@ nav{position:sticky;top:0;z-index:200;background:rgba(8,8,8,.95);backdrop-filter
 .nav-tab::after{content:'';position:absolute;bottom:-1px;left:16px;right:16px;height:2px;background:var(--accent);border-radius:2px;transform:scaleX(0);transition:transform .18s}
 .nav-tab.active{color:var(--accent)}.nav-tab.active::after{transform:scaleX(1)}
 .nav-tab:not(.active):hover{color:var(--text);background:var(--border)}
-.view{display:none;padding:20px;max-width:1200px;margin:0 auto}
+
+/* LAYOUT */
+.view{display:none;padding:20px;max-width:1300px;margin:0 auto}
 .view.active{display:block;animation:fadeIn .2s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .page-title{font-family:'Archivo Black';font-size:26px;letter-spacing:1px;margin-bottom:20px;display:flex;align-items:center;gap:10px}
 .page-title .dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:14px}
 .card-label{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:14px}
+
+/* TIPO SELECTOR */
 .tipo-selector{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
 .tipo-btn{padding:8px 18px;border:1px solid var(--border2);background:var(--card);color:var(--muted2);font-family:'Archivo';font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border-radius:6px;transition:all .15s}
 .tipo-btn:hover{border-color:var(--muted2);color:var(--text)}
@@ -35,86 +48,140 @@ nav{position:sticky;top:0;z-index:200;background:rgba(8,8,8,.95);backdrop-filter
 .tipo-btn.active.venta{background:var(--green);color:#000}
 .tipo-btn.active.reserva{background:var(--yellow);color:#000}
 .tipo-btn.active.pago{background:var(--accent2);color:#fff}
-.tipo-btn.active.costo{background:#7C4DFF;color:#fff}
+.tipo-btn.active.costo{background:var(--purple);color:#fff}
 .form-panel{display:none}.form-panel.active{display:block;animation:fadeIn .2s ease}
+
+/* PAGO TOGGLE */
+.pago-toggle{display:flex;gap:6px;margin-bottom:16px}
+.ptoggle-btn{flex:1;padding:10px;border:1px solid var(--border2);background:var(--bg);color:var(--muted2);font-family:'Archivo';font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border-radius:8px;transition:all .15s;text-align:center}
+.ptoggle-btn.active.contado{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.ptoggle-btn.active.credito{background:var(--orange);color:#fff;border-color:var(--orange)}
+
+/* FORM GRID */
 .form-grid{display:grid;grid-template-columns:1fr;gap:12px}
-@media(min-width:540px){.form-grid.g2{grid-template-columns:1fr 1fr}.form-grid.g3{grid-template-columns:1fr 1fr 1fr}.form-grid.g4{grid-template-columns:1fr 1fr 1fr 1fr}}
-.field{display:flex;flex-direction:column;gap:5px}
+@media(min-width:540px){
+  .form-grid.g2{grid-template-columns:1fr 1fr}
+  .form-grid.g3{grid-template-columns:1fr 1fr 1fr}
+  .form-grid.g4{grid-template-columns:1fr 1fr 1fr 1fr}
+}
+.field{display:flex;flex-direction:column;gap:5px;position:relative}
 .field label{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2)}
-.field input,.field select,.field textarea{background:var(--bg);border:1px solid var(--border2);border-radius:7px;padding:9px 12px;color:var(--text);font-family:'Archivo';font-size:13px;outline:none;transition:border .15s;width:100%}
+.field input,.field select,.field textarea{
+  background:var(--bg);border:1px solid var(--border2);border-radius:7px;
+  padding:9px 12px;color:var(--text);font-family:'Archivo';font-size:13px;
+  outline:none;transition:border .15s;width:100%
+}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent)}
 .field select option{background:var(--surface)}
 .field textarea{resize:vertical;min-height:72px}
 .field input::placeholder{color:var(--muted)}
 .field.span2{grid-column:span 2}.field.span3{grid-column:span 3}.field.span4{grid-column:span 4}
+
+/* AUTOCOMPLETE DROPDOWN */
+.ac-wrap{position:relative}
+.ac-list{
+  position:absolute;top:calc(100% + 4px);left:0;right:0;
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:8px;z-index:100;max-height:200px;overflow-y:auto;
+  display:none;box-shadow:0 8px 24px rgba(0,0,0,.5)
+}
+.ac-list.open{display:block}
+.ac-item{
+  padding:9px 12px;font-size:13px;cursor:pointer;
+  border-bottom:1px solid var(--border);transition:background .1s
+}
+.ac-item:last-child{border-bottom:none}
+.ac-item:hover,.ac-item.focused{background:var(--border2)}
+.ac-item mark{background:none;color:var(--accent);font-weight:700}
+
+/* PRECIO PREVIEW */
 .precio-preview{background:var(--bg);border:1px solid var(--border2);border-radius:7px;padding:12px 14px;display:none;gap:20px;margin-top:8px;flex-wrap:wrap}
 .precio-preview.show{display:flex}
-.pp-item{flex:1;min-width:80px}.pp-label{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:3px}
+.pp-item{flex:1;min-width:80px}
+.pp-label{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:3px}
 .pp-val{font-family:'Archivo Black';font-size:18px}
+
+/* INFO BOX */
+.info-box{padding:10px 14px;border-radius:8px;font-size:12px;line-height:1.6;margin-bottom:14px}
+.info-orange{background:rgba(255,109,0,.08);border:1px solid rgba(255,109,0,.25);color:#ffb74d}
+.info-purple{background:rgba(124,77,255,.08);border:1px solid rgba(124,77,255,.25);color:#b39ddb}
+
+/* BUTTONS */
 .btn{padding:10px 22px;border:none;border-radius:8px;font-family:'Archivo';font-size:13px;font-weight:600;letter-spacing:.5px;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:7px}
 .btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
 .btn-primary{background:var(--accent);color:var(--bg)}.btn-primary:hover:not(:disabled){filter:brightness(1.1);transform:translateY(-1px)}
 .btn-green{background:var(--green);color:#000}.btn-green:hover:not(:disabled){filter:brightness(1.05);transform:translateY(-1px)}
 .btn-yellow{background:var(--yellow);color:#000}.btn-yellow:hover:not(:disabled){filter:brightness(1.05)}
 .btn-orange{background:var(--accent2);color:#fff}.btn-orange:hover:not(:disabled){filter:brightness(1.1)}
-.btn-purple{background:#7C4DFF;color:#fff}.btn-purple:hover:not(:disabled){filter:brightness(1.1)}
+.btn-purple{background:var(--purple);color:#fff}.btn-purple:hover:not(:disabled){filter:brightness(1.1)}
 .btn-ghost{background:var(--border2);color:var(--text)}.btn-ghost:hover{background:#2e2e2e}
 .btn-sm{padding:6px 14px;font-size:11px}
-/* nota de costo */
-.nota-box{background:rgba(124,77,255,.08);border:1px solid rgba(124,77,255,.25);border-radius:8px;padding:10px 14px;font-size:12px;color:#b39ddb;margin-bottom:14px;line-height:1.5}
-/* editable TC */
-.tc-editable{display:flex;gap:8px;align-items:center;margin-top:6px}
-.tc-editable input{flex:1}
-.tc-badge{background:rgba(200,255,0,.1);border:1px solid rgba(200,255,0,.2);border-radius:6px;padding:3px 10px;font-size:11px;color:var(--accent);font-weight:600;white-space:nowrap}
-/* table */
+.btn-pay{background:rgba(255,109,0,.15);border:1px solid rgba(255,109,0,.4);color:var(--orange);padding:4px 10px;font-size:10px;font-weight:700;letter-spacing:.5px;border-radius:5px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn-pay:hover{background:var(--orange);color:#fff;border-color:var(--orange)}
+
+/* TABLE */
 .table-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
 .search-box{flex:1;min-width:160px;background:var(--bg);border:1px solid var(--border2);border-radius:7px;padding:8px 12px;color:var(--text);font-family:'Archivo';font-size:13px;outline:none}
 .search-box:focus{border-color:var(--accent)}
 .filter-select{background:var(--bg);border:1px solid var(--border2);border-radius:7px;padding:8px 12px;color:var(--text);font-family:'Archivo';font-size:12px;outline:none;cursor:pointer}
 .filter-select:focus{border-color:var(--accent)}
-.table-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border);width:100%}
-table{width:100%;border-collapse:collapse;font-size:12px;min-width:900px}
+.table-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:1000px}
 thead tr{background:#0e0e0e}
 th{padding:9px 10px;text-align:left;font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);white-space:nowrap;border-bottom:1px solid var(--border)}
 td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle;white-space:nowrap}
 tbody tr:last-child td{border-bottom:none}
-tbody tr{transition:background .12s}
 tbody tr:hover td{background:#1a1a1a}
-.td-main{font-weight:600;color:var(--text);white-space:nowrap}
+.td-main{font-weight:700;color:var(--text)}
 .td-code{font-size:11px;font-weight:600;color:var(--muted2)}
-/* stats */
+.td-amt{font-family:'Archivo Black';font-size:15px}
+.td-unit{font-size:10px;color:var(--muted2);margin-top:1px}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.5px;white-space:nowrap}
+.badge-green{background:rgba(0,230,118,.12);color:var(--green)}
+.badge-red{background:rgba(255,23,68,.12);color:var(--red)}
+.badge-yellow{background:rgba(255,214,0,.12);color:var(--yellow)}
+.badge-accent{background:rgba(200,255,0,.1);color:var(--accent)}
+.badge-muted{background:var(--border);color:var(--muted2)}
+.badge-orange{background:rgba(255,109,0,.15);color:var(--orange)}
+.badge-purple{background:rgba(124,77,255,.15);color:#b39ddb}
+
+/* STATS */
 .stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
-@media(min-width:600px){.stats-row{grid-template-columns:repeat(4,1fr)}}
-@media(min-width:900px){.stats-row.stats6{grid-template-columns:repeat(6,1fr)}}
+@media(min-width:600px){.stats-row{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:900px){.stats-row.s6{grid-template-columns:repeat(6,1fr)}}
 .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px}
 .stat-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted2)}
-.stat-val{font-family:'Archivo Black';font-size:20px;margin-top:3px;letter-spacing:-.5px}
-.stat-val.green{color:var(--green)}.stat-val.accent{color:var(--accent)}.stat-val.red{color:var(--red)}.stat-val.yellow{color:var(--yellow)}.stat-val.purple{color:#b39ddb}
+.stat-val{font-family:'Archivo Black';font-size:22px;margin-top:3px;letter-spacing:-.5px}
+.stat-val.green{color:var(--green)}.stat-val.accent{color:var(--accent)}
+.stat-val.red{color:var(--red)}.stat-val.yellow{color:var(--yellow)}
+.stat-val.orange{color:var(--orange)}.stat-val.purple{color:#b39ddb}
 .stat-sub{font-size:10px;color:var(--muted2);margin-top:2px}
-/* badges */
-.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;letter-spacing:.5px;white-space:nowrap}
-.badge-green{background:rgba(0,230,118,.12);color:var(--green)}.badge-red{background:rgba(255,23,68,.12);color:var(--red)}
-.badge-yellow{background:rgba(255,214,0,.12);color:var(--yellow)}.badge-accent{background:rgba(200,255,0,.1);color:var(--accent)}
-.badge-muted{background:var(--border);color:var(--muted2)}.badge-purple{background:rgba(124,77,255,.15);color:#b39ddb}
-/* empty */
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;display:none;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.open{display:flex;animation:fadeIn .15s ease}
+.modal{background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:24px;width:100%;max-width:400px}
+.modal-title{font-family:'Archivo Black';font-size:16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.modal-close{background:none;border:none;color:var(--muted2);font-size:20px;cursor:pointer;line-height:1}
+.modal-close:hover{color:var(--text)}
+
+/* MISC */
 .empty-state{text-align:center;padding:50px 20px;color:var(--muted2)}
-.empty-icon{font-size:36px;margin-bottom:10px;opacity:.5}.empty-text{font-size:13px}
-/* spinner */
+.empty-icon{font-size:36px;margin-bottom:10px;opacity:.5}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .5s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-row td{text-align:center;padding:40px}
-/* toast */
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);padding:10px 20px;border-radius:8px;font-weight:600;font-size:13px;z-index:999;transition:transform .25s cubic-bezier(.34,1.56,.64,1);max-width:90vw;text-align:center;pointer-events:none}
 #toast.show{transform:translateX(-50%) translateY(0)}
-#toast.ok{background:var(--accent);color:var(--bg)}#toast.err{background:var(--red);color:#fff}#toast.warn{background:var(--yellow);color:#000}
-/* inline edit */
-.inline-edit{display:inline-flex;align-items:center;gap:6px}
-.inline-edit input{background:var(--bg);border:1px solid var(--border2);border-radius:5px;padding:3px 7px;color:var(--text);font-family:'Archivo';font-size:12px;outline:none;width:80px}
-.inline-edit input:focus{border-color:var(--accent)}
-.inline-edit button{background:none;border:none;color:var(--accent);cursor:pointer;font-size:12px;padding:2px 4px}
+#toast.ok{background:var(--accent);color:var(--bg)}
+#toast.err{background:var(--red);color:#fff}
+#toast.warn{background:var(--yellow);color:#000}
 </style>
 </head>
 <body>
+
 <nav>
   <div class="nav-logo">KICKS<span>VAULT</span></div>
   <div class="nav-tabs">
@@ -126,9 +193,12 @@ tbody tr:hover td{background:#1a1a1a}
   </div>
 </nav>
 
-<!-- ═══ REGISTRO ═══ -->
+<!-- ══════════════════════════════════
+     REGISTRO
+══════════════════════════════════ -->
 <div id="view-registro" class="view active">
   <div class="page-title"><div class="dot"></div> Registro</div>
+
   <div class="tipo-selector">
     <button class="tipo-btn active compra"  onclick="setTipo('compra',this)">🛒 Compra</button>
     <button class="tipo-btn venta"          onclick="setTipo('venta',this)">💸 Venta</button>
@@ -137,57 +207,120 @@ tbody tr:hover td{background:#1a1a1a}
     <button class="tipo-btn costo"          onclick="setTipo('costo',this)">📦 Costo</button>
   </div>
 
-  <!-- COMPRA -->
+  <!-- ── COMPRA ── -->
   <div id="form-compra" class="form-panel active">
+
+    <!-- TOGGLE CONTADO / CRÉDITO -->
+    <div class="pago-toggle">
+      <button class="ptoggle-btn active contado" id="pt-contado" onclick="setTipoPago('CONTADO')">💵 Contado</button>
+      <button class="ptoggle-btn credito"         id="pt-credito" onclick="setTipoPago('CREDITO')">🗓 Crédito</button>
+    </div>
+
+    <!-- Info contextual -->
+    <div id="cp-info-contado" class="info-box info-purple">
+      💵 <strong>Contado:</strong> El egreso se registra hoy en el flujo de caja. El inventario muestra el precio completo.
+    </div>
+    <div id="cp-info-credito" class="info-box info-orange" style="display:none">
+      🗓 <strong>Crédito:</strong> El producto entra al inventario como <strong>● PENDIENTE</strong> sin afectar el flujo de caja. Cuando pagues, marcas como pagado desde el inventario y ahí sí afecta la caja.
+    </div>
+
     <div class="card">
       <div class="card-label">Identificación del producto</div>
       <div class="form-grid g4">
-        <div class="field"><label>Marca</label><input type="text" id="cp-marca" placeholder="NIKE"></div>
-        <div class="field"><label>Silueta</label><input type="text" id="cp-silueta" placeholder="JORDAN 1"></div>
-        <div class="field"><label>Colorway</label><input type="text" id="cp-colorway" placeholder="NIGEL SYLVESTER"></div>
-        <div class="field"><label>Talla</label><input type="text" id="cp-talla" placeholder="8US / M / -"></div>
-        <div class="field"><label>Categoría</label>
-          <select id="cp-cat"><option value="ZAPATILLAS">👟 Zapatillas</option><option value="ROPA">👕 Ropa</option><option value="ACCESORIOS">🧢 Accesorios</option><option value="OTROS">📦 Otros</option></select>
+        <div class="field ac-wrap">
+          <label>Marca</label>
+          <input type="text" id="cp-marca" placeholder="NIKE" autocomplete="off"
+            oninput="acFilter('cp-marca','ac-marca',MARCAS)" onkeydown="acKey(event,'ac-marca','cp-marca')">
+          <div class="ac-list" id="ac-marca"></div>
+        </div>
+        <div class="field ac-wrap">
+          <label>Silueta</label>
+          <input type="text" id="cp-silueta" placeholder="JORDAN 1" autocomplete="off"
+            oninput="acFilter('cp-silueta','ac-silueta',getSiluetas())" onkeydown="acKey(event,'ac-silueta','cp-silueta')">
+          <div class="ac-list" id="ac-silueta"></div>
+        </div>
+        <div class="field ac-wrap">
+          <label>Colorway</label>
+          <input type="text" id="cp-colorway" placeholder="CHICAGO" autocomplete="off"
+            oninput="acFilter('cp-colorway','ac-colorway',getColorways())" onkeydown="acKey(event,'ac-colorway','cp-colorway')">
+          <div class="ac-list" id="ac-colorway"></div>
+        </div>
+        <div class="field ac-wrap">
+          <label>Talla</label>
+          <input type="text" id="cp-talla" placeholder="8US / M / -" autocomplete="off"
+            oninput="acFilter('cp-talla','ac-talla',TALLAS)" onkeydown="acKey(event,'ac-talla','cp-talla')">
+          <div class="ac-list" id="ac-talla"></div>
+        </div>
+        <div class="field">
+          <label>Categoría</label>
+          <select id="cp-cat">
+            <option value="ZAPATILLAS">👟 Zapatillas</option>
+            <option value="ROPA">👕 Ropa</option>
+            <option value="ACCESORIOS">🧢 Accesorios</option>
+            <option value="OTROS">📦 Otros</option>
+          </select>
         </div>
         <div class="field"><label>Fecha de compra</label><input type="date" id="cp-fecha"></div>
+        <!-- Fecha vencimiento solo para crédito -->
+        <div class="field cp-credito-only" style="display:none">
+          <label>Fecha de vencimiento</label>
+          <input type="date" id="cp-vencimiento">
+        </div>
       </div>
     </div>
 
     <div class="card">
       <div class="card-label">Precio de compra</div>
       <div class="form-grid g3">
-        <div class="field"><label>USD $</label><input type="number" id="cp-usd" placeholder="0.00" step="0.01" oninput="calcPrecio()"></div>
-        <div class="field"><label>Tipo de cambio</label><input type="number" id="cp-tc" value="3.70" step="0.001" oninput="calcPrecio()"></div>
-        <div class="field"><label>S/. directo (opcional)</label><input type="number" id="cp-soles" placeholder="0.00" step="0.01" oninput="calcPrecio()"></div>
-        <div class="field"><label>Precio venta sugerido S/.</label><input type="number" id="cp-pventa" placeholder="0.00" step="0.01" oninput="calcPrecio()"></div>
+        <div class="field">
+          <label>Moneda</label>
+          <select id="cp-moneda" onchange="toggleMoneda()">
+            <option value="USD">🇺🇸 USD — Dólares</option>
+            <option value="SOLES">🇵🇪 SOLES</option>
+          </select>
+        </div>
+        <div class="field" id="cp-usd-wrap">
+          <label>Monto USD $</label>
+          <input type="number" id="cp-usd" placeholder="0.00" step="0.01" oninput="calcPrecio()">
+        </div>
+        <div class="field" id="cp-tc-wrap">
+          <label>Tipo de cambio</label>
+          <input type="number" id="cp-tc" value="3.70" step="0.001" oninput="calcPrecio()">
+        </div>
+        <div class="field" id="cp-soles-wrap">
+          <label id="cp-soles-label">S/. (calculado)</label>
+          <input type="number" id="cp-soles" placeholder="0.00" step="0.01" oninput="calcPrecio()">
+        </div>
+        <div class="field">
+          <label>Precio venta sugerido S/.</label>
+          <input type="number" id="cp-pventa" placeholder="0.00" step="0.01" oninput="calcPrecio()">
+        </div>
         <div class="field"><label>Factura</label><input type="text" id="cp-factura" placeholder="FAC-001"></div>
-        <div class="field"><label>Descripción factura</label><input type="text" id="cp-desc-factura" placeholder="Importación DHL enero..."></div>
+        <div class="field span3"><label>Descripción factura</label><input type="text" id="cp-desc-factura" placeholder="Importación DHL enero..."></div>
+        <div class="field span3"><label>Comentarios</label><textarea id="cp-comentarios" placeholder="Condición, origen, notas..."></textarea></div>
       </div>
       <div class="precio-preview" id="cp-preview">
         <div class="pp-item"><div class="pp-label">Precio compra S/.</div><div class="pp-val" id="pp-soles" style="color:var(--red)">—</div></div>
         <div class="pp-item"><div class="pp-label">Precio venta sugerido</div><div class="pp-val" id="pp-venta" style="color:var(--accent)">—</div></div>
         <div class="pp-item"><div class="pp-label">Margen estimado</div><div class="pp-val" id="pp-margen" style="color:var(--green)">—</div></div>
       </div>
-      <div class="form-grid g2" style="margin-top:12px">
-        <div class="field span2"><label>Comentarios</label><textarea id="cp-comentarios" placeholder="Condición, origen, notas..."></textarea></div>
-      </div>
     </div>
     <button class="btn btn-primary" id="btn-compra" onclick="registrarCompra()">✓ Registrar Compra</button>
   </div>
 
-  <!-- VENTA -->
+  <!-- ── VENTA ── -->
   <div id="form-venta" class="form-panel">
     <div class="card">
       <div class="card-label">Nueva Venta</div>
       <div class="form-grid g2">
         <div class="field span2">
           <label>Producto disponible</label>
-          <select id="vt-producto" onchange="onSelectProducto()"><option value="">— Seleccionar producto —</option></select>
+          <select id="vt-producto" onchange="onSelectProducto()"><option value="">— Seleccionar —</option></select>
         </div>
         <div id="vt-info" style="display:none;grid-column:span 2">
           <div class="precio-preview show">
             <div class="pp-item"><div class="pp-label">Precio Final S/.</div><div class="pp-val" id="vt-precio-final" style="color:var(--red)">—</div></div>
-            <div class="pp-item"><div class="pp-label">Precio Sugerido S/.</div><div class="pp-val" id="vt-precio-sug" style="color:var(--accent)">—</div></div>
+            <div class="pp-item"><div class="pp-label">Sugerido S/.</div><div class="pp-val" id="vt-precio-sug" style="color:var(--accent)">—</div></div>
             <div class="pp-item"><div class="pp-label">Ganancia estimada</div><div class="pp-val" id="vt-ganancia-prev" style="color:var(--green)">—</div></div>
           </div>
         </div>
@@ -202,29 +335,49 @@ tbody tr:hover td{background:#1a1a1a}
     <button class="btn btn-green" id="btn-venta" onclick="registrarVenta()">✓ Registrar Venta</button>
   </div>
 
-  <!-- RESERVA -->
+  <!-- ── RESERVA ── -->
   <div id="form-reserva" class="form-panel">
     <div class="card">
       <div class="card-label">Nueva Reserva</div>
       <div class="form-grid g2">
         <div class="field span2"><label>Tipo</label>
           <select id="rv-tipo" onchange="toggleReservaTipo()">
-            <option value="EN_STOCK">📦 Producto en stock</option>
-            <option value="A_PEDIDO">🔍 A pedido (aún no tenemos)</option>
+            <option value="EN_STOCK">📦 En stock</option>
+            <option value="A_PEDIDO">🔍 A pedido</option>
           </select>
         </div>
         <div id="rv-stock-wrap" class="field span2">
-          <label>Seleccionar producto</label>
-          <select id="rv-producto" onchange="onSelectReservaProducto()"><option value="">— Seleccionar producto —</option></select>
+          <label>Producto</label>
+          <select id="rv-producto" onchange="onSelectReservaProducto()"><option value="">— Seleccionar —</option></select>
         </div>
         <div id="rv-pedido-wrap" style="display:none;grid-column:span 2">
           <div class="form-grid g3">
-            <div class="field"><label>Marca</label><input type="text" id="rv-marca" placeholder="NIKE"></div>
-            <div class="field"><label>Silueta</label><input type="text" id="rv-silueta" placeholder="JORDAN 1"></div>
-            <div class="field"><label>Colorway</label><input type="text" id="rv-colorway" placeholder="CHICAGO"></div>
+            <div class="field ac-wrap">
+              <label>Marca</label>
+              <input type="text" id="rv-marca" placeholder="NIKE" autocomplete="off"
+                oninput="acFilter('rv-marca','ac-rv-marca',MARCAS)" onkeydown="acKey(event,'ac-rv-marca','rv-marca')">
+              <div class="ac-list" id="ac-rv-marca"></div>
+            </div>
+            <div class="field ac-wrap">
+              <label>Silueta</label>
+              <input type="text" id="rv-silueta" placeholder="JORDAN 1" autocomplete="off"
+                oninput="acFilter('rv-silueta','ac-rv-silueta',getSiluetas())" onkeydown="acKey(event,'ac-rv-silueta','rv-silueta')">
+              <div class="ac-list" id="ac-rv-silueta"></div>
+            </div>
+            <div class="field ac-wrap">
+              <label>Colorway</label>
+              <input type="text" id="rv-colorway" placeholder="CHICAGO" autocomplete="off"
+                oninput="acFilter('rv-colorway','ac-rv-colorway',getColorways())" onkeydown="acKey(event,'ac-rv-colorway','rv-colorway')">
+              <div class="ac-list" id="ac-rv-colorway"></div>
+            </div>
           </div>
         </div>
-        <div class="field"><label>Talla</label><input type="text" id="rv-talla" placeholder="8US / M"></div>
+        <div class="field ac-wrap">
+          <label>Talla</label>
+          <input type="text" id="rv-talla" placeholder="8US / M" autocomplete="off"
+            oninput="acFilter('rv-talla','ac-rv-talla',TALLAS)" onkeydown="acKey(event,'ac-rv-talla','rv-talla')">
+          <div class="ac-list" id="ac-rv-talla"></div>
+        </div>
         <div class="field"><label>Adelanto S/.</label><input type="number" id="rv-adelanto" placeholder="0.00" step="0.01"></div>
         <div class="field"><label>Canal</label>
           <select id="rv-canal"><option>INSTAGRAM</option><option>WHATSAPP</option><option>PRESENCIAL</option><option>OTRO</option></select>
@@ -239,14 +392,19 @@ tbody tr:hover td{background:#1a1a1a}
     <button class="btn btn-yellow" id="btn-reserva" onclick="registrarReserva()">✓ Registrar Reserva</button>
   </div>
 
-  <!-- PAGO -->
+  <!-- ── PAGO ── -->
   <div id="form-pago" class="form-panel">
     <div class="card">
       <div class="card-label">Gasto Operativo</div>
       <div class="form-grid g2">
         <div class="field span2"><label>Concepto</label><input type="text" id="pg-concepto" placeholder="STAND SL / SUNAT / WEB..."></div>
         <div class="field"><label>Categoría</label>
-          <select id="pg-cat"><option value="OPERATIVO">🏪 Operativo</option><option value="PERSONAL">👤 Personal</option><option value="IMPORTACION">📦 Importación</option><option value="MARKETING">📣 Marketing</option></select>
+          <select id="pg-cat">
+            <option value="OPERATIVO">🏪 Operativo</option>
+            <option value="PERSONAL">👤 Personal</option>
+            <option value="IMPORTACION">📦 Importación</option>
+            <option value="MARKETING">📣 Marketing</option>
+          </select>
         </div>
         <div class="field"><label>Monto S/.</label><input type="number" id="pg-monto" placeholder="-100.00" step="0.01"></div>
         <div class="field"><label>Fecha</label><input type="date" id="pg-fecha"></div>
@@ -255,81 +413,120 @@ tbody tr:hover td{background:#1a1a1a}
     <button class="btn btn-orange" id="btn-pago" onclick="registrarPago()">✓ Registrar Pago</button>
   </div>
 
-  <!-- COSTO -->
+  <!-- ── COSTO ── -->
   <div id="form-costo" class="form-panel">
-    <div class="nota-box">
-      💡 <strong>Los costos se registran ahora en USD.</strong> El tipo de cambio se puede actualizar después desde el inventario cuando se concrete el pago — el precio final se recalcula automáticamente.
+    <div class="info-box info-purple">
+      💡 Los costos en USD se registran ahora. El monto en soles se puede actualizar desde el inventario cuando se concrete el pago.
     </div>
     <div class="card">
       <div class="card-label">Costo adicional por producto</div>
       <div class="form-grid g2">
         <div class="field span2"><label>Producto</label>
-          <select id="cs-producto"><option value="">— Seleccionar producto —</option></select>
+          <select id="cs-producto"><option value="">— Seleccionar —</option></select>
         </div>
         <div class="field span2"><label>Concepto</label><input type="text" id="cs-concepto" placeholder="DHL / ADUANA / LIMPIEZA / REPARACION"></div>
         <div class="field"><label>Monto USD $</label><input type="number" id="cs-usd" placeholder="0.00" step="0.01" oninput="calcCostoSoles()"></div>
-        <div class="field"><label>Tipo de cambio (editable después)</label><input type="number" id="cs-tc" value="3.70" step="0.001" oninput="calcCostoSoles()"></div>
-        <div class="field"><label>Costo S/. (calculado)</label><input type="number" id="cs-soles" placeholder="0.00" step="0.01" oninput="calcCostoSoles()"></div>
+        <div class="field"><label>Tipo de cambio</label><input type="number" id="cs-tc" value="3.70" step="0.001" oninput="calcCostoSoles()"></div>
+        <div class="field"><label>Monto S/. (o ingresar directo)</label><input type="number" id="cs-soles" placeholder="0.00" step="0.01" oninput="calcCostoSoles()"></div>
         <div class="field"><label>Fecha</label><input type="date" id="cs-fecha"></div>
-      </div>
-      <div id="cs-preview" style="display:none;margin-top:8px" class="precio-preview show">
-        <div class="pp-item"><div class="pp-label">Costo S/.</div><div class="pp-val" id="cs-prev-val" style="color:#b39ddb">—</div></div>
-        <div class="pp-item"><div class="pp-label">TC aplicado</div><div class="pp-val" id="cs-prev-tc" style="color:var(--muted2)">—</div></div>
       </div>
     </div>
     <button class="btn btn-purple" id="btn-costo" onclick="registrarCosto()">✓ Agregar Costo</button>
   </div>
 </div>
 
-<!-- ═══ INVENTARIO ═══ -->
+<!-- ══════════════════════════════════
+     INVENTARIO
+══════════════════════════════════ -->
 <div id="view-inventario" class="view">
   <div class="page-title"><div class="dot"></div> Inventario</div>
 
-  <!-- Stats row 1: totales -->
-  <div class="stats-row stats6">
-    <div class="stat-card"><div class="stat-label">Total productos</div><div class="stat-val accent" id="st-total">—</div></div>
+  <div class="stats-row s6">
+    <div class="stat-card"><div class="stat-label">Total</div><div class="stat-val accent" id="st-total">—</div></div>
     <div class="stat-card"><div class="stat-label">Disponibles</div><div class="stat-val green" id="st-disp">—</div></div>
     <div class="stat-card"><div class="stat-label">Vendidos</div><div class="stat-val yellow" id="st-vend">—</div></div>
-    <div class="stat-card"><div class="stat-label">Zapatillas stock</div><div class="stat-val accent" id="st-zap">—</div><div class="stat-sub" id="st-zap-val"></div></div>
-    <div class="stat-card"><div class="stat-label">Ropa &amp; otros stock</div><div class="stat-val purple" id="st-ropa">—</div><div class="stat-sub" id="st-ropa-val"></div></div>
-    <div class="stat-card"><div class="stat-label">Compras este mes</div><div class="stat-val red" id="st-mes">—</div><div class="stat-sub" id="st-mes-val"></div></div>
+    <div class="stat-card">
+      <div class="stat-label">Zapatillas en stock</div>
+      <div class="stat-val accent" id="st-zap">—</div>
+      <div class="stat-sub" id="st-zap-val"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Ropa &amp; otros stock</div>
+      <div class="stat-val purple" id="st-ropa">—</div>
+      <div class="stat-sub" id="st-ropa-val"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Compras este mes</div>
+      <div class="stat-val red" id="st-mes">—</div>
+      <div class="stat-sub" id="st-mes-val"></div>
+    </div>
   </div>
 
-  <!-- Toolbar -->
   <div class="table-toolbar">
-    <input class="search-box" type="text" id="inv-search" placeholder="🔍  Buscar marca, silueta, colorway, código..." oninput="filterInventario()">
+    <input class="search-box" id="inv-search" type="text" placeholder="🔍  Marca, silueta, colorway, código..." oninput="filterInventario()">
+    <div class="field ac-wrap" style="min-width:120px">
+      <input class="filter-select" id="inv-talla-search" type="text" placeholder="Talla..." autocomplete="off"
+        oninput="acFilter('inv-talla-search','ac-inv-talla',TALLAS);filterInventario()" onkeydown="acKey(event,'ac-inv-talla','inv-talla-search')" style="border-radius:7px;padding:8px 12px">
+      <div class="ac-list" id="ac-inv-talla"></div>
+    </div>
     <select class="filter-select" id="inv-estado" onchange="filterInventario()">
-      <option value="">Todos</option><option value="DISPONIBLE">Disponible</option><option value="VENDIDO">Vendido</option>
+      <option value="">Todos</option>
+      <option value="DISPONIBLE">Disponible</option>
+      <option value="VENDIDO">Vendido</option>
+      <option value="PENDIENTE">Pendiente pago</option>
     </select>
     <select class="filter-select" id="inv-cat" onchange="filterInventario()">
-      <option value="">Todas las categorías</option><option value="ZAPATILLAS">Zapatillas</option><option value="ROPA">Ropa</option><option value="ACCESORIOS">Accesorios</option><option value="OTROS">Otros</option>
+      <option value="">Todas las categorías</option>
+      <option value="ZAPATILLAS">Zapatillas</option>
+      <option value="ROPA">Ropa</option>
+      <option value="ACCESORIOS">Accesorios</option>
+      <option value="OTROS">Otros</option>
     </select>
-    <button class="btn btn-ghost btn-sm" onclick="loadInventario()">↺ Actualizar</button>
+    <button class="btn btn-ghost btn-sm" onclick="loadInventario()">↺</button>
   </div>
 
   <div class="table-wrap">
     <table>
       <thead><tr>
-        <th>Fecha</th><th>Código</th><th>Marca</th><th>Silueta</th><th>Colorway</th><th>Cat.</th><th>Talla</th>
-        <th>P. Compra S/.</th><th>Costos S/.</th><th>P. Final S/.</th><th>P. Venta S/.</th><th>Margen</th><th>Estado</th><th>Factura</th>
+        <th>Fecha</th><th>Código</th><th>Marca</th><th>Silueta</th><th>Colorway</th>
+        <th>Cat.</th><th>Talla</th><th>P. Compra</th><th>Costos</th>
+        <th>P. Final</th><th>P. Venta</th><th>Margen</th><th>Estado</th><th>Pago</th><th>Factura</th>
       </tr></thead>
-      <tbody id="inv-tbody"><tr class="loading-row"><td colspan="14"><div class="spinner"></div></td></tr></tbody>
+      <tbody id="inv-tbody">
+        <tr class="loading-row"><td colspan="15"><div class="spinner"></div></td></tr>
+      </tbody>
     </table>
   </div>
 </div>
 
 <!-- Placeholders -->
-<div id="view-ventas" class="view">
-  <div class="page-title"><div class="dot"></div> Ventas</div>
-  <div class="empty-state"><div class="empty-icon">↗</div><div class="empty-text">Próximamente</div></div>
-</div>
-<div id="view-flujo" class="view">
-  <div class="page-title"><div class="dot"></div> Flujo de Caja</div>
-  <div class="empty-state"><div class="empty-icon">≋</div><div class="empty-text">Próximamente</div></div>
-</div>
-<div id="view-clientes" class="view">
-  <div class="page-title"><div class="dot"></div> Clientes</div>
-  <div class="empty-state"><div class="empty-icon">◎</div><div class="empty-text">Próximamente</div></div>
+<div id="view-ventas" class="view"><div class="page-title"><div class="dot"></div> Ventas</div><div class="empty-state"><div class="empty-icon">↗</div><div class="empty-text">Próximamente</div></div></div>
+<div id="view-flujo" class="view"><div class="page-title"><div class="dot"></div> Flujo de Caja</div><div class="empty-state"><div class="empty-icon">≋</div><div class="empty-text">Próximamente</div></div></div>
+<div id="view-clientes" class="view"><div class="page-title"><div class="dot"></div> Clientes</div><div class="empty-state"><div class="empty-icon">◎</div><div class="empty-text">Próximamente</div></div></div>
+
+<!-- MODAL PAGAR CRÉDITO -->
+<div class="modal-overlay" id="modal-pagar">
+  <div class="modal">
+    <div class="modal-title">
+      <span>💳 Pagar Crédito</span>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div id="modal-prod-info" style="background:var(--bg);border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px;color:var(--muted2)"></div>
+    <div class="form-grid g2">
+      <div class="field span2">
+        <label>Monto pagado S/.</label>
+        <input type="number" id="modal-monto" placeholder="0.00" step="0.01">
+      </div>
+      <div class="field span2">
+        <label>Fecha de pago</label>
+        <input type="date" id="modal-fecha">
+      </div>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:8px">
+      <button class="btn btn-primary" id="btn-modal-pagar" onclick="confirmarPago()">✓ Confirmar Pago</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+    </div>
+  </div>
 </div>
 
 <div id="toast"></div>
@@ -338,15 +535,97 @@ tbody tr:hover td{background:#1a1a1a}
 const SUPA_URL='https://erpkxogskfrtfttawapg.supabase.co';
 const SUPA_KEY='sb_publishable_qgRu9snBNMnDpQ3o9UOR4A_HAzXUhA1';
 const db=supabase.createClient(SUPA_URL,SUPA_KEY);
-let inventarioCache=[],clientesCache=[];
 
-async function init(){setToday();await Promise.all([loadInventario(),loadClientes()]);}
+let inventarioCache=[],clientesCache=[];
+let tipoPagoActual='CONTADO';
+let modalCodigo=null;
+
+// ── AUTOCOMPLETE DATA ──
+const MARCAS=['NIKE','ADIDAS','JORDAN','YEEZY','SUPREME','NEW BALANCE','OFF-WHITE',
+  'ESSENTIALS','FEAR OF GOD','STONE ISLAND','PALACE','BAPE','STUSSY','PUMA','REEBOK',
+  'CONVERSE','VANS','ASICS','SALOMON','ARC\'TERYX'];
+
+const TALLAS_ZAP=['4US','4.5US','5US','5.5US','6US','6.5US','7US','7.5US','8US','8.5US',
+  '9US','9.5US','10US','10.5US','11US','11.5US','12US','13US','14US',
+  '36EU','37EU','38EU','39EU','40EU','41EU','42EU','43EU','44EU','45EU','46EU',
+  '4Y','4.5Y','5Y','5.5Y','6Y','6.5Y','7Y'];
+const TALLAS_ROPA=['XS','S','M','L','XL','XXL','XXXL','34','36','38','40','42','44','28','30','32','-'];
+const TALLAS=[...TALLAS_ZAP,...TALLAS_ROPA];
+
+function getSiluetas(){
+  const set=new Set(inventarioCache.map(p=>p.silueta).filter(Boolean));
+  return [...set].sort();
+}
+function getColorways(){
+  const set=new Set(inventarioCache.map(p=>p.colorway).filter(Boolean));
+  return [...set].sort();
+}
+
+// ── AUTOCOMPLETE ENGINE ──
+function acFilter(inputId,listId,items){
+  const val=document.getElementById(inputId).value.toUpperCase().trim();
+  const list=document.getElementById(listId);
+  if(!val){list.classList.remove('open');return;}
+  const filtered=items.filter(i=>i.toUpperCase().includes(val)).slice(0,8);
+  if(!filtered.length){list.classList.remove('open');return;}
+  list.innerHTML=filtered.map(i=>{
+    const hl=i.replace(new RegExp(val,'gi'),m=>`<mark>${m}</mark>`);
+    return`<div class="ac-item" onclick="acSelect('${inputId}','${listId}','${i.replace(/'/g,"\\'")}')">${hl}</div>`;
+  }).join('');
+  list.classList.add('open');
+}
+
+function acSelect(inputId,listId,val){
+  document.getElementById(inputId).value=val;
+  document.getElementById(listId).classList.remove('open');
+  // trigger calc if needed
+  if(inputId==='cp-marca'||inputId==='cp-silueta'||inputId==='cp-colorway') calcPrecio();
+}
+
+function acKey(e,listId,inputId){
+  const list=document.getElementById(listId);
+  const items=list.querySelectorAll('.ac-item');
+  if(!items.length)return;
+  const focused=list.querySelector('.focused');
+  if(e.key==='ArrowDown'){
+    e.preventDefault();
+    const next=focused?focused.nextElementSibling:items[0];
+    if(focused)focused.classList.remove('focused');
+    if(next)next.classList.add('focused');
+  }else if(e.key==='ArrowUp'){
+    e.preventDefault();
+    const prev=focused?focused.previousElementSibling:items[items.length-1];
+    if(focused)focused.classList.remove('focused');
+    if(prev)prev.classList.add('focused');
+  }else if(e.key==='Enter'&&focused){
+    e.preventDefault();
+    document.getElementById(inputId).value=focused.textContent.trim();
+    list.classList.remove('open');
+  }else if(e.key==='Escape'){
+    list.classList.remove('open');
+  }
+}
+
+// Close AC on outside click
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.ac-wrap'))
+    document.querySelectorAll('.ac-list').forEach(l=>l.classList.remove('open'));
+});
+
+// ── INIT ──
+async function init(){
+  setToday();
+  await Promise.all([loadInventario(),loadClientes()]);
+}
 
 function setToday(){
   const t=new Date().toISOString().split('T')[0];
-  ['cp-fecha','vt-fecha','pg-fecha','cs-fecha'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=t;});
+  ['cp-fecha','vt-fecha','pg-fecha','cs-fecha','modal-fecha'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value=t;
+  });
 }
 
+// ── NAV ──
 function showView(n,btn){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
@@ -364,14 +643,38 @@ function setTipo(tipo,btn){
   if(tipo==='reserva')fillClienteSelect();
 }
 
+// ── TIPO PAGO TOGGLE ──
+function setTipoPago(tipo){
+  tipoPagoActual=tipo;
+  document.getElementById('pt-contado').className='ptoggle-btn'+(tipo==='CONTADO'?' active contado':'');
+  document.getElementById('pt-credito').className='ptoggle-btn credito'+(tipo==='CREDITO'?' active':'');
+  document.getElementById('cp-info-contado').style.display=tipo==='CONTADO'?'block':'none';
+  document.getElementById('cp-info-credito').style.display=tipo==='CREDITO'?'block':'none';
+  document.querySelectorAll('.cp-credito-only').forEach(el=>el.style.display=tipo==='CREDITO'?'flex':'none');
+}
+
+// ── MONEDA TOGGLE ──
+function toggleMoneda(){
+  const m=document.getElementById('cp-moneda').value;
+  const isUSD=m==='USD';
+  document.getElementById('cp-usd-wrap').style.display=isUSD?'flex':'none';
+  document.getElementById('cp-tc-wrap').style.display=isUSD?'flex':'none';
+  const label=document.getElementById('cp-soles-label');
+  label.textContent=isUSD?'S/. (calculado)':'Monto S/.';
+  document.getElementById('cp-soles').placeholder=isUSD?'0.00 (auto)':'0.00';
+  calcPrecio();
+}
+
 // ── LOAD ──
 async function loadInventario(){
-  const{data,error}=await db.from('inventario').select('*, costos(id,concepto,costo_soles,fecha)').order('fecha_compra',{ascending:false});
+  const{data,error}=await db.from('inventario')
+    .select('*, costos(id,concepto,costo_soles,fecha)')
+    .order('fecha_compra',{ascending:false});
   if(error){toast('Error: '+error.message,'err');return;}
-  inventarioCache=(data||[]).map(p=>{
-    const tc=(p.costos||[]).reduce((s,c)=>s+parseFloat(c.costo_soles||0),0);
-    return{...p,total_costos:tc};
-  });
+  inventarioCache=(data||[]).map(p=>({
+    ...p,
+    total_costos:(p.costos||[]).reduce((s,c)=>s+parseFloat(c.costo_soles||0),0)
+  }));
   renderInventario(inventarioCache);
   updateStats();
   fillProductoSelects();
@@ -382,43 +685,66 @@ async function loadClientes(){
   clientesCache=data||[];fillClienteSelect();
 }
 
-// ── RENDER INVENTARIO ──
+// ── RENDER ──
 function renderInventario(rows){
   const tbody=document.getElementById('inv-tbody');
   if(!rows.length){
-    tbody.innerHTML='<tr><td colspan="14"><div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Sin productos</div></div></td></tr>';
+    tbody.innerHTML='<tr><td colspan="15"><div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Sin productos</div></div></td></tr>';
     return;
   }
   tbody.innerHTML=rows.map(p=>{
     const pF=parseFloat(p.precio_final||p.precio_compra_soles||0);
     const pV=parseFloat(p.precio_venta_sugerido||0);
     const margen=pF>0&&pV>0?Math.round((pV-pF)/pF*100):null;
-    const estado=p.estado==='DISPONIBLE'?'<span class="badge badge-green">● DISP</span>':'<span class="badge badge-red">● VEND</span>';
+    const isPendiente=p.pago_estado==='PENDIENTE';
+
+    // Estado badge
+    let estadoBadge;
+    if(isPendiente)
+      estadoBadge='<span class="badge badge-orange">● PENDIENTE</span>';
+    else if(p.estado==='DISPONIBLE')
+      estadoBadge='<span class="badge badge-green">● DISP</span>';
+    else
+      estadoBadge='<span class="badge badge-red">● VEND</span>';
+
+    // Pago badge + botón
+    let pagoBadge;
+    if(p.tipo_pago==='CREDITO'&&isPendiente)
+      pagoBadge=`<button class="btn-pay" onclick="abrirModalPago('${p.codigo_producto}')">💳 Pagar</button>`;
+    else if(p.tipo_pago==='CREDITO')
+      pagoBadge='<span class="badge badge-muted">Crédito ✓</span>';
+    else
+      pagoBadge='<span style="color:var(--muted);font-size:11px">Contado</span>';
+
     const mg=margen!==null?`<span class="badge ${margen>=0?'badge-green':'badge-red'}">${margen}%</span>`:'<span style="color:var(--muted)">—</span>';
-    const fecha=p.fecha_compra?p.fecha_compra.split('T')[0].substring(2):'—';
-    const costoDisplay=p.total_costos>0
-      ?`<span style="color:#b39ddb">${fmt(p.total_costos)}</span>`
-      :'<span style="color:var(--muted)">—</span>';
+    const fecha=p.fecha_compra?p.fecha_compra.substring(2,10):'—';
+
+    // Montos grandes, unidades pequeñas
+    const pcSoles=pF>0?`<div class="td-amt">${fmtAmt(p.precio_compra_soles)}</div>`:'<span style="color:var(--muted)">—</span>';
+    const costosAmt=p.total_costos>0?`<div class="td-amt" style="color:#b39ddb">${fmtAmt(p.total_costos)}</div>`:'<span style="color:var(--muted)">—</span>';
+    const finalAmt=`<div class="td-amt" style="color:${isPendiente?'var(--orange)':'var(--text)'}">${fmtAmt(pF)}</div>`;
+    const ventaAmt=pV>0?`<div class="td-amt" style="color:var(--accent)">${fmtAmt(pV)}</div>`:'<span style="color:var(--muted)">—</span>';
+
     return`<tr>
       <td><span class="td-code">${fecha}</span></td>
       <td><span class="td-code">${p.codigo_producto}</span></td>
       <td class="td-main">${p.marca||'—'}</td>
-      <td>${p.silueta||'—'}</td>
-      <td>${p.colorway||'—'}</td>
+      <td style="color:var(--muted2)">${p.silueta||'—'}</td>
+      <td style="color:var(--muted2)">${p.colorway||'—'}</td>
       <td><span class="badge badge-accent" style="font-size:9px">${p.categoria}</span></td>
-      <td>${p.talla||'—'}</td>
-      <td>${fmt(p.precio_compra_soles)}</td>
-      <td>${costoDisplay}</td>
-      <td><strong>${fmt(pF)}</strong></td>
-      <td>${pV>0?fmt(pV):'<span style="color:var(--muted)">—</span>'}</td>
+      <td><strong>${p.talla||'—'}</strong></td>
+      <td>${pcSoles}</td>
+      <td>${costosAmt}</td>
+      <td>${finalAmt}</td>
+      <td>${ventaAmt}</td>
       <td>${mg}</td>
-      <td>${estado}</td>
-      <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${p.factura?`<span class="td-code">${p.factura}</span>`:'<span style="color:var(--muted)">—</span>'}</td>
+      <td>${estadoBadge}</td>
+      <td>${pagoBadge}</td>
+      <td>${p.factura?`<span class="td-code">${p.factura}</span>`:'<span style="color:var(--muted)">—</span>'}</td>
     </tr>`;
   }).join('');
 }
 
-// ── STATS ──
 function updateStats(){
   const now=new Date();
   const mesActual=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
@@ -431,11 +757,11 @@ function updateStats(){
   document.getElementById('st-disp').textContent=disp.length;
   document.getElementById('st-vend').textContent=inventarioCache.filter(p=>p.estado==='VENDIDO').length;
 
-  const vzap=zap.reduce((s,p)=>s+parseFloat(p.precio_final||p.precio_compra_soles||0),0);
+  const vzap=zap.reduce((s,p)=>s+parseFloat(p.precio_final||0),0);
   document.getElementById('st-zap').textContent=zap.length+' uds';
   document.getElementById('st-zap-val').textContent=fmt(vzap);
 
-  const vropa=ropa.reduce((s,p)=>s+parseFloat(p.precio_final||p.precio_compra_soles||0),0);
+  const vropa=ropa.reduce((s,p)=>s+parseFloat(p.precio_final||0),0);
   document.getElementById('st-ropa').textContent=ropa.length+' uds';
   document.getElementById('st-ropa-val').textContent=fmt(vropa);
 
@@ -446,41 +772,57 @@ function updateStats(){
 
 function filterInventario(){
   const q=document.getElementById('inv-search').value.toLowerCase();
+  const talla=document.getElementById('inv-talla-search').value.toLowerCase();
   const estado=document.getElementById('inv-estado').value;
   const cat=document.getElementById('inv-cat').value;
+
   renderInventario(inventarioCache.filter(p=>{
     const n=[p.marca,p.silueta,p.colorway,p.codigo_producto].filter(Boolean).join(' ').toLowerCase();
-    return(!q||n.includes(q))&&(!estado||p.estado===estado)&&(!cat||p.categoria===cat);
+    const matchQ=!q||n.includes(q);
+    const matchT=!talla||(p.talla||'').toLowerCase().includes(talla);
+    const matchE=!estado||(estado==='PENDIENTE'?p.pago_estado==='PENDIENTE':p.estado===estado&&p.pago_estado!=='PENDIENTE');
+    const matchC=!cat||p.categoria===cat;
+    return matchQ&&matchT&&matchE&&matchC;
   }));
 }
 
 // ── SELECTS ──
 function fillProductoSelects(){
   const disp=inventarioCache.filter(p=>p.estado==='DISPONIBLE');
-  const mkDisp=arr=>'<option value="">— Seleccionar producto —</option>'+arr.map(p=>{
+  const mk=arr=>'<option value="">— Seleccionar —</option>'+arr.map(p=>{
     const n=[p.marca,p.silueta,p.colorway].filter(Boolean).join(' ');
     return`<option value="${p.codigo_producto}" data-final="${p.precio_final||p.precio_compra_soles||0}" data-sug="${p.precio_venta_sugerido||0}">${p.codigo_producto} · ${n} (${p.talla||'—'})</option>`;
   }).join('');
-  const mkAll=arr=>'<option value="">— Seleccionar producto —</option>'+arr.map(p=>{
+  const mkAll=arr=>'<option value="">— Seleccionar —</option>'+arr.map(p=>{
     const n=[p.marca,p.silueta,p.colorway].filter(Boolean).join(' ');
     return`<option value="${p.codigo_producto}">${p.codigo_producto} · ${n} (${p.talla||'—'})</option>`;
   }).join('');
-  ['vt-producto','rv-producto'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=mkDisp(disp);});
+  ['vt-producto','rv-producto'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=mk(disp);});
   const cs=document.getElementById('cs-producto');if(cs)cs.innerHTML=mkAll(inventarioCache);
 }
 
 function fillClienteSelect(){
   const sel=document.getElementById('rv-cliente');if(!sel)return;
-  sel.innerHTML='<option value="">— Sin cliente —</option>'+clientesCache.map(c=>`<option value="${c.id_cliente}">${c.nombre}${c.instagram?' · '+c.instagram:''}</option>`).join('');
+  sel.innerHTML='<option value="">— Sin cliente —</option>'+
+    clientesCache.map(c=>`<option value="${c.id_cliente}">${c.nombre}${c.instagram?' · '+c.instagram:''}</option>`).join('');
 }
 
 // ── CALCULOS ──
 function calcPrecio(){
+  const moneda=document.getElementById('cp-moneda').value;
   const usd=parseFloat(document.getElementById('cp-usd').value)||0;
   const tc=parseFloat(document.getElementById('cp-tc').value)||0;
-  const soles=parseFloat(document.getElementById('cp-soles').value)||0;
+  const solesManual=parseFloat(document.getElementById('cp-soles').value)||0;
   const pv=parseFloat(document.getElementById('cp-pventa').value)||0;
-  const pc=soles>0?soles:(usd*tc);
+
+  let pc=0;
+  if(moneda==='USD'){
+    pc=solesManual>0?solesManual:(usd>0&&tc>0?Math.round(usd*tc*100)/100:0);
+    if(usd>0&&tc>0&&solesManual===0) document.getElementById('cp-soles').value=pc||'';
+  }else{
+    pc=solesManual;
+  }
+
   const prev=document.getElementById('cp-preview');
   if(pc>0){
     prev.classList.add('show');
@@ -496,16 +838,9 @@ function calcPrecio(){
 function calcCostoSoles(){
   const usd=parseFloat(document.getElementById('cs-usd').value)||0;
   const tc=parseFloat(document.getElementById('cs-tc').value)||0;
-  const solesManual=parseFloat(document.getElementById('cs-soles').value)||0;
-  let soles=solesManual>0?solesManual:(usd*tc);
-  const prev=document.getElementById('cs-preview');
-  if(soles>0){
-    prev.style.display='flex';
-    document.getElementById('cs-prev-val').textContent=fmt(soles);
-    document.getElementById('cs-prev-tc').textContent=tc>0?'TC '+tc:'—';
-    // auto-fill soles field if calculated from USD
-    if(usd>0&&tc>0&&solesManual===0) document.getElementById('cs-soles').value=Math.round(soles*100)/100;
-  }else prev.style.display='none';
+  const solesM=parseFloat(document.getElementById('cs-soles').value)||0;
+  if(usd>0&&tc>0&&solesM===0)
+    document.getElementById('cs-soles').value=Math.round(usd*tc*100)/100;
 }
 
 function onSelectProducto(){
@@ -546,11 +881,42 @@ function onSelectReservaProducto(){
   if(prod)document.getElementById('rv-talla').value=prod.talla||'';
 }
 
-// ── GENERAR CODIGO ──
-async function genCodigo(tipo){
-  const{data,error}=await db.rpc('gen_codigo_'+tipo);
-  if(error)throw new Error('No se pudo generar código: '+error.message);
-  return data;
+// ── MODAL PAGAR CRÉDITO ──
+function abrirModalPago(codigo){
+  modalCodigo=codigo;
+  const prod=inventarioCache.find(p=>p.codigo_producto===codigo);
+  const nombre=[prod?.marca,prod?.silueta,prod?.colorway].filter(Boolean).join(' ');
+  document.getElementById('modal-prod-info').innerHTML=
+    `<strong>${codigo}</strong> — ${nombre}<br>Talla: ${prod?.talla||'—'}`;
+  document.getElementById('modal-monto').value=prod?.precio_compra_soles||'';
+  document.getElementById('modal-overlay')||null;
+  document.getElementById('modal-pagar').classList.add('open');
+}
+
+function closeModal(){
+  document.getElementById('modal-pagar').classList.remove('open');
+  modalCodigo=null;
+}
+
+async function confirmarPago(){
+  const monto=parseFloat(document.getElementById('modal-monto').value)||0;
+  const fecha=document.getElementById('modal-fecha').value;
+  if(!monto){toast('Ingresa el monto pagado','warn');return;}
+  if(!modalCodigo)return;
+  const btn=document.getElementById('btn-modal-pagar');
+  setLoading(btn,true);
+  try{
+    const{error}=await db.rpc('pagar_credito',{
+      p_codigo:modalCodigo,
+      p_monto_soles:monto,
+      p_fecha:fecha
+    });
+    if(error)throw error;
+    toast('✓ Crédito pagado — flujo de caja actualizado','ok');
+    closeModal();
+    await loadInventario();
+  }catch(e){toast('Error: '+e.message,'err');}
+  finally{setLoading(btn,false,'✓ Confirmar Pago');}
 }
 
 // ── REGISTRAR COMPRA ──
@@ -558,30 +924,45 @@ async function registrarCompra(){
   const marca=document.getElementById('cp-marca').value.trim().toUpperCase();
   const silueta=document.getElementById('cp-silueta').value.trim().toUpperCase();
   const colorway=document.getElementById('cp-colorway').value.trim().toUpperCase();
+  const moneda=document.getElementById('cp-moneda').value;
   const usd=parseFloat(document.getElementById('cp-usd').value)||null;
   const tc=parseFloat(document.getElementById('cp-tc').value)||null;
   const soles=parseFloat(document.getElementById('cp-soles').value)||null;
   const pventa=parseFloat(document.getElementById('cp-pventa').value)||null;
+
   if(!marca){toast('Ingresa la marca','warn');return;}
   const pc=soles||(usd&&tc?Math.round(usd*tc*100)/100:null);
-  if(!pc){toast('Ingresa el precio de compra','warn');return;}
+
+  // Para crédito puede no tener precio aún
+  if(!pc&&tipoPagoActual==='CONTADO'){toast('Ingresa el precio de compra','warn');return;}
+
   const btn=document.getElementById('btn-compra');setLoading(btn,true);
   try{
     const cod=await genCodigo('producto');
+    const esCredito=tipoPagoActual==='CREDITO';
     const{error}=await db.from('inventario').insert({
-      codigo_producto:cod,fecha_compra:document.getElementById('cp-fecha').value,
-      marca,silueta,colorway,categoria:document.getElementById('cp-cat').value,
+      codigo_producto:cod,
+      fecha_compra:document.getElementById('cp-fecha').value,
+      marca,silueta,colorway,
+      categoria:document.getElementById('cp-cat').value,
       talla:document.getElementById('cp-talla').value.trim()||'-',
-      precio_compra_usd:usd,tipo_cambio:tc,precio_compra_soles:pc,precio_final:pc,
+      precio_compra_usd:moneda==='USD'?usd:null,
+      tipo_cambio:moneda==='USD'?tc:null,
+      precio_compra_soles:pc||0,
+      precio_final:pc||0,
       precio_venta_sugerido:pventa,
       factura:document.getElementById('cp-factura').value.trim()||null,
       descripcion_factura:document.getElementById('cp-desc-factura').value.trim()||null,
       comentarios:document.getElementById('cp-comentarios').value.trim()||null,
-      estado:'DISPONIBLE'
+      estado:'DISPONIBLE',
+      tipo_pago:tipoPagoActual,
+      pago_estado:esCredito?'PENDIENTE':'PAGADO',
+      moneda,
+      fecha_vencimiento:document.getElementById('cp-vencimiento').value||null
     });
     if(error)throw error;
-    toast(`✓ ${cod} registrado`,'ok');
-    ['cp-marca','cp-silueta','cp-colorway','cp-talla','cp-usd','cp-soles','cp-pventa','cp-factura','cp-desc-factura','cp-comentarios'].forEach(id=>document.getElementById(id).value='');
+    toast(`✓ ${cod} registrado${esCredito?' — ● PENDIENTE':''}`, 'ok');
+    ['cp-marca','cp-silueta','cp-colorway','cp-talla','cp-usd','cp-soles','cp-pventa','cp-factura','cp-desc-factura','cp-comentarios','cp-vencimiento'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('cp-tc').value='3.70';
     document.getElementById('cp-preview').classList.remove('show');
     await loadInventario();
@@ -630,9 +1011,9 @@ async function registrarReserva(){
     if(p){marca=p.marca;silueta=p.silueta;colorway=p.colorway;}
   }else{
     marca=document.getElementById('rv-marca').value.trim().toUpperCase();
+    if(!marca){toast('Ingresa la marca','warn');return;}
     silueta=document.getElementById('rv-silueta').value.trim().toUpperCase();
     colorway=document.getElementById('rv-colorway').value.trim().toUpperCase();
-    if(!marca){toast('Ingresa la marca','warn');return;}
   }
   const btn=document.getElementById('btn-reserva');setLoading(btn,true);
   try{
@@ -648,8 +1029,7 @@ async function registrarReserva(){
     if(error)throw error;
     toast('✓ Reserva registrada','ok');
     ['rv-talla','rv-adelanto','rv-notas','rv-marca','rv-silueta','rv-colorway'].forEach(id=>document.getElementById(id).value='');
-    document.getElementById('rv-producto').value='';
-    document.getElementById('rv-fecha-limite').value='';
+    ['rv-producto','rv-fecha-limite'].forEach(id=>document.getElementById(id).value='');
   }catch(e){toast('Error: '+e.message,'err');}
   finally{setLoading(btn,false,'✓ Registrar Reserva');}
 }
@@ -680,8 +1060,8 @@ async function registrarCosto(){
   const concepto=document.getElementById('cs-concepto').value.trim();
   const usd=parseFloat(document.getElementById('cs-usd').value)||0;
   const tc=parseFloat(document.getElementById('cs-tc').value)||0;
-  const solesManual=parseFloat(document.getElementById('cs-soles').value)||0;
-  const soles=solesManual>0?solesManual:(usd>0&&tc>0?Math.round(usd*tc*100)/100:0);
+  const solesM=parseFloat(document.getElementById('cs-soles').value)||0;
+  const soles=solesM>0?solesM:(usd>0&&tc>0?Math.round(usd*tc*100)/100:0);
   if(!codProd){toast('Selecciona un producto','warn');return;}
   if(!concepto){toast('Ingresa el concepto','warn');return;}
   if(!soles){toast('Ingresa el monto','warn');return;}
@@ -697,17 +1077,28 @@ async function registrarCosto(){
     ['cs-concepto','cs-usd','cs-soles'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('cs-tc').value='3.70';
     document.getElementById('cs-producto').value='';
-    document.getElementById('cs-preview').style.display='none';
     await loadInventario();
   }catch(e){toast('Error: '+e.message,'err');}
   finally{setLoading(btn,false,'✓ Agregar Costo');}
 }
 
+// ── GENERAR CODIGO ──
+async function genCodigo(tipo){
+  const{data,error}=await db.rpc('gen_codigo_'+tipo);
+  if(error)throw new Error('No se pudo generar código: '+error.message);
+  return data;
+}
+
 // ── UTILS ──
 function fmt(n){return'S/. '+parseFloat(n||0).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmtAmt(n){return parseFloat(n||0).toLocaleString('es-PE',{minimumFractionDigits:0,maximumFractionDigits:0});}
 function setLoading(btn,on,label){btn.disabled=on;btn.innerHTML=on?'<div class="spinner"></div> Guardando...':(label||'');}
 let toastTimer;
-function toast(msg,type='ok'){const el=document.getElementById('toast');el.textContent=msg;el.className=`show ${type}`;clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.className='',3500);}
+function toast(msg,type='ok'){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.className=`show ${type}`;
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.className='',3500);
+}
 
 init();
 </script>
