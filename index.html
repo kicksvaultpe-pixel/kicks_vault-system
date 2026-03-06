@@ -218,10 +218,10 @@ tbody tr:hover td{background:#1a1a1a}
 
     <!-- Info contextual -->
     <div id="cp-info-contado" class="info-box info-purple">
-      💵 <strong>Contado:</strong> El egreso se registra hoy en el flujo de caja. El inventario muestra el precio completo.
+      💵 <strong>Contado:</strong> Sale dinero hoy — se registra en flujo de caja inmediatamente.
     </div>
     <div id="cp-info-credito" class="info-box info-orange" style="display:none">
-      🗓 <strong>Crédito:</strong> El producto entra al inventario como <strong>● PENDIENTE</strong> sin afectar el flujo de caja. Cuando pagues, marcas como pagado desde el inventario y ahí sí afecta la caja.
+      🗓 <strong>Crédito:</strong> Entra al inventario como <strong>● PENDIENTE</strong> sin afectar la caja. Cuando pagues, usa el botón <em>Pagar</em> en el inventario.
     </div>
 
     <div class="card">
@@ -261,35 +261,17 @@ tbody tr:hover td{background:#1a1a1a}
           </select>
         </div>
         <div class="field"><label>Fecha de compra</label><input type="date" id="cp-fecha"></div>
-        <!-- Fecha vencimiento solo para crédito -->
-        <div class="field cp-credito-only" style="display:none">
-          <label>Fecha de vencimiento</label>
-          <input type="date" id="cp-vencimiento">
-        </div>
+
       </div>
     </div>
 
-    <div class="card">
+    <!-- CONTADO: solo soles -->
+    <div class="card" id="cp-card-contado">
       <div class="card-label">Precio de compra</div>
       <div class="form-grid g3">
         <div class="field">
-          <label>Moneda</label>
-          <select id="cp-moneda" onchange="toggleMoneda()">
-            <option value="USD">🇺🇸 USD — Dólares</option>
-            <option value="SOLES">🇵🇪 SOLES</option>
-          </select>
-        </div>
-        <div class="field" id="cp-usd-wrap">
-          <label>Monto USD $</label>
-          <input type="number" id="cp-usd" placeholder="0.00" step="0.01" oninput="calcPrecio()">
-        </div>
-        <div class="field" id="cp-tc-wrap">
-          <label>Tipo de cambio</label>
-          <input type="number" id="cp-tc" value="3.70" step="0.001" oninput="calcPrecio()">
-        </div>
-        <div class="field" id="cp-soles-wrap">
-          <label id="cp-soles-label">S/. (calculado)</label>
-          <input type="number" id="cp-soles" placeholder="0.00" step="0.01" oninput="calcPrecio()">
+          <label>Monto S/.</label>
+          <input type="number" id="cp-soles-contado" placeholder="0.00" step="0.01" oninput="calcPrecio()">
         </div>
         <div class="field">
           <label>Precio venta sugerido S/.</label>
@@ -303,6 +285,38 @@ tbody tr:hover td{background:#1a1a1a}
         <div class="pp-item"><div class="pp-label">Precio compra S/.</div><div class="pp-val" id="pp-soles" style="color:var(--red)">—</div></div>
         <div class="pp-item"><div class="pp-label">Precio venta sugerido</div><div class="pp-val" id="pp-venta" style="color:var(--accent)">—</div></div>
         <div class="pp-item"><div class="pp-label">Margen estimado</div><div class="pp-val" id="pp-margen" style="color:var(--green)">—</div></div>
+      </div>
+    </div>
+
+    <!-- CRÉDITO: USD o soles -->
+    <div class="card" id="cp-card-credito" style="display:none">
+      <div class="card-label">Precio de compra (pago diferido)</div>
+      <div class="form-grid g3">
+        <div class="field">
+          <label>Moneda</label>
+          <select id="cp-moneda" onchange="toggleMoneda()">
+            <option value="USD">🇺🇸 USD — Dólares</option>
+            <option value="SOLES">🇵🇪 SOLES</option>
+          </select>
+        </div>
+        <div class="field" id="cp-usd-wrap">
+          <label>Monto USD $</label>
+          <input type="number" id="cp-usd" placeholder="0.00" step="0.01" oninput="calcPrecio()">
+        </div>
+        <div class="field" id="cp-tc-wrap">
+          <label>TC referencial</label>
+          <input type="number" id="cp-tc" value="3.70" step="0.001" oninput="calcPrecio()">
+        </div>
+        <div class="field" id="cp-soles-wrap">
+          <label id="cp-soles-label">S/. estimado</label>
+          <input type="number" id="cp-soles" placeholder="0.00" step="0.01" oninput="calcPrecio()">
+        </div>
+        <div class="field">
+          <label>Precio venta sugerido S/.</label>
+          <input type="number" id="cp-pventa-credito" placeholder="0.00" step="0.01">
+        </div>
+        <div class="field"><label>Factura</label><input type="text" id="cp-factura-credito" placeholder="FAC-001"></div>
+        <div class="field span3"><label>Comentarios</label><textarea id="cp-comentarios-credito" placeholder="Proveedor, condiciones, notas..."></textarea></div>
       </div>
     </div>
     <button class="btn btn-primary" id="btn-compra" onclick="registrarCompra()">✓ Registrar Compra</button>
@@ -447,18 +461,18 @@ tbody tr:hover td{background:#1a1a1a}
     <div class="stat-card"><div class="stat-label">Vendidos</div><div class="stat-val yellow" id="st-vend">—</div></div>
     <div class="stat-card">
       <div class="stat-label">Zapatillas en stock</div>
-      <div class="stat-val accent" id="st-zap">—</div>
-      <div class="stat-sub" id="st-zap-val"></div>
+      <div class="stat-val accent" id="st-zap-val">—</div>
+      <div class="stat-sub" id="st-zap"></div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Ropa &amp; otros stock</div>
-      <div class="stat-val purple" id="st-ropa">—</div>
-      <div class="stat-sub" id="st-ropa-val"></div>
+      <div class="stat-val purple" id="st-ropa-val">—</div>
+      <div class="stat-sub" id="st-ropa"></div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Compras este mes</div>
-      <div class="stat-val red" id="st-mes">—</div>
-      <div class="stat-sub" id="st-mes-val"></div>
+      <div class="stat-val red" id="st-mes-val">—</div>
+      <div class="stat-sub" id="st-mes"></div>
     </div>
   </div>
 
@@ -650,7 +664,8 @@ function setTipoPago(tipo){
   document.getElementById('pt-credito').className='ptoggle-btn credito'+(tipo==='CREDITO'?' active':'');
   document.getElementById('cp-info-contado').style.display=tipo==='CONTADO'?'block':'none';
   document.getElementById('cp-info-credito').style.display=tipo==='CREDITO'?'block':'none';
-  document.querySelectorAll('.cp-credito-only').forEach(el=>el.style.display=tipo==='CREDITO'?'flex':'none');
+  document.getElementById('cp-card-contado').style.display=tipo==='CONTADO'?'block':'none';
+  document.getElementById('cp-card-credito').style.display=tipo==='CREDITO'?'block':'none';
 }
 
 // ── MONEDA TOGGLE ──
@@ -809,18 +824,20 @@ function fillClienteSelect(){
 
 // ── CALCULOS ──
 function calcPrecio(){
-  const moneda=document.getElementById('cp-moneda').value;
-  const usd=parseFloat(document.getElementById('cp-usd').value)||0;
-  const tc=parseFloat(document.getElementById('cp-tc').value)||0;
-  const solesManual=parseFloat(document.getElementById('cp-soles').value)||0;
+  let pc=0;
   const pv=parseFloat(document.getElementById('cp-pventa').value)||0;
 
-  let pc=0;
-  if(moneda==='USD'){
-    pc=solesManual>0?solesManual:(usd>0&&tc>0?Math.round(usd*tc*100)/100:0);
-    if(usd>0&&tc>0&&solesManual===0) document.getElementById('cp-soles').value=pc||'';
+  if(tipoPagoActual==='CONTADO'){
+    pc=parseFloat(document.getElementById('cp-soles-contado').value)||0;
   }else{
-    pc=solesManual;
+    const moneda=document.getElementById('cp-moneda').value;
+    const usd=parseFloat(document.getElementById('cp-usd').value)||0;
+    const tc=parseFloat(document.getElementById('cp-tc').value)||0;
+    const solesM=parseFloat(document.getElementById('cp-soles').value)||0;
+    if(moneda==='USD'){
+      pc=solesM>0?solesM:(usd>0&&tc>0?Math.round(usd*tc*100)/100:0);
+      if(usd>0&&tc>0&&solesM===0) document.getElementById('cp-soles').value=pc||'';
+    }else pc=solesM;
   }
 
   const prev=document.getElementById('cp-preview');
@@ -925,16 +942,22 @@ async function registrarCompra(){
   const silueta=document.getElementById('cp-silueta').value.trim().toUpperCase();
   const colorway=document.getElementById('cp-colorway').value.trim().toUpperCase();
   const moneda=document.getElementById('cp-moneda').value;
-  const usd=parseFloat(document.getElementById('cp-usd').value)||null;
-  const tc=parseFloat(document.getElementById('cp-tc').value)||null;
-  const soles=parseFloat(document.getElementById('cp-soles').value)||null;
-  const pventa=parseFloat(document.getElementById('cp-pventa').value)||null;
+  let usd=null,tc=null,soles=null,pventa=null,pc=null,monedaVal='SOLES';
+
+  if(tipoPagoActual==='CONTADO'){
+    pc=parseFloat(document.getElementById('cp-soles-contado').value)||null;
+    pventa=parseFloat(document.getElementById('cp-pventa').value)||null;
+    if(!pc){toast('Ingresa el precio de compra','warn');return;}
+  }else{
+    monedaVal=document.getElementById('cp-moneda').value;
+    usd=monedaVal==='USD'?(parseFloat(document.getElementById('cp-usd').value)||null):null;
+    tc=monedaVal==='USD'?(parseFloat(document.getElementById('cp-tc').value)||null):null;
+    soles=parseFloat(document.getElementById('cp-soles').value)||null;
+    pventa=parseFloat(document.getElementById('cp-pventa-credito').value)||null;
+    pc=soles||(usd&&tc?Math.round(usd*tc*100)/100:null)||0;
+  }
 
   if(!marca){toast('Ingresa la marca','warn');return;}
-  const pc=soles||(usd&&tc?Math.round(usd*tc*100)/100:null);
-
-  // Para crédito puede no tener precio aún
-  if(!pc&&tipoPagoActual==='CONTADO'){toast('Ingresa el precio de compra','warn');return;}
 
   const btn=document.getElementById('btn-compra');setLoading(btn,true);
   try{
@@ -946,8 +969,8 @@ async function registrarCompra(){
       marca,silueta,colorway,
       categoria:document.getElementById('cp-cat').value,
       talla:document.getElementById('cp-talla').value.trim()||'-',
-      precio_compra_usd:moneda==='USD'?usd:null,
-      tipo_cambio:moneda==='USD'?tc:null,
+      precio_compra_usd:usd,
+      tipo_cambio:tc,
       precio_compra_soles:pc||0,
       precio_final:pc||0,
       precio_venta_sugerido:pventa,
@@ -957,12 +980,12 @@ async function registrarCompra(){
       estado:'DISPONIBLE',
       tipo_pago:tipoPagoActual,
       pago_estado:esCredito?'PENDIENTE':'PAGADO',
-      moneda,
+      moneda:tipoPagoActual==='CONTADO'?'SOLES':monedaVal,
       fecha_vencimiento:document.getElementById('cp-vencimiento').value||null
     });
     if(error)throw error;
     toast(`✓ ${cod} registrado${esCredito?' — ● PENDIENTE':''}`, 'ok');
-    ['cp-marca','cp-silueta','cp-colorway','cp-talla','cp-usd','cp-soles','cp-pventa','cp-factura','cp-desc-factura','cp-comentarios','cp-vencimiento'].forEach(id=>document.getElementById(id).value='');
+    ['cp-marca','cp-silueta','cp-colorway','cp-talla','cp-usd','cp-soles','cp-pventa','cp-factura','cp-desc-factura','cp-comentarios','cp-soles-contado','cp-pventa-credito','cp-factura-credito','cp-comentarios-credito'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     document.getElementById('cp-tc').value='3.70';
     document.getElementById('cp-preview').classList.remove('show');
     await loadInventario();
