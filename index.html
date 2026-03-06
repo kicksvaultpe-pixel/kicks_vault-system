@@ -553,7 +553,7 @@ input[list] { cursor: text; }
       <div class="sg-row"><span class="sg-cat">👟 Zapatillas</span><span class="sg-num" id="st-zap-total">—</span></div>
       <div class="sg-row"><span class="sg-cat">👕 Ropa &amp; Otros</span><span class="sg-num" id="st-ropa-total">—</span></div>
       <div class="sg-divider"></div>
-      <div class="sg-row"><span class="sg-cat sg-tot">Total</span><span class="sg-big" id="st-total">—</span></div>
+      <div class="sg-row-tot"><span class="sg-lbl-tot">Total</span><span class="sg-val-tot" id="st-total">—</span></div>
     </div>
     <!-- DISPONIBLES -->
     <div class="stat-card">
@@ -561,7 +561,7 @@ input[list] { cursor: text; }
       <div class="sg-row"><span class="sg-cat">👟 Zapatillas</span><span class="sg-num green" id="st-zap-disp">—</span></div>
       <div class="sg-row"><span class="sg-cat">👕 Ropa &amp; Otros</span><span class="sg-num green" id="st-ropa-disp">—</span></div>
       <div class="sg-divider"></div>
-      <div class="sg-row"><span class="sg-cat sg-tot">Total</span><span class="sg-big green" id="st-disp">—</span></div>
+      <div class="sg-row-tot"><span class="sg-lbl-tot">Total</span><span class="sg-val-tot green" id="st-disp">—</span></div>
     </div>
     <!-- VENDIDOS -->
     <div class="stat-card">
@@ -569,7 +569,7 @@ input[list] { cursor: text; }
       <div class="sg-row"><span class="sg-cat">👟 Zapatillas</span><span class="sg-num" id="st-zap-vend">—</span></div>
       <div class="sg-row"><span class="sg-cat">👕 Ropa &amp; Otros</span><span class="sg-num" id="st-ropa-vend">—</span></div>
       <div class="sg-divider"></div>
-      <div class="sg-row"><span class="sg-cat sg-tot">Total</span><span class="sg-big" id="st-vend">—</span></div>
+      <div class="sg-row-tot"><span class="sg-lbl-tot">Total</span><span class="sg-val-tot" id="st-vend">—</span></div>
     </div>
     <!-- VALOR STOCK -->
     <div class="stat-card">
@@ -577,16 +577,32 @@ input[list] { cursor: text; }
       <div class="sg-row"><span class="sg-cat">👟 Zapatillas</span><span class="sg-num accent" id="st-zap-val">—</span></div>
       <div class="sg-row"><span class="sg-cat">👕 Ropa &amp; Otros</span><span class="sg-num accent" id="st-ropa-val">—</span></div>
       <div class="sg-divider"></div>
-      <div class="sg-row"><span class="sg-cat sg-tot">Total</span><span class="sg-big" id="st-total-val">—</span></div>
+      <div class="sg-row-tot"><span class="sg-lbl-tot">Total</span><span class="sg-val-tot" id="st-total-val">—</span></div>
     </div>
     <!-- COMPRAS DEL MES -->
     <div class="stat-card">
       <div class="stat-label">COMPRAS DEL MES</div>
-      <div class="sg-row-2h"><span class="sg-cat2"></span><span class="sg-col-h">Uds</span><span class="sg-col-h">Monto</span></div>
-      <div class="sg-row-2"><span class="sg-cat2">👟 Zapatillas</span><span class="sg-num" id="st-mes-zap-uds">—</span><span class="sg-num accent" id="st-mes-zap-val">—</span></div>
-      <div class="sg-row-2"><span class="sg-cat2">👕 Ropa &amp; Otros</span><span class="sg-num" id="st-mes-ropa-uds">—</span><span class="sg-num accent" id="st-mes-ropa-val">—</span></div>
+      <div class="sg-mes-head">
+        <span class="sg-h">Categoría</span>
+        <span class="sg-h">Uds</span>
+        <span class="sg-h">Monto</span>
+      </div>
+      <div class="sg-mes-row">
+        <span class="sg-mc">👟 Zapatillas</span>
+        <span class="sg-mn" id="st-mes-zap-uds">—</span>
+        <span class="sg-mn accent" id="st-mes-zap-val">—</span>
+      </div>
+      <div class="sg-mes-row">
+        <span class="sg-mc">👕 Ropa &amp; Otros</span>
+        <span class="sg-mn" id="st-mes-ropa-uds">—</span>
+        <span class="sg-mn accent" id="st-mes-ropa-val">—</span>
+      </div>
       <div class="sg-divider"></div>
-      <div class="sg-row-2"><span class="sg-cat sg-tot">Total</span><span class="sg-big" id="st-mes-uds-total">—</span><span class="sg-big red" id="st-mes-val">—</span></div>
+      <div class="sg-mes-row-tot">
+        <span class="sg-mc-tot">Total</span>
+        <span class="sg-mn-tot" id="st-mes-uds-total">—</span>
+        <span class="sg-mn-tot red" id="st-mes-val">—</span>
+      </div>
     </div>
   </div>
 
