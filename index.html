@@ -158,8 +158,8 @@ tbody tr:hover td{background:#1a1a1a}
 /* calendar picker visible */
 
 
-/* Select and datalist inputs — consistent style */
-.field select, input[list] {
+/* Select consistent style */
+.field select {
   appearance: none;
   -webkit-appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23888888' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
@@ -234,27 +234,27 @@ input[list] { cursor: text; }
       <div class="form-grid g4">
         <div class="field">
           <label>Marca</label>
-          <input type="text" id="cp-marca" placeholder="NIKE" list="dl-marcas" autocomplete="off">
+          <select id="cp-marca"><option value="">— Marca —</option></select>
         </div>
         <div class="field">
           <label>Silueta</label>
-          <input type="text" id="cp-silueta" placeholder="JORDAN 1" list="dl-siluetas" autocomplete="off">
+          <select id="cp-silueta"><option value="">— Silueta —</option></select>
         </div>
         <div class="field">
           <label>Colorway</label>
-          <input type="text" id="cp-colorway" placeholder="CHICAGO" list="dl-colorways" autocomplete="off">
+          <select id="cp-colorway"><option value="">— Colorway —</option></select>
         </div>
         <div class="field">
           <label>Talla</label>
-          <input type="text" id="cp-talla" placeholder="8US / M / -" list="dl-tallas" autocomplete="off">
+          <select id="cp-talla"><option value="">— Talla —</option></select>
         </div>
         <div class="field">
           <label>Categoría</label>
           <select id="cp-cat">
-            <option value="ZAPATILLAS">Zapatillas</option>
-            <option value="ROPA">Ropa</option>
-            <option value="ACCESORIOS">Accesorios</option>
-            <option value="OTROS">Otros</option>
+            <option value="ZAPATILLAS">👟 Zapatillas</option>
+            <option value="ROPA">👕 Ropa</option>
+            <option value="ACCESORIOS">🧢 Accesorios</option>
+            <option value="OTROS">📦 Otros</option>
           </select>
         </div>
         <div class="field"><label>Fecha de compra</label><input type="date" id="cp-fecha"></div>
@@ -365,21 +365,21 @@ input[list] { cursor: text; }
           <div class="form-grid g3">
             <div class="field">
               <label>Marca</label>
-              <input type="text" id="rv-marca" placeholder="NIKE" list="dl-marcas" autocomplete="off">
+              <select id="rv-marca"><option value="">— Marca —</option></select>
             </div>
             <div class="field">
               <label>Silueta</label>
-              <input type="text" id="rv-silueta" placeholder="JORDAN 1" list="dl-siluetas" autocomplete="off">
+              <select id="rv-silueta"><option value="">— Silueta —</option></select>
             </div>
             <div class="field">
               <label>Colorway</label>
-              <input type="text" id="rv-colorway" placeholder="CHICAGO" list="dl-colorways" autocomplete="off">
+              <select id="rv-colorway"><option value="">— Colorway —</option></select>
             </div>
           </div>
         </div>
         <div class="field">
           <label>Talla</label>
-          <input type="text" id="rv-talla" placeholder="8US / M" list="dl-tallas" autocomplete="off">
+          <select id="rv-talla"><option value="">— Talla —</option></select>
         </div>
         <div class="field"><label>Adelanto S/.</label><input type="number" id="rv-adelanto" placeholder="0.00" step="0.01"></div>
         <div class="field"><label>Canal</label>
@@ -403,10 +403,10 @@ input[list] { cursor: text; }
         <div class="field span2"><label>Concepto</label><input type="text" id="pg-concepto" placeholder="STAND SL / SUNAT / WEB..."></div>
         <div class="field"><label>Categoría</label>
           <select id="pg-cat">
-            <option value="OPERATIVO">Operativo</option>
-            <option value="PERSONAL">Personal</option>
-            <option value="IMPORTACION">Importación</option>
-            <option value="MARKETING">Marketing</option>
+            <option value="OPERATIVO">🏪 Operativo</option>
+            <option value="PERSONAL">👤 Personal</option>
+            <option value="IMPORTACION">📦 Importación</option>
+            <option value="MARKETING">📣 Marketing</option>
           </select>
         </div>
         <div class="field"><label>Monto S/.</label><input type="number" id="pg-monto" placeholder="-100.00" step="0.01"></div>
@@ -476,10 +476,10 @@ input[list] { cursor: text; }
     </select>
     <select class="filter-select" id="inv-cat" onchange="filterInventario()">
       <option value="">Todas las categorías</option>
-      <option value="ZAPATILLAS">Zapatillas</option>
-      <option value="ROPA">Ropa</option>
-      <option value="ACCESORIOS">Accesorios</option>
-      <option value="OTROS">Otros</option>
+      <option value="ZAPATILLAS">👟 Zapatillas</option>
+      <option value="ROPA">👕 Ropa</option>
+      <option value="ACCESORIOS">🧢 Accesorios</option>
+      <option value="OTROS">📦 Otros</option>
     </select>
     <button class="btn btn-ghost btn-sm" onclick="loadInventario()">↺</button>
   </div>
@@ -640,11 +640,14 @@ function fillDataLists(){
   const marcas=[...new Set(inventarioCache.map(p=>p.marca).filter(Boolean))].sort();
   const siluetas=[...new Set(inventarioCache.map(p=>p.silueta).filter(Boolean))].sort();
   const colorways=[...new Set(inventarioCache.map(p=>p.colorway).filter(Boolean))].sort();
-  const extra=['NIKE','ADIDAS','JORDAN','YEEZY','SUPREME','NEW BALANCE','OFF-WHITE','ESSENTIALS','FEAR OF GOD','STONE ISLAND','PALACE','BAPE','STUSSY','PUMA','REEBOK','CONVERSE','VANS','ASICS','SALOMON'];
-  const allMarcas=[...new Set([...extra,...marcas])].sort();
-  document.getElementById('dl-marcas').innerHTML=allMarcas.map(m=>`<option value="${m}">`).join('');
-  document.getElementById('dl-siluetas').innerHTML=siluetas.map(s=>`<option value="${s}">`).join('');
-  document.getElementById('dl-colorways').innerHTML=colorways.map(c=>`<option value="${c}">`).join('');
+  const TALLAS_ALL=['4US','4.5US','5US','5.5US','6US','6.5US','7US','7.5US','8US','8.5US','9US','9.5US','10US','10.5US','11US','11.5US','12US','13US','14US','36EU','37EU','38EU','39EU','40EU','41EU','42EU','43EU','44EU','45EU','46EU','4Y','4.5Y','5Y','5.5Y','6Y','6.5Y','7Y','XS','S','M','L','XL','XXL','XXXL','-'];
+  const MARCAS_BASE=['NIKE','ADIDAS','JORDAN','YEEZY','SUPREME','NEW BALANCE','OFF-WHITE','ESSENTIALS','FEAR OF GOD','STONE ISLAND','PALACE','BAPE','STUSSY','PUMA','REEBOK','CONVERSE','VANS','ASICS','SALOMON'];
+  const allMarcas=[...new Set([...MARCAS_BASE,...marcas])].sort();
+  const mkOpts=(arr,blank)=>`<option value="">${blank}</option>`+arr.map(v=>`<option value="${v}">${v}</option>`).join('');
+  ['cp-marca','rv-marca'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=mkOpts(allMarcas,'— Marca —');});
+  ['cp-silueta','rv-silueta'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=mkOpts(siluetas,'— Silueta —');});
+  ['cp-colorway','rv-colorway'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=mkOpts(colorways,'— Colorway —');});
+  ['cp-talla','rv-talla'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=mkOpts(TALLAS_ALL,'— Talla —');});
 }
 
 async function loadClientes(){
@@ -942,7 +945,7 @@ async function registrarCompra(){
       tipo_pago:tipoPagoActual,
       pago_estado:esCredito?'PENDIENTE':'PAGADO',
       moneda:tipoPagoActual==='CONTADO'?'SOLES':monedaVal,
-      fecha_vencimiento:document.getElementById('cp-vencimiento').value||null
+      fecha_vencimiento:null
     });
     if(error)throw error;
     toast(`✓ ${cod} registrado${esCredito?' — ● PENDIENTE':''}`, 'ok');
@@ -1086,9 +1089,6 @@ function toast(msg,type='ok'){
 
 init();
 </script>
-
-<!-- DATALISTS -->
-<datalist id="dl-marcas"></datalist>
 <datalist id="dl-siluetas"></datalist>
 <datalist id="dl-colorways"></datalist>
 <datalist id="dl-tallas">
