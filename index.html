@@ -1491,35 +1491,35 @@ async function registrarPago(){
 // Lista de productos para costo múltiple [{codigo, nombre, talla, concepto, soles}]
 let costoLista=[];
 
-function buscarProductoCosto(){
+function buscarProductoCosto(keepOpen){
   const q=(document.getElementById('cs-buscar').value||'').toLowerCase().trim();
   const wrap=document.getElementById('cs-resultados-wrap');
   const body=document.getElementById('cs-resultados-body');
-  if(!q){wrap.style.display='none';return;}
   const yaAgregados=new Set(costoLista.map(x=>x.codigo));
   const res=inventarioCache.filter(p=>
     p.estado!=='CANCELADO'&&p.estado!=='VENDIDO'&&
     !yaAgregados.has(p.codigo_producto)&&(
+      !q||
       (p.codigo_producto||'').toLowerCase().includes(q)||
       (p.marca||'').toLowerCase().includes(q)||
       (p.silueta||'').toLowerCase().includes(q)||
       (p.colorway||'').toLowerCase().includes(q)
     )
-  ).slice(0,15);
+  ).slice(0,50);
   if(!res.length){
     body.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted2);padding:12px">Sin resultados</td></tr>';
-    wrap.style.display='';return;
+  } else {
+    body.innerHTML=res.map(p=>`
+      <tr onclick="csAgregarProducto('${p.codigo_producto}')">
+        <td><span class="td-code">${p.codigo_producto}</span></td>
+        <td>${p.marca||'—'}</td>
+        <td style="color:var(--muted2)">${p.silueta||'—'}</td>
+        <td style="color:var(--muted2)">${p.colorway||'—'}</td>
+        <td><strong>${p.talla||'—'}</strong></td>
+        <td style="color:var(--accent)">${fmt(p.precio_final||p.precio_compra_soles||0)}</td>
+        <td><span style="color:var(--accent);font-size:11px">+ Agregar</span></td>
+      </tr>`).join('');
   }
-  body.innerHTML=res.map(p=>`
-    <tr onclick="csAgregarProducto('${p.codigo_producto}')">
-      <td><span class="td-code">${p.codigo_producto}</span></td>
-      <td>${p.marca||'—'}</td>
-      <td style="color:var(--muted2)">${p.silueta||'—'}</td>
-      <td style="color:var(--muted2)">${p.colorway||'—'}</td>
-      <td><strong>${p.talla||'—'}</strong></td>
-      <td style="color:var(--accent)">${fmt(p.precio_final||p.precio_compra_soles||0)}</td>
-      <td><span style="color:var(--accent);font-size:11px">+ Agregar</span></td>
-    </tr>`).join('');
   wrap.style.display='';
 }
 
@@ -1530,9 +1530,8 @@ function csAgregarProducto(codigo){
   const nombre=[p.marca,p.silueta,p.colorway].filter(Boolean).join(' ');
   const conceptoGlobal=document.getElementById('cs-concepto-global').value||'';
   costoLista.push({codigo, nombre, talla:p.talla||'—', concepto:conceptoGlobal, soles:''});
-  document.getElementById('cs-buscar').value='';
-  document.getElementById('cs-resultados-wrap').style.display='none';
   csRenderLista();
+  buscarProductoCosto(true);  // refresca tabla sin cerrarla
 }
 
 function csActualizarConceptos(){
