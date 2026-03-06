@@ -553,10 +553,15 @@ input[list] { cursor: text; }
     <div class="card" style="margin-bottom:12px">
       <div class="card-label">Configuración global</div>
       <div class="form-grid g2">
-        <div class="field">
-          <label>Concepto global</label>
-          <input type="text" id="cs-concepto-global" placeholder="DHL / ADUANA / LIMPIEZA..."
-            oninput="csActualizarConceptos()">
+        <div class="field combo-wrap">
+          <label>Concepto de costo</label>
+          <input type="text" id="cs-concepto-global" placeholder="DHL / ADUANA / LIMPIEZA..." autocomplete="off"
+            onblur="comboBlur('cl-cs-concepto')"
+            oninput="comboFilter('cs-concepto-global','cl-cs-concepto');csActualizarConceptos()"
+            onfocus="comboOpen('cs-concepto-global','cl-cs-concepto')"
+            onkeydown="comboKey(event,'cs-concepto-global','cl-cs-concepto')">
+          <span class="combo-arrow">▼</span>
+          <div class="combo-list" id="cl-cs-concepto"></div>
         </div>
         <div class="field">
           <label>Fecha</label>
@@ -565,14 +570,44 @@ input[list] { cursor: text; }
       </div>
     </div>
 
-    <!-- Buscador agregar producto -->
+    <!-- Filtros combos producto -->
     <div class="card" style="margin-bottom:12px">
       <div class="card-label">Agregar producto a la lista</div>
-      <div class="field" style="margin-bottom:8px">
-        <input type="text" id="cs-buscar" placeholder="Código, marca, silueta, colorway..."
-          autocomplete="off" oninput="buscarProductoCosto()">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        <div class="combo-wrap" style="flex:1;min-width:120px">
+          <input type="text" id="cs-f-marca" placeholder="Marca..." autocomplete="off" onblur="comboBlur('cl-cs-marca')"
+            oninput="comboFilter('cs-f-marca','cl-cs-marca');buscarProductoCosto()"
+            onfocus="comboOpen('cs-f-marca','cl-cs-marca')"
+            onkeydown="comboKey(event,'cs-f-marca','cl-cs-marca')">
+          <span class="combo-arrow">▼</span>
+          <div class="combo-list" id="cl-cs-marca"></div>
+        </div>
+        <div class="combo-wrap" style="flex:1;min-width:120px">
+          <input type="text" id="cs-f-silueta" placeholder="Silueta..." autocomplete="off" onblur="comboBlur('cl-cs-silueta')"
+            oninput="comboFilter('cs-f-silueta','cl-cs-silueta');buscarProductoCosto()"
+            onfocus="comboOpen('cs-f-silueta','cl-cs-silueta')"
+            onkeydown="comboKey(event,'cs-f-silueta','cl-cs-silueta')">
+          <span class="combo-arrow">▼</span>
+          <div class="combo-list" id="cl-cs-silueta"></div>
+        </div>
+        <div class="combo-wrap" style="flex:1;min-width:120px">
+          <input type="text" id="cs-f-colorway" placeholder="Colorway..." autocomplete="off" onblur="comboBlur('cl-cs-colorway')"
+            oninput="comboFilter('cs-f-colorway','cl-cs-colorway');buscarProductoCosto()"
+            onfocus="comboOpen('cs-f-colorway','cl-cs-colorway')"
+            onkeydown="comboKey(event,'cs-f-colorway','cl-cs-colorway')">
+          <span class="combo-arrow">▼</span>
+          <div class="combo-list" id="cl-cs-colorway"></div>
+        </div>
+        <div class="combo-wrap" style="min-width:90px">
+          <input type="text" id="cs-f-talla" placeholder="Talla..." autocomplete="off" onblur="comboBlur('cl-cs-talla')"
+            oninput="comboFilter('cs-f-talla','cl-cs-talla');buscarProductoCosto()"
+            onfocus="comboOpen('cs-f-talla','cl-cs-talla')"
+            onkeydown="comboKey(event,'cs-f-talla','cl-cs-talla')">
+          <span class="combo-arrow">▼</span>
+          <div class="combo-list" id="cl-cs-talla"></div>
+        </div>
       </div>
-      <div id="cs-resultados-wrap" style="display:none">
+      <div id="cs-resultados-wrap">
         <div class="cs-tabla-wrap">
           <table class="cs-tabla">
             <thead><tr>
@@ -835,6 +870,7 @@ function comboPick(inputId, listId, val) {
   const list = document.getElementById(listId);
   if (list) list.classList.remove('open');
   if (inputId.startsWith('inv-')) filterInventario();
+  if (inputId.startsWith('cs-f-')) buscarProductoCosto();
 }
 
 function comboKey(e, inputId, listId) {
@@ -967,6 +1003,12 @@ function fillDataLists(){
   comboSetData('cl-colorway', colorways);comboSetData('cl-rv-colorway', colorways);comboSetData('cl-inv-colorway', colorways);
   comboSetData('cl-talla', TALLAS_ALL);  comboSetData('cl-rv-talla', TALLAS_ALL); comboSetData('cl-inv-talla', TALLAS_ALL);
   comboSetData('cl-inv-cat', ['ZAPATILLAS','ROPA','ACCESORIOS','OTROS']);
+  // Costo form combos
+  comboSetData('cl-cs-marca', allMarcas);
+  comboSetData('cl-cs-silueta', siluetas);
+  comboSetData('cl-cs-colorway', colorways);
+  comboSetData('cl-cs-talla', TALLAS_ALL);
+  comboSetData('cl-cs-concepto', ['DHL','ADUANA','LIMPIEZA','REPARACION','ALMACEN','TRANSPORTE','OTROS']);
 }
 
 async function loadClientes(){
@@ -1491,20 +1533,19 @@ async function registrarPago(){
 // Lista de productos para costo múltiple [{codigo, nombre, talla, concepto, soles}]
 let costoLista=[];
 
-function buscarProductoCosto(keepOpen){
-  const q=(document.getElementById('cs-buscar').value||'').toLowerCase().trim();
-  const wrap=document.getElementById('cs-resultados-wrap');
+function buscarProductoCosto(){
+  const g=id=>(document.getElementById(id)||{value:''}).value.toLowerCase().trim();
+  const marca=g('cs-f-marca'), silueta=g('cs-f-silueta');
+  const colorway=g('cs-f-colorway'), talla=g('cs-f-talla');
   const body=document.getElementById('cs-resultados-body');
   const yaAgregados=new Set(costoLista.map(x=>x.codigo));
   const res=inventarioCache.filter(p=>
     p.estado!=='CANCELADO'&&p.estado!=='VENDIDO'&&
-    !yaAgregados.has(p.codigo_producto)&&(
-      !q||
-      (p.codigo_producto||'').toLowerCase().includes(q)||
-      (p.marca||'').toLowerCase().includes(q)||
-      (p.silueta||'').toLowerCase().includes(q)||
-      (p.colorway||'').toLowerCase().includes(q)
-    )
+    !yaAgregados.has(p.codigo_producto)&&
+    (!marca||(p.marca||'').toLowerCase().includes(marca))&&
+    (!silueta||(p.silueta||'').toLowerCase().includes(silueta))&&
+    (!colorway||(p.colorway||'').toLowerCase().includes(colorway))&&
+    (!talla||(p.talla||'').toLowerCase().includes(talla))
   ).slice(0,50);
   if(!res.length){
     body.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted2);padding:12px">Sin resultados</td></tr>';
@@ -1520,7 +1561,6 @@ function buscarProductoCosto(keepOpen){
         <td><span style="color:var(--accent);font-size:11px">+ Agregar</span></td>
       </tr>`).join('');
   }
-  wrap.style.display='';
 }
 
 function csAgregarProducto(codigo){
@@ -1582,7 +1622,7 @@ function csQuitarProducto(i){
 
 function limpiarSeleccionCosto(){
   costoLista=[];
-  document.getElementById('cs-buscar').value='';
+
   document.getElementById('cs-concepto-global').value='';
   csRenderLista();
 }
