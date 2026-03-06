@@ -839,7 +839,7 @@ async function loadTCGlobal(){
 // ── INIT ──
 async function init(){
   setToday();
-  await Promise.all([loadInventario(),loadClientes()]);
+  await Promise.all([loadTCGlobal(), loadInventario(), loadClientes()]);
 }
 
 function setToday(){
