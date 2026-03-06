@@ -139,12 +139,17 @@ tbody tr:hover td{background:#1a1a1a}
 @media(min-width:600px){.stats-row{grid-template-columns:repeat(3,1fr)}}
 @media(min-width:900px){.stats-row.s6{grid-template-columns:repeat(6,1fr)}}
 .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
-.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin-top:12px}
-.sg-item{}
-.sg-label{font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2)}
-.sg-val{font-family:"Archivo Black";font-size:20px;margin-top:2px;letter-spacing:-.5px}
-.sg-val.accent{color:var(--accent)}.sg-val.green{color:var(--green)}
-.sg-val.yellow{color:var(--yellow)}.sg-val.red{color:var(--red)}.sg-val.purple{color:#b39ddb}
+.stats5{grid-template-columns:repeat(2,1fr)}
+@media(min-width:700px){.stats5{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:1000px){.stats5{grid-template-columns:repeat(5,1fr)}}
+.sg-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0}
+.sg-divider{border-top:1px solid var(--border2);margin:6px 0}
+.sg-cat{font-size:12px;color:var(--muted2)}
+.sg-num{font-family:"Archivo Black";font-size:18px;color:var(--text)}
+.sg-num.accent{color:var(--accent)}.sg-num.green{color:var(--green)}
+.sg-num.red{color:var(--red)}
+.sg-tot{color:var(--text)!important;font-size:13px}
+.sg-cat.sg-tot{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted2)}
 .stat-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted2)}
 .stat-val{font-family:'Archivo Black';font-size:22px;margin-top:3px;letter-spacing:-.5px}
 .stat-val.green{color:var(--green)}.stat-val.accent{color:var(--accent)}
@@ -526,48 +531,46 @@ input[list] { cursor: text; }
 <div id="view-inventario" class="view">
   <div class="page-title"><div class="dot"></div> Inventario</div>
 
-  <div class="stats-row" style="grid-template-columns:repeat(2,1fr)">
-    <!-- ZAPATILLAS -->
-    <div class="stat-card" style="border-color:rgba(200,255,0,.2)">
-      <div class="stat-label" style="color:var(--accent);letter-spacing:3px">👟 ZAPATILLAS</div>
-      <div class="stat-grid">
-        <div class="sg-item"><div class="sg-label">Total</div><div class="sg-val accent" id="st-zap-total">—</div></div>
-        <div class="sg-item"><div class="sg-label">Disponibles</div><div class="sg-val green" id="st-zap-disp">—</div></div>
-        <div class="sg-item"><div class="sg-label">Vendidos</div><div class="sg-val yellow" id="st-zap-vend">—</div></div>
-        <div class="sg-item"><div class="sg-label">Valor stock</div><div class="sg-val accent" id="st-zap-val">—</div></div>
-      </div>
+  <div class="stats-row stats5">
+    <!-- TOTAL -->
+    <div class="stat-card">
+      <div class="stat-label">TOTAL</div>
+      <div class="sg-row"><span class="sg-cat">👟</span><span class="sg-num" id="st-zap-total">—</span></div>
+      <div class="sg-row"><span class="sg-cat">👕</span><span class="sg-num" id="st-ropa-total">—</span></div>
+      <div class="sg-divider"></div>
+      <div class="sg-row"><span class="sg-cat sg-tot">Total</span><span class="sg-num sg-tot" id="st-total">—</span></div>
     </div>
-    <!-- ROPA & OTROS -->
-    <div class="stat-card" style="border-color:rgba(124,77,255,.2)">
-      <div class="stat-label" style="color:#b39ddb;letter-spacing:3px">👕 ROPA &amp; OTROS</div>
-      <div class="stat-grid">
-        <div class="sg-item"><div class="sg-label">Total</div><div class="sg-val purple" id="st-ropa-total">—</div></div>
-        <div class="sg-item"><div class="sg-label">Disponibles</div><div class="sg-val green" id="st-ropa-disp">—</div></div>
-        <div class="sg-item"><div class="sg-label">Vendidos</div><div class="sg-val yellow" id="st-ropa-vend">—</div></div>
-        <div class="sg-item"><div class="sg-label">Valor stock</div><div class="sg-val purple" id="st-ropa-val">—</div></div>
-      </div>
+    <!-- DISPONIBLES -->
+    <div class="stat-card">
+      <div class="stat-label">DISPONIBLES</div>
+      <div class="sg-row"><span class="sg-cat">👟</span><span class="sg-num green" id="st-zap-disp">—</span></div>
+      <div class="sg-row"><span class="sg-cat">👕</span><span class="sg-num green" id="st-ropa-disp">—</span></div>
+      <div class="sg-divider"></div>
+      <div class="sg-row"><span class="sg-cat sg-tot">Total</span><span class="sg-num sg-tot green" id="st-disp">—</span></div>
     </div>
-  </div>
-  <div class="stats-row" style="grid-template-columns:repeat(2,1fr);margin-top:-4px">
-    <!-- TOTAL GENERAL -->
-    <div class="stat-card" style="border-color:rgba(255,255,255,.08)">
-      <div class="stat-label" style="letter-spacing:3px">📊 TOTAL GENERAL</div>
-      <div class="stat-grid">
-        <div class="sg-item"><div class="sg-label">Total</div><div class="sg-val accent" id="st-total">—</div></div>
-        <div class="sg-item"><div class="sg-label">Disponibles</div><div class="sg-val green" id="st-disp">—</div></div>
-        <div class="sg-item"><div class="sg-label">Vendidos</div><div class="sg-val yellow" id="st-vend">—</div></div>
-        <div class="sg-item"><div class="sg-label">Valor stock</div><div class="sg-val" id="st-total-val">—</div></div>
-      </div>
+    <!-- VENDIDOS -->
+    <div class="stat-card">
+      <div class="stat-label">VENDIDOS</div>
+      <div class="sg-row"><span class="sg-cat">👟</span><span class="sg-num" id="st-zap-vend">—</span></div>
+      <div class="sg-row"><span class="sg-cat">👕</span><span class="sg-num" id="st-ropa-vend">—</span></div>
+      <div class="sg-divider"></div>
+      <div class="sg-row"><span class="sg-cat sg-tot">Total</span><span class="sg-num sg-tot" id="st-vend">—</span></div>
+    </div>
+    <!-- VALOR STOCK -->
+    <div class="stat-card">
+      <div class="stat-label">VALOR STOCK</div>
+      <div class="sg-row"><span class="sg-cat">👟</span><span class="sg-num accent" id="st-zap-val">—</span></div>
+      <div class="sg-row"><span class="sg-cat">👕</span><span class="sg-num accent" id="st-ropa-val">—</span></div>
+      <div class="sg-divider"></div>
+      <div class="sg-row"><span class="sg-cat sg-tot">Total</span><span class="sg-num sg-tot accent" id="st-total-val">—</span></div>
     </div>
     <!-- COMPRAS DEL MES -->
-    <div class="stat-card" style="border-color:rgba(255,23,68,.2)">
-      <div class="stat-label" style="color:var(--red);letter-spacing:3px">📅 COMPRAS DEL MES</div>
-      <div class="stat-grid">
-        <div class="sg-item"><div class="sg-label">Unidades</div><div class="sg-val red" id="st-mes-uds">—</div></div>
-        <div class="sg-item"><div class="sg-label">Monto pagado</div><div class="sg-val red" id="st-mes-val">—</div></div>
-        <div class="sg-item"><div class="sg-label">Zapatillas</div><div class="sg-val accent" id="st-mes-zap">—</div></div>
-        <div class="sg-item"><div class="sg-label">Ropa &amp; otros</div><div class="sg-val purple" id="st-mes-ropa">—</div></div>
-      </div>
+    <div class="stat-card">
+      <div class="stat-label">COMPRAS DEL MES</div>
+      <div class="sg-row"><span class="sg-cat">👟</span><span class="sg-num" id="st-mes-zap">—</span></div>
+      <div class="sg-row"><span class="sg-cat">👕</span><span class="sg-num" id="st-mes-ropa">—</span></div>
+      <div class="sg-divider"></div>
+      <div class="sg-row"><span class="sg-cat sg-tot">S/.</span><span class="sg-num sg-tot red" id="st-mes-val">—</span></div>
     </div>
   </div>
 
@@ -951,46 +954,38 @@ function updateStats(){
   const allRopa=inventarioCache.filter(p=>p.categoria!=='ZAPATILLAS');
   const dispZap=allZap.filter(p=>p.estado==='DISPONIBLE'&&p.pago_estado!=='PENDIENTE');
   const dispRopa=allRopa.filter(p=>p.estado==='DISPONIBLE'&&p.pago_estado!=='PENDIENTE');
-  const vendZap=allZap.filter(p=>p.estado==='VENDIDO');
-  const vendRopa=allRopa.filter(p=>p.estado==='VENDIDO');
-
-  // Zapatillas
-  document.getElementById('st-zap-total').textContent=allZap.length;
-  document.getElementById('st-zap-disp').textContent=dispZap.length;
-  document.getElementById('st-zap-vend').textContent=vendZap.length;
-  document.getElementById('st-zap-val').textContent=fmt(dispZap.reduce((s,p)=>s+parseFloat(p.precio_final||0),0));
-
-  // Ropa & Otros
-  document.getElementById('st-ropa-total').textContent=allRopa.length;
-  document.getElementById('st-ropa-disp').textContent=dispRopa.length;
-  document.getElementById('st-ropa-vend').textContent=vendRopa.length;
-  document.getElementById('st-ropa-val').textContent=fmt(dispRopa.reduce((s,p)=>s+parseFloat(p.precio_final||0),0));
-
-  // Total general
   const dispAll=inventarioCache.filter(p=>p.estado==='DISPONIBLE'&&p.pago_estado!=='PENDIENTE');
-  document.getElementById('st-total').textContent=inventarioCache.length;
-  document.getElementById('st-disp').textContent=dispAll.length;
-  document.getElementById('st-vend').textContent=inventarioCache.filter(p=>p.estado==='VENDIDO').length;
-  document.getElementById('st-total-val').textContent=fmt(dispAll.reduce((s,p)=>s+parseFloat(p.precio_final||0),0));
 
-  // Compras del mes — solo pagado (contado + créditos pagados este mes)
-  // Para créditos pagados: pago_estado=PAGADO + tipo_pago=CREDITO, la fecha de pago la tomamos de updated_at
-  // Por simplicidad: contado ingresado este mes + créditos con pago_estado=PAGADO ingresados este mes
+  // Total
+  set('st-zap-total', allZap.length);
+  set('st-ropa-total', allRopa.length);
+  set('st-total', inventarioCache.length);
+  // Disponibles
+  set('st-zap-disp', dispZap.length);
+  set('st-ropa-disp', dispRopa.length);
+  set('st-disp', dispAll.length);
+  // Vendidos
+  set('st-zap-vend', allZap.filter(p=>p.estado==='VENDIDO').length);
+  set('st-ropa-vend', allRopa.filter(p=>p.estado==='VENDIDO').length);
+  set('st-vend', inventarioCache.filter(p=>p.estado==='VENDIDO').length);
+  // Valor stock
+  set('st-zap-val', fmt(dispZap.reduce((s,p)=>s+parseFloat(p.precio_final||0),0)));
+  set('st-ropa-val', fmt(dispRopa.reduce((s,p)=>s+parseFloat(p.precio_final||0),0)));
+  set('st-total-val', fmt(dispAll.reduce((s,p)=>s+parseFloat(p.precio_final||0),0)));
+  // Compras del mes — solo pagado
   const mesPagados=inventarioCache.filter(p=>
     p.fecha_compra&&p.fecha_compra.startsWith(mesActual)&&
     (p.tipo_pago==='CONTADO'||(p.tipo_pago==='CREDITO'&&p.pago_estado==='PAGADO'))
   );
-  const mesZap=mesPagados.filter(p=>p.categoria==='ZAPATILLAS');
-  const mesRopa=mesPagados.filter(p=>p.categoria!=='ZAPATILLAS');
-  const montoMes=mesPagados.reduce((s,p)=>s+parseFloat(p.precio_compra_soles||0),0)
-    +inventarioCache.filter(p=>p.fecha_compra&&p.fecha_compra.startsWith(mesActual))
-      .reduce((s,p)=>s+parseFloat(p.total_costos||0),0);
-
-  document.getElementById('st-mes-uds').textContent=mesPagados.length+' uds';
-  document.getElementById('st-mes-val').textContent=fmt(montoMes);
-  document.getElementById('st-mes-zap').textContent=mesZap.length+' uds';
-  document.getElementById('st-mes-ropa').textContent=mesRopa.length+' uds';
+  const costosMes=inventarioCache
+    .filter(p=>p.fecha_compra&&p.fecha_compra.startsWith(mesActual))
+    .reduce((s,p)=>s+parseFloat(p.total_costos||0),0);
+  const montoMes=mesPagados.reduce((s,p)=>s+parseFloat(p.precio_compra_soles||0),0)+costosMes;
+  set('st-mes-zap', mesPagados.filter(p=>p.categoria==='ZAPATILLAS').length+' uds');
+  set('st-mes-ropa', mesPagados.filter(p=>p.categoria!=='ZAPATILLAS').length+' uds');
+  set('st-mes-val', fmt(montoMes));
 }
+function set(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
 
 let sortCol=null,sortDir=1;
 
