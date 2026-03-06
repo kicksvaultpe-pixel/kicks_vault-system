@@ -31,7 +31,7 @@ nav{position:sticky;top:0;z-index:200;background:rgba(8,8,8,.96);backdrop-filter
 .nav-tab:not(.active):hover{color:var(--text);background:var(--border)}
 
 /* LAYOUT */
-.view{display:none;padding:20px;max-width:1300px;margin:0 auto}
+.view{display:none;padding:20px;max-width:1600px;margin:0 auto}
 .view.active{display:block;animation:fadeIn .2s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .page-title{font-family:'Archivo Black';font-size:26px;letter-spacing:1px;margin-bottom:20px;display:flex;align-items:center;gap:10px}
@@ -785,10 +785,10 @@ function fillDataLists(){
   const TALLAS_ALL=['4US','4.5US','5US','5.5US','6US','6.5US','7US','7.5US','8US','8.5US','9US','9.5US','10US','10.5US','11US','11.5US','12US','13US','14US','36EU','37EU','38EU','39EU','40EU','41EU','42EU','43EU','44EU','45EU','46EU','4Y','4.5Y','5Y','5.5Y','6Y','6.5Y','7Y','XS','S','M','L','XL','XXL','XXXL','-'];
   const MARCAS_BASE=['NIKE','ADIDAS','JORDAN','YEEZY','SUPREME','NEW BALANCE','OFF-WHITE','ESSENTIALS','FEAR OF GOD','STONE ISLAND','PALACE','BAPE','STUSSY','PUMA','REEBOK','CONVERSE','VANS','ASICS','SALOMON'];
   const allMarcas=[...new Set([...MARCAS_BASE,...marcas])].sort();
-  comboSetData('cl-marca', allMarcas);   comboSetData('cl-rv-marca', allMarcas);
-  comboSetData('cl-silueta', siluetas);  comboSetData('cl-rv-silueta', siluetas);
-  comboSetData('cl-colorway', colorways);comboSetData('cl-rv-colorway', colorways);
-  comboSetData('cl-talla', TALLAS_ALL);  comboSetData('cl-rv-talla', TALLAS_ALL);
+  comboSetData('cl-marca', allMarcas);   comboSetData('cl-rv-marca', allMarcas);  comboSetData('cl-inv-marca', allMarcas);
+  comboSetData('cl-silueta', siluetas);  comboSetData('cl-rv-silueta', siluetas); comboSetData('cl-inv-silueta', siluetas);
+  comboSetData('cl-colorway', colorways);comboSetData('cl-rv-colorway', colorways);comboSetData('cl-inv-colorway', colorways);
+  comboSetData('cl-talla', TALLAS_ALL);  comboSetData('cl-rv-talla', TALLAS_ALL); comboSetData('cl-inv-talla', TALLAS_ALL);
 }
 
 async function loadClientes(){
@@ -882,18 +882,19 @@ function updateStats(){
 }
 
 function filterInventario(){
-  const q=document.getElementById('inv-search').value.toLowerCase();
-  const talla=document.getElementById('inv-talla-search').value.toLowerCase();
+  const marca=(document.getElementById('inv-marca').value||'').toLowerCase();
+  const silueta=(document.getElementById('inv-silueta').value||'').toLowerCase();
+  const colorway=(document.getElementById('inv-colorway').value||'').toLowerCase();
+  const talla=(document.getElementById('inv-talla').value||'').toLowerCase();
   const estado=document.getElementById('inv-estado').value;
-  const cat=document.getElementById('inv-cat').value;
 
   renderInventario(inventarioCache.filter(p=>{
-    const n=[p.marca,p.silueta,p.colorway,p.codigo_producto].filter(Boolean).join(' ').toLowerCase();
-    const matchQ=!q||n.includes(q);
+    const matchM=!marca||(p.marca||'').toLowerCase().includes(marca);
+    const matchS=!silueta||(p.silueta||'').toLowerCase().includes(silueta);
+    const matchC=!colorway||(p.colorway||'').toLowerCase().includes(colorway);
     const matchT=!talla||(p.talla||'').toLowerCase().includes(talla);
     const matchE=!estado||(estado==='PENDIENTE'?p.pago_estado==='PENDIENTE':p.estado===estado&&p.pago_estado!=='PENDIENTE');
-    const matchC=!cat||p.categoria===cat;
-    return matchQ&&matchT&&matchE&&matchC;
+    return matchM&&matchS&&matchC&&matchT&&matchE;
   }));
 }
 
