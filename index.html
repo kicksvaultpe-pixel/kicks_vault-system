@@ -735,10 +735,10 @@ function renderInventario(rows){
     const fecha=p.fecha_compra?p.fecha_compra.substring(2,10):'—';
 
     // Montos grandes, unidades pequeñas
-    const pcSoles=pF>0?`<div class="td-amt">${fmtAmt(p.precio_compra_soles)}</div>`:'<span style="color:var(--muted)">—</span>';
-    const costosAmt=p.total_costos>0?`<div class="td-amt" style="color:#b39ddb">${fmtAmt(p.total_costos)}</div>`:'<span style="color:var(--muted)">—</span>';
-    const finalAmt=`<div class="td-amt" style="color:${isPendiente?'var(--orange)':'var(--text)'}">${fmtAmt(pF)}</div>`;
-    const ventaAmt=pV>0?`<div class="td-amt" style="color:var(--accent)">${fmtAmt(pV)}</div>`:'<span style="color:var(--muted)">—</span>';
+    const pcSoles=p.precio_compra_soles>0?fmt(p.precio_compra_soles):'<span style="color:var(--muted)">—</span>';
+    const costosAmt=p.total_costos>0?`<span style="color:#b39ddb">${fmt(p.total_costos)}</span>`:'<span style="color:var(--muted)">—</span>';
+    const finalAmt=`<span style="color:${isPendiente?'var(--orange)':'var(--text)'}">${fmt(pF)}</span>`;
+    const ventaAmt=pV>0?`<span style="color:var(--accent)">${fmt(pV)}</span>`:'<span style="color:var(--muted)">—</span>';
 
     return`<tr>
       <td><span class="td-code">${fecha}</span></td>
