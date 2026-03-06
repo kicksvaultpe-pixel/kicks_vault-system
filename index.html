@@ -439,6 +439,30 @@ input[list] { cursor: text; }
         <div class="field"><label>Factura</label><input type="text" id="cp-factura-credito" placeholder="FAC-001"></div>
         <div class="field span3"><label>Comentarios</label><textarea id="cp-comentarios-credito" placeholder="Proveedor, condiciones, notas..."></textarea></div>
       </div>
+      <!-- OC -->
+      <div style="border-top:1px solid var(--border);margin-top:14px;padding-top:14px">
+        <div class="card-label" style="margin-bottom:10px">Orden de Compra</div>
+        <div class="form-grid g3">
+          <div class="field">
+            <label>Tipo</label>
+            <select id="cp-oc-tipo">
+              <option value="LOCAL">🏪 Local</option>
+              <option value="IMPORTACION">✈️ Importación</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>OC</label>
+            <select id="cp-oc-select" onchange="csOCSelectChange()">
+              <option value="NUEVA">+ Nueva OC</option>
+            </select>
+          </div>
+          <div class="field" id="cp-oc-nueva-wrap">
+            <label>Código (auto)</label>
+            <input type="text" id="cp-oc-nueva" placeholder="OC-001" readonly
+              style="color:var(--accent);font-family:'Archivo Black'">
+          </div>
+        </div>
+      </div>
     </div>
     <button class="btn btn-primary" id="btn-compra" onclick="registrarCompra()">✓ Registrar Compra</button>
   </div>
@@ -745,10 +769,10 @@ input[list] { cursor: text; }
         <th onclick="sortTable('precio_final')" style="cursor:pointer">P. Final <span id="sort-precio_final"></span></th>
         <th onclick="sortTable('precio_venta_sugerido')" style="cursor:pointer">P. Venta <span id="sort-precio_venta_sugerido"></span></th>
         <th onclick="sortTable('margen')" style="cursor:pointer">Margen <span id="sort-margen"></span></th>
-        <th>Estado</th><th>Pago</th><th>Factura</th><th></th>
+        <th>OC</th><th>Estado</th><th>Pago</th><th>Factura</th><th></th>
       </tr></thead>
       <tbody id="inv-tbody">
-        <tr class="loading-row"><td colspan="16"><div class="spinner"></div></td></tr>
+        <tr class="loading-row"><td colspan="17"><div class="spinner"></div></td></tr>
       </tbody>
     </table>
   </div>
@@ -902,6 +926,37 @@ document.addEventListener('click', e => {
     document.querySelectorAll('.combo-list').forEach(l => l.classList.remove('open'));
 });
 
+// ── ORDENES DE COMPRA ──
+let ocCache=[];
+
+async function loadOCs(){
+  const{data}=await db.from('ordenes_compra').select('*').order('id',{ascending:false});
+  ocCache=data||[];
+  renderOCSelect();
+}
+
+function renderOCSelect(){
+  const sel=document.getElementById('cp-oc-select');
+  if(!sel) return;
+  const prev=sel.value;
+  sel.innerHTML='<option value="NUEVA">+ Nueva OC</option>'+
+    ocCache.map(oc=>`<option value="${oc.codigo}">${oc.codigo} — ${oc.tipo} (${oc.estado})</option>`).join('');
+  sel.value=ocCache.find(o=>o.codigo===prev)?prev:'NUEVA';
+  csOCSelectChange();
+}
+
+function csOCSelectChange(){
+  const isNueva=document.getElementById('cp-oc-select').value==='NUEVA';
+  document.getElementById('cp-oc-nueva-wrap').style.display=isNueva?'':'none';
+}
+
+async function pregenOC(){
+  if(tipoPagoActual!=='CREDITO') return;
+  const{data}=await db.rpc('gen_codigo_oc');
+  const el=document.getElementById('cp-oc-nueva');
+  if(el&&data) el.value=data;
+}
+
 // ── TC GLOBAL ──
 let tcSaveTimer=null;
 function saveTCGlobal(val){
@@ -922,7 +977,7 @@ async function loadTCGlobal(){
 // ── INIT ──
 async function init(){
   setToday();
-  await Promise.all([loadTCGlobal(), loadInventario(), loadClientes()]);
+  await Promise.all([loadTCGlobal(), loadInventario(), loadClientes(), loadOCs()]);
 }
 
 function setToday(){
@@ -960,6 +1015,7 @@ function setTipoPago(tipo){
   document.getElementById('cp-info-credito').style.display=tipo==='CREDITO'?'block':'none';
   document.getElementById('cp-card-contado').style.display=tipo==='CONTADO'?'block':'none';
   document.getElementById('cp-card-credito').style.display=tipo==='CREDITO'?'block':'none';
+  if(tipo==='CREDITO') pregenOC();
 }
 
 // ── MONEDA TOGGLE ──
@@ -977,7 +1033,7 @@ function toggleMoneda(){
 // ── LOAD ──
 async function loadInventario(){
   const{data,error}=await db.from('inventario')
-    .select('*, costos(id,concepto,costo_soles,fecha)')
+    .select('*, costos(id,concepto,costo_soles,fecha), orden_compra')
     .order('fecha_compra',{ascending:false})
     .order('codigo_producto',{ascending:false});
   if(error){toast('Error: '+error.message,'err');return;}
@@ -1020,7 +1076,7 @@ async function loadClientes(){
 function renderInventario(rows){
   const tbody=document.getElementById('inv-tbody');
   if(!rows.length){
-    tbody.innerHTML='<tr><td colspan="16"><div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Sin productos</div></div></td></tr>';
+    tbody.innerHTML='<tr><td colspan="17"><div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Sin productos</div></div></td></tr>';
     return;
   }
   tbody.innerHTML=rows.map(p=>{
@@ -1086,6 +1142,7 @@ function renderInventario(rows){
       <td>${finalAmt}</td>
       <td>${ventaAmt}</td>
       <td>${mg}</td>
+      <td>${p.orden_compra?`<span class="td-code" style="font-size:10px">${p.orden_compra}</span>`:`<span style="color:var(--muted)">—</span>`}</td>
       <td>${estadoBadge}</td>
       <td>${pagoBadge}</td>
       <td>${p.factura?`<span class="td-code">${p.factura}</span>`:'<span style="color:var(--muted)">—</span>'}</td>
@@ -1415,6 +1472,27 @@ async function registrarCompra(){
   try{
     const cod=await genCodigo('producto');
     const esCredito=tipoPagoActual==='CREDITO';
+
+    // OC logic for credito
+    let ordenCompra=null;
+    if(esCredito){
+      const ocSel=document.getElementById('cp-oc-select').value;
+      if(ocSel==='NUEVA'){
+        const ocCod=document.getElementById('cp-oc-nueva').value;
+        const ocTipo=document.getElementById('cp-oc-tipo').value;
+        // Create OC if not exists
+        const{error:eOC}=await db.from('ordenes_compra').upsert({
+          codigo:ocCod, tipo:ocTipo,
+          fecha:document.getElementById('cp-fecha').value,
+          estado:'PENDIENTE'
+        },{onConflict:'codigo'});
+        if(eOC) throw eOC;
+        ordenCompra=ocCod;
+      } else {
+        ordenCompra=ocSel;
+      }
+    }
+
     const{error}=await db.from('inventario').insert({
       codigo_producto:cod,
       fecha_compra:document.getElementById('cp-fecha').value,
@@ -1433,12 +1511,14 @@ async function registrarCompra(){
       tipo_pago:tipoPagoActual,
       pago_estado:esCredito?'PENDIENTE':'PAGADO',
       moneda:tipoPagoActual==='CONTADO'?'SOLES':monedaVal,
-      fecha_vencimiento:null
+      fecha_vencimiento:null,
+      orden_compra:ordenCompra
     });
     if(error)throw error;
     toast(`✓ ${cod} registrado${esCredito?' — ● PENDIENTE':''}`, 'ok');
     ['cp-marca','cp-silueta','cp-colorway','cp-talla','cp-usd','cp-soles','cp-pventa','cp-factura','cp-desc-factura','cp-comentarios','cp-soles-contado','cp-pventa-credito','cp-factura-credito','cp-comentarios-credito'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     document.getElementById('cp-tc').value='3.70';
+    await loadOCs(); pregenOC();
     document.getElementById('cp-preview').classList.remove('show');
     await loadInventario();
   }catch(e){toast('Error: '+e.message,'err');}
