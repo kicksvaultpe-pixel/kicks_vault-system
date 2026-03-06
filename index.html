@@ -724,6 +724,7 @@ function comboPick(inputId, listId, val) {
   if (el) el.value = val;
   const list = document.getElementById(listId);
   if (list) list.classList.remove('open');
+  if (inputId.startsWith('inv-')) filterInventario();
 }
 
 function comboKey(e, inputId, listId) {
@@ -762,7 +763,8 @@ async function init(){
 }
 
 function setToday(){
-  const t=new Date().toISOString().split('T')[0];
+  const now=new Date();
+  const t=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
   ['cp-fecha','vt-fecha','pg-fecha','cs-fecha','modal-fecha'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.value=t;
   });
@@ -876,7 +878,14 @@ function renderInventario(rows){
       pagoBadge='<span style="color:var(--muted);font-size:11px">Contado</span>';
 
     const mg=margen!==null?`<span class="badge ${margen>=0?'badge-green':'badge-red'}">${margen}%</span>`:'<span style="color:var(--muted)">—</span>';
-    const fecha=p.fecha_compra?p.fecha_compra.substring(2,10):'—';
+    const fecha=(()=>{
+      if(!p.fecha_compra) return '—';
+      const d=new Date(p.fecha_compra+'T12:00:00');
+      const dd=String(d.getDate()).padStart(2,'0');
+      const mm=String(d.getMonth()+1).padStart(2,'0');
+      const yy=String(d.getFullYear()).slice(2);
+      return dd+'/'+mm+'/'+yy;
+    })();
 
     // Montos grandes, unidades pequeñas
     const pcSoles=p.precio_compra_soles>0?fmt(p.precio_compra_soles):'<span style="color:var(--muted)">—</span>';
