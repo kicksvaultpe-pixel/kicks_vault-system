@@ -21,13 +21,6 @@ body{background:var(--bg);color:var(--text);font-family:'Archivo',sans-serif;min
 
 /* NAV */
 nav{position:sticky;top:0;z-index:200;background:rgba(8,8,8,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);height:52px;display:flex;align-items:center;padding:0 20px}
-.nav-tc{display:flex;align-items:center;gap:6px;margin-left:auto}
-.nav-tc-label{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted2)}
-.nav-tc input{background:var(--surface);border:1px solid var(--border2);border-radius:6px;
-  color:var(--accent);font-family:"Archivo Black";font-size:13px;padding:4px 6px;text-align:center;
-  -moz-appearance:textfield}
-.nav-tc input::-webkit-inner-spin-button,.nav-tc input::-webkit-outer-spin-button{-webkit-appearance:none}
-.nav-tc input:focus{outline:none;border-color:var(--accent)}
 .nav-logo{font-family:'Archivo Black';font-size:17px;letter-spacing:3px;color:var(--accent);margin-right:28px;white-space:nowrap}
 .nav-logo span{color:var(--muted2)}
 .nav-tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;flex:1}
@@ -264,11 +257,6 @@ input[list] { cursor: text; }
 
 <nav>
   <div class="nav-logo">KICKS<span>VAULT</span></div>
-  <div class="nav-tc" title="Tipo de cambio global — afecta nuevos registros">
-    <span class="nav-tc-label">TC S/.</span>
-    <input type="number" id="tc-global" value="3.70" step="0.001" min="1" max="10"
-      oninput="saveTCGlobal(this.value)" style="width:58px">
-  </div>
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showView('registro',this)">⊕ Registro</button>
     <button class="nav-tab" onclick="showView('inventario',this)">▦ Inventario</button>
@@ -282,7 +270,17 @@ input[list] { cursor: text; }
      REGISTRO
 ══════════════════════════════════ -->
 <div id="view-registro" class="view active">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
   <div class="page-title"><div class="dot"></div> Registro</div>
+  <div style="display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border2);border-radius:8px;padding:8px 14px">
+    <span style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted2)">TIPO DE CAMBIO</span>
+    <span style="font-size:10px;color:var(--muted2)">S/.</span>
+    <input type="number" id="tc-global" step="0.001" min="1" max="10"
+      oninput="saveTCGlobal(this.value)"
+      style="width:64px;background:transparent;border:none;color:var(--accent);font-family:'Archivo Black';font-size:15px;text-align:center;outline:none;-moz-appearance:textfield">
+    <span style="font-size:10px;color:var(--muted2)">/ USD</span>
+  </div>
+</div>
 
   <div class="tipo-selector">
     <button class="tipo-btn active compra"  onclick="setTipo('compra',this)">🛒 Compra</button>
