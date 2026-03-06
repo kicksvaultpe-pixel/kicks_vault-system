@@ -880,7 +880,8 @@ function toggleMoneda(){
 async function loadInventario(){
   const{data,error}=await db.from('inventario')
     .select('*, costos(id,concepto,costo_soles,fecha)')
-    .order('fecha_compra',{ascending:false});
+    .order('fecha_compra',{ascending:false})
+    .order('codigo_producto',{ascending:false});
   if(error){toast('Error: '+error.message,'err');return;}
   inventarioCache=(data||[]).map(p=>({
     ...p,
