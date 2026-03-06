@@ -104,6 +104,8 @@ nav{position:sticky;top:0;z-index:200;background:rgba(8,8,8,.96);backdrop-filter
 .btn-sm{padding:6px 14px;font-size:11px}
 .btn-pay{background:rgba(255,109,0,.15);border:1px solid rgba(255,109,0,.4);color:var(--orange);padding:4px 10px;font-size:10px;font-weight:700;letter-spacing:.5px;border-radius:5px;cursor:pointer;transition:all .15s;white-space:nowrap}
 .btn-pay:hover{background:var(--orange);color:#fff;border-color:var(--orange)}
+.btn-cancel{background:rgba(255,23,68,.1);border:1px solid rgba(255,23,68,.3);color:#ff1744;padding:3px 8px;font-size:10px;font-weight:700;border-radius:5px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn-cancel:hover{background:#ff1744;color:#fff}
 
 /* TABLE */
 .table-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
@@ -643,6 +645,7 @@ input[list] { cursor: text; }
       <option value="DISPONIBLE">● Disponible</option>
       <option value="VENDIDO">● Vendido</option>
       <option value="PENDIENTE">● Pendiente pago</option>
+      <option value="CANCELADO">✕ Cancelados</option>
     </select>
     <button class="btn btn-ghost btn-sm" onclick="clearFiltros()" title="Limpiar filtros">✕ Limpiar</button>
     <button class="btn btn-ghost btn-sm" onclick="loadInventario()">↺</button>
@@ -663,10 +666,10 @@ input[list] { cursor: text; }
         <th onclick="sortTable('precio_final')" style="cursor:pointer">P. Final <span id="sort-precio_final"></span></th>
         <th onclick="sortTable('precio_venta_sugerido')" style="cursor:pointer">P. Venta <span id="sort-precio_venta_sugerido"></span></th>
         <th onclick="sortTable('margen')" style="cursor:pointer">Margen <span id="sort-margen"></span></th>
-        <th>Estado</th><th>Pago</th><th>Factura</th>
+        <th>Estado</th><th>Pago</th><th>Factura</th><th></th>
       </tr></thead>
       <tbody id="inv-tbody">
-        <tr class="loading-row"><td colspan="15"><div class="spinner"></div></td></tr>
+        <tr class="loading-row"><td colspan="16"><div class="spinner"></div></td></tr>
       </tbody>
     </table>
   </div>
@@ -931,7 +934,7 @@ async function loadClientes(){
 function renderInventario(rows){
   const tbody=document.getElementById('inv-tbody');
   if(!rows.length){
-    tbody.innerHTML='<tr><td colspan="15"><div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Sin productos</div></div></td></tr>';
+    tbody.innerHTML='<tr><td colspan="16"><div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Sin productos</div></div></td></tr>';
     return;
   }
   tbody.innerHTML=rows.map(p=>{
@@ -940,9 +943,12 @@ function renderInventario(rows){
     const margen=pF>0&&pV>0?Math.round((pV-pF)/pF*100):null;
     const isPendiente=p.pago_estado==='PENDIENTE';
 
+    const isCancelado=p.estado==='CANCELADO';
     // Estado badge
     let estadoBadge;
-    if(isPendiente)
+    if(isCancelado)
+      estadoBadge='<span class="badge" style="background:rgba(100,100,100,.2);color:#666;border:1px solid #444">✕ CANCELADO</span>';
+    else if(isPendiente)
       estadoBadge='<span class="badge badge-orange">● PENDIENTE</span>';
     else if(p.estado==='DISPONIBLE')
       estadoBadge='<span class="badge badge-green">● DISP</span>';
@@ -951,12 +957,19 @@ function renderInventario(rows){
 
     // Pago badge + botón
     let pagoBadge;
-    if(p.tipo_pago==='CREDITO'&&isPendiente)
+    if(isCancelado)
+      pagoBadge='<span style="color:var(--muted);font-size:11px">—</span>';
+    else if(p.tipo_pago==='CREDITO'&&isPendiente)
       pagoBadge=`<button class="btn-pay" onclick="abrirModalPago('${p.codigo_producto}')">💳 Pagar</button>`;
     else if(p.tipo_pago==='CREDITO')
       pagoBadge='<span class="badge badge-muted">Crédito ✓</span>';
     else
       pagoBadge='<span style="color:var(--muted);font-size:11px">Contado</span>';
+
+    // Botón cancelar — solo si no está cancelado ni vendido
+    const btnCancel=(!isCancelado&&p.estado!=='VENDIDO')
+      ?`<button class="btn-cancel" onclick="cancelarProducto('${p.codigo_producto}')">✕ Cancelar</button>`
+      :'';
 
     const mg=margen!==null?`<span class="badge ${margen>=0?'badge-green':'badge-red'}">${margen}%</span>`:'<span style="color:var(--muted)">—</span>';
     const fecha=(()=>{
@@ -990,6 +1003,7 @@ function renderInventario(rows){
       <td>${estadoBadge}</td>
       <td>${pagoBadge}</td>
       <td>${p.factura?`<span class="td-code">${p.factura}</span>`:'<span style="color:var(--muted)">—</span>'}</td>
+      <td>${btnCancel}</td>
     </tr>`;
   }).join('');
 }
@@ -1080,6 +1094,9 @@ function filterInventario(){
     const matchT=!talla||(p.talla||'').toLowerCase().includes(talla);
     const matchE=!estado||(estado==='PENDIENTE'?p.pago_estado==='PENDIENTE':p.estado===estado&&p.pago_estado!=='PENDIENTE');
     const matchCat=!cat||(p.categoria||'').toUpperCase().includes(cat);
+    // Cancelados ocultos por defecto, visibles solo sin filtro de estado
+    const showCancelado=estado==='CANCELADO';
+    if(p.estado==='CANCELADO'&&!showCancelado) return false;
     return matchM&&matchS&&matchC&&matchT&&matchE&&matchCat;
   });
 
@@ -1208,6 +1225,44 @@ function onSelectReservaProducto(){
 }
 
 // ── MODAL PAGAR CRÉDITO ──
+async function cancelarProducto(codigo){
+  const prod=inventarioCache.find(p=>p.codigo_producto===codigo);
+  if(!prod) return;
+  const nombre=[prod.marca,prod.silueta,prod.colorway].filter(Boolean).join(' ');
+  if(!confirm(`¿Cancelar compra de ${nombre} (${prod.talla||'—'})?
+
+Se revertirá el egreso de S/. ${fmt(prod.precio_compra_soles||0)} en flujo de caja.`)) return;
+
+  try{
+    // 1. Marcar inventario como CANCELADO
+    const{error:e1}=await db.from('inventario')
+      .update({estado:'CANCELADO'})
+      .eq('codigo_producto',codigo);
+    if(e1) throw e1;
+
+    // 2. Registrar ingreso en flujo_caja para revertir el egreso
+    const monto=parseFloat(prod.precio_compra_soles||0);
+    if(monto>0){
+      const now=new Date();
+      const fecha=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+      const{error:e2}=await db.from('flujo_caja').insert({
+        fecha,
+        tipo:'INGRESO',
+        categoria:'CANCELACION',
+        descripcion:`Cancelación compra ${codigo} — ${nombre}`,
+        monto,
+        referencia:codigo
+      });
+      if(e2) throw e2;
+    }
+
+    toast('✓ Compra cancelada — flujo de caja revertido','ok');
+    loadInventario();
+  } catch(err){
+    toast('Error: '+err.message,'err');
+  }
+}
+
 function abrirModalPago(codigo){
   modalCodigo=codigo;
   const prod=inventarioCache.find(p=>p.codigo_producto===codigo);
