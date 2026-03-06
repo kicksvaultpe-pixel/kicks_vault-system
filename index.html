@@ -242,6 +242,16 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 input[list] { cursor: text; }
 
+/* COSTO TABLA BUSQUEDA */
+.cs-tabla-wrap{max-height:220px;overflow-y:auto;border:1px solid var(--border2);border-radius:8px}
+.cs-tabla{width:100%;border-collapse:collapse}
+.cs-tabla thead th{padding:7px 10px;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);background:#0e0e0e;position:sticky;top:0}
+.cs-tabla tbody tr{border-top:1px solid var(--border);cursor:pointer;transition:background .1s}
+.cs-tabla tbody tr:hover{background:rgba(200,255,0,.06)}
+.cs-tabla tbody td{padding:8px 10px;font-size:12px;color:var(--text)}
+.cs-selected-item{background:rgba(200,255,0,.06);border:1px solid rgba(200,255,0,.2);border-radius:8px;padding:10px 14px;font-size:13px;display:flex;justify-content:space-between;align-items:center}
+.cs-selected-item button{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:16px;padding:0 4px}
+.cs-selected-item button:hover{color:var(--red)}
 /* MISC */
 .empty-state{text-align:center;padding:50px 20px;color:var(--muted2)}
 .empty-icon{font-size:36px;margin-bottom:10px;opacity:.5}
@@ -530,20 +540,40 @@ input[list] { cursor: text; }
 
   <!-- ── COSTO ── -->
   <div id="form-costo" class="form-panel">
-    <div class="info-box info-purple">
-      💡 Los costos en USD se registran ahora. El monto en soles se puede actualizar desde el inventario cuando se concrete el pago.
-    </div>
     <div class="card">
       <div class="card-label">Costo adicional por producto</div>
       <div class="form-grid g2">
-        <div class="field span2"><label>Producto</label>
-          <select id="cs-producto"><option value="">— Seleccionar —</option></select>
+        <!-- Buscador de producto -->
+        <div class="field span2">
+          <label>Buscar producto</label>
+          <input type="text" id="cs-buscar" placeholder="Código, marca, silueta, colorway..."
+            autocomplete="off" oninput="buscarProductoCosto()">
         </div>
-        <div class="field span2"><label>Concepto</label><input type="text" id="cs-concepto" placeholder="DHL / ADUANA / LIMPIEZA / REPARACION"></div>
-        <div class="field"><label>Monto USD $</label><input type="number" id="cs-usd" placeholder="0.00" step="0.01" oninput="calcCostoSoles()"></div>
-        <div class="field"><label>Tipo de cambio</label><input type="number" id="cs-tc" value="3.70" step="0.001" oninput="calcCostoSoles()"></div>
-        <div class="field"><label>Monto S/. (o ingresar directo)</label><input type="number" id="cs-soles" placeholder="0.00" step="0.01" oninput="calcCostoSoles()"></div>
-        <div class="field"><label>Fecha</label><input type="date" id="cs-fecha"></div>
+        <!-- Tabla resultados -->
+        <div class="field span2" id="cs-resultados-wrap" style="display:none">
+          <div class="cs-tabla-wrap">
+            <table class="cs-tabla">
+              <thead><tr>
+                <th>Código</th><th>Marca</th><th>Silueta</th><th>Colorway</th><th>Talla</th><th>P. Final</th>
+              </tr></thead>
+              <tbody id="cs-resultados-body"></tbody>
+            </table>
+          </div>
+        </div>
+        <!-- Producto seleccionado -->
+        <div class="field span2" id="cs-seleccionado-wrap" style="display:none">
+          <div id="cs-seleccionado-info" class="cs-selected-item"></div>
+          <input type="hidden" id="cs-producto">
+        </div>
+        <div class="field span2"><label>Concepto</label>
+          <input type="text" id="cs-concepto" placeholder="DHL / ADUANA / LIMPIEZA / REPARACION">
+        </div>
+        <div class="field"><label>Monto S/.</label>
+          <input type="number" id="cs-soles" placeholder="0.00" step="0.01">
+        </div>
+        <div class="field"><label>Fecha</label>
+          <input type="date" id="cs-fecha">
+        </div>
       </div>
     </div>
     <button class="btn btn-purple" id="btn-costo" onclick="registrarCosto()">✓ Agregar Costo</button>
@@ -1444,16 +1474,61 @@ async function registrarPago(){
 }
 
 // ── REGISTRAR COSTO ──
+function buscarProductoCosto(){
+  const q=(document.getElementById('cs-buscar').value||'').toLowerCase().trim();
+  const wrap=document.getElementById('cs-resultados-wrap');
+  const body=document.getElementById('cs-resultados-body');
+  if(!q){wrap.style.display='none';return;}
+  const res=inventarioCache.filter(p=>
+    p.estado!=='CANCELADO'&&p.estado!=='VENDIDO'&&(
+      (p.codigo_producto||'').toLowerCase().includes(q)||
+      (p.marca||'').toLowerCase().includes(q)||
+      (p.silueta||'').toLowerCase().includes(q)||
+      (p.colorway||'').toLowerCase().includes(q)
+    )
+  ).slice(0,20);
+  if(!res.length){
+    body.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted2);padding:14px">Sin resultados</td></tr>';
+    wrap.style.display='';return;
+  }
+  body.innerHTML=res.map(p=>`
+    <tr onclick="seleccionarProductoCosto('${p.codigo_producto}')">
+      <td><span class="td-code">${p.codigo_producto}</span></td>
+      <td>${p.marca||'—'}</td>
+      <td style="color:var(--muted2)">${p.silueta||'—'}</td>
+      <td style="color:var(--muted2)">${p.colorway||'—'}</td>
+      <td><strong>${p.talla||'—'}</strong></td>
+      <td style="color:var(--accent)">${fmt(p.precio_final||p.precio_compra_soles||0)}</td>
+    </tr>`).join('');
+  wrap.style.display='';
+}
+
+function seleccionarProductoCosto(codigo){
+  const p=inventarioCache.find(x=>x.codigo_producto===codigo);
+  if(!p) return;
+  document.getElementById('cs-producto').value=codigo;
+  const nombre=[p.marca,p.silueta,p.colorway].filter(Boolean).join(' ');
+  document.getElementById('cs-seleccionado-info').innerHTML=
+    `<span>✓ <strong>${codigo}</strong> — ${nombre} <span style="color:var(--muted2)">(${p.talla||'—'})</span> <span style="color:var(--accent)">${fmt(p.precio_final||0)}</span></span>
+     <button onclick="limpiarSeleccionCosto()">✕</button>`;
+  document.getElementById('cs-seleccionado-wrap').style.display='';
+  document.getElementById('cs-resultados-wrap').style.display='none';
+  document.getElementById('cs-buscar').value='';
+}
+
+function limpiarSeleccionCosto(){
+  document.getElementById('cs-producto').value='';
+  document.getElementById('cs-seleccionado-wrap').style.display='none';
+  document.getElementById('cs-buscar').value='';
+}
+
 async function registrarCosto(){
   const codProd=document.getElementById('cs-producto').value;
   const concepto=document.getElementById('cs-concepto').value.trim();
-  const usd=parseFloat(document.getElementById('cs-usd').value)||0;
-  const tc=parseFloat(document.getElementById('cs-tc').value)||0;
-  const solesM=parseFloat(document.getElementById('cs-soles').value)||0;
-  const soles=solesM>0?solesM:(usd>0&&tc>0?Math.round(usd*tc*100)/100:0);
+  const soles=parseFloat(document.getElementById('cs-soles').value)||0;
   if(!codProd){toast('Selecciona un producto','warn');return;}
   if(!concepto){toast('Ingresa el concepto','warn');return;}
-  if(!soles){toast('Ingresa el monto','warn');return;}
+  if(!soles){toast('Ingresa el monto en S/.','warn');return;}
   const btn=document.getElementById('btn-costo');setLoading(btn,true);
   try{
     const{error}=await db.from('costos').insert({
@@ -1463,9 +1538,9 @@ async function registrarCosto(){
     });
     if(error)throw error;
     toast('✓ Costo agregado — precio final actualizado','ok');
-    ['cs-concepto','cs-usd','cs-soles'].forEach(id=>document.getElementById(id).value='');
-    document.getElementById('cs-tc').value='3.70';
-    document.getElementById('cs-producto').value='';
+    document.getElementById('cs-concepto').value='';
+    document.getElementById('cs-soles').value='';
+    limpiarSeleccionCosto();
     await loadInventario();
   }catch(e){toast('Error: '+e.message,'err');}
   finally{setLoading(btn,false,'✓ Agregar Costo');}
