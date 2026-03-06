@@ -251,14 +251,11 @@ tbody tr:hover td{background:#1a1a1a}
             oninput="acFilter('cp-talla','ac-talla',TALLAS)" onkeydown="acKey(event,'ac-talla','cp-talla')">
           <div class="ac-list" id="ac-talla"></div>
         </div>
-        <div class="field">
+        <div class="field ac-wrap">
           <label>Categoría</label>
-          <select id="cp-cat">
-            <option value="ZAPATILLAS">👟 Zapatillas</option>
-            <option value="ROPA">👕 Ropa</option>
-            <option value="ACCESORIOS">🧢 Accesorios</option>
-            <option value="OTROS">📦 Otros</option>
-          </select>
+          <input type="text" id="cp-cat" placeholder="ZAPATILLAS" autocomplete="off"
+            oninput="acFilter('cp-cat','ac-cat',CATEGORIAS)" onkeydown="acKey(event,'ac-cat','cp-cat')" value="ZAPATILLAS">
+          <div class="ac-list" id="ac-cat"></div>
         </div>
         <div class="field"><label>Fecha de compra</label><input type="date" id="cp-fecha"></div>
 
@@ -555,6 +552,7 @@ let tipoPagoActual='CONTADO';
 let modalCodigo=null;
 
 // ── AUTOCOMPLETE DATA ──
+const CATEGORIAS=['ZAPATILLAS','ROPA','ACCESORIOS','OTROS'];
 const MARCAS=['NIKE','ADIDAS','JORDAN','YEEZY','SUPREME','NEW BALANCE','OFF-WHITE',
   'ESSENTIALS','FEAR OF GOD','STONE ISLAND','PALACE','BAPE','STUSSY','PUMA','REEBOK',
   'CONVERSE','VANS','ASICS','SALOMON','ARC\'TERYX'];
