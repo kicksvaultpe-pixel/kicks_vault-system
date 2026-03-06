@@ -158,6 +158,42 @@ tbody tr:hover td{background:#1a1a1a}
 /* calendar picker visible */
 
 
+
+/* COMBOBOX — write + dropdown */
+.combo-wrap { position: relative; }
+.combo-wrap input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: 7px;
+  padding: 9px 32px 9px 12px;
+  color: var(--text);
+  font-family: 'Archivo'; font-size: 13px;
+  outline: none; transition: border .15s;
+}
+.combo-wrap input:focus { border-color: var(--accent); }
+.combo-wrap input::placeholder { color: var(--muted); }
+.combo-arrow {
+  position: absolute; right: 11px; top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none; color: var(--muted2); font-size: 10px;
+}
+.combo-list {
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 8px; z-index: 150; max-height: 220px; overflow-y: auto;
+  display: none; box-shadow: 0 8px 24px rgba(0,0,0,.6);
+}
+.combo-list.open { display: block; }
+.combo-opt {
+  padding: 9px 13px; font-size: 13px; cursor: pointer;
+  border-bottom: 1px solid var(--border); color: var(--text);
+  transition: background .1s;
+}
+.combo-opt:last-child { border-bottom: none; }
+.combo-opt:hover, .combo-opt.focused { background: var(--border2); color: var(--accent); }
+.combo-opt mark { background: none; color: var(--accent); font-weight: 700; }
+
 /* Select consistent style */
 .field select {
   appearance: none;
@@ -234,19 +270,47 @@ input[list] { cursor: text; }
       <div class="form-grid g4">
         <div class="field">
           <label>Marca</label>
-          <select id="cp-marca"><option value="">— Marca —</option></select>
+<div class="field combo-wrap">
+          <input type="text" id="cp-marca" placeholder="NIKE" autocomplete="off"
+            oninput="comboFilter('cp-marca','cl-marca')"
+            onfocus="comboOpen('cp-marca','cl-marca')"
+            onkeydown="comboKey(event,'cp-marca','cl-marca')">
+          <span class="combo-arrow">▼</span>
+          <div class="combo-list" id="cl-marca"></div>
+        </div>
         </div>
         <div class="field">
           <label>Silueta</label>
-          <select id="cp-silueta"><option value="">— Silueta —</option></select>
+<div class="field combo-wrap">
+          <input type="text" id="cp-silueta" placeholder="JORDAN 1" autocomplete="off"
+            oninput="comboFilter('cp-silueta','cl-silueta')"
+            onfocus="comboOpen('cp-silueta','cl-silueta')"
+            onkeydown="comboKey(event,'cp-silueta','cl-silueta')">
+          <span class="combo-arrow">▼</span>
+          <div class="combo-list" id="cl-silueta"></div>
+        </div>
         </div>
         <div class="field">
           <label>Colorway</label>
-          <select id="cp-colorway"><option value="">— Colorway —</option></select>
+<div class="field combo-wrap">
+          <input type="text" id="cp-colorway" placeholder="CHICAGO" autocomplete="off"
+            oninput="comboFilter('cp-colorway','cl-colorway')"
+            onfocus="comboOpen('cp-colorway','cl-colorway')"
+            onkeydown="comboKey(event,'cp-colorway','cl-colorway')">
+          <span class="combo-arrow">▼</span>
+          <div class="combo-list" id="cl-colorway"></div>
+        </div>
         </div>
         <div class="field">
           <label>Talla</label>
-          <select id="cp-talla"><option value="">— Talla —</option></select>
+<div class="field combo-wrap">
+          <input type="text" id="cp-talla" placeholder="8US / M / -" autocomplete="off"
+            oninput="comboFilter('cp-talla','cl-talla')"
+            onfocus="comboOpen('cp-talla','cl-talla')"
+            onkeydown="comboKey(event,'cp-talla','cl-talla')">
+          <span class="combo-arrow">▼</span>
+          <div class="combo-list" id="cl-talla"></div>
+        </div>
         </div>
         <div class="field">
           <label>Categoría</label>
@@ -379,7 +443,14 @@ input[list] { cursor: text; }
         </div>
         <div class="field">
           <label>Talla</label>
-          <select id="rv-talla"><option value="">— Talla —</option></select>
+<div class="field combo-wrap">
+          <input type="text" id="rv-talla" placeholder="8US / M" autocomplete="off"
+            oninput="comboFilter('rv-talla','cl-rv-talla')"
+            onfocus="comboOpen('rv-talla','cl-rv-talla')"
+            onkeydown="comboKey(event,'rv-talla','cl-rv-talla')">
+          <span class="combo-arrow">▼</span>
+          <div class="combo-list" id="cl-rv-talla"></div>
+        </div>
         </div>
         <div class="field"><label>Adelanto S/.</label><input type="number" id="rv-adelanto" placeholder="0.00" step="0.01"></div>
         <div class="field"><label>Canal</label>
@@ -566,6 +637,77 @@ function getColorways(){
 // Close AC on outside click
 
 
+
+// ── COMBOBOX ──
+const COMBO_DATA = {};
+
+function comboSetData(listId, items) {
+  COMBO_DATA[listId] = items;
+}
+
+function comboOpen(inputId, listId) {
+  const val = document.getElementById(inputId).value.toUpperCase().trim();
+  comboRender(inputId, listId, val || '');
+}
+
+function comboFilter(inputId, listId) {
+  const val = document.getElementById(inputId).value.toUpperCase().trim();
+  comboRender(inputId, listId, val);
+}
+
+function comboRender(inputId, listId, val) {
+  const list = document.getElementById(listId);
+  if (!list) return;
+  const items = COMBO_DATA[listId] || [];
+  const filtered = val
+    ? items.filter(i => i.toUpperCase().includes(val))
+    : items;
+  if (!filtered.length) { list.classList.remove('open'); return; }
+  list.innerHTML = filtered.map(i => {
+    const hl = val
+      ? i.replace(new RegExp(val.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'), m => `<mark>${m}</mark>`)
+      : i;
+    return `<div class="combo-opt" onclick="comboPick('${inputId}','${listId}','${i.replace(/'/g,"\'")}')">${hl}</div>`;
+  }).join('');
+  list.classList.add('open');
+}
+
+function comboPick(inputId, listId, val) {
+  const el = document.getElementById(inputId);
+  if (el) el.value = val;
+  const list = document.getElementById(listId);
+  if (list) list.classList.remove('open');
+}
+
+function comboKey(e, inputId, listId) {
+  const list = document.getElementById(listId);
+  if (!list) return;
+  const items = list.querySelectorAll('.combo-opt');
+  const focused = list.querySelector('.focused');
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    const next = focused ? focused.nextElementSibling : items[0];
+    if (focused) focused.classList.remove('focused');
+    if (next) { next.classList.add('focused'); next.scrollIntoView({block:'nearest'}); }
+    if (!list.classList.contains('open')) comboOpen(inputId, listId);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    const prev = focused ? focused.previousElementSibling : items[items.length - 1];
+    if (focused) focused.classList.remove('focused');
+    if (prev) { prev.classList.add('focused'); prev.scrollIntoView({block:'nearest'}); }
+  } else if (e.key === 'Enter' && focused) {
+    e.preventDefault();
+    comboPick(inputId, listId, focused.textContent.trim());
+  } else if (e.key === 'Escape') {
+    list.classList.remove('open');
+  }
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.combo-wrap'))
+    document.querySelectorAll('.combo-list').forEach(l => l.classList.remove('open'));
+});
+
 // ── INIT ──
 async function init(){
   setToday();
@@ -643,11 +785,10 @@ function fillDataLists(){
   const TALLAS_ALL=['4US','4.5US','5US','5.5US','6US','6.5US','7US','7.5US','8US','8.5US','9US','9.5US','10US','10.5US','11US','11.5US','12US','13US','14US','36EU','37EU','38EU','39EU','40EU','41EU','42EU','43EU','44EU','45EU','46EU','4Y','4.5Y','5Y','5.5Y','6Y','6.5Y','7Y','XS','S','M','L','XL','XXL','XXXL','-'];
   const MARCAS_BASE=['NIKE','ADIDAS','JORDAN','YEEZY','SUPREME','NEW BALANCE','OFF-WHITE','ESSENTIALS','FEAR OF GOD','STONE ISLAND','PALACE','BAPE','STUSSY','PUMA','REEBOK','CONVERSE','VANS','ASICS','SALOMON'];
   const allMarcas=[...new Set([...MARCAS_BASE,...marcas])].sort();
-  const mkOpts=(arr,blank)=>`<option value="">${blank}</option>`+arr.map(v=>`<option value="${v}">${v}</option>`).join('');
-  ['cp-marca','rv-marca'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=mkOpts(allMarcas,'— Marca —');});
-  ['cp-silueta','rv-silueta'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=mkOpts(siluetas,'— Silueta —');});
-  ['cp-colorway','rv-colorway'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=mkOpts(colorways,'— Colorway —');});
-  ['cp-talla','rv-talla'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=mkOpts(TALLAS_ALL,'— Talla —');});
+  comboSetData('cl-marca', allMarcas);   comboSetData('cl-rv-marca', allMarcas);
+  comboSetData('cl-silueta', siluetas);  comboSetData('cl-rv-silueta', siluetas);
+  comboSetData('cl-colorway', colorways);comboSetData('cl-rv-colorway', colorways);
+  comboSetData('cl-talla', TALLAS_ALL);  comboSetData('cl-rv-talla', TALLAS_ALL);
 }
 
 async function loadClientes(){
