@@ -115,6 +115,7 @@ nav{position:sticky;top:0;z-index:200;background:rgba(8,8,8,.96);backdrop-filter
 table{width:100%;border-collapse:collapse;font-size:12px;min-width:1000px}
 thead tr{background:#0e0e0e}
 th{padding:9px 10px;text-align:left;font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);white-space:nowrap;border-bottom:1px solid var(--border)}
+th[onclick]:hover{color:var(--accent);background:rgba(200,255,0,.04)}
 td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle;white-space:nowrap}
 tbody tr:last-child td{border-bottom:none}
 tbody tr:hover td{background:#1a1a1a}
@@ -537,20 +538,43 @@ input[list] { cursor: text; }
   </div>
 
   <div class="table-toolbar">
-    <input class="search-box" id="inv-search" type="text" placeholder="🔍  Marca, silueta, colorway, código..." oninput="filterInventario()">
-    <input class="filter-select" id="inv-talla-search" type="text" placeholder="Talla..." list="dl-tallas" autocomplete="off" oninput="filterInventario()" style="min-width:100px">
-    <select class="filter-select" id="inv-estado" onchange="filterInventario()">
+    <div class="combo-wrap" style="flex:1;min-width:130px">
+      <input type="text" id="inv-marca" placeholder="Marca..." autocomplete="off"
+        oninput="comboFilter('inv-marca','cl-inv-marca');filterInventario()"
+        onfocus="comboOpen('inv-marca','cl-inv-marca')"
+        onkeydown="comboKey(event,'inv-marca','cl-inv-marca')">
+      <span class="combo-arrow">▼</span>
+      <div class="combo-list" id="cl-inv-marca"></div>
+    </div>
+    <div class="combo-wrap" style="flex:1;min-width:130px">
+      <input type="text" id="inv-silueta" placeholder="Silueta..." autocomplete="off"
+        oninput="comboFilter('inv-silueta','cl-inv-silueta');filterInventario()"
+        onfocus="comboOpen('inv-silueta','cl-inv-silueta')"
+        onkeydown="comboKey(event,'inv-silueta','cl-inv-silueta')">
+      <span class="combo-arrow">▼</span>
+      <div class="combo-list" id="cl-inv-silueta"></div>
+    </div>
+    <div class="combo-wrap" style="flex:1;min-width:130px">
+      <input type="text" id="inv-colorway" placeholder="Colorway..." autocomplete="off"
+        oninput="comboFilter('inv-colorway','cl-inv-colorway');filterInventario()"
+        onfocus="comboOpen('inv-colorway','cl-inv-colorway')"
+        onkeydown="comboKey(event,'inv-colorway','cl-inv-colorway')">
+      <span class="combo-arrow">▼</span>
+      <div class="combo-list" id="cl-inv-colorway"></div>
+    </div>
+    <div class="combo-wrap" style="min-width:100px">
+      <input type="text" id="inv-talla" placeholder="Talla..." autocomplete="off"
+        oninput="comboFilter('inv-talla','cl-inv-talla');filterInventario()"
+        onfocus="comboOpen('inv-talla','cl-inv-talla')"
+        onkeydown="comboKey(event,'inv-talla','cl-inv-talla')">
+      <span class="combo-arrow">▼</span>
+      <div class="combo-list" id="cl-inv-talla"></div>
+    </div>
+    <select class="filter-select" id="inv-estado" onchange="filterInventario()" style="min-width:130px">
       <option value="">Todos</option>
-      <option value="DISPONIBLE">Disponible</option>
-      <option value="VENDIDO">Vendido</option>
-      <option value="PENDIENTE">Pendiente pago</option>
-    </select>
-    <select class="filter-select" id="inv-cat" onchange="filterInventario()">
-      <option value="">Todas las categorías</option>
-      <option value="ZAPATILLAS">👟 Zapatillas</option>
-      <option value="ROPA">👕 Ropa</option>
-      <option value="ACCESORIOS">🧢 Accesorios</option>
-      <option value="OTROS">📦 Otros</option>
+      <option value="DISPONIBLE">● Disponible</option>
+      <option value="VENDIDO">● Vendido</option>
+      <option value="PENDIENTE">● Pendiente pago</option>
     </select>
     <button class="btn btn-ghost btn-sm" onclick="loadInventario()">↺</button>
   </div>
@@ -558,9 +582,19 @@ input[list] { cursor: text; }
   <div class="table-wrap">
     <table>
       <thead><tr>
-        <th>Fecha</th><th>Código</th><th>Marca</th><th>Silueta</th><th>Colorway</th>
-        <th>Cat.</th><th>Talla</th><th>P. Compra</th><th>Costos</th>
-        <th>P. Final</th><th>P. Venta</th><th>Margen</th><th>Estado</th><th>Pago</th><th>Factura</th>
+        <th onclick="sortTable('fecha_compra')" style="cursor:pointer">Fecha <span id="sort-fecha_compra"></span></th>
+        <th>Código</th>
+        <th onclick="sortTable('marca')" style="cursor:pointer">Marca <span id="sort-marca"></span></th>
+        <th onclick="sortTable('silueta')" style="cursor:pointer">Silueta <span id="sort-silueta"></span></th>
+        <th>Colorway</th>
+        <th>Cat.</th>
+        <th onclick="sortTable('talla')" style="cursor:pointer">Talla <span id="sort-talla"></span></th>
+        <th onclick="sortTable('precio_compra_soles')" style="cursor:pointer">P. Compra <span id="sort-precio_compra_soles"></span></th>
+        <th>Costos</th>
+        <th onclick="sortTable('precio_final')" style="cursor:pointer">P. Final <span id="sort-precio_final"></span></th>
+        <th onclick="sortTable('precio_venta_sugerido')" style="cursor:pointer">P. Venta <span id="sort-precio_venta_sugerido"></span></th>
+        <th onclick="sortTable('margen')" style="cursor:pointer">Margen <span id="sort-margen"></span></th>
+        <th>Estado</th><th>Pago</th><th>Factura</th>
       </tr></thead>
       <tbody id="inv-tbody">
         <tr class="loading-row"><td colspan="15"><div class="spinner"></div></td></tr>
@@ -881,21 +915,49 @@ function updateStats(){
   document.getElementById('st-mes-val').textContent=fmt(vmes);
 }
 
-function filterInventario(){
-  const marca=(document.getElementById('inv-marca').value||'').toLowerCase();
-  const silueta=(document.getElementById('inv-silueta').value||'').toLowerCase();
-  const colorway=(document.getElementById('inv-colorway').value||'').toLowerCase();
-  const talla=(document.getElementById('inv-talla').value||'').toLowerCase();
-  const estado=document.getElementById('inv-estado').value;
+let sortCol=null,sortDir=1;
 
-  renderInventario(inventarioCache.filter(p=>{
+function sortTable(col){
+  if(sortCol===col)sortDir*=-1;else{sortCol=col;sortDir=1;}
+  document.querySelectorAll('[id^="sort-"]').forEach(el=>el.textContent='');
+  const el=document.getElementById('sort-'+col);
+  if(el)el.textContent=sortDir===1?' ↑':' ↓';
+  filterInventario();
+}
+
+function filterInventario(){
+  const g=id=>(document.getElementById(id)||{value:''}).value;
+  const marca=g('inv-marca').toLowerCase();
+  const silueta=g('inv-silueta').toLowerCase();
+  const colorway=g('inv-colorway').toLowerCase();
+  const talla=g('inv-talla').toLowerCase();
+  const estado=g('inv-estado');
+
+  let rows=inventarioCache.filter(p=>{
     const matchM=!marca||(p.marca||'').toLowerCase().includes(marca);
     const matchS=!silueta||(p.silueta||'').toLowerCase().includes(silueta);
     const matchC=!colorway||(p.colorway||'').toLowerCase().includes(colorway);
     const matchT=!talla||(p.talla||'').toLowerCase().includes(talla);
     const matchE=!estado||(estado==='PENDIENTE'?p.pago_estado==='PENDIENTE':p.estado===estado&&p.pago_estado!=='PENDIENTE');
     return matchM&&matchS&&matchC&&matchT&&matchE;
-  }));
+  });
+
+  if(sortCol){
+    rows=[...rows].sort((a,b)=>{
+      let va,vb;
+      if(['precio_compra_soles','precio_final','precio_venta_sugerido'].includes(sortCol)){
+        va=parseFloat(a[sortCol])||0; vb=parseFloat(b[sortCol])||0;
+      }else if(sortCol==='margen'){
+        const pFa=parseFloat(a.precio_final||0),pVa=parseFloat(a.precio_venta_sugerido||0);
+        const pFb=parseFloat(b.precio_final||0),pVb=parseFloat(b.precio_venta_sugerido||0);
+        va=pFa>0&&pVa>0?(pVa-pFa)/pFa:0; vb=pFb>0&&pVb>0?(pVb-pFb)/pFb:0;
+      }else{
+        va=String(a[sortCol]??'').toLowerCase(); vb=String(b[sortCol]??'').toLowerCase();
+      }
+      return va<vb?-sortDir:va>vb?sortDir:0;
+    });
+  }
+  renderInventario(rows);
 }
 
 // ── SELECTS ──
