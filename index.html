@@ -141,7 +141,7 @@ tbody tr:hover td{background:#1a1a1a}
 .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
 .stats5{grid-template-columns:repeat(2,1fr)}
 @media(min-width:700px){.stats5{grid-template-columns:repeat(3,1fr)}}
-@media(min-width:1100px){.stats5{grid-template-columns:repeat(4,1fr) 1.6fr}}
+@media(min-width:1100px){.stats5{grid-template-columns:repeat(5,1fr)}}
 .stat-label{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:10px}
 /* fila normal */
 .sg-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0}
@@ -153,19 +153,21 @@ tbody tr:hover td{background:#1a1a1a}
 /* fila total */
 .sg-row-tot{display:flex;justify-content:space-between;align-items:center;padding:5px 0}
 .sg-lbl-tot{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2)}
-.sg-val-tot{font-family:"Archivo Black";font-size:18px;color:var(--text)}
+.sg-val-tot{font-family:"Archivo Black";font-size:16px;color:var(--text);white-space:nowrap}
 .sg-val-tot.green{color:var(--green)}.sg-val-tot.accent{color:var(--accent)}.sg-val-tot.red{color:var(--red)}
 /* compras mes */
-.sg-mes-head{display:grid;grid-template-columns:1fr 28px 76px;gap:0 4px;padding:0 0 6px;border-bottom:1px solid var(--border)}
-.sg-mes-row{display:grid;grid-template-columns:1fr 28px 76px;gap:0 4px;padding:5px 0;align-items:center}
-.sg-mes-row-tot{display:grid;grid-template-columns:1fr 28px 76px;gap:0 4px;padding:6px 0;align-items:center}
+.sg-mes-head{display:grid;grid-template-columns:1fr auto;gap:0 8px;padding:0 0 6px;border-bottom:1px solid var(--border)}
+.sg-mes-row{display:grid;grid-template-columns:1fr auto;gap:0 8px;padding:5px 0;align-items:center}
+.sg-mes-row3{display:grid;grid-template-columns:1fr 28px 1fr;gap:0 6px;padding:5px 0;align-items:center}
+.sg-mes-row3 .sg-mn{text-align:right}
+.sg-mes-row3 .sg-mn-tot{text-align:right}
 .sg-h{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);text-align:right}
 .sg-h:first-child{text-align:left}
 .sg-mc{font-size:12px;color:var(--muted2)}
 .sg-mc-tot{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2)}
 .sg-mn{font-family:"Archivo Black";font-size:13px;color:var(--text);text-align:right;white-space:nowrap}
 .sg-mn.accent{color:var(--accent)}
-.sg-mn-tot{font-family:"Archivo Black";font-size:18px;color:var(--text);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sg-mn-tot{font-family:"Archivo Black";font-size:16px;color:var(--text);text-align:right;white-space:nowrap}
 .sg-mn-tot.red{color:var(--red)}
 .stat-val{font-family:"Archivo Black";font-size:22px;margin-top:3px}
 .stat-sub{font-size:10px;color:var(--muted2);margin-top:2px}
@@ -547,60 +549,43 @@ input[list] { cursor: text; }
   <div class="stats-row stats5">
     <!-- TOTAL -->
     <div class="stat-card">
-      <div class="stat-label">TOTAL</div>
-      <div class="sg-row"><span class="sg-cat">👟 Zapatillas</span><span class="sg-num" id="st-zap-total">—</span></div>
-      <div class="sg-row"><span class="sg-cat">👕 Ropa &amp; Otros</span><span class="sg-num" id="st-ropa-total">—</span></div>
+      <div class="sg-mes-head"><span class="sg-h" style="text-align:left">TOTAL</span><span class="sg-h">Uds</span></div>
+      <div class="sg-mes-row"><span class="sg-mc">👟 Zapatillas</span><span class="sg-mn" id="st-zap-total">—</span></div>
+      <div class="sg-mes-row"><span class="sg-mc">👕 Ropa &amp; Otros</span><span class="sg-mn" id="st-ropa-total">—</span></div>
       <div class="sg-divider"></div>
-      <div class="sg-row-tot"><span class="sg-lbl-tot">Total</span><span class="sg-val-tot" id="st-total">—</span></div>
+      <div class="sg-mes-row"><span class="sg-mc-tot">Total</span><span class="sg-mn-tot" id="st-total">—</span></div>
     </div>
     <!-- DISPONIBLES -->
     <div class="stat-card">
-      <div class="stat-label">DISPONIBLES</div>
-      <div class="sg-row"><span class="sg-cat">👟 Zapatillas</span><span class="sg-num green" id="st-zap-disp">—</span></div>
-      <div class="sg-row"><span class="sg-cat">👕 Ropa &amp; Otros</span><span class="sg-num green" id="st-ropa-disp">—</span></div>
+      <div class="sg-mes-head"><span class="sg-h" style="text-align:left">DISPONIBLES</span><span class="sg-h">Uds</span></div>
+      <div class="sg-mes-row"><span class="sg-mc">👟 Zapatillas</span><span class="sg-mn green" id="st-zap-disp">—</span></div>
+      <div class="sg-mes-row"><span class="sg-mc">👕 Ropa &amp; Otros</span><span class="sg-mn green" id="st-ropa-disp">—</span></div>
       <div class="sg-divider"></div>
-      <div class="sg-row-tot"><span class="sg-lbl-tot">Total</span><span class="sg-val-tot green" id="st-disp">—</span></div>
+      <div class="sg-mes-row"><span class="sg-mc-tot">Total</span><span class="sg-mn-tot green" id="st-disp">—</span></div>
     </div>
     <!-- VENDIDOS -->
     <div class="stat-card">
-      <div class="stat-label">VENDIDOS</div>
-      <div class="sg-row"><span class="sg-cat">👟 Zapatillas</span><span class="sg-num" id="st-zap-vend">—</span></div>
-      <div class="sg-row"><span class="sg-cat">👕 Ropa &amp; Otros</span><span class="sg-num" id="st-ropa-vend">—</span></div>
+      <div class="sg-mes-head"><span class="sg-h" style="text-align:left">VENDIDOS</span><span class="sg-h">Uds</span></div>
+      <div class="sg-mes-row"><span class="sg-mc">👟 Zapatillas</span><span class="sg-mn" id="st-zap-vend">—</span></div>
+      <div class="sg-mes-row"><span class="sg-mc">👕 Ropa &amp; Otros</span><span class="sg-mn" id="st-ropa-vend">—</span></div>
       <div class="sg-divider"></div>
-      <div class="sg-row-tot"><span class="sg-lbl-tot">Total</span><span class="sg-val-tot" id="st-vend">—</span></div>
+      <div class="sg-mes-row"><span class="sg-mc-tot">Total</span><span class="sg-mn-tot" id="st-vend">—</span></div>
     </div>
     <!-- VALOR STOCK -->
     <div class="stat-card">
-      <div class="stat-label">VALOR STOCK</div>
-      <div class="sg-row"><span class="sg-cat">👟 Zapatillas</span><span class="sg-num accent" id="st-zap-val">—</span></div>
-      <div class="sg-row"><span class="sg-cat">👕 Ropa &amp; Otros</span><span class="sg-num accent" id="st-ropa-val">—</span></div>
+      <div class="sg-mes-head"><span class="sg-h" style="text-align:left">VALOR STOCK</span><span class="sg-h">S/.</span></div>
+      <div class="sg-mes-row"><span class="sg-mc">👟 Zapatillas</span><span class="sg-mn accent" id="st-zap-val">—</span></div>
+      <div class="sg-mes-row"><span class="sg-mc">👕 Ropa &amp; Otros</span><span class="sg-mn accent" id="st-ropa-val">—</span></div>
       <div class="sg-divider"></div>
-      <div class="sg-row-tot"><span class="sg-lbl-tot">Total</span><span class="sg-val-tot" id="st-total-val">—</span></div>
+      <div class="sg-mes-row"><span class="sg-mc-tot">Total</span><span class="sg-mn-tot accent" id="st-total-val">—</span></div>
     </div>
     <!-- COMPRAS DEL MES -->
     <div class="stat-card">
-      <div class="stat-label">COMPRAS DEL MES</div>
-      <div class="sg-mes-head">
-        <span class="sg-h">Categoría</span>
-        <span class="sg-h">Uds</span>
-        <span class="sg-h">Monto</span>
-      </div>
-      <div class="sg-mes-row">
-        <span class="sg-mc">👟 Zapatillas</span>
-        <span class="sg-mn" id="st-mes-zap-uds">—</span>
-        <span class="sg-mn accent" id="st-mes-zap-val">—</span>
-      </div>
-      <div class="sg-mes-row">
-        <span class="sg-mc">👕 Ropa &amp; Otros</span>
-        <span class="sg-mn" id="st-mes-ropa-uds">—</span>
-        <span class="sg-mn accent" id="st-mes-ropa-val">—</span>
-      </div>
+      <div class="sg-mes-head"><span class="sg-h" style="text-align:left">COMPRAS MES</span><span class="sg-h">Uds</span><span class="sg-h">S/.</span></div>
+      <div class="sg-mes-row3"><span class="sg-mc">👟 Zapatillas</span><span class="sg-mn" id="st-mes-zap-uds">—</span><span class="sg-mn accent" id="st-mes-zap-val">—</span></div>
+      <div class="sg-mes-row3"><span class="sg-mc">👕 Ropa &amp; Otros</span><span class="sg-mn" id="st-mes-ropa-uds">—</span><span class="sg-mn accent" id="st-mes-ropa-val">—</span></div>
       <div class="sg-divider"></div>
-      <div class="sg-mes-row-tot">
-        <span class="sg-mc-tot">Total</span>
-        <span class="sg-mn-tot" id="st-mes-uds-total">—</span>
-        <span class="sg-mn-tot red" id="st-mes-val">—</span>
-      </div>
+      <div class="sg-mes-row3"><span class="sg-mc-tot">Total</span><span class="sg-mn-tot" id="st-mes-uds-total">—</span><span class="sg-mn-tot red" id="st-mes-val">—</span></div>
     </div>
   </div>
 
