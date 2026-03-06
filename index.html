@@ -21,6 +21,13 @@ body{background:var(--bg);color:var(--text);font-family:'Archivo',sans-serif;min
 
 /* NAV */
 nav{position:sticky;top:0;z-index:200;background:rgba(8,8,8,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);height:52px;display:flex;align-items:center;padding:0 20px}
+.nav-tc{display:flex;align-items:center;gap:6px;margin-left:auto}
+.nav-tc-label{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted2)}
+.nav-tc input{background:var(--surface);border:1px solid var(--border2);border-radius:6px;
+  color:var(--accent);font-family:"Archivo Black";font-size:13px;padding:4px 6px;text-align:center;
+  -moz-appearance:textfield}
+.nav-tc input::-webkit-inner-spin-button,.nav-tc input::-webkit-outer-spin-button{-webkit-appearance:none}
+.nav-tc input:focus{outline:none;border-color:var(--accent)}
 .nav-logo{font-family:'Archivo Black';font-size:17px;letter-spacing:3px;color:var(--accent);margin-right:28px;white-space:nowrap}
 .nav-logo span{color:var(--muted2)}
 .nav-tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;flex:1}
@@ -257,6 +264,11 @@ input[list] { cursor: text; }
 
 <nav>
   <div class="nav-logo">KICKS<span>VAULT</span></div>
+  <div class="nav-tc" title="Tipo de cambio global — afecta nuevos registros">
+    <span class="nav-tc-label">TC S/.</span>
+    <input type="number" id="tc-global" value="3.70" step="0.001" min="1" max="10"
+      oninput="saveTCGlobal(this.value)" style="width:58px">
+  </div>
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showView('registro',this)">⊕ Registro</button>
     <button class="nav-tab" onclick="showView('inventario',this)">▦ Inventario</button>
@@ -303,7 +315,7 @@ input[list] { cursor: text; }
         <div class="field">
           <label>Marca</label>
 <div class="field combo-wrap">
-          <input type="text" id="cp-marca" placeholder="NIKE" autocomplete="off"
+          <input type="text" id="cp-marca" placeholder="NIKE" autocomplete="off" onblur="comboBlur('cl-marca')"
             oninput="comboFilter('cp-marca','cl-marca')"
             onfocus="comboOpen('cp-marca','cl-marca')"
             onkeydown="comboKey(event,'cp-marca','cl-marca')">
@@ -314,7 +326,7 @@ input[list] { cursor: text; }
         <div class="field">
           <label>Silueta</label>
 <div class="field combo-wrap">
-          <input type="text" id="cp-silueta" placeholder="JORDAN 1" autocomplete="off"
+          <input type="text" id="cp-silueta" placeholder="JORDAN 1" autocomplete="off" onblur="comboBlur('cl-silueta')"
             oninput="comboFilter('cp-silueta','cl-silueta')"
             onfocus="comboOpen('cp-silueta','cl-silueta')"
             onkeydown="comboKey(event,'cp-silueta','cl-silueta')">
@@ -325,7 +337,7 @@ input[list] { cursor: text; }
         <div class="field">
           <label>Colorway</label>
 <div class="field combo-wrap">
-          <input type="text" id="cp-colorway" placeholder="CHICAGO" autocomplete="off"
+          <input type="text" id="cp-colorway" placeholder="CHICAGO" autocomplete="off" onblur="comboBlur('cl-colorway')"
             oninput="comboFilter('cp-colorway','cl-colorway')"
             onfocus="comboOpen('cp-colorway','cl-colorway')"
             onkeydown="comboKey(event,'cp-colorway','cl-colorway')">
@@ -336,7 +348,7 @@ input[list] { cursor: text; }
         <div class="field">
           <label>Talla</label>
 <div class="field combo-wrap">
-          <input type="text" id="cp-talla" placeholder="8US / M / -" autocomplete="off"
+          <input type="text" id="cp-talla" placeholder="8US / M / -" autocomplete="off" onblur="comboBlur('cl-talla')"
             oninput="comboFilter('cp-talla','cl-talla')"
             onfocus="comboOpen('cp-talla','cl-talla')"
             onkeydown="comboKey(event,'cp-talla','cl-talla')">
@@ -476,7 +488,7 @@ input[list] { cursor: text; }
         <div class="field">
           <label>Talla</label>
 <div class="field combo-wrap">
-          <input type="text" id="rv-talla" placeholder="8US / M" autocomplete="off"
+          <input type="text" id="rv-talla" placeholder="8US / M" autocomplete="off" onblur="comboBlur('cl-rv-talla')"
             oninput="comboFilter('rv-talla','cl-rv-talla')"
             onfocus="comboOpen('rv-talla','cl-rv-talla')"
             onkeydown="comboKey(event,'rv-talla','cl-rv-talla')">
@@ -592,7 +604,7 @@ input[list] { cursor: text; }
 
   <div class="table-toolbar">
     <div class="combo-wrap" style="flex:1;min-width:130px">
-      <input type="text" id="inv-marca" placeholder="Marca..." autocomplete="off"
+      <input type="text" id="inv-marca" placeholder="Marca..." autocomplete="off" onblur="comboBlur('cl-inv-marca')"
         oninput="comboFilter('inv-marca','cl-inv-marca');filterInventario()"
         onfocus="comboOpen('inv-marca','cl-inv-marca')"
         onkeydown="comboKey(event,'inv-marca','cl-inv-marca')">
@@ -600,7 +612,7 @@ input[list] { cursor: text; }
       <div class="combo-list" id="cl-inv-marca"></div>
     </div>
     <div class="combo-wrap" style="flex:1;min-width:130px">
-      <input type="text" id="inv-silueta" placeholder="Silueta..." autocomplete="off"
+      <input type="text" id="inv-silueta" placeholder="Silueta..." autocomplete="off" onblur="comboBlur('cl-inv-silueta')"
         oninput="comboFilter('inv-silueta','cl-inv-silueta');filterInventario()"
         onfocus="comboOpen('inv-silueta','cl-inv-silueta')"
         onkeydown="comboKey(event,'inv-silueta','cl-inv-silueta')">
@@ -608,7 +620,7 @@ input[list] { cursor: text; }
       <div class="combo-list" id="cl-inv-silueta"></div>
     </div>
     <div class="combo-wrap" style="flex:1;min-width:130px">
-      <input type="text" id="inv-colorway" placeholder="Colorway..." autocomplete="off"
+      <input type="text" id="inv-colorway" placeholder="Colorway..." autocomplete="off" onblur="comboBlur('cl-inv-colorway')"
         oninput="comboFilter('inv-colorway','cl-inv-colorway');filterInventario()"
         onfocus="comboOpen('inv-colorway','cl-inv-colorway')"
         onkeydown="comboKey(event,'inv-colorway','cl-inv-colorway')">
@@ -616,7 +628,7 @@ input[list] { cursor: text; }
       <div class="combo-list" id="cl-inv-colorway"></div>
     </div>
     <div class="combo-wrap" style="min-width:100px">
-      <input type="text" id="inv-talla" placeholder="Talla..." autocomplete="off"
+      <input type="text" id="inv-talla" placeholder="Talla..." autocomplete="off" onblur="comboBlur('cl-inv-talla')"
         oninput="comboFilter('inv-talla','cl-inv-talla');filterInventario()"
         onfocus="comboOpen('inv-talla','cl-inv-talla')"
         onkeydown="comboKey(event,'inv-talla','cl-inv-talla')">
@@ -624,7 +636,7 @@ input[list] { cursor: text; }
       <div class="combo-list" id="cl-inv-talla"></div>
     </div>
     <div class="combo-wrap" style="min-width:130px">
-      <input type="text" id="inv-cat" placeholder="Categoría..." autocomplete="off"
+      <input type="text" id="inv-cat" placeholder="Categoría..." autocomplete="off" onblur="comboBlur('cl-inv-cat')"
         oninput="comboFilter('inv-cat','cl-inv-cat');filterInventario()"
         onfocus="comboOpen('inv-cat','cl-inv-cat')"
         onkeydown="comboKey(event,'inv-cat','cl-inv-cat')">
@@ -746,6 +758,13 @@ function comboOpen(inputId, listId) {
   comboRender(inputId, listId, val || '');
 }
 
+function comboBlur(listId){
+  setTimeout(()=>{
+    const list=document.getElementById(listId);
+    if(list) list.classList.remove('open');
+  },160);
+}
+
 function comboFilter(inputId, listId) {
   const val = document.getElementById(inputId).value.toUpperCase().trim();
   comboRender(inputId, listId, val);
@@ -804,6 +823,20 @@ document.addEventListener('click', e => {
   if (!e.target.closest('.combo-wrap'))
     document.querySelectorAll('.combo-list').forEach(l => l.classList.remove('open'));
 });
+
+// ── TC GLOBAL ──
+function saveTCGlobal(val){
+  localStorage.setItem('kicks_tc', val);
+  const el=document.getElementById('cp-tc');
+  if(el) el.value=val;
+}
+function loadTCGlobal(){
+  const saved=localStorage.getItem('kicks_tc')||'3.70';
+  const nav=document.getElementById('tc-global');
+  const cp=document.getElementById('cp-tc');
+  if(nav) nav.value=saved;
+  if(cp) cp.value=saved;
+}
 
 // ── INIT ──
 async function init(){
@@ -1181,8 +1214,10 @@ function abrirModalPago(codigo){
   modalCodigo=codigo;
   const prod=inventarioCache.find(p=>p.codigo_producto===codigo);
   const nombre=[prod?.marca,prod?.silueta,prod?.colorway].filter(Boolean).join(' ');
+  const usdInfo=prod?.moneda==='USD'&&prod?.precio_compra_usd>0
+    ?`<div style="margin-top:6px;color:var(--accent);font-size:12px;font-weight:700">💵 $${parseFloat(prod.precio_compra_usd).toFixed(0)} USD</div>`:'';
   document.getElementById('modal-prod-info').innerHTML=
-    `<strong>${codigo}</strong> — ${nombre}<br>Talla: ${prod?.talla||'—'}`;
+    `<strong>${codigo}</strong> — ${nombre}<br>Talla: ${prod?.talla||'—'}${usdInfo}`;
   document.getElementById('modal-monto').value=prod?.precio_compra_soles||'';
   document.getElementById('modal-overlay')||null;
   document.getElementById('modal-pagar').classList.add('open');
