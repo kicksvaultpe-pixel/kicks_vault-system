@@ -141,35 +141,33 @@ tbody tr:hover td{background:#1a1a1a}
 .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
 .stats5{grid-template-columns:repeat(2,1fr)}
 @media(min-width:700px){.stats5{grid-template-columns:repeat(3,1fr)}}
-@media(min-width:1000px){.stats5{grid-template-columns:repeat(5,1fr)}}
-.sg-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0}
-.sg-divider{border-top:1px solid var(--border2);margin:6px 0}
-.sg-cat{font-size:12px;color:var(--muted2)}
-.sg-num{font-family:"Archivo Black";font-size:18px;color:var(--text)}
-.sg-num.accent{color:var(--accent)}.sg-num.green{color:var(--green)}
-.sg-num.red{color:var(--red)}
-.sg-tot{color:var(--text)!important;font-size:11px;font-weight:700;letter-spacing:.5px}
-.sg-cat.sg-tot{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted2)}
-.sg-big{font-family:"Archivo Black";font-size:22px;color:var(--text)}
-.sg-big.accent{color:var(--accent)}.sg-big.green{color:var(--green)}.sg-big.red{color:var(--red)}
-/* sg-row: label izq, número der — misma altura */
+@media(min-width:1100px){.stats5{grid-template-columns:repeat(5,1fr)}}
+.stat-label{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:10px}
+/* fila normal */
 .sg-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0}
-.sg-row .sg-num{font-size:16px}
-/* total row */
-.sg-divider{border-top:1px solid var(--border2);margin:7px 0}
-.sg-cat.sg-tot{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2)}
-/* compras mes: 3 columnas fijas */
-.sg-row-2h{display:grid;grid-template-columns:1fr 42px 90px;padding:0 0 4px}
-.sg-row-2{display:grid;grid-template-columns:1fr 42px 90px;padding:5px 0;align-items:center}
-.sg-row-2 .sg-num{text-align:right;font-size:15px}
-.sg-row-2 .sg-big{text-align:right;font-size:18px}
-.sg-col-h{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);text-align:right}
-.sg-cat2{font-size:12px;color:var(--muted2)}
-.stat-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted2)}
-.stat-val{font-family:'Archivo Black';font-size:22px;margin-top:3px;letter-spacing:-.5px}
-.stat-val.green{color:var(--green)}.stat-val.accent{color:var(--accent)}
-.stat-val.red{color:var(--red)}.stat-val.yellow{color:var(--yellow)}
-.stat-val.orange{color:var(--orange)}.stat-val.purple{color:#b39ddb}
+.sg-cat{font-size:12px;color:var(--muted2)}
+.sg-num{font-family:"Archivo Black";font-size:16px;color:var(--text)}
+.sg-num.green{color:var(--green)}.sg-num.accent{color:var(--accent)}.sg-num.red{color:var(--red)}
+/* divisor */
+.sg-divider{border-top:1px solid var(--border2);margin:8px 0}
+/* fila total */
+.sg-row-tot{display:flex;justify-content:space-between;align-items:center;padding:5px 0}
+.sg-lbl-tot{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2)}
+.sg-val-tot{font-family:"Archivo Black";font-size:22px;color:var(--text)}
+.sg-val-tot.green{color:var(--green)}.sg-val-tot.accent{color:var(--accent)}.sg-val-tot.red{color:var(--red)}
+/* compras mes */
+.sg-mes-head{display:grid;grid-template-columns:1fr 30px 82px;gap:0 6px;padding:0 0 6px;border-bottom:1px solid var(--border)}
+.sg-mes-row{display:grid;grid-template-columns:1fr 30px 82px;gap:0 6px;padding:5px 0;align-items:center}
+.sg-mes-row-tot{display:grid;grid-template-columns:1fr 30px 82px;gap:0 6px;padding:6px 0;align-items:center}
+.sg-h{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);text-align:right}
+.sg-h:first-child{text-align:left}
+.sg-mc{font-size:12px;color:var(--muted2)}
+.sg-mc-tot{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2)}
+.sg-mn{font-family:"Archivo Black";font-size:15px;color:var(--text);text-align:right;white-space:nowrap}
+.sg-mn.accent{color:var(--accent)}
+.sg-mn-tot{font-family:"Archivo Black";font-size:18px;color:var(--text);text-align:right;white-space:nowrap}
+.sg-mn-tot.red{color:var(--red)}
+.stat-val{font-family:"Archivo Black";font-size:22px;margin-top:3px}
 .stat-sub{font-size:10px;color:var(--muted2);margin-top:2px}
 
 /* MODAL */
