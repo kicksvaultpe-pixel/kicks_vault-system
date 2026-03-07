@@ -265,6 +265,64 @@ input[list] { cursor: text; }
 .oc-toggle{background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:6px 14px;font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--muted2);cursor:pointer;transition:all .15s}
 .oc-toggle.active{background:rgba(200,255,0,.1);border-color:rgba(200,255,0,.4);color:var(--accent)}
 .oc-toggle:hover:not(.active){border-color:var(--accent);color:var(--text)}
+
+/* ── FLUJO DE CAJA ── */
+.fc-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px}
+.fc-stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.fc-stat-label{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px}
+.fc-stat-val{font-family:"Archivo Black";font-size:20px;color:var(--text);white-space:nowrap}
+.fc-stat-val.green{color:var(--green)}
+.fc-stat-val.red{color:var(--red)}
+.fc-stat-val.accent{color:var(--accent)}
+.fc-stat-val.yellow{color:#facc15}
+.fc-stat-sub{font-size:11px;color:var(--muted2);margin-top:3px}
+.fc-stat.highlight{border-color:rgba(200,255,0,.25);background:rgba(200,255,0,.04)}
+.fc-stat.control-ok{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.04)}
+.fc-stat.control-err{border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.04)}
+
+.fc-section{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.fc-block{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.fc-block-title{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.fc-block-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border)}
+.fc-block-row:last-child{border-bottom:none}
+.fc-block-lbl{font-size:12px;color:var(--muted2)}
+.fc-block-val{font-family:"Archivo Black";font-size:14px;color:var(--text)}
+.fc-block-val.green{color:var(--green)}
+.fc-block-val.accent{color:var(--accent)}
+.fc-block-val.red{color:var(--red)}
+.fc-block-divider{border-top:2px solid var(--border2);margin:8px 0}
+.fc-total-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0}
+.fc-total-lbl{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2)}
+.fc-total-val{font-family:"Archivo Black";font-size:16px}
+
+/* Mes nav */
+.fc-nav{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.fc-nav-btn{background:var(--card);border:1px solid var(--border2);border-radius:6px;padding:6px 14px;color:var(--text);cursor:pointer;font-size:14px;font-weight:700}
+.fc-nav-btn:hover{border-color:var(--accent);color:var(--accent)}
+.fc-mes-label{font-family:"Archivo Black";font-size:18px;color:var(--text);min-width:160px;text-align:center}
+
+/* Tabla movimientos */
+.fc-tabla-wrap{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.fc-tabla{width:100%;border-collapse:collapse;font-size:12px}
+.fc-tabla thead th{padding:9px 10px;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);background:#0a0a0a;text-align:left;white-space:nowrap}
+.fc-tabla tbody tr{border-top:1px solid var(--border);transition:background .1s}
+.fc-tabla tbody tr:hover{background:rgba(255,255,255,.03)}
+.fc-tabla tbody td{padding:9px 10px;color:var(--text);vertical-align:middle}
+.fc-tabla .td-ing{font-family:"Archivo Black";font-size:13px;color:var(--green);white-space:nowrap}
+.fc-tabla .td-egr{font-family:"Archivo Black";font-size:13px;color:var(--red);white-space:nowrap}
+.fc-tabla .td-egr-usd{font-family:"Archivo Black";font-size:13px;color:#f97316;white-space:nowrap}
+.fc-tabla .td-pend{color:#facc15;font-size:11px;font-weight:700}
+.fc-tabla .td-reserva{color:#a855f7;font-size:11px;font-weight:700}
+.fc-accion-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.5px}
+.fc-accion-COMPRA{background:rgba(239,68,68,.15);color:#ef4444}
+.fc-accion-VENTA{background:rgba(34,197,94,.15);color:#22c55e}
+.fc-accion-RESERVA{background:rgba(168,85,247,.15);color:#a855f7}
+.fc-accion-PAGO{background:rgba(249,115,22,.15);color:#f97316}
+.fc-accion-COSTO{background:rgba(96,165,250,.15);color:#60a5fa}
+.fc-accion-CANCELACION{background:rgba(156,163,175,.15);color:#9ca3af}
+@media(max-width:900px){.fc-stats{grid-template-columns:repeat(3,1fr)}.fc-section{grid-template-columns:1fr}}
+@media(max-width:600px){.fc-stats{grid-template-columns:repeat(2,1fr)}}
+
 /* MISC */
 .empty-state{text-align:center;padding:50px 20px;color:var(--muted2)}
 .empty-icon{font-size:36px;margin-bottom:10px;opacity:.5}
@@ -849,7 +907,106 @@ input[list] { cursor: text; }
 
 <!-- Placeholders -->
 <div id="view-ventas" class="view"><div class="page-title"><div class="dot"></div> Ventas</div><div class="empty-state"><div class="empty-icon">↗</div><div class="empty-text">Próximamente</div></div></div>
-<div id="view-flujo" class="view"><div class="page-title"><div class="dot"></div> Flujo de Caja</div><div class="empty-state"><div class="empty-icon">≋</div><div class="empty-text">Próximamente</div></div></div>
+<div id="view-flujo" class="view">
+  <div class="page-title"><div class="dot"></div> Flujo de Caja</div>
+
+  <!-- Navegación de mes -->
+  <div class="fc-nav">
+    <button class="fc-nav-btn" onclick="fcMesAnterior()">‹</button>
+    <div class="fc-mes-label" id="fc-mes-label">—</div>
+    <button class="fc-nav-btn" onclick="fcMesSiguiente()">›</button>
+  </div>
+
+  <!-- Burbujas resumen -->
+  <div class="fc-stats">
+    <!-- INICIO DE MES -->
+    <div class="fc-stat">
+      <div class="fc-stat-label">Inicio de Mes</div>
+      <div class="fc-stat-val accent" id="fc-caja-inicio">—</div>
+      <div class="fc-stat-sub">Caja</div>
+      <div style="margin-top:8px">
+      <div class="fc-stat-val" id="fc-stock-inicio" style="font-size:15px">—</div>
+      <div class="fc-stat-sub">Stock</div>
+      </div>
+    </div>
+    <!-- GANANCIAS + TOTAL -->
+    <div class="fc-stat">
+      <div class="fc-stat-label">Ganancias del mes</div>
+      <div class="fc-stat-val green" id="fc-ganancias">—</div>
+      <div style="margin-top:10px">
+      <div class="fc-stat-label">Total antes ganancia</div>
+      <div class="fc-stat-val" id="fc-total-antes" style="font-size:15px">—</div>
+      </div>
+    </div>
+    <!-- CAJA ACTUAL -->
+    <div class="fc-stat highlight">
+      <div class="fc-stat-label">Caja Actual</div>
+      <div class="fc-stat-val accent" id="fc-caja-actual">—</div>
+      <div class="fc-stat-sub" id="fc-caja-actual-sub">+ingresos −egresos</div>
+    </div>
+    <!-- FIN DE MES -->
+    <div class="fc-stat">
+      <div class="fc-stat-label">Fin de Mes</div>
+      <div class="fc-stat-val" id="fc-caja-fin">—</div>
+      <div class="fc-stat-sub">Caja (−reservas)</div>
+      <div style="margin-top:8px">
+      <div class="fc-stat-val" id="fc-stock-fin" style="font-size:15px">—</div>
+      <div class="fc-stat-sub">Stock fin</div>
+      </div>
+    </div>
+    <!-- CONTROL -->
+    <div class="fc-stat" id="fc-control-card">
+      <div class="fc-stat-label">Control</div>
+      <div class="fc-stat-val" id="fc-control">—</div>
+      <div class="fc-stat-sub">Total inicio vs fin</div>
+      <div style="margin-top:8px">
+      <div class="fc-stat-val accent" id="fc-total-label" style="font-size:13px">—</div>
+      <div class="fc-stat-sub">Total</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detalle: ingresos / egresos / pendientes -->
+  <div class="fc-section">
+    <div class="fc-block">
+      <div class="fc-block-title">📥 Movimientos del mes</div>
+      <div class="fc-block-row"><span class="fc-block-lbl">Ingresos ventas</span><span class="fc-block-val green" id="fc-ing-ventas">—</span></div>
+      <div class="fc-block-row"><span class="fc-block-lbl">Egresos S/. pagados</span><span class="fc-block-val red" id="fc-egr-soles">—</span></div>
+      <div class="fc-block-row"><span class="fc-block-lbl">Costos pagados</span><span class="fc-block-val red" id="fc-egr-costos">—</span></div>
+      <div class="fc-block-row"><span class="fc-block-lbl">Gastos operativos</span><span class="fc-block-val red" id="fc-egr-gastos">—</span></div>
+      <div class="fc-block-divider"></div>
+      <div class="fc-total-row"><span class="fc-total-lbl">Neto del mes</span><span class="fc-total-val" id="fc-neto-mes">—</span></div>
+    </div>
+    <div class="fc-block">
+      <div class="fc-block-title">⏳ Pendientes</div>
+      <div class="fc-block-row"><span class="fc-block-lbl">Egresos pendientes S/.</span><span class="fc-block-val yellow" id="fc-pend-soles">—</span></div>
+      <div class="fc-block-row"><span class="fc-block-lbl">Egresos pendientes $</span><span class="fc-block-val yellow" id="fc-pend-usd">—</span></div>
+      <div class="fc-block-row"><span class="fc-block-lbl">Adelantos reservas</span><span class="fc-block-val" id="fc-reservas">—</span></div>
+      <div class="fc-block-divider"></div>
+      <div class="fc-total-row"><span class="fc-total-lbl">Por pagar este mes</span><span class="fc-total-val yellow" id="fc-por-pagar">—</span></div>
+    </div>
+  </div>
+
+  <!-- Tabla movimientos -->
+  <div class="fc-tabla-wrap">
+    <table class="fc-tabla">
+      <thead><tr>
+        <th>Fecha</th>
+        <th>Acción</th>
+        <th>Código</th>
+        <th>Descripción</th>
+        <th>Talla</th>
+        <th style="text-align:right">Ingreso S/.</th>
+        <th style="text-align:right">Egreso S/.</th>
+        <th style="text-align:right">Egreso $</th>
+        <th>Información</th>
+      </tr></thead>
+      <tbody id="fc-tabla-body">
+        <tr><td colspan="9" style="text-align:center;padding:30px;color:var(--muted2)">Cargando...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 <div id="view-clientes" class="view"><div class="page-title"><div class="dot"></div> Clientes</div><div class="empty-state"><div class="empty-icon">◎</div><div class="empty-text">Próximamente</div></div></div>
 
 <!-- MODAL PAGAR CRÉDITO -->
@@ -1576,6 +1733,18 @@ async function confirmarPago(){
       p_fecha:fecha
     });
     if(error)throw error;
+    // Registrar egreso en flujo_caja al pagar crédito
+    const prodPago=inventarioCache.find(p=>p.codigo_producto===modalCodigo);
+    if(prodPago){
+      const descP=[prodPago.marca,prodPago.silueta,prodPago.colorway].filter(Boolean).join(' ');
+      await db.from('flujo_caja').insert({
+        tipo:'EGRESO', categoria:'COMPRA',
+        monto:-monto,
+        descripcion:descP,
+        referencia_id:modalCodigo,
+        fecha
+      });
+    }
     toast('✓ Crédito pagado — flujo de caja actualizado','ok');
     closeModal();
     await loadInventario();
@@ -1656,6 +1825,17 @@ async function registrarCompra(){
       orden_compra:ordenCompra
     });
     if(error)throw error;
+    // Registrar egreso en flujo_caja solo si CONTADO
+    if(!esCredito){
+      const desc=[marca,silueta,colorway].filter(Boolean).join(' ');
+      await db.from('flujo_caja').insert({
+        tipo:'EGRESO', categoria:'COMPRA',
+        monto:-(pc||0),
+        descripcion:desc,
+        referencia_id:cod,
+        fecha:document.getElementById('cp-fecha').value
+      });
+    }
     toast(`✓ ${cod} registrado${esCredito?' — ● PENDIENTE':''}`, 'ok');
     ['cp-marca','cp-silueta','cp-colorway','cp-talla','cp-usd','cp-soles','cp-pventa','cp-factura','cp-desc-factura','cp-comentarios','cp-soles-contado','cp-pventa-credito','cp-factura-credito','cp-comentarios-credito'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     document.getElementById('cp-tc').value='3.70';
@@ -1691,6 +1871,17 @@ async function registrarVenta(){
       fecha:document.getElementById('vt-fecha').value
     });
     if(error)throw error;
+    // UPDATE inventario estado=VENDIDO
+    await db.from('inventario').update({estado:'VENDIDO'}).eq('codigo_producto',codProd);
+    // Registrar ingreso en flujo_caja
+    const descV=[prod?.marca,prod?.silueta,prod?.colorway].filter(Boolean).join(' ');
+    await db.from('flujo_caja').insert({
+      tipo:'INGRESO', categoria:'VENTA',
+      monto:precio,
+      descripcion:descV,
+      referencia_id:cv,
+      fecha:document.getElementById('vt-fecha').value
+    });
     toast(`✓ ${cv} — Ganancia: ${fmt(g)}`,'ok');
     ['vt-precio','vt-comprador'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('vt-producto').value='';
@@ -1727,6 +1918,18 @@ async function registrarReserva(){
       notas:document.getElementById('rv-notas').value.trim()||null
     });
     if(error)throw error;
+    // Registrar adelanto en flujo_caja como RESERVA (no afecta caja real)
+    const adelantoRv=parseFloat(document.getElementById('rv-adelanto').value)||0;
+    if(adelantoRv>0){
+      const descRv=[marca||'',silueta||'',colorway||''].filter(Boolean).join(' ');
+      await db.from('flujo_caja').insert({
+        tipo:'INGRESO', categoria:'RESERVA',
+        monto:adelantoRv,
+        descripcion:'Adelanto reserva — '+descRv,
+        referencia_id:codProd||null,
+        fecha:document.getElementById('rv-fecha').value||document.getElementById('cp-fecha').value
+      });
+    }
     toast('✓ Reserva registrada','ok');
     ['rv-talla','rv-adelanto','rv-notas','rv-marca','rv-silueta','rv-colorway'].forEach(id=>document.getElementById(id).value='');
     ['rv-producto','rv-fecha-limite'].forEach(id=>document.getElementById(id).value='');
@@ -1748,6 +1951,14 @@ async function registrarPago(){
       fecha:document.getElementById('pg-fecha').value
     });
     if(error)throw error;
+    await db.from('flujo_caja').insert({
+      tipo:'EGRESO',
+      categoria:document.getElementById('pg-cat').value,
+      monto:-Math.abs(monto),
+      descripcion:concepto,
+      referencia_id:null,
+      fecha:document.getElementById('pg-fecha').value
+    });
     toast('✓ Pago registrado','ok');
     ['pg-concepto','pg-monto'].forEach(id=>document.getElementById(id).value='');
   }catch(e){toast('Error: '+e.message,'err');}
@@ -1874,11 +2085,238 @@ async function registrarCosto(){
     }));
     const{error}=await db.from('costos').insert(inserts);
     if(error)throw error;
+    // Registrar egresos en flujo_caja por cada costo
+    const costoFlujoBatch = costoLista.map(item=>({
+      tipo:'EGRESO', categoria:'COSTO',
+      monto:-parseFloat(item.soles),
+      descripcion:item.concepto.trim()+' — '+item.nombre,
+      referencia_id:item.codigo,
+      fecha
+    }));
+    await db.from('flujo_caja').insert(costoFlujoBatch);
     toast('✓ '+inserts.length+' costo'+(inserts.length>1?'s registrados':'registrado'),'ok');
     limpiarSeleccionCosto();
     await loadInventario();
   }catch(e){toast('Error: '+e.message,'err');}
   finally{setLoading(btn,false);}
+}
+
+
+// ══════════════════════════════════════════
+// FLUJO DE CAJA
+// ══════════════════════════════════════════
+let fcMesActual = null; // 'YYYY-MM'
+let flujoCache = [];
+
+function fcMesStr(date) {
+  return date.toISOString().substring(0,7);
+}
+function fcMesLabel(mes) {
+  const [y,m] = mes.split('-');
+  const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                 'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  return meses[parseInt(m)-1] + ' ' + y;
+}
+function fcMesAnterior() {
+  const [y,m] = fcMesActual.split('-').map(Number);
+  const d = new Date(y, m-2, 1);
+  fcMesActual = fcMesStr(d);
+  loadFlujo();
+}
+function fcMesSiguiente() {
+  const [y,m] = fcMesActual.split('-').map(Number);
+  const now = new Date();
+  const mesHoy = fcMesStr(now);
+  if(fcMesActual >= mesHoy) return;
+  const d = new Date(y, m, 1);
+  fcMesActual = fcMesStr(d);
+  loadFlujo();
+}
+
+async function loadFlujo() {
+  if(!fcMesActual) {
+    const now = new Date();
+    fcMesActual = fcMesStr(now);
+  }
+  document.getElementById('fc-mes-label').textContent = fcMesLabel(fcMesActual);
+
+  const [y,m] = fcMesActual.split('-').map(Number);
+  const fechaInicio = `${y}-${String(m).padStart(2,'0')}-01`;
+  const fechaFin = new Date(y, m, 0); // último día del mes
+  const fechaFinStr = fechaFin.toISOString().substring(0,10);
+
+  // Cargar flujo_caja del mes
+  const {data:flujoMes} = await db.from('flujo_caja')
+    .select('*')
+    .gte('fecha', fechaInicio)
+    .lte('fecha', fechaFinStr)
+    .order('fecha', {ascending:true});
+  flujoCache = flujoMes || [];
+
+  // Cargar caja_mensual para este mes
+  const {data:cajaMes} = await db.from('caja_mensual')
+    .select('*').eq('mes', fcMesActual).single();
+
+  // Calcular caja_inicio
+  let cajaInicio = 0;
+  if(cajaMes) {
+    cajaInicio = parseFloat(cajaMes.caja_inicio||0);
+  } else {
+    // Intentar derivar del mes anterior: buscar caja_mensual mes-1
+    const dPrev = new Date(y, m-2, 1);
+    const mesPrev = fcMesStr(dPrev);
+    const {data:cajaPrev} = await db.from('caja_mensual')
+      .select('*').eq('mes', mesPrev).single();
+    if(cajaPrev) cajaInicio = parseFloat(cajaPrev.caja_inicio||0);
+  }
+
+  // STOCK INICIO — productos DISPONIBLES + PAGADO al último día del mes anterior
+  const dPrevEnd = new Date(y, m-2, 0); // último día mes anterior
+  const prevEndStr = dPrevEnd.toISOString().substring(0,10);
+  const stockInicioProds = inventarioCache.filter(p =>
+    p.estado === 'DISPONIBLE' &&
+    p.pago_estado === 'PAGADO' &&
+    p.fecha_compra <= prevEndStr
+  );
+  const stockInicio = stockInicioProds.reduce((s,p) => s + parseFloat(p.precio_final||0), 0);
+
+  // STOCK FIN — productos DISPONIBLES + PAGADO al fin del mes actual
+  const stockFinProds = inventarioCache.filter(p =>
+    p.estado === 'DISPONIBLE' &&
+    p.pago_estado === 'PAGADO' &&
+    p.fecha_compra <= fechaFinStr
+  );
+  const stockFin = stockFinProds.reduce((s,p) => s + parseFloat(p.precio_final||0), 0);
+
+  // MOVIMIENTOS del mes desde flujo_caja
+  const ingVentas   = flujoCache.filter(f=>f.categoria==='VENTA').reduce((s,f)=>s+parseFloat(f.monto||0),0);
+  const egrCompras  = flujoCache.filter(f=>f.categoria==='COMPRA').reduce((s,f)=>s+parseFloat(f.monto||0),0);
+  const egrCostos   = flujoCache.filter(f=>f.categoria==='COSTO').reduce((s,f)=>s+parseFloat(f.monto||0),0);
+  const egrGastos   = flujoCache.filter(f=>f.categoria==='OPERATIVO'||f.categoria==='MARKETING'||f.categoria==='PERSONAL'||f.categoria==='IMPORTACION').reduce((s,f)=>s+parseFloat(f.monto||0),0);
+
+  // PENDIENTES — créditos sin pagar registrados este mes
+  const pendMes = inventarioCache.filter(p =>
+    p.pago_estado === 'PENDIENTE' &&
+    p.fecha_compra >= fechaInicio &&
+    p.fecha_compra <= fechaFinStr
+  );
+  const pendSoles = pendMes.reduce((s,p) => s + parseFloat(p.precio_compra_soles||0), 0);
+  const pendUsd   = pendMes.reduce((s,p) => s + parseFloat(p.precio_compra_usd||0), 0);
+
+  // RESERVAS del mes (adelantos)
+  const reservasMes = flujoCache.filter(f=>f.categoria==='RESERVA').reduce((s,f)=>s+parseFloat(f.monto||0),0);
+
+  // GANANCIAS — ventas del mes
+  const {data:ventasMes} = await db.from('ventas')
+    .select('ganancia')
+    .gte('fecha_venta', fechaInicio)
+    .lte('fecha_venta', fechaFinStr);
+  const ganancias = (ventasMes||[]).reduce((s,v) => s + parseFloat(v.ganancia||0), 0);
+
+  // CÁLCULOS
+  const totalAntesGanancias = cajaInicio + stockInicio;
+  const total = totalAntesGanancias + ganancias;
+  const netoMes = ingVentas + egrCompras + egrCostos + egrGastos;
+  const cajaActual = cajaInicio + netoMes;
+  const cajaFin = cajaActual - reservasMes;
+  const totalFin = cajaFin + stockFin;
+  const control = Math.round((total - totalFin) * 100) / 100;
+
+  // ── RENDER BURBUJAS ──
+  document.getElementById('fc-caja-inicio').textContent = fmt(cajaInicio);
+  document.getElementById('fc-stock-inicio').textContent = fmt(stockInicio);
+  document.getElementById('fc-ganancias').textContent = fmt(ganancias);
+  document.getElementById('fc-total-antes').textContent = fmt(totalAntesGanancias);
+  document.getElementById('fc-caja-actual').textContent = fmt(cajaActual);
+  document.getElementById('fc-caja-fin').textContent = fmt(cajaFin);
+  document.getElementById('fc-stock-fin').textContent = fmt(stockFin);
+  document.getElementById('fc-total-label').textContent = fmt(total);
+
+  const ctrlEl = document.getElementById('fc-control');
+  const ctrlCard = document.getElementById('fc-control-card');
+  ctrlEl.textContent = fmt(Math.abs(control));
+  ctrlEl.className = 'fc-stat-val ' + (Math.abs(control) < 1 ? 'green' : 'red');
+  ctrlCard.className = 'fc-stat ' + (Math.abs(control) < 1 ? 'control-ok' : 'control-err');
+
+  // ── RENDER BLOQUE MOVIMIENTOS ──
+  document.getElementById('fc-ing-ventas').textContent   = fmt(ingVentas);
+  document.getElementById('fc-egr-soles').textContent    = fmt(Math.abs(egrCompras));
+  document.getElementById('fc-egr-costos').textContent   = fmt(Math.abs(egrCostos));
+  document.getElementById('fc-egr-gastos').textContent   = fmt(Math.abs(egrGastos));
+  const netoEl = document.getElementById('fc-neto-mes');
+  netoEl.textContent = fmt(netoMes);
+  netoEl.className = 'fc-total-val ' + (netoMes >= 0 ? 'green' : 'red');
+
+  document.getElementById('fc-pend-soles').textContent  = fmt(pendSoles);
+  document.getElementById('fc-pend-usd').textContent    = '$ ' + parseFloat(pendUsd).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('fc-reservas').textContent    = fmt(reservasMes);
+  document.getElementById('fc-por-pagar').textContent   = fmt(pendSoles);
+
+  // ── RENDER TABLA ──
+  renderFlujoTabla();
+}
+
+function renderFlujoTabla() {
+  const body = document.getElementById('fc-tabla-body');
+  if(!flujoCache.length) {
+    body.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--muted2)">Sin movimientos este mes</td></tr>';
+    return;
+  }
+
+  // También incluir créditos pendientes del mes como filas especiales
+  const [y,m] = fcMesActual.split('-').map(Number);
+  const fechaInicio = `${y}-${String(m).padStart(2,'0')}-01`;
+  const dFin = new Date(y, m, 0);
+  const fechaFinStr = dFin.toISOString().substring(0,10);
+
+  const pendRows = inventarioCache.filter(p =>
+    p.pago_estado === 'PENDIENTE' &&
+    p.fecha_compra >= fechaInicio &&
+    p.fecha_compra <= fechaFinStr
+  );
+
+  const fmtFecha = f => {
+    if(!f) return '—';
+    const d = new Date(f);
+    return d.toLocaleDateString('es-PE',{day:'2-digit',month:'2-digit',year:'2-digit'});
+  };
+
+  // Filas flujo_caja
+  let rows = flujoCache.map(f => {
+    const ing = parseFloat(f.monto||0) > 0 ? parseFloat(f.monto) : null;
+    const egr = parseFloat(f.monto||0) < 0 ? parseFloat(f.monto) : null;
+    const esReserva = f.categoria === 'RESERVA';
+    const accion = f.categoria==='VENTA'?'VENTA':f.categoria==='COMPRA'?'COMPRA':f.categoria==='COSTO'?'COSTO':f.categoria==='RESERVA'?'RESERVA':'PAGO';
+    return `<tr>
+      <td style="white-space:nowrap;color:var(--muted2)">${fmtFecha(f.fecha)}</td>
+      <td><span class="fc-accion-badge fc-accion-${accion}">${accion}</span></td>
+      <td><span class="td-code" style="font-size:10px">${f.referencia_id||'—'}</span></td>
+      <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.descripcion||'—'}</td>
+      <td style="color:var(--muted2)">—</td>
+      <td class="td-ing" style="text-align:right">${ing?fmt(ing):esReserva?`<span class="td-reserva">+${fmt(f.monto)} (reserva)</span>`:'—'}</td>
+      <td class="td-egr" style="text-align:right">${egr&&!esReserva?fmt(Math.abs(egr)):'—'}</td>
+      <td style="text-align:right;color:var(--muted2)">—</td>
+      <td style="color:var(--muted2);font-size:11px">${f.descripcion||''}</td>
+    </tr>`;
+  });
+
+  // Filas pendientes (crédito sin pagar)
+  const pendRows2 = pendRows.map(p => {
+    const desc = [p.marca,p.silueta,p.colorway].filter(Boolean).join(' ');
+    return `<tr style="opacity:.7">
+      <td style="white-space:nowrap;color:var(--muted2)">${fmtFecha(p.fecha_compra)}</td>
+      <td><span class="fc-accion-badge fc-accion-COMPRA">COMPRA</span></td>
+      <td><span class="td-code" style="font-size:10px">${p.codigo_producto}</span></td>
+      <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${desc}</td>
+      <td style="color:var(--muted2)">${p.talla||'—'}</td>
+      <td style="text-align:right">—</td>
+      <td style="text-align:right"><span class="td-pend">⏳ ${fmt(p.precio_compra_soles||0)}</span></td>
+      <td style="text-align:right"><span class="td-pend">⏳ $${parseFloat(p.precio_compra_usd||0).toFixed(2)}</span></td>
+      <td style="color:#facc15;font-size:11px">PENDIENTE ${p.orden_compra||''}</td>
+    </tr>`;
+  });
+
+  body.innerHTML = [...rows, ...pendRows2].join('');
 }
 
 // ── GENERAR CODIGO ──
