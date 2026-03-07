@@ -2492,14 +2492,20 @@ async function loadFlujo() {
   netoEl.textContent = (netoMes >= 0 ? '+ ' : '− ') + fmt(Math.abs(netoMes));
   netoEl.className = 'fc-bot-val ' + (netoMes >= 0 ? 'green' : 'red');
 
-  // Pendientes — 3 categorías sin conversión
-  const pendComprasSoles = pendMes.filter(p => (p.moneda||'SOLES') !== 'USD')
-    .reduce((s,p) => s + parseFloat(p.precio_compra_soles||0), 0);
-  const pendComprasUsd = pendMes.filter(p => p.moneda === 'USD')
-    .reduce((s,p) => s + parseFloat(p.precio_compra_usd||0), 0);
+  // Pendientes — desde flujoCache (nuevos con trigger) + inventarioCache (antiguos)
+  const pendFlujoSoles = flujoCache.filter(f=>(f.tipo||'').toUpperCase()==='PENDIENTE' && parseFloat(f.egreso_usd||0)===0)
+    .reduce((s,f)=>s+parseFloat(f.egreso_soles||0),0);
+  const pendFlujoUsd = flujoCache.filter(f=>(f.tipo||'').toUpperCase()==='PENDIENTE' && parseFloat(f.egreso_usd||0)>0)
+    .reduce((s,f)=>s+parseFloat(f.egreso_usd||0),0);
+  // Créditos antiguos (no tienen fila en flujo_caja)
+  const codigosEnFlujo2 = new Set(flujoCache.filter(f=>(f.tipo||'').toUpperCase()==='PENDIENTE').map(f=>f.referencia_id));
+  const pendAntiguos = pendMes.filter(p=>!codigosEnFlujo2.has(p.codigo_producto));
+  const pendAntSoles = pendAntiguos.filter(p=>(p.moneda||'SOLES')!=='USD').reduce((s,p)=>s+parseFloat(p.precio_compra_soles||0),0);
+  const pendAntUsd   = pendAntiguos.filter(p=>p.moneda==='USD').reduce((s,p)=>s+parseFloat(p.precio_compra_usd||0),0);
 
-  // Reservas pendientes del mes (adelantos de reservas en flujo_caja)
-  const pendReservasAmt = reservasMes;
+  const pendComprasSoles = pendFlujoSoles + pendAntSoles;
+  const pendComprasUsd   = pendFlujoUsd   + pendAntUsd;
+  const pendReservasAmt  = reservasMes;
 
   const fmtUsd = v => '$ ' + parseFloat(v).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2});
   document.getElementById('fc-pend-reservas').textContent = fmt(pendReservasAmt);
@@ -2556,11 +2562,13 @@ function renderFlujoTabla() {
     const esPend = fcCat==='PENDIENTE';
     const accion = esPend?'PENDIENTE':fcCat==='VENTA'?'VENTA':fcCat==='COMPRA'?'COMPRA':fcCat==='COSTO'?'COSTO':fcCat==='RESERVA'?'RESERVA':fcCat==='CANCELACION'?'CANCELACION':'PAGO';
     const trClass = esPend ? 'row-pend' : '';
+    const egrUsd  = parseFloat(f.egreso_usd||0);
+    const esUsdPend = esPend && egrUsd > 0;
     const ingHtml = ing>0 ? `<span class="${esRes?'td-reserva':'td-ing'}">${esRes?'+ '+fmt(ing)+' <span style="font-size:9px;opacity:.7">(reserva)</span>':fmt(ing)}</span>` : '<span class="td-muted">—</span>';
     const egrHtml = egr>0&&!esRes&&!esPend ? `<span class="td-egr">${fmt(egr)}</span>` : '<span class="td-muted">—</span>';
-    // Pendiente: mostrar en columna Pend S/. o Pend $
-    const pendS = esPend && egr>0 ? `<span class="td-pend">⏳ ${fmt(egr)}</span>` : '<span class="td-muted">—</span>';
-    const pendU = '<span class="td-muted">—</span>';
+    // Pendiente S/. o $ según moneda
+    const pendS = esPend && !esUsdPend && egr>0 ? `<span class="td-pend">⏳ ${fmt(egr)}</span>` : '<span class="td-muted">—</span>';
+    const pendU = esUsdPend ? `<span class="td-egr-usd">⏳ ${fmtUsdAmt(egrUsd)}</span>` : '<span class="td-muted">—</span>';
     return `<tr class="${trClass}">
       <td class="td-fecha">${fmtFecha(f.fecha)}</td>
       <td><span class="fc-accion-badge fc-accion-${accion}">${accion}</span></td>
