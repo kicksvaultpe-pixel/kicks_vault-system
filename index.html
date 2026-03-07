@@ -1500,7 +1500,7 @@ function set(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
 let sortCol=null,sortDir=1;
 
 function clearFiltros(){
-  ['inv-marca','inv-silueta','inv-colorway','inv-talla','inv-cat'].forEach(id=>{
+  ['inv-codigo','inv-marca','inv-silueta','inv-colorway','inv-talla','inv-cat'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.value='';
   });
   document.getElementById('inv-estado').value='';
@@ -1519,6 +1519,7 @@ function sortTable(col){
 
 function filterInventario(){
   const g=id=>(document.getElementById(id)||{value:''}).value;
+  const codigo=g('inv-codigo').trim().toUpperCase();
   const marca=g('inv-marca').toLowerCase();
   const silueta=g('inv-silueta').toLowerCase();
   const colorway=g('inv-colorway').toLowerCase();
@@ -1527,16 +1528,16 @@ function filterInventario(){
   const cat=g('inv-cat').toUpperCase();
 
   let rows=inventarioCache.filter(p=>{
+    const matchCod=!codigo||(p.codigo_producto||'').toUpperCase().startsWith(codigo);
     const matchM=!marca||(p.marca||'').toLowerCase().includes(marca);
     const matchS=!silueta||(p.silueta||'').toLowerCase().includes(silueta);
     const matchC=!colorway||(p.colorway||'').toLowerCase().includes(colorway);
     const matchT=!talla||(p.talla||'').toLowerCase().includes(talla);
     const matchE=!estado||(estado==='PENDIENTE'?p.pago_estado==='PENDIENTE':p.estado===estado&&p.pago_estado!=='PENDIENTE');
     const matchCat=!cat||(p.categoria||'').toUpperCase().includes(cat);
-    // Cancelados ocultos por defecto, visibles solo sin filtro de estado
     const showCancelado=estado==='CANCELADO';
     if(p.estado==='CANCELADO'&&!showCancelado) return false;
-    return matchM&&matchS&&matchC&&matchT&&matchE&&matchCat;
+    return matchCod&&matchM&&matchS&&matchC&&matchT&&matchE&&matchCat;
   });
 
   if(sortCol){
@@ -1834,8 +1835,9 @@ async function registrarCompra(){
     if(!esCredito){
       const desc=[marca,silueta,colorway].filter(Boolean).join(' ');
       const fcTalla=document.getElementById('cp-talla').value.trim()||null;
+      const fcFecha=document.getElementById('cp-fecha').value||new Date().toISOString().substring(0,10);
       await db.from('flujo_caja').insert({
-        fecha:document.getElementById('cp-fecha').value,
+        fecha:fcFecha,
         tipo:'EGRESO',
         categoria:'COMPRA',
         descripcion:desc,
@@ -2168,7 +2170,8 @@ async function loadFlujo() {
     .select('*')
     .gte('fecha', fechaInicio)
     .lte('fecha', fechaFinStr)
-    .order('fecha', {ascending:true});
+    .order('fecha', {ascending:false})
+    .order('id', {ascending:false});
   flujoCache = flujoMes || [];
 
   // Cargar caja_mensual para este mes
