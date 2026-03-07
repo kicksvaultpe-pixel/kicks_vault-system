@@ -637,6 +637,32 @@ input[list] { cursor: text; }
           <input type="date" id="cs-fecha">
         </div>
       </div>
+
+      <!-- OC en costo -->
+      <div style="border-top:1px solid var(--border);margin-top:12px;padding-top:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div class="card-label" style="margin:0">Orden de Compra <span style="color:var(--muted2);font-weight:400;font-size:10px">(opcional)</span></div>
+          <div id="cs-oc-badge" style="display:none;background:rgba(200,255,0,.1);border:1px solid rgba(200,255,0,.3);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;color:var(--accent)"></div>
+        </div>
+        <div class="form-grid g2">
+          <div class="field">
+            <label>Vincular a OC</label>
+            <select id="cs-oc-select" onchange="csOCChange()">
+              <option value="">— Sin OC —</option>
+            </select>
+          </div>
+          <div id="cs-oc-info" style="display:none" class="field">
+            <label>Info OC</label>
+            <div style="background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;font-size:12px;display:flex;gap:14px;align-items:center">
+              <span id="cs-oc-tipo" style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted2)"></span>
+              <span>·</span>
+              <span id="cs-oc-prods" style="color:var(--text)"></span>
+              <span>·</span>
+              <span id="cs-oc-monto" style="color:var(--accent);font-weight:700"></span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Filtros combos producto -->
@@ -982,9 +1008,16 @@ async function loadOCs(){
 
 function renderOCSelectExistente(){
   const sel=document.getElementById('cp-oc-select');
-  if(!sel) return;
-  sel.innerHTML='<option value="">— Seleccionar OC —</option>'+
+  if(sel) sel.innerHTML='<option value="">— Seleccionar OC —</option>'+
     ocCache.map(oc=>`<option value="${oc.codigo}">${oc.codigo} — ${oc.tipo} (${oc.estado})</option>`).join('');
+  // Also populate costo OC select
+  const csSel=document.getElementById('cs-oc-select');
+  if(csSel){
+    const prev=csSel.value;
+    csSel.innerHTML='<option value="">— Sin OC —</option>'+
+      ocCache.map(oc=>`<option value="${oc.codigo}">${oc.codigo} — ${oc.tipo}</option>`).join('');
+    if(prev) csSel.value=prev;
+  }
 }
 
 function ocSetMode(modo){
@@ -1037,6 +1070,25 @@ async function pregenOC(){
 }
 
 function csOCSelectChange(){}
+
+function csOCChange(){
+  const cod=document.getElementById('cs-oc-select').value;
+  const badge=document.getElementById('cs-oc-badge');
+  const info=document.getElementById('cs-oc-info');
+  if(!cod){ badge.style.display='none'; info.style.display='none'; return; }
+  const oc=ocCache.find(o=>o.codigo===cod);
+  if(!oc){ badge.style.display='none'; info.style.display='none'; return; }
+  // Badge
+  badge.textContent=cod;
+  badge.style.display='';
+  // Info
+  const prods=inventarioCache.filter(p=>p.orden_compra===cod);
+  const monto=prods.reduce((s,p)=>s+parseFloat(p.precio_compra_soles||0),0);
+  document.getElementById('cs-oc-tipo').textContent=(oc.tipo==='IMPORTACION'?'✈️ ':' 🏪 ')+oc.tipo;
+  document.getElementById('cs-oc-prods').textContent=prods.length+' productos';
+  document.getElementById('cs-oc-monto').textContent=fmt(monto);
+  info.style.display='';
+}
 
 // ── TC GLOBAL ──
 let tcSaveTimer=null;
@@ -1798,6 +1850,7 @@ function limpiarSeleccionCosto(){
 async function registrarCosto(){
   if(!costoLista.length){toast('Agrega al menos un producto','warn');return;}
   const fecha=document.getElementById('cs-fecha').value;
+  const ocCosto=(document.getElementById('cs-oc-select')||{value:''}).value||null;
   // Validar que todos tengan monto
   const sinMonto=costoLista.filter(x=>!parseFloat(x.soles));
   if(sinMonto.length){toast('Falta monto en: '+sinMonto.map(x=>x.codigo).join(', '),'warn');return;}
