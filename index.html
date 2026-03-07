@@ -2285,18 +2285,7 @@ async function registrarCosto(){
     }));
     const{error}=await db.from('costos').insert(inserts);
     if(error)throw error;
-    // Registrar egresos en flujo_caja por cada costo
-    const costoFlujoBatch = costoLista.map(item=>({
-      fecha,
-      tipo:'COSTO',
-      categoria:'COSTO',
-      descripcion:item.concepto.trim()+' — '+item.nombre,
-      ingreso_soles:0,
-      egreso_soles:parseFloat(item.soles),
-      referencia_id:item.codigo,
-      talla:inventarioCache.find(p=>p.codigo_producto===item.codigo)?.talla||null
-    }));
-    await db.from('flujo_caja').insert(costoFlujoBatch);
+    // flujo_caja lo maneja el trigger after_costo en Supabase
     toast('✓ '+inserts.length+' costo'+(inserts.length>1?'s registrados':'registrado'),'ok');
     limpiarSeleccionCosto();
     await loadInventario();
