@@ -2178,7 +2178,7 @@ function buscarProductoCosto(){
   const res=inventarioCache.filter(p=>
     p.estado!=='CANCELADO'&&p.estado!=='VENDIDO'&&
     !yaAgregados.has(p.codigo_producto)&&
-    (!codigo||(p.codigo_producto||'').toLowerCase().startsWith(codigo))&&
+    (!codigo||(p.codigo_producto||'').toLowerCase().includes(codigo))&&
     (!ocFiltro||(p.orden_compra===ocFiltro))&&
     (!marca||(p.marca||'').toLowerCase().includes(marca))&&
     (!silueta||(p.silueta||'').toLowerCase().includes(silueta))&&
