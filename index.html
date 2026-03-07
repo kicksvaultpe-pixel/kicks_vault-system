@@ -1004,12 +1004,16 @@ input[list] { cursor: text; }
         <span class="fc-row-val red" id="fc-egr-costos-gastos">—</span>
       </div>
       <div class="fc-inner-div" style="margin:10px 0 6px"></div>
+      <div class="fc-row" id="fc-pend-reservas-row" style="display:none">
+        <span class="fc-row-lbl">⏳ Reservas S/.</span>
+        <span class="fc-row-val yellow" id="fc-pend-reservas">—</span>
+      </div>
       <div class="fc-row" id="fc-pend-soles-row" style="display:none">
-        <span class="fc-row-lbl">⏳ Pendiente S/.</span>
+        <span class="fc-row-lbl">⏳ Compras S/.</span>
         <span class="fc-row-val yellow" id="fc-pend-soles">—</span>
       </div>
       <div class="fc-row" id="fc-pend-usd-row" style="display:none">
-        <span class="fc-row-lbl">⏳ Pendiente $</span>
+        <span class="fc-row-lbl">⏳ Compras $</span>
         <span class="fc-row-val yellow" id="fc-pend-usd">—</span>
       </div>
       <div class="fc-bot">
@@ -2353,22 +2357,24 @@ async function loadFlujo() {
   netoEl.textContent = (netoMes >= 0 ? '+ ' : '− ') + fmt(Math.abs(netoMes));
   netoEl.className = 'fc-bot-val ' + (netoMes >= 0 ? 'green' : 'red');
 
-  // Pendientes — mostrar solo si hay, sin conversión
-  const pendSolesProds = pendMes.filter(p => (p.moneda||'SOLES') !== 'USD');
-  const pendUsdProds   = pendMes.filter(p => p.moneda === 'USD');
-  const pendSolesAmt   = pendSolesProds.reduce((s,p) => s + parseFloat(p.precio_compra_soles||0), 0);
-  const pendUsdAmt     = pendUsdProds.reduce((s,p) => s + parseFloat(p.precio_compra_usd||0), 0);
+  // Pendientes — 3 categorías sin conversión
+  const pendComprasSoles = pendMes.filter(p => (p.moneda||'SOLES') !== 'USD')
+    .reduce((s,p) => s + parseFloat(p.precio_compra_soles||0), 0);
+  const pendComprasUsd = pendMes.filter(p => p.moneda === 'USD')
+    .reduce((s,p) => s + parseFloat(p.precio_compra_usd||0), 0);
 
-  const rowS = document.getElementById('fc-pend-soles-row');
-  const rowU = document.getElementById('fc-pend-usd-row');
-  if(pendSolesAmt > 0){
-    document.getElementById('fc-pend-soles').textContent = fmt(pendSolesAmt);
-    rowS.style.display = 'flex';
-  } else { rowS.style.display = 'none'; }
-  if(pendUsdAmt > 0){
-    document.getElementById('fc-pend-usd').textContent = '$ ' + pendUsdAmt.toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2});
-    rowU.style.display = 'flex';
-  } else { rowU.style.display = 'none'; }
+  // Reservas pendientes del mes (adelantos de reservas en flujo_caja)
+  const pendReservasAmt = reservasMes;
+
+  const fmtUsd = v => '$ ' + parseFloat(v).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const showRow = (rowId, valId, show, val) => {
+    const row = document.getElementById(rowId);
+    if(show){ document.getElementById(valId).textContent = val; row.style.display='flex'; }
+    else { row.style.display='none'; }
+  };
+  showRow('fc-pend-reservas-row','fc-pend-reservas', pendReservasAmt>0, fmt(pendReservasAmt));
+  showRow('fc-pend-soles-row',   'fc-pend-soles',   pendComprasSoles>0, fmt(pendComprasSoles));
+  showRow('fc-pend-usd-row',     'fc-pend-usd',     pendComprasUsd>0,  fmtUsd(pendComprasUsd));
 
   // ── RENDER TABLA ──
   renderFlujoTabla();
