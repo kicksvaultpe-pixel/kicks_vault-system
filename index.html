@@ -1687,11 +1687,11 @@ Se revertirá el egreso de S/. ${fmt(prod.precio_compra_soles||0)} en flujo de c
       const fecha=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
       const{error:e2}=await db.from('flujo_caja').insert({
         fecha,
-        tipo:'INGRESO',
+        tipo:'CANCELACION',
         categoria:'CANCELACION',
         descripcion:`Cancelación compra ${codigo} — ${nombre}`,
         ingreso_soles:monto,
-        egreso_soles:null,
+        egreso_soles:0,
         referencia_id:codigo
       });
       if(e2) throw e2;
@@ -1742,10 +1742,10 @@ async function confirmarPago(){
       const descP=[prodPago.marca,prodPago.silueta,prodPago.colorway].filter(Boolean).join(' ');
       await db.from('flujo_caja').insert({
         fecha,
-        tipo:'EGRESO',
+        tipo:'COMPRA',
         categoria:'COMPRA',
         descripcion:descP,
-        ingreso_soles:null,
+        ingreso_soles:0,
         egreso_soles:monto,
         referencia_id:modalCodigo,
         talla:prodPago?.talla||null
@@ -1838,10 +1838,10 @@ async function registrarCompra(){
       const fcFecha=document.getElementById('cp-fecha').value||new Date().toISOString().substring(0,10);
       await db.from('flujo_caja').insert({
         fecha:fcFecha,
-        tipo:'EGRESO',
+        tipo:'COMPRA',
         categoria:'COMPRA',
         descripcion:desc,
-        ingreso_soles:null,
+        ingreso_soles:0,
         egreso_soles:pc||0,
         referencia_id:cod,
         talla:fcTalla
@@ -1935,11 +1935,11 @@ async function registrarReserva(){
       const descRv=[marca||'',silueta||'',colorway||''].filter(Boolean).join(' ');
       await db.from('flujo_caja').insert({
         fecha:document.getElementById('rv-fecha').value||new Date().toISOString().substring(0,10),
-        tipo:'INGRESO',
+        tipo:'RESERVA',
         categoria:'RESERVA',
         descripcion:'Adelanto reserva — '+descRv,
         ingreso_soles:adelantoRv,
-        egreso_soles:null,
+        egreso_soles:0,
         referencia_id:codProd||null,
         talla:document.getElementById('rv-talla').value.trim()||null
       });
@@ -1965,12 +1965,13 @@ async function registrarPago(){
       fecha:document.getElementById('pg-fecha').value
     });
     if(error)throw error;
+    const pgCat=document.getElementById('pg-cat').value;
     await db.from('flujo_caja').insert({
       fecha:document.getElementById('pg-fecha').value,
-      tipo:'EGRESO',
-      categoria:document.getElementById('pg-cat').value,
+      tipo:pgCat,
+      categoria:pgCat,
       descripcion:concepto,
-      ingreso_soles:null,
+      ingreso_soles:0,
       egreso_soles:Math.abs(monto),
       referencia_id:null
     });
@@ -2103,10 +2104,10 @@ async function registrarCosto(){
     // Registrar egresos en flujo_caja por cada costo
     const costoFlujoBatch = costoLista.map(item=>({
       fecha,
-      tipo:'EGRESO',
+      tipo:'COSTO',
       categoria:'COSTO',
       descripcion:item.concepto.trim()+' — '+item.nombre,
-      ingreso_soles:null,
+      ingreso_soles:0,
       egreso_soles:parseFloat(item.soles),
       referencia_id:item.codigo,
       talla:inventarioCache.find(p=>p.codigo_producto===item.codigo)?.talla||null
@@ -2200,11 +2201,12 @@ async function loadFlujo() {
       .select('ingreso_soles,egreso_soles,categoria')
       .gte('fecha', prevIni).lte('fecha', prevFinStr);
     const fp = flujoPrev || [];
-    const pIngV  = fp.filter(f=>f.categoria==='VENTA').reduce((s,f)=>s+parseFloat(f.ingreso_soles||0),0);
-    const pEgrC  = fp.filter(f=>f.categoria==='COMPRA').reduce((s,f)=>s+parseFloat(f.egreso_soles||0),0);
-    const pEgrCo = fp.filter(f=>f.categoria==='COSTO').reduce((s,f)=>s+parseFloat(f.egreso_soles||0),0);
-    const pEgrG  = fp.filter(f=>['OPERATIVO','MARKETING','PERSONAL','IMPORTACION'].includes(f.categoria)).reduce((s,f)=>s+parseFloat(f.egreso_soles||0),0);
-    const pReserv= fp.filter(f=>f.categoria==='RESERVA').reduce((s,f)=>s+parseFloat(f.ingreso_soles||0),0);
+    const pcat = f => (f.categoria||f.tipo||'').toUpperCase();
+    const pIngV  = fp.filter(f=>pcat(f)==='VENTA').reduce((s,f)=>s+parseFloat(f.ingreso_soles||0),0);
+    const pEgrC  = fp.filter(f=>pcat(f)==='COMPRA').reduce((s,f)=>s+parseFloat(f.egreso_soles||0),0);
+    const pEgrCo = fp.filter(f=>pcat(f)==='COSTO').reduce((s,f)=>s+parseFloat(f.egreso_soles||0),0);
+    const pEgrG  = fp.filter(f=>['OPERATIVO','MARKETING','PERSONAL','IMPORTACION','PAGO'].includes(pcat(f))).reduce((s,f)=>s+parseFloat(f.egreso_soles||0),0);
+    const pReserv= fp.filter(f=>pcat(f)==='RESERVA').reduce((s,f)=>s+parseFloat(f.ingreso_soles||0),0);
     const cajaPrevFin = cajaPrevInicio + pIngV - pEgrC - pEgrCo - pEgrG - pReserv;
     cajaInicio = cajaPrevFin;
   }
@@ -2230,10 +2232,11 @@ async function loadFlujo() {
   // MOVIMIENTOS del mes desde flujo_caja
   const sumIng = arr => arr.reduce((s,f)=>s+parseFloat(f.ingreso_soles||0),0);
   const sumEgr = arr => arr.reduce((s,f)=>s+parseFloat(f.egreso_soles||0),0);
-  const ingVentas   = sumIng(flujoCache.filter(f=>f.categoria==='VENTA'));
-  const egrCompras  = sumEgr(flujoCache.filter(f=>f.categoria==='COMPRA'));
-  const egrCostos   = sumEgr(flujoCache.filter(f=>f.categoria==='COSTO'));
-  const egrGastos   = sumEgr(flujoCache.filter(f=>['OPERATIVO','MARKETING','PERSONAL','IMPORTACION'].includes(f.categoria)));
+  const cat = f => (f.categoria||f.tipo||'').toUpperCase();
+  const ingVentas   = sumIng(flujoCache.filter(f=>cat(f)==='VENTA'));
+  const egrCompras  = sumEgr(flujoCache.filter(f=>cat(f)==='COMPRA'));
+  const egrCostos   = sumEgr(flujoCache.filter(f=>cat(f)==='COSTO'));
+  const egrGastos   = sumEgr(flujoCache.filter(f=>['OPERATIVO','MARKETING','PERSONAL','IMPORTACION','PAGO'].includes(cat(f))));
 
   // PENDIENTES — créditos sin pagar registrados este mes
   const pendMes = inventarioCache.filter(p =>
@@ -2245,7 +2248,7 @@ async function loadFlujo() {
   const pendUsd   = pendMes.reduce((s,p) => s + parseFloat(p.precio_compra_usd||0), 0);
 
   // RESERVAS del mes (adelantos)
-  const reservasMes = flujoCache.filter(f=>f.categoria==='RESERVA').reduce((s,f)=>s+parseFloat(f.ingreso_soles||0),0);
+  const reservasMes = flujoCache.filter(f=>(f.categoria||f.tipo||'')==='RESERVA').reduce((s,f)=>s+parseFloat(f.ingreso_soles||0),0);
 
   // GANANCIAS — ventas del mes
   const {data:ventasMes} = await db.from('ventas')
@@ -2333,9 +2336,9 @@ function renderFlujoTabla() {
   let rows = flujoCache.map(f => {
     const ing  = parseFloat(f.ingreso_soles||0);
     const egr  = parseFloat(f.egreso_soles||0);
-    const esReserva = f.categoria==='RESERVA';
-    const cat = (f.categoria||'').toUpperCase();
-    const accion = cat==='VENTA'?'VENTA':cat==='COMPRA'?'COMPRA':cat==='COSTO'?'COSTO':cat==='RESERVA'?'RESERVA':cat==='CANCELACION'?'CANCELACION':'PAGO';
+    const fcCat = (f.categoria||f.tipo||'').toUpperCase();
+    const esReserva = fcCat==='RESERVA';
+    const accion = fcCat==='VENTA'?'VENTA':fcCat==='COMPRA'?'COMPRA':fcCat==='COSTO'?'COSTO':fcCat==='RESERVA'?'RESERVA':fcCat==='CANCELACION'?'CANCELACION':'PAGO';
     return `<tr>
       <td style="white-space:nowrap;color:var(--muted2)">${fmtFecha(f.fecha)}</td>
       <td><span class="fc-accion-badge fc-accion-${accion}">${accion}</span></td>
