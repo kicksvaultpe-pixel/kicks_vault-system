@@ -275,6 +275,55 @@ input[list] { cursor: text; }
 .oc-toggle.active{background:rgba(200,255,0,.1);border-color:rgba(200,255,0,.4);color:var(--accent)}
 .oc-toggle:hover:not(.active){border-color:var(--accent);color:var(--text)}
 
+
+/* ── INDICADORES ── */
+.ind-row{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:12px;margin-bottom:20px}
+@media(max-width:1000px){.ind-row{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.ind-row{grid-template-columns:1fr}}
+
+.ind-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;position:relative;overflow:hidden}
+
+/* Patrimonio */
+.pat-chip{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:14px}
+.pat-total{font-family:"Archivo Black";font-size:22px;color:var(--text);margin-bottom:3px;font-variant-numeric:tabular-nums}
+.pat-sub{font-size:11px;color:var(--muted2);margin-bottom:14px;letter-spacing:.2px}
+.pat-bar-wrap{height:5px;background:var(--border2);border-radius:10px;overflow:hidden;margin-bottom:14px}
+.pat-bar-inner{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--accent),#60a5fa);transition:width .7s cubic-bezier(.4,0,.2,1)}
+.pat-legend{display:flex;justify-content:space-between;align-items:flex-end}
+.pat-leg-item{display:flex;flex-direction:column;gap:3px}
+.pat-leg-item:last-child{text-align:right}
+.pat-leg-dot{display:flex;align-items:center;gap:5px;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2)}
+.pat-leg-dot.right{justify-content:flex-end}
+.pat-leg-dot::before{content:'';width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.caja-dot::before{background:var(--accent)}
+.stock-dot::before{background:#60a5fa}
+.pat-leg-pct{font-family:"Archivo Black";font-size:22px;line-height:1;font-variant-numeric:tabular-nums}
+.pat-leg-pct.accent{color:var(--accent)}
+.pat-leg-pct.blue{color:#60a5fa}
+.pat-leg-amt{font-size:10px;color:var(--muted2);font-variant-numeric:tabular-nums;margin-top:1px}
+
+/* Cards simples */
+.sim-chip{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.sim-chip-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.dot-green{background:var(--green)}
+.dot-accent{background:var(--accent);box-shadow:0 0 5px var(--accent)}
+.dot-red{background:var(--red)}
+.dot-purple{background:#a78bfa}
+.sim-num{font-family:"Archivo Black";font-size:22px;line-height:1;letter-spacing:-1px;margin-bottom:4px;font-variant-numeric:tabular-nums}
+.sim-lbl{font-size:11px;color:var(--muted2);letter-spacing:.2px}
+.sim-trend{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;margin-top:10px;padding:3px 10px;border-radius:20px}
+.trend-up{background:rgba(0,230,118,.1);color:var(--green)}
+.trend-down{background:rgba(255,23,68,.1);color:var(--red)}
+.trend-neu{background:rgba(114,114,138,.1);color:var(--muted2)}
+.trend-purple{background:rgba(167,139,250,.1);color:#a78bfa}
+
+/* Bordes de color por tipo */
+.ind-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.ind-ganancias{border-color:rgba(0,230,118,.12)}.ind-ganancias::before{background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.ind-utilidad-pos{border-color:rgba(200,255,0,.12)}.ind-utilidad-pos::before{background:linear-gradient(90deg,transparent,var(--accent),transparent)}
+.ind-utilidad-neg{border-color:rgba(255,23,68,.12)}.ind-utilidad-neg::before{background:linear-gradient(90deg,transparent,var(--red),transparent)}
+.ind-reinversion{border-color:rgba(167,139,250,.12)}.ind-reinversion::before{background:linear-gradient(90deg,transparent,#a78bfa,transparent)}
+
 /* ── FLUJO DE CAJA ── */
 
 /* Nav mes */
@@ -1041,6 +1090,55 @@ input[list] { cursor: text; }
         <span class="fc-bot-val" id="fc-control">—</span>
       </div>
       <div class="fc-ctrl-badge ok" id="fc-control-badge" style="display:none">✓ Cuadra</div>
+    </div>
+
+  </div>
+
+  <!-- Indicadores -->
+  <div class="ind-row">
+
+    <!-- PATRIMONIO -->
+    <div class="ind-card">
+      <div class="pat-chip">Patrimonio</div>
+      <div class="pat-total" id="ind-patrimonio">—</div>
+      <div class="pat-sub">Caja + Stock</div>
+      <div class="pat-bar-wrap"><div class="pat-bar-inner" id="ind-bar" style="width:50%"></div></div>
+      <div class="pat-legend">
+        <div class="pat-leg-item">
+          <div class="pat-leg-dot caja-dot">Caja</div>
+          <div class="pat-leg-pct accent" id="ind-caja-pct">—</div>
+          <div class="pat-leg-amt" id="ind-caja-amt">—</div>
+        </div>
+        <div class="pat-leg-item">
+          <div class="pat-leg-dot stock-dot right">Stock</div>
+          <div class="pat-leg-pct blue" style="text-align:right" id="ind-stock-pct">—</div>
+          <div class="pat-leg-amt" id="ind-stock-amt">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GANANCIAS -->
+    <div class="ind-card ind-ganancias">
+      <div class="sim-chip"><div class="sim-chip-dot dot-green"></div>Ganancias</div>
+      <div class="sim-num" id="ind-ganancias" style="color:var(--green)">—</div>
+      <div class="sim-lbl">Ventas del mes</div>
+      <div class="sim-trend trend-up" id="ind-ganancias-trend">—</div>
+    </div>
+
+    <!-- UTILIDAD -->
+    <div class="ind-card ind-utilidad-pos" id="ind-utilidad-card">
+      <div class="sim-chip"><div class="sim-chip-dot dot-accent" id="ind-utilidad-dot"></div>Utilidad</div>
+      <div class="sim-num" id="ind-utilidad">—</div>
+      <div class="sim-lbl">Caja fin − Caja inicio</div>
+      <div class="sim-trend" id="ind-utilidad-trend">—</div>
+    </div>
+
+    <!-- REINVERSIÓN -->
+    <div class="ind-card ind-reinversion">
+      <div class="sim-chip"><div class="sim-chip-dot dot-purple"></div>Reinversión</div>
+      <div class="sim-num" id="ind-reinversion" style="color:#a78bfa">—</div>
+      <div class="sim-lbl">Stock fin − Stock inicio</div>
+      <div class="sim-trend trend-purple" id="ind-reinversion-trend">—</div>
     </div>
 
   </div>
@@ -2323,6 +2421,47 @@ async function loadFlujo() {
   const cajaFin = cajaActual - reservasMes;
   const totalFin = cajaFin + stockFin;
   const control = Math.round((total - totalFin) * 100) / 100;
+
+
+  // ── INDICADORES ──
+  const patrimonio    = cajaActual + stockFin;
+  const cajaPct       = patrimonio > 0 ? Math.round(cajaActual / patrimonio * 1000) / 10 : 0;
+  const stockPct      = patrimonio > 0 ? Math.round(stockFin   / patrimonio * 1000) / 10 : 0;
+  const utilidad      = cajaFin - cajaInicio;
+  const reinversion   = stockFin - stockInicio;
+  const nVentas       = (ventasMes||[]).length;
+
+  // Patrimonio
+  document.getElementById('ind-patrimonio').textContent = fmt(patrimonio);
+  document.getElementById('ind-bar').style.width        = cajaPct + '%';
+  document.getElementById('ind-caja-pct').textContent   = cajaPct.toFixed(1) + '%';
+  document.getElementById('ind-caja-amt').textContent   = fmt(cajaActual);
+  document.getElementById('ind-stock-pct').textContent  = stockPct.toFixed(1) + '%';
+  document.getElementById('ind-stock-amt').textContent  = fmt(stockFin);
+
+  // Ganancias
+  document.getElementById('ind-ganancias').textContent       = fmt(ganancias);
+  document.getElementById('ind-ganancias-trend').textContent = nVentas + (nVentas === 1 ? ' venta' : ' ventas') + ' este mes';
+
+  // Utilidad
+  const utilEl    = document.getElementById('ind-utilidad');
+  const utilCard  = document.getElementById('ind-utilidad-card');
+  const utilDot   = document.getElementById('ind-utilidad-dot');
+  const utilTrend = document.getElementById('ind-utilidad-trend');
+  const utilPos   = utilidad >= 0;
+  utilEl.textContent    = (utilPos ? '+ ' : '− ') + fmt(Math.abs(utilidad));
+  utilEl.style.color    = utilPos ? 'var(--accent)' : 'var(--red)';
+  utilDot.className     = 'sim-chip-dot ' + (utilPos ? 'dot-accent' : 'dot-red');
+  utilCard.className    = 'ind-card ' + (utilPos ? 'ind-utilidad-pos' : 'ind-utilidad-neg');
+  utilTrend.textContent = utilPos ? '↑ Caja creció este mes' : '↓ Más egresos que ingresos';
+  utilTrend.className   = 'sim-trend ' + (utilPos ? 'trend-up' : 'trend-down');
+
+  // Reinversión
+  const reinvEl    = document.getElementById('ind-reinversion');
+  const reinvTrend = document.getElementById('ind-reinversion-trend');
+  const reinvPos   = reinversion >= 0;
+  reinvEl.textContent    = (reinvPos ? '+ ' : '− ') + fmt(Math.abs(reinversion));
+  reinvTrend.textContent = reinvPos ? '↑ Stock creció este mes' : '↓ Stock redujo este mes';
 
   // ── RENDER BURBUJAS ──
   // Inicio
