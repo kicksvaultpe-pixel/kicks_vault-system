@@ -276,62 +276,96 @@ input[list] { cursor: text; }
 .oc-toggle:hover:not(.active){border-color:var(--accent);color:var(--text)}
 
 /* ── FLUJO DE CAJA ── */
-.fc-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
-.fc-stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;transition:all .2s;position:relative;overflow:hidden}
-.fc-stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--border2),transparent)}
-.fc-stat-label{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px}
-.fc-stat-val{font-family:"Archivo Black";font-size:22px;color:var(--text);white-space:nowrap;line-height:1.1}
-.fc-stat-val.green{color:var(--green)}
-.fc-stat-val.red{color:var(--red)}
-.fc-stat-val.accent{color:var(--accent)}
-.fc-stat-val.yellow{color:#facc15}
-.fc-stat-sub{font-size:11px;color:var(--muted2);margin-top:3px}
-.fc-stat.highlight{border-color:rgba(200,255,0,.2);background:rgba(200,255,0,.03)}.fc-stat.highlight::before{background:linear-gradient(90deg,transparent,var(--accent),transparent)}
-.fc-stat.control-ok{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.04)}
-.fc-stat.control-err{border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.04)}
 
-.fc-section{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
-.fc-block{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 22px}
-.fc-block-title{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:10px;display:flex;align-items:center;gap:6px}
-.fc-block-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border)}
-.fc-block-row:last-child{border-bottom:none}
-.fc-block-lbl{font-size:12px;color:var(--muted2)}
-.fc-block-val{font-family:"Archivo Black";font-size:14px;color:var(--text)}
-.fc-block-val.green{color:var(--green)}
-.fc-block-val.accent{color:var(--accent)}
-.fc-block-val.red{color:var(--red)}
-.fc-block-divider{border-top:2px solid var(--border2);margin:8px 0}
-.fc-total-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0}
-.fc-total-lbl{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2)}
-.fc-total-val{font-family:"Archivo Black";font-size:16px}
-
-/* Mes nav */
-.fc-nav{display:flex;align-items:center;gap:12px;margin-bottom:16px}
-.fc-nav-btn{background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:7px 16px;color:var(--muted2);cursor:pointer;font-size:14px;font-weight:700;transition:all .2s}
+/* Nav mes */
+.fc-nav{display:flex;align-items:center;gap:14px;margin-bottom:24px}
+.fc-nav-btn{background:var(--surface);border:1px solid var(--border2);border-radius:8px;width:34px;height:34px;color:var(--muted2);cursor:pointer;font-size:16px;font-weight:700;transition:all .2s;display:flex;align-items:center;justify-content:center}
 .fc-nav-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(200,255,0,.05)}
-.fc-mes-label{font-family:"Archivo Black";font-size:18px;color:var(--text);min-width:160px;text-align:center}
+.fc-mes-label{font-family:"Archivo Black";font-size:20px;color:var(--text);letter-spacing:.5px}
+
+/* 3 burbujas principales */
+.fc-trio{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:900px){.fc-trio{grid-template-columns:1fr}}
+
+.fc-bubble{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px 24px;position:relative;overflow:hidden;transition:all .2s}
+.fc-bubble::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:16px 16px 0 0}
+.fc-bubble.inicio::after{background:linear-gradient(90deg,transparent,var(--border2),transparent)}
+.fc-bubble.actual::after{background:linear-gradient(90deg,transparent,var(--accent),transparent)}
+.fc-bubble.fin::after{background:linear-gradient(90deg,transparent,#60a5fa,transparent)}
+.fc-bubble.actual{border-color:rgba(200,255,0,.18);background:linear-gradient(135deg,#111116 0%,rgba(200,255,0,.03) 100%)}
+
+/* Chip label */
+.fc-chip{display:inline-flex;align-items:center;gap:5px;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:14px}
+.fc-chip-dot{width:5px;height:5px;border-radius:50%}
+.inicio .fc-chip-dot{background:var(--muted2)}
+.actual .fc-chip-dot{background:var(--accent);box-shadow:0 0 6px var(--accent)}
+.fin .fc-chip-dot{background:#60a5fa}
+
+/* Número principal */
+.fc-main-num{font-family:"Archivo Black";font-size:28px;line-height:1;letter-spacing:-1px;margin-bottom:4px;font-variant-numeric:tabular-nums}
+.fc-main-num.white{color:var(--text)}
+.fc-main-num.accent{color:var(--accent)}
+.fc-main-num.blue{color:#60a5fa}
+.fc-main-num.red{color:var(--red)}
+.fc-main-num.green{color:var(--green)}
+.fc-main-lbl{font-size:11px;color:var(--muted2);margin-bottom:16px;letter-spacing:.3px}
+
+/* Divisor interno */
+.fc-inner-div{border-top:1px solid var(--border);margin:14px 0}
+
+/* Filas internas */
+.fc-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0}
+.fc-row-lbl{font-size:11px;color:var(--muted2);letter-spacing:.2px}
+.fc-row-val{font-family:"Archivo Black";font-size:13px;color:var(--text);font-variant-numeric:tabular-nums}
+.fc-row-val.green{color:var(--green)}
+.fc-row-val.red{color:var(--red)}
+.fc-row-val.accent{color:var(--accent)}
+.fc-row-val.blue{color:#60a5fa}
+.fc-row-val.yellow{color:var(--yellow)}
+.fc-row-val.muted{color:var(--muted2)}
+
+/* Total fondo de burbuja */
+.fc-bot{display:flex;justify-content:space-between;align-items:baseline;margin-top:12px;padding-top:12px;border-top:1px solid var(--border2)}
+.fc-bot-lbl{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2)}
+.fc-bot-val{font-family:"Archivo Black";font-size:16px;font-variant-numeric:tabular-nums}
+.fc-bot-val.accent{color:var(--accent)}
+.fc-bot-val.green{color:var(--green)}
+.fc-bot-val.blue{color:#60a5fa}
+.fc-bot-val.red{color:var(--red)}
+
+/* Control badge dentro de burbuja fin */
+.fc-ctrl-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.5px;margin-top:12px}
+.fc-ctrl-badge.ok{background:rgba(0,230,118,.1);color:var(--green);border:1px solid rgba(0,230,118,.2)}
+.fc-ctrl-badge.err{background:rgba(255,23,68,.1);color:var(--red);border:1px solid rgba(255,23,68,.2)}
+
+/* Burbujas pendientes (fila secundaria) */
+.fc-pend-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+@media(max-width:700px){.fc-pend-row{grid-template-columns:1fr}}
+.fc-pend-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
+.fc-pend-info{}
+.fc-pend-chip{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px}
+.fc-pend-amt{font-family:"Archivo Black";font-size:20px;color:var(--yellow);font-variant-numeric:tabular-nums}
+.fc-pend-sub{font-size:11px;color:var(--muted2);margin-top:3px}
+.fc-pend-icon{font-size:28px;opacity:.3}
 
 /* Tabla movimientos */
-.fc-tabla-wrap{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.fc-tabla-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
 .fc-tabla{width:100%;border-collapse:collapse;font-size:12px}
-.fc-tabla thead th{padding:9px 10px;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);background:#0a0a0a;text-align:left;white-space:nowrap}
-.fc-tabla tbody tr{border-top:1px solid var(--border);transition:background .1s}
+.fc-tabla thead th{padding:10px 14px;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);background:var(--surface);text-align:left;white-space:nowrap;border-bottom:1px solid var(--border)}
+.fc-tabla tbody tr{border-top:1px solid rgba(255,255,255,.04);transition:background .1s}
 .fc-tabla tbody tr:hover{background:rgba(255,255,255,.03)}
-.fc-tabla tbody td{padding:9px 10px;color:var(--text);vertical-align:middle}
+.fc-tabla tbody td{padding:10px 14px;color:var(--text);vertical-align:middle}
 .fc-tabla .td-ing{font-family:"Archivo Black";font-size:13px;color:var(--green);white-space:nowrap}
 .fc-tabla .td-egr{font-family:"Archivo Black";font-size:13px;color:var(--red);white-space:nowrap}
-.fc-tabla .td-egr-usd{font-family:"Archivo Black";font-size:13px;color:#f97316;white-space:nowrap}
-.fc-tabla .td-pend{color:#facc15;font-size:11px;font-weight:700}
+.fc-tabla .td-pend{color:var(--yellow);font-size:11px;font-weight:700}
 .fc-tabla .td-reserva{color:#a855f7;font-size:11px;font-weight:700}
-.fc-accion-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.5px}
-.fc-accion-COMPRA{background:rgba(239,68,68,.15);color:#ef4444}
-.fc-accion-VENTA{background:rgba(34,197,94,.15);color:#22c55e}
-.fc-accion-RESERVA{background:rgba(168,85,247,.15);color:#a855f7}
-.fc-accion-PAGO{background:rgba(249,115,22,.15);color:#f97316}
-.fc-accion-COSTO{background:rgba(96,165,250,.15);color:#60a5fa}
-.fc-accion-CANCELACION{background:rgba(156,163,175,.15);color:#9ca3af}
-@media(max-width:900px){.fc-stats{grid-template-columns:repeat(3,1fr)}.fc-section{grid-template-columns:1fr}}
-@media(max-width:600px){.fc-stats{grid-template-columns:repeat(2,1fr)}}
+.fc-accion-badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:.5px}
+.fc-accion-COMPRA{background:rgba(239,68,68,.12);color:#ef4444;border:1px solid rgba(239,68,68,.2)}
+.fc-accion-VENTA{background:rgba(0,230,118,.1);color:var(--green);border:1px solid rgba(0,230,118,.2)}
+.fc-accion-RESERVA{background:rgba(168,85,247,.12);color:#a855f7;border:1px solid rgba(168,85,247,.2)}
+.fc-accion-PAGO{background:rgba(249,115,22,.12);color:#f97316;border:1px solid rgba(249,115,22,.2)}
+.fc-accion-COSTO{background:rgba(96,165,250,.12);color:#60a5fa;border:1px solid rgba(96,165,250,.2)}
+.fc-accion-CANCELACION{background:rgba(156,163,175,.1);color:#9ca3af;border:1px solid rgba(156,163,175,.2)}
 
 /* MISC */
 .empty-state{text-align:center;padding:50px 20px;color:var(--muted2)}
@@ -928,74 +962,83 @@ input[list] { cursor: text; }
     <button class="fc-nav-btn" onclick="fcMesSiguiente()">›</button>
   </div>
 
-  <!-- Burbujas resumen -->
-  <div class="fc-stats">
-    <!-- INICIO DE MES -->
-    <div class="fc-stat">
-      <div class="fc-stat-label">Inicio de Mes</div>
-      <div class="fc-stat-val accent" id="fc-caja-inicio">—</div>
-      <div class="fc-stat-sub">Caja</div>
-      <div style="margin-top:8px">
-      <div class="fc-stat-val" id="fc-stock-inicio" style="font-size:15px">—</div>
-      <div class="fc-stat-sub">Stock</div>
-      </div>
-    </div>
-    <!-- GANANCIAS + TOTAL -->
-    <div class="fc-stat">
-      <div class="fc-stat-label">Ganancias del mes</div>
-      <div class="fc-stat-val green" id="fc-ganancias">—</div>
-      <div style="margin-top:10px">
-      <div class="fc-stat-label">Total antes ganancia</div>
-      <div class="fc-stat-val" id="fc-total-antes" style="font-size:15px">—</div>
-      </div>
-    </div>
-    <!-- CAJA ACTUAL -->
-    <div class="fc-stat highlight">
-      <div class="fc-stat-label">Caja Actual</div>
-      <div class="fc-stat-val accent" id="fc-caja-actual">—</div>
-      <div class="fc-stat-sub" id="fc-caja-actual-sub">+ingresos −egresos</div>
-    </div>
-    <!-- FIN DE MES -->
-    <div class="fc-stat">
-      <div class="fc-stat-label">Fin de Mes</div>
-      <div class="fc-stat-val" id="fc-caja-fin">—</div>
-      <div class="fc-stat-sub">Caja (−reservas)</div>
-      <div style="margin-top:8px">
-      <div class="fc-stat-val" id="fc-stock-fin" style="font-size:15px">—</div>
-      <div class="fc-stat-sub">Stock fin</div>
-      </div>
-    </div>
-    <!-- CONTROL -->
-    <div class="fc-stat" id="fc-control-card">
-      <div class="fc-stat-label">Control</div>
-      <div class="fc-stat-val" id="fc-control">—</div>
-      <div class="fc-stat-sub">Total inicio vs fin</div>
-      <div style="margin-top:8px">
-      <div class="fc-stat-val accent" id="fc-total-label" style="font-size:13px">—</div>
-      <div class="fc-stat-sub">Total</div>
-      </div>
-    </div>
-  </div>
+  <!-- 3 Burbujas principales -->
+  <div class="fc-trio">
 
-  <!-- Detalle: ingresos / egresos / pendientes -->
-  <div class="fc-section">
-    <div class="fc-block">
-      <div class="fc-block-title">📥 Movimientos del mes</div>
-      <div class="fc-block-row"><span class="fc-block-lbl">Ingresos ventas</span><span class="fc-block-val green" id="fc-ing-ventas">—</span></div>
-      <div class="fc-block-row"><span class="fc-block-lbl">Egresos S/. pagados</span><span class="fc-block-val red" id="fc-egr-soles">—</span></div>
-      <div class="fc-block-row"><span class="fc-block-lbl">Costos pagados</span><span class="fc-block-val red" id="fc-egr-costos">—</span></div>
-      <div class="fc-block-row"><span class="fc-block-lbl">Gastos operativos</span><span class="fc-block-val red" id="fc-egr-gastos">—</span></div>
-      <div class="fc-block-divider"></div>
-      <div class="fc-total-row"><span class="fc-total-lbl">Neto del mes</span><span class="fc-total-val" id="fc-neto-mes">—</span></div>
+    <!-- INICIO DE MES -->
+    <div class="fc-bubble inicio">
+      <div class="fc-chip"><div class="fc-chip-dot"></div>Inicio de Mes</div>
+      <div class="fc-main-num white" id="fc-caja-inicio">—</div>
+      <div class="fc-main-lbl">Caja disponible</div>
+      <div class="fc-inner-div"></div>
+      <div class="fc-row">
+        <span class="fc-row-lbl">Stock valorizado</span>
+        <span class="fc-row-val" id="fc-stock-inicio">—</span>
+      </div>
+      <div class="fc-row">
+        <span class="fc-row-lbl">Ganancias del mes</span>
+        <span class="fc-row-val green" id="fc-ganancias">—</span>
+      </div>
+      <div class="fc-bot">
+        <span class="fc-bot-lbl">Total patrimonio</span>
+        <span class="fc-bot-val accent" id="fc-total-antes">—</span>
+      </div>
     </div>
-    <div class="fc-block">
-      <div class="fc-block-title">⏳ Pendientes</div>
-      <div class="fc-block-row"><span class="fc-block-lbl">Egresos pendientes S/.</span><span class="fc-block-val yellow" id="fc-pend-soles">—</span></div>
-      <div class="fc-block-row"><span class="fc-block-lbl">Egresos pendientes $</span><span class="fc-block-val yellow" id="fc-pend-usd">—</span></div>
-      <div class="fc-block-row"><span class="fc-block-lbl">Adelantos reservas</span><span class="fc-block-val" id="fc-reservas">—</span></div>
-      <div class="fc-block-divider"></div>
-      <div class="fc-total-row"><span class="fc-total-lbl">Por pagar este mes</span><span class="fc-total-val yellow" id="fc-por-pagar">—</span></div>
+
+    <!-- CAJA ACTUAL -->
+    <div class="fc-bubble actual">
+      <div class="fc-chip"><div class="fc-chip-dot"></div>Caja Actual</div>
+      <div class="fc-main-num accent" id="fc-caja-actual">—</div>
+      <div class="fc-main-lbl">inicio + ingresos − egresos</div>
+      <div class="fc-inner-div"></div>
+      <div class="fc-row">
+        <span class="fc-row-lbl">↑ Ventas cobradas</span>
+        <span class="fc-row-val green" id="fc-ing-ventas">—</span>
+      </div>
+      <div class="fc-row">
+        <span class="fc-row-lbl">↓ Compras pagadas</span>
+        <span class="fc-row-val red" id="fc-egr-soles">—</span>
+      </div>
+      <div class="fc-row">
+        <span class="fc-row-lbl">↓ Costos / Gastos</span>
+        <span class="fc-row-val red" id="fc-egr-costos-gastos">—</span>
+      </div>
+      <div class="fc-inner-div" style="margin:10px 0 6px"></div>
+      <div class="fc-row" id="fc-pend-soles-row" style="display:none">
+        <span class="fc-row-lbl">⏳ Pendiente S/.</span>
+        <span class="fc-row-val yellow" id="fc-pend-soles">—</span>
+      </div>
+      <div class="fc-row" id="fc-pend-usd-row" style="display:none">
+        <span class="fc-row-lbl">⏳ Pendiente $</span>
+        <span class="fc-row-val yellow" id="fc-pend-usd">—</span>
+      </div>
+      <div class="fc-bot">
+        <span class="fc-bot-lbl">Neto del mes</span>
+        <span class="fc-bot-val" id="fc-neto-mes">—</span>
+      </div>
     </div>
+
+    <!-- FIN DE MES -->
+    <div class="fc-bubble fin">
+      <div class="fc-chip"><div class="fc-chip-dot"></div>Fin de Mes</div>
+      <div class="fc-main-num blue" id="fc-caja-fin">—</div>
+      <div class="fc-main-lbl">Caja − adelantos reservas</div>
+      <div class="fc-inner-div"></div>
+      <div class="fc-row">
+        <span class="fc-row-lbl">Stock fin de mes</span>
+        <span class="fc-row-val blue" id="fc-stock-fin">—</span>
+      </div>
+      <div class="fc-row">
+        <span class="fc-row-lbl">Total patrimonio fin</span>
+        <span class="fc-row-val" id="fc-total-label">—</span>
+      </div>
+      <div class="fc-bot">
+        <span class="fc-bot-lbl">Control</span>
+        <span class="fc-bot-val" id="fc-control">—</span>
+      </div>
+      <div class="fc-ctrl-badge ok" id="fc-control-badge" style="display:none">✓ Cuadra</div>
+    </div>
+
   </div>
 
   <!-- Tabla movimientos -->
@@ -2278,34 +2321,54 @@ async function loadFlujo() {
   const control = Math.round((total - totalFin) * 100) / 100;
 
   // ── RENDER BURBUJAS ──
-  document.getElementById('fc-caja-inicio').textContent = fmt(cajaInicio);
+  // Inicio
+  document.getElementById('fc-caja-inicio').textContent  = fmt(cajaInicio);
   document.getElementById('fc-stock-inicio').textContent = fmt(stockInicio);
-  document.getElementById('fc-ganancias').textContent = fmt(ganancias);
-  document.getElementById('fc-total-antes').textContent = fmt(totalAntesGanancias);
-  document.getElementById('fc-caja-actual').textContent = fmt(cajaActual);
-  document.getElementById('fc-caja-fin').textContent = fmt(cajaFin);
-  document.getElementById('fc-stock-fin').textContent = fmt(stockFin);
-  document.getElementById('fc-total-label').textContent = fmt(total);
-
-  const ctrlEl = document.getElementById('fc-control');
-  const ctrlCard = document.getElementById('fc-control-card');
-  ctrlEl.textContent = fmt(Math.abs(control));
-  ctrlEl.className = 'fc-stat-val ' + (Math.abs(control) < 1 ? 'green' : 'red');
-  ctrlCard.className = 'fc-stat ' + (Math.abs(control) < 1 ? 'control-ok' : 'control-err');
+  document.getElementById('fc-ganancias').textContent    = ganancias > 0 ? '+ ' + fmt(ganancias) : fmt(ganancias);
+  document.getElementById('fc-total-antes').textContent  = fmt(totalAntesGanancias);
+  // Actual
+  document.getElementById('fc-caja-actual').textContent  = fmt(cajaActual);
+  // Fin
+  document.getElementById('fc-caja-fin').textContent     = fmt(cajaFin);
+  document.getElementById('fc-stock-fin').textContent    = fmt(stockFin);
+  document.getElementById('fc-total-label').textContent  = fmt(totalFin);
+  // Control
+  const ctrlEl    = document.getElementById('fc-control');
+  const ctrlBadge = document.getElementById('fc-control-badge');
+  const cuadra    = Math.abs(control) < 1;
+  ctrlEl.textContent  = cuadra ? '✓ S/. 0.00' : '✗ ' + fmt(Math.abs(control));
+  ctrlEl.className    = 'fc-bot-val ' + (cuadra ? 'green' : 'red');
+  ctrlBadge.style.display = cuadra ? 'inline-flex' : 'none';
+  ctrlBadge.className = 'fc-ctrl-badge ' + (cuadra ? 'ok' : 'err');
+  ctrlBadge.textContent = cuadra ? '✓ Cuadra' : '✗ Diferencia';
 
   // ── RENDER BLOQUE MOVIMIENTOS ──
-  document.getElementById('fc-ing-ventas').textContent   = fmt(ingVentas);
-  document.getElementById('fc-egr-soles').textContent    = fmt(egrCompras);
-  document.getElementById('fc-egr-costos').textContent   = fmt(egrCostos);
-  document.getElementById('fc-egr-gastos').textContent   = fmt(egrGastos);
-  const netoEl = document.getElementById('fc-neto-mes');
-  netoEl.textContent = fmt(netoMes);
-  netoEl.className = 'fc-total-val ' + (netoMes >= 0 ? 'green' : 'red');
+  // Movimientos
+  document.getElementById('fc-ing-ventas').textContent      = ingVentas > 0 ? '+ ' + fmt(ingVentas) : fmt(ingVentas);
+  document.getElementById('fc-egr-soles').textContent       = egrCompras > 0 ? '− ' + fmt(egrCompras) : '—';
+  document.getElementById('fc-egr-costos-gastos').textContent = (egrCostos + egrGastos) > 0 ? '− ' + fmt(egrCostos + egrGastos) : '—';
 
-  document.getElementById('fc-pend-soles').textContent  = fmt(pendSoles);
-  document.getElementById('fc-pend-usd').textContent    = '$ ' + parseFloat(pendUsd).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2});
-  document.getElementById('fc-reservas').textContent    = fmt(reservasMes);
-  document.getElementById('fc-por-pagar').textContent   = fmt(pendSoles);
+  // Neto
+  const netoEl = document.getElementById('fc-neto-mes');
+  netoEl.textContent = (netoMes >= 0 ? '+ ' : '− ') + fmt(Math.abs(netoMes));
+  netoEl.className = 'fc-bot-val ' + (netoMes >= 0 ? 'green' : 'red');
+
+  // Pendientes — mostrar solo si hay, sin conversión
+  const pendSolesProds = pendMes.filter(p => (p.moneda||'SOLES') !== 'USD');
+  const pendUsdProds   = pendMes.filter(p => p.moneda === 'USD');
+  const pendSolesAmt   = pendSolesProds.reduce((s,p) => s + parseFloat(p.precio_compra_soles||0), 0);
+  const pendUsdAmt     = pendUsdProds.reduce((s,p) => s + parseFloat(p.precio_compra_usd||0), 0);
+
+  const rowS = document.getElementById('fc-pend-soles-row');
+  const rowU = document.getElementById('fc-pend-usd-row');
+  if(pendSolesAmt > 0){
+    document.getElementById('fc-pend-soles').textContent = fmt(pendSolesAmt);
+    rowS.style.display = 'flex';
+  } else { rowS.style.display = 'none'; }
+  if(pendUsdAmt > 0){
+    document.getElementById('fc-pend-usd').textContent = '$ ' + pendUsdAmt.toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2});
+    rowU.style.display = 'flex';
+  } else { rowU.style.display = 'none'; }
 
   // ── RENDER TABLA ──
   renderFlujoTabla();
