@@ -277,17 +277,17 @@ input[list] { cursor: text; }
 
 
 /* ── INDICADORES ── */
-.ind-row{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:12px;margin-bottom:20px}
+.ind-row{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:10px;margin-bottom:14px}
 @media(max-width:1000px){.ind-row{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.ind-row{grid-template-columns:1fr}}
 
-.ind-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;position:relative;overflow:hidden}
+.ind-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;position:relative;overflow:hidden}
 
 /* Patrimonio */
-.pat-chip{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:14px}
-.pat-total{font-family:"Archivo Black";font-size:22px;color:var(--text);margin-bottom:3px;font-variant-numeric:tabular-nums}
-.pat-sub{font-size:11px;color:var(--muted2);margin-bottom:14px;letter-spacing:.2px}
-.pat-bar-wrap{height:5px;background:var(--border2);border-radius:4px;overflow:hidden;margin-bottom:14px;display:flex}
+.pat-chip{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:8px}
+.pat-total{font-family:"Archivo Black";font-size:18px;color:var(--text);margin-bottom:2px;font-variant-numeric:tabular-nums}
+.pat-sub{font-size:10px;color:var(--muted2);margin-bottom:8px;letter-spacing:.2px}
+.pat-bar-wrap{height:4px;background:var(--border2);border-radius:4px;overflow:hidden;margin-bottom:8px;display:flex}
 .pat-bar-inner{height:100%;border-radius:0;background:var(--accent);transition:width .7s cubic-bezier(.4,0,.2,1)}
 .pat-legend{display:flex;justify-content:space-between;align-items:flex-end}
 .pat-leg-item{display:flex;flex-direction:column;gap:3px}
@@ -297,21 +297,21 @@ input[list] { cursor: text; }
 .pat-leg-dot::before{content:'';width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .caja-dot::before{background:var(--accent)}
 .stock-dot::before{background:#60a5fa}
-.pat-leg-pct{font-family:"Archivo Black";font-size:22px;line-height:1;font-variant-numeric:tabular-nums}
+.pat-leg-pct{font-family:"Archivo Black";font-size:17px;line-height:1;font-variant-numeric:tabular-nums}
 .pat-leg-pct.accent{color:var(--accent)}
 .pat-leg-pct.blue{color:#60a5fa}
 .pat-leg-amt{font-size:10px;color:var(--muted2);font-variant-numeric:tabular-nums;margin-top:1px}
 
 /* Cards simples */
-.sim-chip{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.sim-chip{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:8px;display:flex;align-items:center;gap:6px}
 .sim-chip-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
 .dot-green{background:var(--green)}
 .dot-accent{background:var(--accent);box-shadow:0 0 5px var(--accent)}
 .dot-red{background:var(--red)}
 .dot-purple{background:#a78bfa}
-.sim-num{font-family:"Archivo Black";font-size:22px;line-height:1;letter-spacing:-1px;margin-bottom:4px;font-variant-numeric:tabular-nums}
+.sim-num{font-family:"Archivo Black";font-size:18px;line-height:1;letter-spacing:-1px;margin-bottom:3px;font-variant-numeric:tabular-nums}
 .sim-lbl{font-size:11px;color:var(--muted2);letter-spacing:.2px}
-.sim-trend{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;margin-top:10px;padding:3px 10px;border-radius:20px}
+.sim-trend{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:700;margin-top:6px;padding:2px 8px;border-radius:20px}
 .trend-up{background:rgba(0,230,118,.1);color:var(--green)}
 .trend-down{background:rgba(255,23,68,.1);color:var(--red)}
 .trend-neu{background:rgba(114,114,138,.1);color:var(--muted2)}
