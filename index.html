@@ -175,7 +175,7 @@ tbody tr:hover td{background:rgba(255,255,255,.03)}
 .sg-mes-row3 .sg-mn-tot{text-align:right}
 .sg-h{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);text-align:right}
 .sg-h:first-child{text-align:left}
-.sg-mc{font-size:12px;color:var(--muted2)}
+.sg-mc{font-size:12px;color:var(--muted2)}.sg-uni-head{display:grid;grid-template-columns:1fr auto;gap:0 8px;padding-bottom:6px}.sg-uni-row{display:grid;grid-template-columns:1fr auto;gap:0 8px;padding:4px 0;align-items:center}
 .sg-mc-tot{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2)}
 .sg-mn{font-family:"Archivo Black";font-size:13px;color:var(--text);text-align:right;white-space:nowrap}
 .sg-mn.accent{color:var(--accent)}
@@ -932,19 +932,38 @@ input[list] { cursor: text; }
     </div>
     <!-- VALOR STOCK -->
     <div class="stat-card">
-      <div class="sg-mes-head"><span class="sg-h" style="text-align:left">VALOR STOCK</span><span class="sg-h">MONTO S/.</span></div>
-      <div class="sg-mes-row"><span class="sg-mc">👟 Zapatillas</span><span class="sg-mn accent" id="st-zap-val">—</span></div>
-      <div class="sg-mes-row"><span class="sg-mc">👕 Ropa &amp; Otros</span><span class="sg-mn accent" id="st-ropa-val">—</span></div>
-      <div class="sg-divider"></div>
-      <div class="sg-mes-row"><span class="sg-mc-tot">Total</span><span class="sg-mn-tot accent" id="st-total-val">—</span></div>
+      <div class="sg-uni-head">
+        <span class="sg-h" style="text-align:left">VALOR STOCK</span>
+        <span class="sg-h">MONTO S/.</span>
+      </div>
+      <div class="sg-divider" style="margin:6px 0"></div>
+      <div class="sg-uni-row"><span class="sg-mc">👟 Zapatillas</span><span class="sg-mn accent" id="st-zap-val">—</span></div>
+      <div class="sg-uni-row"><span class="sg-mc">👕 Ropa &amp; Otros</span><span class="sg-mn accent" id="st-ropa-val">—</span></div>
+      <div class="sg-divider" style="margin:6px 0"></div>
+      <div class="sg-uni-row"><span class="sg-mc-tot">Total</span><span class="sg-mn-tot accent" id="st-total-val">—</span></div>
     </div>
     <!-- COMPRAS DEL MES -->
     <div class="stat-card">
-      <div class="sg-mes-head3"><span class="sg-h" style="text-align:left">COMPRAS MES</span><span class="sg-h">UDS</span><span class="sg-h">MONTO S/.</span></div>
-      <div class="sg-mes-row3"><span class="sg-mc">👟 Zapatillas</span><span class="sg-mn" id="st-mes-zap-uds">—</span><span class="sg-mn accent" id="st-mes-zap-val">—</span></div>
-      <div class="sg-mes-row3"><span class="sg-mc">👕 Ropa &amp; Otros</span><span class="sg-mn" id="st-mes-ropa-uds">—</span><span class="sg-mn accent" id="st-mes-ropa-val">—</span></div>
-      <div class="sg-divider"></div>
-      <div class="sg-mes-row3"><span class="sg-mc-tot">Total</span><span class="sg-mn-tot" id="st-mes-uds-total">—</span><span class="sg-mn-tot red" id="st-mes-val">—</span></div>
+      <div style="display:grid;grid-template-columns:1fr auto auto;gap:0 8px;padding-bottom:6px">
+        <span class="sg-h" style="text-align:left">COMPRAS MES</span>
+        <span class="sg-h" style="min-width:36px;text-align:right">UDS</span>
+        <span class="sg-h" style="min-width:100px;text-align:right">MONTO S/.</span>
+      </div>
+      <div class="sg-divider" style="margin:6px 0"></div>
+      <div style="display:grid;grid-template-columns:1fr auto auto;gap:4px 8px;align-items:center">
+        <span class="sg-mc">👟 Zapatillas</span>
+        <span class="sg-mn" id="st-mes-zap-uds" style="min-width:36px;text-align:right">—</span>
+        <span class="sg-mn accent" id="st-mes-zap-val" style="min-width:100px;text-align:right">—</span>
+        <span class="sg-mc">👕 Ropa &amp; Otros</span>
+        <span class="sg-mn" id="st-mes-ropa-uds" style="min-width:36px;text-align:right">—</span>
+        <span class="sg-mn accent" id="st-mes-ropa-val" style="min-width:100px;text-align:right">—</span>
+      </div>
+      <div class="sg-divider" style="margin:6px 0"></div>
+      <div style="display:grid;grid-template-columns:1fr auto auto;gap:0 8px;align-items:center">
+        <span class="sg-mc-tot">Total</span>
+        <span class="sg-mn-tot" id="st-mes-uds-total" style="min-width:36px;text-align:right">—</span>
+        <span class="sg-mn-tot red" id="st-mes-val" style="min-width:100px;text-align:right">—</span>
+      </div>
     </div>
   </div>
 
