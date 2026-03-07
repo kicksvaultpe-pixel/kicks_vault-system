@@ -2154,6 +2154,8 @@ async function loadFlujo() {
     fcMesActual = fcMesStr(now);
   }
   document.getElementById('fc-mes-label').textContent = fcMesLabel(fcMesActual);
+  // Asegurar inventarioCache cargado
+  if(!inventarioCache.length) await loadInventario();
 
   const [y,m] = fcMesActual.split('-').map(Number);
   const fechaInicio = `${y}-${String(m).padStart(2,'0')}-01`;
@@ -2177,12 +2179,30 @@ async function loadFlujo() {
   if(cajaMes) {
     cajaInicio = parseFloat(cajaMes.caja_inicio||0);
   } else {
-    // Intentar derivar del mes anterior: buscar caja_mensual mes-1
+    // Calcular caja_fin del mes anterior dinámicamente
     const dPrev = new Date(y, m-2, 1);
     const mesPrev = fcMesStr(dPrev);
+    const prevIni = `${mesPrev}-01`;
+    const dPrevFin = new Date(y, m-2, 0);
+    const prevFinStr = dPrevFin.toISOString().substring(0,10);
+
+    // Buscar caja_mensual del mes anterior
     const {data:cajaPrev} = await db.from('caja_mensual')
-      .select('*').eq('mes', mesPrev).single();
-    if(cajaPrev) cajaInicio = parseFloat(cajaPrev.caja_inicio||0);
+      .select('*').eq('mes', mesPrev).maybeSingle();
+    const cajaPrevInicio = cajaPrev ? parseFloat(cajaPrev.caja_inicio||0) : 0;
+
+    // Sumar movimientos del mes anterior para derivar caja_fin
+    const {data:flujoPrev} = await db.from('flujo_caja')
+      .select('ingreso_soles,egreso_soles,categoria')
+      .gte('fecha', prevIni).lte('fecha', prevFinStr);
+    const fp = flujoPrev || [];
+    const pIngV  = fp.filter(f=>f.categoria==='VENTA').reduce((s,f)=>s+parseFloat(f.ingreso_soles||0),0);
+    const pEgrC  = fp.filter(f=>f.categoria==='COMPRA').reduce((s,f)=>s+parseFloat(f.egreso_soles||0),0);
+    const pEgrCo = fp.filter(f=>f.categoria==='COSTO').reduce((s,f)=>s+parseFloat(f.egreso_soles||0),0);
+    const pEgrG  = fp.filter(f=>['OPERATIVO','MARKETING','PERSONAL','IMPORTACION'].includes(f.categoria)).reduce((s,f)=>s+parseFloat(f.egreso_soles||0),0);
+    const pReserv= fp.filter(f=>f.categoria==='RESERVA').reduce((s,f)=>s+parseFloat(f.ingreso_soles||0),0);
+    const cajaPrevFin = cajaPrevInicio + pIngV - pEgrC - pEgrCo - pEgrG - pReserv;
+    cajaInicio = cajaPrevFin;
   }
 
   // STOCK INICIO — productos DISPONIBLES + PAGADO al último día del mes anterior
@@ -2230,10 +2250,10 @@ async function loadFlujo() {
     .lte('fecha_venta', fechaFinStr);
   const ganancias = (ventasMes||[]).reduce((s,v) => s + parseFloat(v.ganancia||0), 0);
 
-  // CÁLCULOS
+  // CÁLCULOS — egresos son positivos en BD, se restan
   const totalAntesGanancias = cajaInicio + stockInicio;
   const total = totalAntesGanancias + ganancias;
-  const netoMes = ingVentas + egrCompras + egrCostos + egrGastos;
+  const netoMes = ingVentas - egrCompras - egrCostos - egrGastos;
   const cajaActual = cajaInicio + netoMes;
   const cajaFin = cajaActual - reservasMes;
   const totalFin = cajaFin + stockFin;
@@ -2257,9 +2277,9 @@ async function loadFlujo() {
 
   // ── RENDER BLOQUE MOVIMIENTOS ──
   document.getElementById('fc-ing-ventas').textContent   = fmt(ingVentas);
-  document.getElementById('fc-egr-soles').textContent    = fmt(Math.abs(egrCompras));
-  document.getElementById('fc-egr-costos').textContent   = fmt(Math.abs(egrCostos));
-  document.getElementById('fc-egr-gastos').textContent   = fmt(Math.abs(egrGastos));
+  document.getElementById('fc-egr-soles').textContent    = fmt(egrCompras);
+  document.getElementById('fc-egr-costos').textContent   = fmt(egrCostos);
+  document.getElementById('fc-egr-gastos').textContent   = fmt(egrGastos);
   const netoEl = document.getElementById('fc-neto-mes');
   netoEl.textContent = fmt(netoMes);
   netoEl.className = 'fc-total-val ' + (netoMes >= 0 ? 'green' : 'red');
