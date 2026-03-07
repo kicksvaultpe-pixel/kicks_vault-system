@@ -414,7 +414,7 @@ input[list] { cursor: text; }
 .fc-tabla .td-ing{font-family:"Archivo Black";font-size:13px;color:var(--green);text-align:right;font-variant-numeric:tabular-nums}
 .fc-tabla .td-egr{font-family:"Archivo Black";font-size:13px;color:var(--red);text-align:right;font-variant-numeric:tabular-nums}
 .fc-tabla .td-egr-usd{font-family:"Archivo Black";font-size:13px;color:#f97316;text-align:right;font-variant-numeric:tabular-nums}
-.fc-tabla .td-pend{color:var(--yellow);font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+.fc-tabla .td-pend{font-family:"Archivo Black";font-size:13px;color:var(--yellow);text-align:right;font-variant-numeric:tabular-nums}
 .fc-tabla .td-reserva{color:#a855f7;font-size:12px;font-weight:700}
 .fc-tabla .td-muted{color:var(--muted2);text-align:right}
 .fc-accion-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:.5px;white-space:nowrap}
@@ -429,7 +429,7 @@ input[list] { cursor: text; }
 /* ── MÓVIL: scroll horizontal en tabla ── */
 @media(max-width:700px){
   .fc-tabla-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  .fc-tabla{min-width:680px}
+  .fc-tabla{min-width:820px}
 }
 
 /* MISC */
@@ -1171,9 +1171,10 @@ input[list] { cursor: text; }
         <th style="width:90px">Código</th>
         <th>Descripción</th>
         <th style="width:60px;text-align:center">Talla</th>
-        <th class="right" style="width:130px">Ingreso S/.</th>
-        <th class="right" style="width:130px">Egreso S/.</th>
-        <th class="right" style="width:110px">Egreso $</th>
+        <th class="right" style="width:120px">Ingreso S/.</th>
+        <th class="right" style="width:120px">Egreso S/.</th>
+        <th class="right" style="width:130px">Pend. S/.</th>
+        <th class="right" style="width:110px">Pend. $</th>
         <th style="width:120px">Información</th>
       </tr></thead>
       <tbody id="fc-tabla-body">
@@ -2588,6 +2589,7 @@ function renderFlujoTabla() {
       <td class="right">${ingHtml}</td>
       <td class="right">${egrHtml}</td>
       <td class="td-muted">—</td>
+      <td class="td-muted">—</td>
       <td class="td-fecha" style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${f.categoria||f.tipo||''}</td>
     </tr>`;
   });
@@ -2605,6 +2607,7 @@ function renderFlujoTabla() {
       <td class="td-desc" title="${desc}">${desc}</td>
       <td class="td-talla">${p.talla||'—'}</td>
       <td class="right">—</td>
+      <td class="td-muted">—</td>
       <td class="right">${montoSoles}</td>
       <td class="right">${montoUsd}</td>
       <td class="td-fecha" style="color:var(--yellow)">OC: ${p.orden_compra||'—'}</td>
