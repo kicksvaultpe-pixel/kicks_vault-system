@@ -2017,7 +2017,6 @@ async function registrarCompra(){
       tipo_pago:tipoPagoActual,
       pago_estado:esCredito?'PENDIENTE':'PAGADO',
       moneda:tipoPagoActual==='CONTADO'?'SOLES':monedaVal,
-      fecha_vencimiento:null,
       orden_compra:ordenCompra
     });
     if(error)throw error;
