@@ -2013,22 +2013,7 @@ async function registrarCompra(){
       orden_compra:ordenCompra
     });
     if(error)throw error;
-    // Registrar egreso en flujo_caja solo si CONTADO
-    if(!esCredito){
-      const desc=[marca,silueta,colorway].filter(Boolean).join(' ');
-      const fcTalla=document.getElementById('cp-talla').value.trim()||null;
-      const fcFecha=document.getElementById('cp-fecha').value||new Date().toISOString().substring(0,10);
-      await db.from('flujo_caja').insert({
-        fecha:fcFecha,
-        tipo:'COMPRA',
-        categoria:'COMPRA',
-        descripcion:desc,
-        ingreso_soles:0,
-        egreso_soles:pc||0,
-        referencia_id:cod,
-        talla:fcTalla
-      });
-    }
+    // flujo_caja lo maneja trigger after_compra en Supabase
     toast(`✓ ${cod} registrado${esCredito?' — ● PENDIENTE':''}`, 'ok');
     ['cp-marca','cp-silueta','cp-colorway','cp-talla','cp-usd','cp-soles','cp-pventa','cp-factura','cp-desc-factura','cp-comentarios','cp-soles-contado','cp-pventa-credito','cp-factura-credito','cp-comentarios-credito'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     document.getElementById('cp-tc').value='3.70';
@@ -2066,15 +2051,7 @@ async function registrarVenta(){
     if(error)throw error;
     // UPDATE inventario estado=VENDIDO
     await db.from('inventario').update({estado:'VENDIDO'}).eq('codigo_producto',codProd);
-    // Registrar ingreso en flujo_caja
-    const descV=[prod?.marca,prod?.silueta,prod?.colorway].filter(Boolean).join(' ');
-    await db.from('flujo_caja').insert({
-      tipo:'INGRESO', categoria:'VENTA',
-      monto:precio,
-      descripcion:descV,
-      referencia_id:cv,
-      fecha:document.getElementById('vt-fecha').value
-    });
+    // flujo_caja lo maneja trigger after_venta en Supabase
     toast(`✓ ${cv} — Ganancia: ${fmt(g)}`,'ok');
     ['vt-precio','vt-comprador'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('vt-producto').value='';
@@ -2147,16 +2124,7 @@ async function registrarPago(){
       fecha:document.getElementById('pg-fecha').value
     });
     if(error)throw error;
-    const pgCat=document.getElementById('pg-cat').value;
-    await db.from('flujo_caja').insert({
-      fecha:document.getElementById('pg-fecha').value,
-      tipo:pgCat,
-      categoria:pgCat,
-      descripcion:concepto,
-      ingreso_soles:0,
-      egreso_soles:Math.abs(monto),
-      referencia_id:null
-    });
+    // flujo_caja lo maneja trigger after_pago en Supabase
     toast('✓ Pago registrado','ok');
     ['pg-concepto','pg-monto'].forEach(id=>document.getElementById(id).value='');
   }catch(e){toast('Error: '+e.message,'err');}
