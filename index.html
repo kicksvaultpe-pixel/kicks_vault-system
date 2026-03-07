@@ -609,7 +609,7 @@ input[list] { cursor: text; }
             <option value="MARKETING">📣 Marketing</option>
           </select>
         </div>
-        <div class="field"><label>Monto S/.</label><input type="number" id="pg-monto" placeholder="-100.00" step="0.01"></div>
+        <div class="field"><label>Monto S/.</label><input type="number" id="pg-monto" placeholder="100.00" step="0.01" min="0"></div>
         <div class="field"><label>Fecha</label><input type="date" id="pg-fecha"></div>
       </div>
     </div>
@@ -638,26 +638,24 @@ input[list] { cursor: text; }
         </div>
       </div>
 
-      <!-- OC en costo -->
+      <!-- OC como filtro -->
       <div style="border-top:1px solid var(--border);margin-top:12px;padding-top:12px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <div class="card-label" style="margin:0">Orden de Compra <span style="color:var(--muted2);font-weight:400;font-size:10px">(opcional)</span></div>
+          <div class="card-label" style="margin:0">Filtrar por Orden de Compra <span style="color:var(--muted2);font-weight:400;font-size:10px">(opcional)</span></div>
           <div id="cs-oc-badge" style="display:none;background:rgba(200,255,0,.1);border:1px solid rgba(200,255,0,.3);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;color:var(--accent)"></div>
         </div>
         <div class="form-grid g2">
           <div class="field">
-            <label>Vincular a OC</label>
             <select id="cs-oc-select" onchange="csOCChange()">
-              <option value="">— Sin OC —</option>
+              <option value="">— Sin filtro OC —</option>
             </select>
           </div>
           <div id="cs-oc-info" style="display:none" class="field">
-            <label>Info OC</label>
-            <div style="background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;font-size:12px;display:flex;gap:14px;align-items:center">
+            <div style="background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;font-size:12px;display:flex;gap:14px;align-items:center;height:100%">
               <span id="cs-oc-tipo" style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted2)"></span>
-              <span>·</span>
+              <span style="color:var(--muted)">·</span>
               <span id="cs-oc-prods" style="color:var(--text)"></span>
-              <span>·</span>
+              <span style="color:var(--muted)">·</span>
               <span id="cs-oc-monto" style="color:var(--accent);font-weight:700"></span>
             </div>
           </div>
@@ -1075,19 +1073,26 @@ function csOCChange(){
   const cod=document.getElementById('cs-oc-select').value;
   const badge=document.getElementById('cs-oc-badge');
   const info=document.getElementById('cs-oc-info');
-  if(!cod){ badge.style.display='none'; info.style.display='none'; return; }
+  if(!cod){
+    badge.style.display='none';
+    info.style.display='none';
+    buscarProductoCosto();
+    return;
+  }
   const oc=ocCache.find(o=>o.codigo===cod);
   if(!oc){ badge.style.display='none'; info.style.display='none'; return; }
   // Badge
   badge.textContent=cod;
   badge.style.display='';
-  // Info
-  const prods=inventarioCache.filter(p=>p.orden_compra===cod);
+  // Info card
+  const prods=inventarioCache.filter(p=>p.orden_compra===cod&&p.estado!=='CANCELADO'&&p.estado!=='VENDIDO');
   const monto=prods.reduce((s,p)=>s+parseFloat(p.precio_compra_soles||0),0);
-  document.getElementById('cs-oc-tipo').textContent=(oc.tipo==='IMPORTACION'?'✈️ ':' 🏪 ')+oc.tipo;
+  document.getElementById('cs-oc-tipo').textContent=(oc.tipo==='IMPORTACION'?'✈️ ':'🏪 ')+oc.tipo;
   document.getElementById('cs-oc-prods').textContent=prods.length+' productos';
   document.getElementById('cs-oc-monto').textContent=fmt(monto);
   info.style.display='';
+  // Refrescar tabla con productos de esta OC
+  buscarProductoCosto();
 }
 
 // ── TC GLOBAL ──
@@ -1738,7 +1743,7 @@ async function registrarPago(){
   const btn=document.getElementById('btn-pago');setLoading(btn,true);
   try{
     const{error}=await db.from('pagos').insert({
-      concepto,monto_soles:monto<0?monto:-Math.abs(monto),
+      concepto,monto_soles:-Math.abs(monto),
       categoria:document.getElementById('pg-cat').value,
       fecha:document.getElementById('pg-fecha').value
     });
@@ -1757,11 +1762,13 @@ function buscarProductoCosto(){
   const g=id=>(document.getElementById(id)||{value:''}).value.toLowerCase().trim();
   const marca=g('cs-f-marca'), silueta=g('cs-f-silueta');
   const colorway=g('cs-f-colorway'), talla=g('cs-f-talla');
+  const ocFiltro=(document.getElementById('cs-oc-select')||{value:''}).value;
   const body=document.getElementById('cs-resultados-body');
   const yaAgregados=new Set(costoLista.map(x=>x.codigo));
   const res=inventarioCache.filter(p=>
     p.estado!=='CANCELADO'&&p.estado!=='VENDIDO'&&
     !yaAgregados.has(p.codigo_producto)&&
+    (!ocFiltro||(p.orden_compra===ocFiltro))&&
     (!marca||(p.marca||'').toLowerCase().includes(marca))&&
     (!silueta||(p.silueta||'').toLowerCase().includes(silueta))&&
     (!colorway||(p.colorway||'').toLowerCase().includes(colorway))&&
