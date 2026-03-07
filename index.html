@@ -2502,10 +2502,13 @@ function renderFlujoTabla() {
   const dFin = new Date(y, m, 0);
   const fechaFinStr = dFin.toISOString().substring(0,10);
 
+  // Créditos del mes del inventario que NO tienen fila en flujo_caja todavía (antiguos)
+  const codigosEnFlujo = new Set(flujoCache.filter(f=>(f.tipo||'').toUpperCase()==='PENDIENTE').map(f=>f.referencia_id));
   const pendRows = inventarioCache.filter(p =>
     p.pago_estado === 'PENDIENTE' &&
     p.fecha_compra >= fechaInicio &&
-    p.fecha_compra <= fechaFinStr
+    p.fecha_compra <= fechaFinStr &&
+    !codigosEnFlujo.has(p.codigo_producto)
   );
 
   if(!flujoCache.length && !pendRows.length) {
@@ -2550,7 +2553,27 @@ function renderFlujoTabla() {
     </tr>`;
   });
 
-  body.innerHTML = rows.join('');
+  // Filas pendientes antiguas (inventario sin fila en flujo_caja)
+  const pendRows2 = pendRows.map(p => {
+    const desc = [p.marca,p.silueta,p.colorway].filter(Boolean).join(' ');
+    const esUsd = p.moneda === 'USD';
+    const pendS = !esUsd ? `<span class="td-pend">⏳ ${fmt(p.precio_compra_soles||0)}</span>` : '<span class="td-muted">—</span>';
+    const pendU = esUsd  ? `<span class="td-egr-usd">⏳ ${fmtUsdAmt(p.precio_compra_usd)}</span>` : '<span class="td-muted">—</span>';
+    return `<tr class="row-pend">
+      <td class="td-fecha">${fmtFecha(p.fecha_compra)}</td>
+      <td><span class="fc-accion-badge fc-accion-PENDIENTE">PENDIENTE</span></td>
+      <td><span class="td-code">${p.codigo_producto}</span></td>
+      <td class="td-desc" title="${desc}">${desc}</td>
+      <td class="td-talla">${p.talla||'—'}</td>
+      <td class="right">—</td>
+      <td class="td-muted">—</td>
+      <td class="right">${pendS}</td>
+      <td class="right">${pendU}</td>
+      <td class="td-fecha" style="color:var(--yellow)">CRÉDITO</td>
+    </tr>`;
+  });
+
+  body.innerHTML = [...rows, ...pendRows2].join('');
 }
 
 // ── GENERAR CODIGO ──
