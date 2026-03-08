@@ -1582,13 +1582,13 @@ function renderInventario(rows){
     // Estado badge
     let estadoBadge;
     if(isCancelado)
-      estadoBadge='<span class="badge" style="background:rgba(100,100,100,.2);color:#666;border:1px solid #444">✕ CANCELADO</span>';
+      estadoBadge='<span class="badge badge-muted">✕ Cancelado</span>';
     else if(isPendiente)
-      estadoBadge='<span class="badge badge-orange">● PENDIENTE</span>';
+      estadoBadge='<span class="badge badge-orange">⏳ Pago Pendiente</span>';
     else if(p.estado==='DISPONIBLE')
-      estadoBadge='<span class="badge badge-green">● DISP</span>';
+      estadoBadge='<span class="badge badge-green">● Disponible</span>';
     else
-      estadoBadge='<span class="badge badge-red">● VEND</span>';
+      estadoBadge='<span class="badge badge-red">✓ Vendido</span>';
 
     // Pago badge + botón
     let pagoBadge;
