@@ -578,15 +578,6 @@ input[list] { cursor: text; }
       </div>
     </div>
 
-    <!-- CONTADO: Factura & Notas -->
-    <div class="card" id="cp-card-factura-contado">
-      <div class="card-label">Factura &amp; Notas</div>
-      <div class="form-grid g3">
-        <div class="field"><label>Factura</label><input type="text" id="cp-factura" placeholder="Nro. factura..."></div>
-        <div class="field span2"><label>Descripción del producto</label><input type="text" id="cp-desc-factura" placeholder="Descripción del producto..."></div>
-        <div class="field span3"><label>Comentarios</label><textarea id="cp-comentarios" placeholder="Condición, origen, notas..."></textarea></div>
-      </div>
-    </div>
 
     <!-- CRÉDITO: USD o soles -->
     <div class="card" id="cp-card-credito" style="display:none">
@@ -680,6 +671,24 @@ input[list] { cursor: text; }
         <div id="oc-session-counter" style="display:none;margin-top:10px;font-size:11px;color:var(--muted2)">
           Esta sesión: <span id="oc-session-count" style="color:var(--accent);font-weight:700">0</span> producto(s) en <span id="oc-session-codigo" style="color:var(--accent)"></span>
         </div>
+      </div>
+    </div>
+    <!-- CONTADO: Factura & Notas -->
+    <div class="card" id="cp-card-factura-contado">
+      <div class="card-label">Factura &amp; Notas</div>
+      <div class="form-grid g3">
+        <div class="field"><label>Factura</label><input type="text" id="cp-factura" placeholder="Nro. factura..."></div>
+        <div class="field span2"><label>Descripción del producto</label><input type="text" id="cp-desc-factura" placeholder="Descripción del producto..."></div>
+        <div class="field span3"><label>Comentarios</label><textarea id="cp-comentarios" placeholder="Condición, origen, notas..."></textarea></div>
+      </div>
+    </div>
+        <!-- CRÉDITO: Factura & Notas -->
+    <div class="card" id="cp-card-factura-credito" style="display:none">
+      <div class="card-label">Factura &amp; Notas</div>
+      <div class="form-grid g3">
+        <div class="field"><label>Factura</label><input type="text" id="cp-factura-credito" placeholder="Nro. factura..."></div>
+        <div class="field span2"><label>Descripción del producto</label><input type="text" id="cp-desc-factura-credito" placeholder="Descripción del producto..."></div>
+        <div class="field span3"><label>Comentarios</label><textarea id="cp-comentarios-credito" placeholder="Proveedor, condiciones, notas..."></textarea></div>
       </div>
     </div>
     <button class="btn btn-primary" id="btn-compra" onclick="registrarCompra()">✓ Registrar Compra</button>
