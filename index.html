@@ -1754,7 +1754,7 @@ function filterInventario(){
   const cat=g('inv-cat').toUpperCase();
 
   let rows=inventarioCache.filter(p=>{
-    const matchCod=!codigo||(p.codigo_producto||'').toUpperCase().startsWith(codigo);
+    const matchCod=!codigo||(p.codigo_producto||'').toUpperCase().includes(codigo);
     const matchM=!marca||(p.marca||'').toLowerCase().includes(marca);
     const matchS=!modelo||(p.modelo||'').toLowerCase().includes(modelo);
     const matchC=!colorway||(p.colorway||'').toLowerCase().includes(colorway);
