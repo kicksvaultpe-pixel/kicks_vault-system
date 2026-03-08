@@ -118,11 +118,11 @@ nav{position:sticky;top:0;z-index:200;background:rgba(5,5,7,.95);backdrop-filter
 .filter-select{background:var(--bg);border:1px solid var(--border2);border-radius:7px;padding:8px 12px;color:var(--text);font-family:'Archivo';font-size:12px;outline:none;cursor:pointer}
 .filter-select:focus{border-color:var(--accent)}
 .table-wrap{overflow-x:auto;border-radius:14px;border:1px solid var(--border);box-shadow:var(--shadow)}
-table{width:100%;border-collapse:collapse;font-size:12px;min-width:1000px}
+table{width:100%;border-collapse:collapse;font-size:8px;font-family:Arial,sans-serif;min-width:1000px}
 thead tr{background:var(--surface)}
-th{padding:11px 14px;text-align:left;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);white-space:nowrap;border-bottom:1px solid var(--border)}
+th{padding:7px 10px;text-align:left;font-size:8px;font-family:Arial,sans-serif;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);white-space:nowrap;border-bottom:1px solid var(--border)}
 th[onclick]:hover{color:var(--accent);background:rgba(200,255,0,.04);cursor:pointer}
-td{padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;white-space:nowrap;color:var(--text)}
+td{padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;white-space:nowrap;color:var(--text);font-size:8px;font-family:Arial,sans-serif}
 tbody tr:last-child td{border-bottom:none}
 tbody tr:hover td{background:rgba(255,255,255,.03)}
 .td-main{font-weight:600;color:var(--text);font-size:13px}
@@ -399,23 +399,23 @@ input[list] { cursor: text; }
 
 /* Tabla movimientos */
 .fc-tabla-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-.fc-tabla{width:100%;border-collapse:collapse;font-size:12px}
+.fc-tabla{width:100%;border-collapse:collapse;font-size:8px;font-family:Arial,sans-serif}
 .fc-tabla thead{background:var(--surface)}
-.fc-tabla thead th{padding:11px 16px;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);white-space:nowrap;border-bottom:1px solid var(--border);text-align:left}
+.fc-tabla thead th{padding:7px 10px;font-size:8px;font-family:Arial,sans-serif;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);white-space:nowrap;border-bottom:1px solid var(--border);text-align:left}
 .fc-tabla thead th.right{text-align:right}
 .fc-tabla tbody tr{border-top:1px solid rgba(255,255,255,.035);transition:background .15s}
 .fc-tabla tbody tr:hover{background:rgba(255,255,255,.03)}
 .fc-tabla tbody tr.row-pend{opacity:.75;background:rgba(250,204,21,.02)}
 .fc-tabla tbody tr.row-pend:hover{background:rgba(250,204,21,.04)}
-.fc-tabla tbody td{padding:11px 16px;color:var(--text);vertical-align:middle;white-space:nowrap}
-.fc-tabla .td-fecha{color:var(--muted2);font-size:11px;font-variant-numeric:tabular-nums}
-.fc-tabla .td-desc{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}
-.fc-tabla .td-talla{color:var(--muted2);font-size:11px;text-align:center}
-.fc-tabla .td-ing{font-family:"Archivo Black";font-size:13px;color:var(--green);text-align:right;font-variant-numeric:tabular-nums}
-.fc-tabla .td-egr{font-family:"Archivo Black";font-size:13px;color:var(--red);text-align:right;font-variant-numeric:tabular-nums}
-.fc-tabla .td-egr-usd{font-family:"Archivo Black";font-size:13px;color:#f97316;text-align:right;font-variant-numeric:tabular-nums}
-.fc-tabla .td-pend{font-family:"Archivo Black";font-size:13px;color:var(--yellow);text-align:right;font-variant-numeric:tabular-nums}
-.fc-tabla .td-reserva{color:#a855f7;font-size:12px;font-weight:700}
+.fc-tabla tbody td{padding:6px 10px;color:var(--text);vertical-align:middle;white-space:nowrap;font-size:8px;font-family:Arial,sans-serif}
+.fc-tabla .td-fecha{color:var(--muted2);font-size:8px;font-variant-numeric:tabular-nums}
+.fc-tabla .td-desc{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:8px}
+.fc-tabla .td-talla{color:var(--muted2);font-size:8px;text-align:center}
+.fc-tabla .td-ing{font-family:Arial,sans-serif;font-size:8px;font-weight:700;color:var(--green);text-align:right;font-variant-numeric:tabular-nums}
+.fc-tabla .td-egr{font-family:Arial,sans-serif;font-size:8px;font-weight:700;color:var(--red);text-align:right;font-variant-numeric:tabular-nums}
+.fc-tabla .td-egr-usd{font-family:Arial,sans-serif;font-size:8px;font-weight:700;color:#f97316;text-align:right;font-variant-numeric:tabular-nums}
+.fc-tabla .td-pend{font-family:Arial,sans-serif;font-size:8px;font-weight:700;color:var(--yellow);text-align:right;font-variant-numeric:tabular-nums}
+.fc-tabla .td-reserva{color:#a855f7;font-size:8px;font-weight:700}
 .fc-tabla .td-muted{color:var(--muted2);text-align:right}
 .fc-accion-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:.5px;white-space:nowrap}
 .fc-accion-COMPRA{background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.18)}
