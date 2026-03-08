@@ -2031,7 +2031,7 @@ async function registrarCompra(){
     // flujo_caja lo maneja trigger after_compra en Supabase
     toast(`✓ ${cod} registrado${esCredito?' — ● PENDIENTE':''}`, 'ok');
     ['cp-marca','cp-modelo','cp-colorway','cp-talla','cp-usd','cp-soles','cp-pventa','cp-factura','cp-desc-factura','cp-comentarios','cp-soles-contado','cp-pventa-credito','cp-factura-credito','cp-desc-factura-credito','cp-comentarios-credito'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-    document.getElementById('cp-tc').value='3.70';
+    document.getElementById('cp-tc').value=document.getElementById('tc-global').value||'3.70';
     await loadOCs();
     if(ocModo==='nueva'){ pregenOC(); }
     else { ocExistenteChange(); }
