@@ -836,46 +836,20 @@ input[list] { cursor: text; }
     <!-- Filtros combos producto -->
     <div class="card" style="margin-bottom:12px">
       <div class="card-label">Agregar producto a la lista</div>
-      <!-- Buscador código -->
+      <!-- Buscador único -->
       <div style="margin-bottom:10px">
-        <input type="text" id="cs-f-codigo" placeholder="🔍 Buscar por código de producto..." autocomplete="off"
-          style="width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:9px;padding:9px 14px;color:var(--text);font-family:'Archivo Black';font-size:13px;color:var(--accent);letter-spacing:.5px"
-          oninput="buscarProductoCosto()">
+        <input type="text" id="cs-f-buscar" placeholder="🔍 Buscar por código, marca, modelo, colorway o talla..."
+          autocomplete="off"
+          style="width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:9px;padding:10px 14px;color:var(--text);font-family:'Archivo';font-size:12px;outline:none;transition:border .15s"
+          oninput="buscarProductoCosto()"
+          onkeydown="if(event.key==='Enter')buscarProductoCosto()">
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-        <div class="combo-wrap" style="flex:1;min-width:120px">
-          <input type="text" id="cs-f-marca" placeholder="Marca..." autocomplete="off" onblur="comboBlur('cl-cs-marca')"
-            oninput="comboFilter('cs-f-marca','cl-cs-marca');buscarProductoCosto()"
-            onfocus="comboOpen('cs-f-marca','cl-cs-marca')"
-            onkeydown="comboKey(event,'cs-f-marca','cl-cs-marca')">
-          <span class="combo-arrow">▼</span>
-          <div class="combo-list" id="cl-cs-marca"></div>
-        </div>
-        <div class="combo-wrap" style="flex:1;min-width:120px">
-          <input type="text" id="cs-f-modelo" placeholder="Modelo..." autocomplete="off" onblur="comboBlur('cl-cs-modelo')"
-            oninput="comboFilter('cs-f-modelo','cl-cs-modelo');buscarProductoCosto()"
-            onfocus="comboOpen('cs-f-modelo','cl-cs-modelo')"
-            onkeydown="comboKey(event,'cs-f-modelo','cl-cs-modelo')">
-          <span class="combo-arrow">▼</span>
-          <div class="combo-list" id="cl-cs-modelo"></div>
-        </div>
-        <div class="combo-wrap" style="flex:1;min-width:120px">
-          <input type="text" id="cs-f-colorway" placeholder="Colorway..." autocomplete="off" onblur="comboBlur('cl-cs-colorway')"
-            oninput="comboFilter('cs-f-colorway','cl-cs-colorway');buscarProductoCosto()"
-            onfocus="comboOpen('cs-f-colorway','cl-cs-colorway')"
-            onkeydown="comboKey(event,'cs-f-colorway','cl-cs-colorway')">
-          <span class="combo-arrow">▼</span>
-          <div class="combo-list" id="cl-cs-colorway"></div>
-        </div>
-        <div class="combo-wrap" style="min-width:90px">
-          <input type="text" id="cs-f-talla" placeholder="Talla..." autocomplete="off" onblur="comboBlur('cl-cs-talla')"
-            oninput="comboFilter('cs-f-talla','cl-cs-talla');buscarProductoCosto()"
-            onfocus="comboOpen('cs-f-talla','cl-cs-talla')"
-            onkeydown="comboKey(event,'cs-f-talla','cl-cs-talla')">
-          <span class="combo-arrow">▼</span>
-          <div class="combo-list" id="cl-cs-talla"></div>
-        </div>
-      </div>
+      <!-- Campos ocultos para compatibilidad con JS -->
+      <input type="hidden" id="cs-f-codigo">
+      <input type="hidden" id="cs-f-marca">
+      <input type="hidden" id="cs-f-modelo">
+      <input type="hidden" id="cs-f-colorway">
+      <input type="hidden" id="cs-f-talla">
       <div id="cs-resultados-wrap">
         <div class="cs-tabla-wrap">
           <table class="cs-tabla">
@@ -2162,22 +2136,22 @@ async function registrarPago(){
 let costoLista=[];
 
 function buscarProductoCosto(){
-  const g=id=>(document.getElementById(id)||{value:''}).value.toLowerCase().trim();
-  const codigo=g('cs-f-codigo');
-  const marca=g('cs-f-marca'), modelo=g('cs-f-modelo');
-  const colorway=g('cs-f-colorway'), talla=g('cs-f-talla');
+  const q=(document.getElementById('cs-f-buscar')||{value:''}).value.toLowerCase().trim();
+  const codigo=q, marca=q, modelo=q, colorway=q, talla=q;
   const ocFiltro=(document.getElementById('cs-oc-select')||{value:''}).value;
   const body=document.getElementById('cs-resultados-body');
   const yaAgregados=new Set(costoLista.map(x=>x.codigo));
   const res=inventarioCache.filter(p=>
     p.estado!=='CANCELADO'&&p.estado!=='VENDIDO'&&
     !yaAgregados.has(p.codigo_producto)&&
-    (!codigo||(p.codigo_producto||'').toLowerCase().includes(codigo))&&
     (!ocFiltro||(p.orden_compra===ocFiltro))&&
-    (!marca||(p.marca||'').toLowerCase().includes(marca))&&
-    (!modelo||(p.modelo||'').toLowerCase().includes(modelo))&&
-    (!colorway||(p.colorway||'').toLowerCase().includes(colorway))&&
-    (!talla||(p.talla||'').toLowerCase().includes(talla))
+    (!q||(
+      (p.codigo_producto||'').toLowerCase().includes(q)||
+      (p.marca||'').toLowerCase().includes(q)||
+      (p.modelo||'').toLowerCase().includes(q)||
+      (p.colorway||'').toLowerCase().includes(q)||
+      (p.talla||'').toLowerCase().includes(q)
+    ))
   ).slice(0,50);
   if(!res.length){
     body.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted2);padding:12px">Sin resultados</td></tr>';
@@ -2256,6 +2230,7 @@ function limpiarSeleccionCosto(){
   costoLista=[];
 
   document.getElementById('cs-concepto-global').value='';
+  const buscarEl=document.getElementById('cs-f-buscar');if(buscarEl)buscarEl.value='';
   csRenderLista();
 }
 
