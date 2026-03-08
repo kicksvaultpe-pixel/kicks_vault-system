@@ -1003,21 +1003,20 @@ input[list] { cursor: text; }
       <thead><tr>
         <th onclick="sortTable('fecha_compra')" style="cursor:pointer">Fecha <span id="sort-fecha_compra"></span></th>
         <th>Código</th>
-        <th onclick="sortTable('marca')" style="cursor:pointer">Producto <span id="sort-marca"></span></th>
-        <th>Categoría</th>
+        <th onclick="sortTable('marca')" style="cursor:pointer">Marca <span id="sort-marca"></span></th>
+        <th onclick="sortTable('modelo')" style="cursor:pointer">Modelo <span id="sort-modelo"></span></th>
+        <th>Colorway</th>
+        <th>Cat.</th>
         <th onclick="sortTable('talla')" style="cursor:pointer">Talla <span id="sort-talla"></span></th>
         <th onclick="sortTable('precio_compra_soles')" style="cursor:pointer">P. Compra <span id="sort-precio_compra_soles"></span></th>
+        <th>Costos</th>
         <th onclick="sortTable('precio_final')" style="cursor:pointer">P. Final <span id="sort-precio_final"></span></th>
         <th onclick="sortTable('precio_venta_sugerido')" style="cursor:pointer">P. Venta <span id="sort-precio_venta_sugerido"></span></th>
         <th onclick="sortTable('margen')" style="cursor:pointer">Margen <span id="sort-margen"></span></th>
-        <th>Estado</th>
-        <th>Pago</th>
-        <th>OC</th>
-        <th>Factura</th>
-        <th></th>
+        <th>OC</th><th>Estado</th><th>Pago</th><th>Factura</th><th></th>
       </tr></thead>
       <tbody id="inv-tbody">
-        <tr class="loading-row"><td colspan="14"><div class="spinner"></div></td></tr>
+        <tr class="loading-row"><td colspan="17"><div class="spinner"></div></td></tr>
       </tbody>
     </table>
   </div>
@@ -1570,7 +1569,7 @@ async function loadClientes(){
 function renderInventario(rows){
   const tbody=document.getElementById('inv-tbody');
   if(!rows.length){
-    tbody.innerHTML='<tr><td colspan="14"><div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Sin productos</div></div></td></tr>';
+    tbody.innerHTML='<tr><td colspan="17"><div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Sin productos</div></div></td></tr>';
     return;
   }
   tbody.innerHTML=rows.map(p=>{
@@ -1580,27 +1579,27 @@ function renderInventario(rows){
     const isPendiente=p.pago_estado==='PENDIENTE';
 
     const isCancelado=p.estado==='CANCELADO';
-    // Estado badge — nombre completo
+    // Estado badge
     let estadoBadge;
     if(isCancelado)
-      estadoBadge='<span class="badge badge-muted">✕ Cancelado</span>';
+      estadoBadge='<span class="badge" style="background:rgba(100,100,100,.2);color:#666;border:1px solid #444">✕ CANCELADO</span>';
     else if(isPendiente)
-      estadoBadge='<span class="badge badge-orange">⏳ Pago Pendiente</span>';
+      estadoBadge='<span class="badge badge-orange">● PENDIENTE</span>';
     else if(p.estado==='DISPONIBLE')
-      estadoBadge='<span class="badge badge-green">● Disponible</span>';
+      estadoBadge='<span class="badge badge-green">● DISP</span>';
     else
-      estadoBadge='<span class="badge badge-red">✓ Vendido</span>';
+      estadoBadge='<span class="badge badge-red">● VEND</span>';
 
     // Pago badge + botón
     let pagoBadge;
     if(isCancelado)
-      pagoBadge='<span style="color:var(--muted)">—</span>';
+      pagoBadge='<span style="color:var(--muted);font-size:11px">—</span>';
     else if(p.tipo_pago==='CREDITO'&&isPendiente)
       pagoBadge=`<button class="btn-pay" onclick="abrirModalPago('${p.codigo_producto}')">💳 Pagar</button>`;
     else if(p.tipo_pago==='CREDITO')
       pagoBadge='<span class="badge badge-muted">Crédito ✓</span>';
     else
-      pagoBadge='<span style="color:var(--muted2);font-size:10px">Contado</span>';
+      pagoBadge='<span style="color:var(--muted);font-size:11px">Contado</span>';
 
     // Botón cancelar — solo si no está cancelado ni vendido
     const btnCancel=(!isCancelado&&p.estado!=='VENDIDO')
@@ -1624,25 +1623,22 @@ function renderInventario(rows){
     const ventaAmt=pV>0?`<span style="color:var(--accent)">${fmt(pV)}</span>`:'<span style="color:var(--muted)">—</span>';
 
     return`<tr>
-      <td style="color:var(--muted2);font-size:10px">${fecha}</td>
-      <td><span style="font-family:Arial;font-size:10px;font-weight:700;color:var(--accent);letter-spacing:.3px">${p.codigo_producto}</span></td>
-      <td>
-        <div style="font-weight:700;font-size:11px;color:var(--text)">${p.marca||'—'}</div>
-        <div style="font-size:10px;color:var(--muted2);margin-top:1px">${p.modelo||''} ${p.colorway?'· '+p.colorway:''}</div>
-      </td>
-      <td><span class="badge badge-accent" style="font-size:9px">${(p.categoria||'').replace('ZAPATILLAS','👟').replace('ROPA','👕').replace('ACCESORIOS','🧢').replace('OTROS','📦')}</span></td>
-      <td style="font-weight:700;text-align:center">${p.talla||'—'}</td>
-      <td>
-        <div style="font-size:11px;color:var(--muted2)">${pcSoles}</div>
-        ${p.total_costos>0?`<div style="font-size:9px;color:var(--purple);margin-top:1px">+${fmt(p.total_costos)} costos</div>`:''}
-      </td>
-      <td style="font-weight:700">${finalAmt}</td>
+      <td class="td-main" style="font-weight:400">${fecha}</td>
+      <td><span class="td-code">${p.codigo_producto}</span></td>
+      <td class="td-main">${p.marca||'—'}</td>
+      <td class="td-main" style="font-weight:400">${p.modelo||'—'}</td>
+      <td class="td-main" style="font-weight:400">${p.colorway||'—'}</td>
+      <td><span class="badge badge-accent" style="font-size:9px">${p.categoria}</span></td>
+      <td><strong>${p.talla||'—'}</strong></td>
+      <td>${pcSoles}</td>
+      <td>${costosAmt}</td>
+      <td>${finalAmt}</td>
       <td>${ventaAmt}</td>
       <td>${mg}</td>
+      <td>${p.orden_compra?`<span class="td-code" style="font-size:10px">${p.orden_compra}</span>`:`<span style="color:var(--muted)">—</span>`}</td>
       <td>${estadoBadge}</td>
       <td>${pagoBadge}</td>
-      <td style="color:var(--muted2);font-size:10px">${p.orden_compra||'—'}</td>
-      <td>${p.factura?`<span style="font-size:10px;color:var(--muted2)">${p.factura}</span>`:'<span style="color:var(--muted)">—</span>'}</td>
+      <td>${p.factura?`<span class="td-code">${p.factura}</span>`:'<span style="color:var(--muted)">—</span>'}</td>
       <td>${btnCancel}</td>
     </tr>`;
   }).join('');
