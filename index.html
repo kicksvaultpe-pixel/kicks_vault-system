@@ -512,14 +512,14 @@ input[list] { cursor: text; }
         </div>
         </div>
         <div class="field">
-          <label>Silueta</label>
+          <label>Modelo</label>
 <div class="field combo-wrap">
-          <input type="text" id="cp-silueta" placeholder="JORDAN 1" autocomplete="off" onblur="comboBlur('cl-silueta')"
-            oninput="comboFilter('cp-silueta','cl-silueta')"
-            onfocus="comboOpen('cp-silueta','cl-silueta')"
-            onkeydown="comboKey(event,'cp-silueta','cl-silueta')">
+          <input type="text" id="cp-modelo" placeholder="JORDAN 1" autocomplete="off" onblur="comboBlur('cl-modelo')"
+            oninput="comboFilter('cp-modelo','cl-modelo')"
+            onfocus="comboOpen('cp-modelo','cl-modelo')"
+            onkeydown="comboKey(event,'cp-modelo','cl-modelo')">
           <span class="combo-arrow">▼</span>
-          <div class="combo-list" id="cl-silueta"></div>
+          <div class="combo-list" id="cl-modelo"></div>
         </div>
         </div>
         <div class="field">
@@ -729,8 +729,8 @@ input[list] { cursor: text; }
               <select id="rv-marca"><option value="">— Marca —</option></select>
             </div>
             <div class="field">
-              <label>Silueta</label>
-              <select id="rv-silueta"><option value="">— Silueta —</option></select>
+              <label>Modelo</label>
+              <select id="rv-modelo"><option value="">— Modelo —</option></select>
             </div>
             <div class="field">
               <label>Colorway</label>
@@ -850,12 +850,12 @@ input[list] { cursor: text; }
           <div class="combo-list" id="cl-cs-marca"></div>
         </div>
         <div class="combo-wrap" style="flex:1;min-width:120px">
-          <input type="text" id="cs-f-silueta" placeholder="Silueta..." autocomplete="off" onblur="comboBlur('cl-cs-silueta')"
-            oninput="comboFilter('cs-f-silueta','cl-cs-silueta');buscarProductoCosto()"
-            onfocus="comboOpen('cs-f-silueta','cl-cs-silueta')"
-            onkeydown="comboKey(event,'cs-f-silueta','cl-cs-silueta')">
+          <input type="text" id="cs-f-modelo" placeholder="Modelo..." autocomplete="off" onblur="comboBlur('cl-cs-modelo')"
+            oninput="comboFilter('cs-f-modelo','cl-cs-modelo');buscarProductoCosto()"
+            onfocus="comboOpen('cs-f-modelo','cl-cs-modelo')"
+            onkeydown="comboKey(event,'cs-f-modelo','cl-cs-modelo')">
           <span class="combo-arrow">▼</span>
-          <div class="combo-list" id="cl-cs-silueta"></div>
+          <div class="combo-list" id="cl-cs-modelo"></div>
         </div>
         <div class="combo-wrap" style="flex:1;min-width:120px">
           <input type="text" id="cs-f-colorway" placeholder="Colorway..." autocomplete="off" onblur="comboBlur('cl-cs-colorway')"
@@ -878,7 +878,7 @@ input[list] { cursor: text; }
         <div class="cs-tabla-wrap">
           <table class="cs-tabla">
             <thead><tr>
-              <th>Código</th><th>Marca</th><th>Silueta</th><th>Colorway</th><th>Talla</th><th>P. Final</th><th></th>
+              <th>Código</th><th>Marca</th><th>Modelo</th><th>Colorway</th><th>Talla</th><th>P. Final</th><th></th>
             </tr></thead>
             <tbody id="cs-resultados-body"></tbody>
           </table>
@@ -977,12 +977,12 @@ input[list] { cursor: text; }
       <div class="combo-list" id="cl-inv-marca"></div>
     </div>
     <div class="combo-wrap" style="flex:1;min-width:130px">
-      <input type="text" id="inv-silueta" placeholder="Silueta..." autocomplete="off" onblur="comboBlur('cl-inv-silueta')"
-        oninput="comboFilter('inv-silueta','cl-inv-silueta');filterInventario()"
-        onfocus="comboOpen('inv-silueta','cl-inv-silueta')"
-        onkeydown="comboKey(event,'inv-silueta','cl-inv-silueta')">
+      <input type="text" id="inv-modelo" placeholder="Modelo..." autocomplete="off" onblur="comboBlur('cl-inv-modelo')"
+        oninput="comboFilter('inv-modelo','cl-inv-modelo');filterInventario()"
+        onfocus="comboOpen('inv-modelo','cl-inv-modelo')"
+        onkeydown="comboKey(event,'inv-modelo','cl-inv-modelo')">
       <span class="combo-arrow">▼</span>
-      <div class="combo-list" id="cl-inv-silueta"></div>
+      <div class="combo-list" id="cl-inv-modelo"></div>
     </div>
     <div class="combo-wrap" style="flex:1;min-width:130px">
       <input type="text" id="inv-colorway" placeholder="Colorway..." autocomplete="off" onblur="comboBlur('cl-inv-colorway')"
@@ -1025,7 +1025,7 @@ input[list] { cursor: text; }
         <th onclick="sortTable('fecha_compra')" style="cursor:pointer">Fecha <span id="sort-fecha_compra"></span></th>
         <th>Código</th>
         <th onclick="sortTable('marca')" style="cursor:pointer">Marca <span id="sort-marca"></span></th>
-        <th onclick="sortTable('silueta')" style="cursor:pointer">Silueta <span id="sort-silueta"></span></th>
+        <th onclick="sortTable('modelo')" style="cursor:pointer">Modelo <span id="sort-modelo"></span></th>
         <th>Colorway</th>
         <th>Cat.</th>
         <th onclick="sortTable('talla')" style="cursor:pointer">Talla <span id="sort-talla"></span></th>
@@ -1262,8 +1262,8 @@ const TALLAS_ZAP=['4US','4.5US','5US','5.5US','6US','6.5US','7US','7.5US','8US',
 const TALLAS_ROPA=['XS','S','M','L','XL','XXL','XXXL','34','36','38','40','42','44','28','30','32','-'];
 const TALLAS=[...TALLAS_ZAP,...TALLAS_ROPA];
 
-function getSiluetas(){
-  const set=new Set(inventarioCache.map(p=>p.silueta).filter(Boolean));
+function getModelos(){
+  const set=new Set(inventarioCache.map(p=>p.modelo).filter(Boolean));
   return [...set].sort();
 }
 function getColorways(){
@@ -1549,19 +1549,19 @@ async function loadInventario(){
 
 function fillDataLists(){
   const marcas=[...new Set(inventarioCache.map(p=>p.marca).filter(Boolean))].sort();
-  const siluetas=[...new Set(inventarioCache.map(p=>p.silueta).filter(Boolean))].sort();
+  const modelos=[...new Set(inventarioCache.map(p=>p.modelo).filter(Boolean))].sort();
   const colorways=[...new Set(inventarioCache.map(p=>p.colorway).filter(Boolean))].sort();
   const TALLAS_ALL=['4US','4.5US','5US','5.5US','6US','6.5US','7US','7.5US','8US','8.5US','9US','9.5US','10US','10.5US','11US','11.5US','12US','13US','14US','36EU','37EU','38EU','39EU','40EU','41EU','42EU','43EU','44EU','45EU','46EU','4Y','4.5Y','5Y','5.5Y','6Y','6.5Y','7Y','XS','S','M','L','XL','XXL','XXXL','-'];
   const MARCAS_BASE=['NIKE','ADIDAS','JORDAN','YEEZY','SUPREME','NEW BALANCE','OFF-WHITE','ESSENTIALS','FEAR OF GOD','STONE ISLAND','PALACE','BAPE','STUSSY','PUMA','REEBOK','CONVERSE','VANS','ASICS','SALOMON'];
   const allMarcas=[...new Set([...MARCAS_BASE,...marcas])].sort();
   comboSetData('cl-marca', allMarcas);   comboSetData('cl-rv-marca', allMarcas);  comboSetData('cl-inv-marca', allMarcas);
-  comboSetData('cl-silueta', siluetas);  comboSetData('cl-rv-silueta', siluetas); comboSetData('cl-inv-silueta', siluetas);
+  comboSetData('cl-modelo', modelos);  comboSetData('cl-rv-modelo', modelos); comboSetData('cl-inv-modelo', modelos);
   comboSetData('cl-colorway', colorways);comboSetData('cl-rv-colorway', colorways);comboSetData('cl-inv-colorway', colorways);
   comboSetData('cl-talla', TALLAS_ALL);  comboSetData('cl-rv-talla', TALLAS_ALL); comboSetData('cl-inv-talla', TALLAS_ALL);
   comboSetData('cl-inv-cat', ['ZAPATILLAS','ROPA','ACCESORIOS','OTROS']);
   // Costo form combos
   comboSetData('cl-cs-marca', allMarcas);
-  comboSetData('cl-cs-silueta', siluetas);
+  comboSetData('cl-cs-modelo', modelos);
   comboSetData('cl-cs-colorway', colorways);
   comboSetData('cl-cs-talla', TALLAS_ALL);
   comboSetData('cl-cs-concepto', ['DHL','ADUANA','LIMPIEZA','REPARACION','ALMACEN','TRANSPORTE','OTROS']);
@@ -1633,7 +1633,7 @@ function renderInventario(rows){
       <td class="td-main" style="font-weight:400">${fecha}</td>
       <td><span class="td-code">${p.codigo_producto}</span></td>
       <td class="td-main">${p.marca||'—'}</td>
-      <td class="td-main" style="font-weight:400">${p.silueta||'—'}</td>
+      <td class="td-main" style="font-weight:400">${p.modelo||'—'}</td>
       <td class="td-main" style="font-weight:400">${p.colorway||'—'}</td>
       <td><span class="badge badge-accent" style="font-size:9px">${p.categoria}</span></td>
       <td><strong>${p.talla||'—'}</strong></td>
@@ -1704,7 +1704,7 @@ function set(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
 let sortCol=null,sortDir=1;
 
 function clearFiltros(){
-  ['inv-codigo','inv-marca','inv-silueta','inv-colorway','inv-talla','inv-cat'].forEach(id=>{
+  ['inv-codigo','inv-marca','inv-modelo','inv-colorway','inv-talla','inv-cat'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.value='';
   });
   document.getElementById('inv-estado').value='';
@@ -1725,7 +1725,7 @@ function filterInventario(){
   const g=id=>(document.getElementById(id)||{value:''}).value;
   const codigo=g('inv-codigo').trim().toUpperCase();
   const marca=g('inv-marca').toLowerCase();
-  const silueta=g('inv-silueta').toLowerCase();
+  const modelo=g('inv-modelo').toLowerCase();
   const colorway=g('inv-colorway').toLowerCase();
   const talla=g('inv-talla').toLowerCase();
   const estado=g('inv-estado');
@@ -1734,7 +1734,7 @@ function filterInventario(){
   let rows=inventarioCache.filter(p=>{
     const matchCod=!codigo||(p.codigo_producto||'').toUpperCase().startsWith(codigo);
     const matchM=!marca||(p.marca||'').toLowerCase().includes(marca);
-    const matchS=!silueta||(p.silueta||'').toLowerCase().includes(silueta);
+    const matchS=!modelo||(p.modelo||'').toLowerCase().includes(modelo);
     const matchC=!colorway||(p.colorway||'').toLowerCase().includes(colorway);
     const matchT=!talla||(p.talla||'').toLowerCase().includes(talla);
     const matchE=!estado||(estado==='PENDIENTE'?p.pago_estado==='PENDIENTE':p.estado===estado&&p.pago_estado!=='PENDIENTE');
@@ -1766,11 +1766,11 @@ function filterInventario(){
 function fillProductoSelects(){
   const disp=inventarioCache.filter(p=>p.estado==='DISPONIBLE');
   const mk=arr=>'<option value="">— Seleccionar —</option>'+arr.map(p=>{
-    const n=[p.marca,p.silueta,p.colorway].filter(Boolean).join(' ');
+    const n=[p.marca,p.modelo,p.colorway].filter(Boolean).join(' ');
     return`<option value="${p.codigo_producto}" data-final="${p.precio_final||p.precio_compra_soles||0}" data-sug="${p.precio_venta_sugerido||0}">${p.codigo_producto} · ${n} (${p.talla||'—'})</option>`;
   }).join('');
   const mkAll=arr=>'<option value="">— Seleccionar —</option>'+arr.map(p=>{
-    const n=[p.marca,p.silueta,p.colorway].filter(Boolean).join(' ');
+    const n=[p.marca,p.modelo,p.colorway].filter(Boolean).join(' ');
     return`<option value="${p.codigo_producto}">${p.codigo_producto} · ${n} (${p.talla||'—'})</option>`;
   }).join('');
   ['vt-producto','rv-producto'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=mk(disp);});
@@ -1872,7 +1872,7 @@ function onSelectReservaProducto(){
 async function cancelarProducto(codigo){
   const prod=inventarioCache.find(p=>p.codigo_producto===codigo);
   if(!prod) return;
-  const nombre=[prod.marca,prod.silueta,prod.colorway].filter(Boolean).join(' ');
+  const nombre=[prod.marca,prod.modelo,prod.colorway].filter(Boolean).join(' ');
   if(!confirm(`¿Cancelar compra de ${nombre} (${prod.talla||'—'})?
 
 Se revertirá el egreso de S/. ${fmt(prod.precio_compra_soles||0)} en flujo de caja.`)) return;
@@ -1911,7 +1911,7 @@ Se revertirá el egreso de S/. ${fmt(prod.precio_compra_soles||0)} en flujo de c
 function abrirModalPago(codigo){
   modalCodigo=codigo;
   const prod=inventarioCache.find(p=>p.codigo_producto===codigo);
-  const nombre=[prod?.marca,prod?.silueta,prod?.colorway].filter(Boolean).join(' ');
+  const nombre=[prod?.marca,prod?.modelo,prod?.colorway].filter(Boolean).join(' ');
   const usdInfo=prod?.moneda==='USD'&&prod?.precio_compra_usd>0
     ?`<div style="margin-top:6px;color:var(--accent);font-size:12px;font-weight:700">💵 $${parseFloat(prod.precio_compra_usd).toFixed(0)} USD</div>`:'';
   document.getElementById('modal-prod-info').innerHTML=
@@ -1951,7 +1951,7 @@ async function confirmarPago(){
 // ── REGISTRAR COMPRA ──
 async function registrarCompra(){
   const marca=document.getElementById('cp-marca').value.trim().toUpperCase();
-  const silueta=document.getElementById('cp-silueta').value.trim().toUpperCase();
+  const modelo=document.getElementById('cp-modelo').value.trim().toUpperCase();
   const colorway=document.getElementById('cp-colorway').value.trim().toUpperCase();
   const moneda=document.getElementById('cp-moneda').value;
   let usd=null,tc=null,soles=null,pventa=null,pc=null,monedaVal='SOLES';
@@ -2002,7 +2002,7 @@ async function registrarCompra(){
     const{error}=await db.from('inventario').insert({
       codigo_producto:cod,
       fecha_compra:document.getElementById('cp-fecha').value,
-      marca,silueta,colorway,
+      marca,modelo,colorway,
       categoria:document.getElementById('cp-cat').value,
       talla:document.getElementById('cp-talla').value.trim()||'-',
       precio_compra_usd:usd,
@@ -2022,7 +2022,7 @@ async function registrarCompra(){
     if(error)throw error;
     // flujo_caja lo maneja trigger after_compra en Supabase
     toast(`✓ ${cod} registrado${esCredito?' — ● PENDIENTE':''}`, 'ok');
-    ['cp-marca','cp-silueta','cp-colorway','cp-talla','cp-usd','cp-soles','cp-pventa','cp-factura','cp-desc-factura','cp-comentarios','cp-soles-contado','cp-pventa-credito','cp-factura-credito','cp-comentarios-credito'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    ['cp-marca','cp-modelo','cp-colorway','cp-talla','cp-usd','cp-soles','cp-pventa','cp-factura','cp-desc-factura','cp-comentarios','cp-soles-contado','cp-pventa-credito','cp-factura-credito','cp-comentarios-credito'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     document.getElementById('cp-tc').value='3.70';
     await loadOCs();
     if(ocModo==='nueva'){ pregenOC(); }
@@ -2071,22 +2071,22 @@ async function registrarVenta(){
 // ── REGISTRAR RESERVA ──
 async function registrarReserva(){
   const tipo=document.getElementById('rv-tipo').value;
-  let codProd=null,marca=null,silueta=null,colorway=null;
+  let codProd=null,marca=null,modelo=null,colorway=null;
   if(tipo==='EN_STOCK'){
     codProd=document.getElementById('rv-producto').value;
     if(!codProd){toast('Selecciona un producto','warn');return;}
     const p=inventarioCache.find(x=>x.codigo_producto===codProd);
-    if(p){marca=p.marca;silueta=p.silueta;colorway=p.colorway;}
+    if(p){marca=p.marca;modelo=p.modelo;colorway=p.colorway;}
   }else{
     marca=document.getElementById('rv-marca').value.trim().toUpperCase();
     if(!marca){toast('Ingresa la marca','warn');return;}
-    silueta=document.getElementById('rv-silueta').value.trim().toUpperCase();
+    modelo=document.getElementById('rv-modelo').value.trim().toUpperCase();
     colorway=document.getElementById('rv-colorway').value.trim().toUpperCase();
   }
   const btn=document.getElementById('btn-reserva');setLoading(btn,true);
   try{
     const{error}=await db.from('reservas').insert({
-      codigo_producto:codProd,marca,silueta,colorway,
+      codigo_producto:codProd,marca,modelo,colorway,
       talla:document.getElementById('rv-talla').value.trim()||null,
       id_cliente:document.getElementById('rv-cliente').value||null,
       monto_adelanto:parseFloat(document.getElementById('rv-adelanto').value)||0,
@@ -2098,7 +2098,7 @@ async function registrarReserva(){
     // Registrar adelanto en flujo_caja como RESERVA (no afecta caja real)
     const adelantoRv=parseFloat(document.getElementById('rv-adelanto').value)||0;
     if(adelantoRv>0){
-      const descRv=[marca||'',silueta||'',colorway||''].filter(Boolean).join(' ');
+      const descRv=[marca||'',modelo||'',colorway||''].filter(Boolean).join(' ');
       await db.from('flujo_caja').insert({
         fecha:document.getElementById('rv-fecha').value||new Date().toISOString().substring(0,10),
         tipo:'RESERVA',
@@ -2111,7 +2111,7 @@ async function registrarReserva(){
       });
     }
     toast('✓ Reserva registrada','ok');
-    ['rv-talla','rv-adelanto','rv-notas','rv-marca','rv-silueta','rv-colorway'].forEach(id=>document.getElementById(id).value='');
+    ['rv-talla','rv-adelanto','rv-notas','rv-marca','rv-modelo','rv-colorway'].forEach(id=>document.getElementById(id).value='');
     ['rv-producto','rv-fecha-limite'].forEach(id=>document.getElementById(id).value='');
   }catch(e){toast('Error: '+e.message,'err');}
   finally{setLoading(btn,false,'✓ Registrar Reserva');}
@@ -2145,7 +2145,7 @@ let costoLista=[];
 function buscarProductoCosto(){
   const g=id=>(document.getElementById(id)||{value:''}).value.toLowerCase().trim();
   const codigo=g('cs-f-codigo');
-  const marca=g('cs-f-marca'), silueta=g('cs-f-silueta');
+  const marca=g('cs-f-marca'), modelo=g('cs-f-modelo');
   const colorway=g('cs-f-colorway'), talla=g('cs-f-talla');
   const ocFiltro=(document.getElementById('cs-oc-select')||{value:''}).value;
   const body=document.getElementById('cs-resultados-body');
@@ -2156,7 +2156,7 @@ function buscarProductoCosto(){
     (!codigo||(p.codigo_producto||'').toLowerCase().includes(codigo))&&
     (!ocFiltro||(p.orden_compra===ocFiltro))&&
     (!marca||(p.marca||'').toLowerCase().includes(marca))&&
-    (!silueta||(p.silueta||'').toLowerCase().includes(silueta))&&
+    (!modelo||(p.modelo||'').toLowerCase().includes(modelo))&&
     (!colorway||(p.colorway||'').toLowerCase().includes(colorway))&&
     (!talla||(p.talla||'').toLowerCase().includes(talla))
   ).slice(0,50);
@@ -2167,7 +2167,7 @@ function buscarProductoCosto(){
       <tr onclick="csAgregarProducto('${p.codigo_producto}')">
         <td><span class="td-code">${p.codigo_producto}</span></td>
         <td>${p.marca||'—'}</td>
-        <td style="color:var(--muted2)">${p.silueta||'—'}</td>
+        <td style="color:var(--muted2)">${p.modelo||'—'}</td>
         <td style="color:var(--muted2)">${p.colorway||'—'}</td>
         <td><strong>${p.talla||'—'}</strong></td>
         <td style="color:var(--accent)">${fmt(p.precio_final||p.precio_compra_soles||0)}</td>
@@ -2180,7 +2180,7 @@ function csAgregarProducto(codigo){
   if(costoLista.find(x=>x.codigo===codigo)) return;
   const p=inventarioCache.find(x=>x.codigo_producto===codigo);
   if(!p) return;
-  const nombre=[p.marca,p.silueta,p.colorway].filter(Boolean).join(' ');
+  const nombre=[p.marca,p.modelo,p.colorway].filter(Boolean).join(' ');
   const conceptoGlobal=document.getElementById('cs-concepto-global').value||'';
   costoLista.push({codigo, nombre, talla:p.talla||'—', concepto:conceptoGlobal, soles:''});
   csRenderLista();
@@ -2584,7 +2584,7 @@ function renderFlujoTabla() {
 
   // Filas pendientes antiguas (inventario sin fila en flujo_caja)
   const pendRows2 = pendRows.map(p => {
-    const desc = [p.marca,p.silueta,p.colorway].filter(Boolean).join(' ');
+    const desc = [p.marca,p.modelo,p.colorway].filter(Boolean).join(' ');
     const esUsd = p.moneda === 'USD';
     const pendS = !esUsd ? `<span class="td-pend">⏳ ${fmt(p.precio_compra_soles||0)}</span>` : '<span class="td-muted">—</span>';
     const pendU = esUsd  ? `<span class="td-egr-usd">⏳ ${fmtUsdAmt(p.precio_compra_usd)}</span>` : '<span class="td-muted">—</span>';
@@ -2625,7 +2625,7 @@ function toast(msg,type='ok'){
 
 init();
 </script>
-<datalist id="dl-siluetas"></datalist>
+<datalist id="dl-modelos"></datalist>
 <datalist id="dl-colorways"></datalist>
 <datalist id="dl-tallas">
   <option value="4US"><option value="4.5US"><option value="5US"><option value="5.5US">
