@@ -409,7 +409,7 @@ input[list] { cursor: text; }
 .fc-tabla tbody td{padding:8px 12px;color:var(--text);vertical-align:middle;white-space:nowrap;font-size:11px;font-family:Arial,sans-serif}
 .fc-tabla .td-fecha{color:var(--text);font-size:11px;font-family:Arial,sans-serif;font-variant-numeric:tabular-nums}
 .fc-tabla .td-desc{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:var(--text);font-family:Arial,sans-serif}
-.fc-tabla .td-talla{color:var(--muted2);font-size:10px;text-align:center}
+.fc-tabla .td-talla{color:var(--text);font-size:11px;font-family:Arial,sans-serif}
 .fc-tabla .td-code{color:var(--text);font-size:11px;font-weight:400}
 .fc-tabla .td-ing{font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:var(--green);text-align:right;font-variant-numeric:tabular-nums}
 .fc-tabla .td-egr{font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:var(--red);text-align:right;font-variant-numeric:tabular-nums}
@@ -2592,7 +2592,7 @@ function renderFlujoTabla() {
 
   // Filas pendientes antiguas (inventario sin fila en flujo_caja)
   const pendRows2 = pendRows.map(p => {
-    const desc = [p.marca,p.modelo,p.colorway,p.talla?'T:'+p.talla:null].filter(Boolean).join(' · ');
+    const desc = [p.marca,p.modelo,p.colorway,p.talla].filter(Boolean).join(' ');
     const esUsd = p.moneda === 'USD';
     const pendS = !esUsd ? `<span class="td-pend">⏳ ${fmt(p.precio_compra_soles||0)}</span>` : '<span class="td-muted">—</span>';
     const pendU = esUsd  ? `<span class="td-egr-usd">⏳ ${fmtUsdAmt(p.precio_compra_usd)}</span>` : '<span class="td-muted">—</span>';
