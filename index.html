@@ -115,8 +115,8 @@ nav{position:sticky;top:0;z-index:200;background:rgba(5,5,7,.95);backdrop-filter
 .table-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
 .search-box{flex:1;min-width:160px;background:var(--bg);border:1px solid var(--border2);border-radius:7px;padding:8px 12px;color:var(--text);font-family:'Archivo';font-size:12px;outline:none}
 .search-box:focus{border-color:var(--accent)}
-.filter-select{background:var(--bg);border:1px solid var(--border2);border-radius:7px;padding:8px 12px;color:var(--text);font-family:'Archivo';font-size:12px;outline:none;cursor:pointer}
-.filter-select:focus{border-color:var(--accent)}
+.filter-select{background:var(--surface);border:1px solid var(--border2);border-radius:9px;padding:10px 14px;color:var(--text);font-family:'Archivo';font-size:12px;outline:none;cursor:pointer;transition:border .15s}
+.filter-select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(200,255,0,.07)}
 .table-wrap{overflow-x:auto;border-radius:14px;border:1px solid var(--border);box-shadow:var(--shadow)}
 table{width:100%;border-collapse:collapse;font-size:11px;font-family:Arial,sans-serif;min-width:1000px}
 thead tr{background:var(--surface)}
@@ -882,10 +882,10 @@ input[list] { cursor: text; }
     <!-- TOTAL + DISPONIBLES + VENDIDOS unificado -->
     <div class="stat-card" style="grid-column:span 1">
       <div style="display:grid;grid-template-columns:1fr auto auto auto;gap:0;align-items:center">
-        <span class="sg-h" style="text-align:left">UDS</span>
-        <span class="sg-h" style="min-width:64px;text-align:right">TOTAL</span>
-        <span class="sg-h" style="min-width:80px;text-align:right">DISPONIBLES</span>
-        <span class="sg-h" style="min-width:64px;text-align:right">VENDIDOS</span>
+        <span class="sg-h" style="text-align:left">Unidades</span>
+        <span class="sg-h" style="min-width:64px;text-align:right">Total</span>
+        <span class="sg-h" style="min-width:80px;text-align:right">Disponibles</span>
+        <span class="sg-h" style="min-width:64px;text-align:right">Vendidos</span>
       </div>
       <div class="sg-divider" style="margin:6px 0"></div>
       <div style="display:grid;grid-template-columns:1fr auto auto auto;gap:4px 0;align-items:center">
@@ -909,8 +909,8 @@ input[list] { cursor: text; }
     <!-- VALOR STOCK -->
     <div class="stat-card">
       <div class="sg-uni-head">
-        <span class="sg-h" style="text-align:left">VALOR STOCK</span>
-        <span class="sg-h">MONTO S/.</span>
+        <span class="sg-h" style="text-align:left">Valor Stock</span>
+        <span class="sg-h">Monto S/.</span>
       </div>
       <div class="sg-divider" style="margin:6px 0"></div>
       <div class="sg-uni-row"><span class="sg-mc">👟 Zapatillas</span><span class="sg-mn accent" id="st-zap-val">—</span></div>
@@ -921,9 +921,9 @@ input[list] { cursor: text; }
     <!-- COMPRAS DEL MES -->
     <div class="stat-card">
       <div style="display:grid;grid-template-columns:1fr auto auto;gap:0 8px;padding-bottom:6px">
-        <span class="sg-h" style="text-align:left">COMPRAS MES</span>
-        <span class="sg-h" style="min-width:36px;text-align:right">UDS</span>
-        <span class="sg-h" style="min-width:100px;text-align:right">MONTO S/.</span>
+        <span class="sg-h" style="text-align:left">Compras del Mes</span>
+        <span class="sg-h" style="min-width:36px;text-align:right">Uds.</span>
+        <span class="sg-h" style="min-width:100px;text-align:right">Monto S/.</span>
       </div>
       <div class="sg-divider" style="margin:6px 0"></div>
       <div style="display:grid;grid-template-columns:1fr auto auto;gap:4px 8px;align-items:center">
@@ -944,9 +944,10 @@ input[list] { cursor: text; }
   </div>
 
   <div class="table-toolbar">
-    <input type="text" id="inv-codigo" placeholder="🔍 Código..." 
-      style="background:var(--surface);border:1px solid var(--border2);border-radius:9px;padding:10px 14px;color:var(--text);font-family:'Archivo';font-size:13px;outline:none;min-width:130px;flex:1"
-      oninput="filterInventario()">
+    <div class="combo-wrap" style="min-width:130px;flex:1">
+      <input type="text" id="inv-codigo" placeholder="🔍 Código..." autocomplete="off"
+        oninput="filterInventario()">
+    </div>
     <div class="combo-wrap" style="flex:1;min-width:130px">
       <input type="text" id="inv-marca" placeholder="Marca..." autocomplete="off" onblur="comboBlur('cl-inv-marca')"
         oninput="comboFilter('inv-marca','cl-inv-marca');filterInventario()"
@@ -994,8 +995,8 @@ input[list] { cursor: text; }
       <option value="PENDIENTE">● Pendiente pago</option>
       <option value="CANCELADO">✕ Cancelados</option>
     </select>
-    <button class="btn btn-ghost btn-sm" onclick="clearFiltros()" title="Limpiar filtros">✕ Limpiar</button>
-    <button class="btn btn-ghost btn-sm" onclick="loadInventario()">↺</button>
+    <button class="btn btn-ghost btn-sm" onclick="clearFiltros()">✕ Limpiar</button>
+    <button class="btn btn-ghost btn-sm" onclick="loadInventario()" title="Recargar">↺</button>
   </div>
 
   <div class="table-wrap">
@@ -1006,7 +1007,7 @@ input[list] { cursor: text; }
         <th onclick="sortTable('marca')" style="cursor:pointer">Marca <span id="sort-marca"></span></th>
         <th onclick="sortTable('modelo')" style="cursor:pointer">Modelo <span id="sort-modelo"></span></th>
         <th>Colorway</th>
-        <th>Cat.</th>
+        <th>Categoría</th>
         <th onclick="sortTable('talla')" style="cursor:pointer">Talla <span id="sort-talla"></span></th>
         <th onclick="sortTable('precio_compra_soles')" style="cursor:pointer">P. Compra <span id="sort-precio_compra_soles"></span></th>
         <th>Costos</th>
