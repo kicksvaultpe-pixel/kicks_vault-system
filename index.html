@@ -612,7 +612,7 @@ input[list] { cursor: text; }
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
           <div class="card-label" style="margin:0">Orden de Compra</div>
           <!-- Badge OC activa -->
-          <div id="cp-oc-badge" style="display:none;background:rgba(200,255,0,.1);border:1px solid rgba(200,255,0,.3);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;color:var(--accent);display:none;align-items:center;gap:6px">
+          <div id="cp-oc-badge" style="display:none;background:rgba(200,255,0,.1);border:1px solid rgba(200,255,0,.3);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;color:var(--accent);align-items:center;gap:6px">
             <span>⬤</span><span id="cp-oc-badge-txt"></span>
           </div>
         </div>
@@ -1377,6 +1377,7 @@ async function loadOCs(){
   const{data}=await db.from('ordenes_compra').select('*').order('id',{ascending:false});
   ocCache=data||[];
   renderOCSelectExistente();
+  if(tipoPagoActual==='CREDITO') pregenOC();
 }
 
 function renderOCSelectExistente(){
@@ -1439,7 +1440,15 @@ function ocUpdateSessionCounter(codigo){
 
 async function pregenOC(){
   if(tipoPagoActual!=='CREDITO') return;
-  const{data}=await db.rpc('gen_codigo_oc');
+  if(ocSessionCodigo) {
+    // Ya hay una OC activa en sesión, mostrarla
+    const el=document.getElementById('cp-oc-nueva');
+    if(el&&ocSessionCodigo) el.value=ocSessionCodigo;
+    ocUpdateBadge(ocSessionCodigo);
+    ocUpdateSessionCounter(ocSessionCodigo);
+    return;
+  }
+  const{data,error}=await db.rpc('gen_codigo_oc');
   const el=document.getElementById('cp-oc-nueva');
   if(el&&data) el.value=data;
 }
