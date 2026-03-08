@@ -1641,7 +1641,7 @@ function renderInventario(rows){
 
     const pcHtml=p.precio_compra_soles>0?`<span class="inv-monto">${fmt(p.precio_compra_soles)}</span>`:'<span class="inv-dash">—</span>';
     const costoHtml=p.total_costos>0?`<span class="inv-monto purple">${fmt(p.total_costos)}</span>`:'<span class="inv-dash">—</span>';
-    const finalHtml=`<span class="inv-monto${isPendiente?' orange':''}">${fmt(pF)}</span>`;
+    const finalHtml=`<span class="inv-monto${isPendiente?' orange':''}" style="font-weight:700">${fmt(pF)}</span>`;
     const ventaHtml=pV>0?`<span class="inv-monto accent">${fmt(pV)}</span>`:'<span class="inv-dash">—</span>';
     const catMap={'ZAPATILLAS':'cat-zap','ROPA':'cat-ropa','ACCESORIOS':'cat-acc','OTROS':'cat-otros'};
     const catCls=catMap[(p.categoria||'').toUpperCase()]||'cat-otros';
