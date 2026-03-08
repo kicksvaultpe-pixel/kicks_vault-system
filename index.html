@@ -797,7 +797,7 @@ input[list] { cursor: text; }
       <div class="form-grid g2">
         <div class="field combo-wrap">
           <label>Concepto de costo</label>
-          <input type="text" id="cs-concepto-global" placeholder="DHL / ADUANA / LIMPIEZA..." autocomplete="off"
+          <input type="text" id="cs-concepto-global" placeholder="IMPORTACION / ENVIO / OTROS..." autocomplete="off"
             onblur="comboBlur('cl-cs-concepto')"
             oninput="comboFilter('cs-concepto-global','cl-cs-concepto');csActualizarConceptos()"
             onfocus="comboOpen('cs-concepto-global','cl-cs-concepto')"
@@ -973,6 +973,9 @@ input[list] { cursor: text; }
   </div>
 
   <div class="table-toolbar">
+    <input type="text" id="inv-codigo" placeholder="🔍 Código..." 
+      style="background:var(--surface);border:1px solid var(--border2);border-radius:9px;padding:10px 14px;color:var(--text);font-family:'Archivo';font-size:13px;outline:none;min-width:130px;flex:1"
+      oninput="filterInventario()">
     <div class="combo-wrap" style="flex:1;min-width:130px">
       <input type="text" id="inv-marca" placeholder="Marca..." autocomplete="off" onblur="comboBlur('cl-inv-marca')"
         oninput="comboFilter('inv-marca','cl-inv-marca');filterInventario()"
@@ -1583,7 +1586,7 @@ function fillDataLists(){
   comboSetData('cl-cs-modelo', modelos);
   comboSetData('cl-cs-colorway', colorways);
   comboSetData('cl-cs-talla', TALLAS_ALL);
-  comboSetData('cl-cs-concepto', ['DHL','ADUANA','LIMPIEZA','REPARACION','ALMACEN','TRANSPORTE','IMPORTACION','EMPAQUE','FOTOGRAFIA','OTROS']);
+  comboSetData('cl-cs-concepto', ['IMPORTACION','ENVIO','OTROS']);
 }
 
 async function loadClientes(){
