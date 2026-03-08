@@ -117,14 +117,18 @@ nav{position:sticky;top:0;z-index:200;background:rgba(5,5,7,.95);backdrop-filter
 .search-box:focus{border-color:var(--accent)}
 .filter-select{background:var(--surface);border:1px solid var(--border2);border-radius:9px;padding:10px 14px;color:var(--text);font-family:'Archivo';font-size:12px;outline:none;cursor:pointer;transition:border .15s}
 .filter-select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(200,255,0,.07)}
-.table-wrap{overflow-x:auto;border-radius:14px;border:1px solid var(--border);box-shadow:var(--shadow)}
+.table-wrap{overflow-x:auto;border-radius:14px;border:1px solid var(--border);box-shadow:var(--shadow);background:var(--card)}
 table{width:100%;border-collapse:collapse;font-size:11px;font-family:Arial,sans-serif;min-width:1200px}
 thead tr{background:var(--surface)}
-th{padding:8px 12px;text-align:left;font-size:9px;font-family:Arial,sans-serif;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);white-space:nowrap;border-bottom:1px solid var(--border)}
+thead tr:first-child td{border-top:none}
+th{padding:9px 14px;text-align:left;font-size:9px;font-family:Arial,sans-serif;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);white-space:nowrap;border-bottom:1px solid var(--border)}
 th[onclick]:hover{color:var(--accent);background:rgba(200,255,0,.04);cursor:pointer}
-td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;white-space:nowrap;color:var(--text);font-size:11px;font-family:Arial,sans-serif}
+td{padding:9px 14px;border-top:1px solid rgba(255,255,255,.035);vertical-align:middle;white-space:nowrap;color:var(--text);font-size:11px;font-family:Arial,sans-serif}
 tbody tr:last-child td{border-bottom:none}
 tbody tr:hover td{background:rgba(255,255,255,.03)}
+tbody tr.row-pend{opacity:.8;background:rgba(250,204,21,.02)}
+tbody tr.row-pend:hover td{background:rgba(250,204,21,.04)}
+tbody tr.row-dim{opacity:.45}
 .td-main{font-size:11px;font-weight:700;color:var(--text);font-family:Arial,sans-serif}
 .td-code{font-size:10px;font-weight:600;color:var(--muted2);font-family:Arial,sans-serif;font-variant-numeric:tabular-nums}
 .td-amt{font-size:11px;font-weight:700;font-family:Arial,sans-serif;font-variant-numeric:tabular-nums}
@@ -445,6 +449,10 @@ input[list] { cursor: text; }
 #toast.warn{background:var(--yellow);color:#000}
 
 /* TABLA INVENTARIO UNIFICADA */
+.cat-zap{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:9px;font-family:'Archivo',sans-serif;font-weight:700;letter-spacing:.5px;background:rgba(200,255,0,.08);color:var(--accent);border:1px solid rgba(200,255,0,.15)}
+.cat-ropa{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:9px;font-family:'Archivo',sans-serif;font-weight:700;letter-spacing:.5px;background:rgba(96,165,250,.08);color:var(--blue);border:1px solid rgba(96,165,250,.15)}
+.cat-acc{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:9px;font-family:'Archivo',sans-serif;font-weight:700;letter-spacing:.5px;background:rgba(124,77,255,.08);color:var(--purple);border:1px solid rgba(124,77,255,.15)}
+.cat-otros{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:9px;font-family:'Archivo',sans-serif;font-weight:700;letter-spacing:.5px;background:rgba(255,255,255,.05);color:var(--muted2);border:1px solid var(--border2)}
 .inv-fecha{font-size:11px;color:var(--muted2);font-family:Arial,sans-serif}
 .inv-cod{font-size:11px;font-weight:700;color:var(--accent);font-family:Arial,sans-serif;letter-spacing:.3px}
 .inv-txt{font-size:11px;color:var(--text);font-family:Arial,sans-serif;font-weight:700}
@@ -1597,28 +1605,28 @@ function renderInventario(rows){
     // Estado badge
     let estadoBadge;
     if(isCancelado)
-      estadoBadge='<span class="badge badge-muted">✕ Cancelado</span>';
+      estadoBadge='<span class="fc-accion-badge" style="background:rgba(255,255,255,.04);color:var(--muted2);border:1px solid var(--border2)">✕ CANCELADO</span>';
     else if(isPendiente)
-      estadoBadge='<span class="badge badge-orange">⏳ Pago Pendiente</span>';
+      estadoBadge='<span class="fc-accion-badge fc-accion-PAGO">⏳ PAGO PENDIENTE</span>';
     else if(p.estado==='DISPONIBLE')
-      estadoBadge='<span class="badge badge-green">● Disponible</span>';
+      estadoBadge='<span class="fc-accion-badge fc-accion-VENTA">● DISPONIBLE</span>';
     else
-      estadoBadge='<span class="badge badge-red">✓ Vendido</span>';
+      estadoBadge='<span class="fc-accion-badge fc-accion-COMPRA">✓ VENDIDO</span>';
 
     // Pago badge + botón
     let pagoBadge;
     if(isCancelado)
-      pagoBadge='<span style="color:var(--muted);font-size:11px">—</span>';
+      pagoBadge='<span style="color:var(--muted2)">—</span>';
     else if(p.tipo_pago==='CREDITO'&&isPendiente)
-      pagoBadge=`<button class="btn-pay" onclick="abrirModalPago('${p.codigo_producto}')">💳 Pagar</button>`;
+      pagoBadge=`<button class="btn-pay" onclick="abrirModalPago('${p.codigo_producto}')">💳 PAGAR</button>`;
     else if(p.tipo_pago==='CREDITO')
-      pagoBadge='<span class="badge badge-muted">Crédito ✓</span>';
+      pagoBadge='<span class="badge badge-muted">CRÉDITO ✓</span>';
     else
       pagoBadge='<span style="color:var(--muted);font-size:11px">Contado</span>';
 
     // Botón cancelar — solo si no está cancelado ni vendido
     const btnCancel=(!isCancelado&&p.estado!=='VENDIDO')
-      ?`<button class="btn-cancel" onclick="cancelarProducto('${p.codigo_producto}')">✕ Cancelar</button>`
+      ?`<button class="btn-cancel" onclick="cancelarProducto('${p.codigo_producto}')">✕ CANCELAR</button>`
       :'';
 
     const mg=margen!==null?`<span class="badge ${margen>=0?'badge-green':'badge-red'}">${margen}%</span>`:'<span style="color:var(--muted)">—</span>';
@@ -1635,22 +1643,25 @@ function renderInventario(rows){
     const costoHtml=p.total_costos>0?`<span class="inv-monto purple">${fmt(p.total_costos)}</span>`:'<span class="inv-dash">—</span>';
     const finalHtml=`<span class="inv-monto${isPendiente?' orange':''}">${fmt(pF)}</span>`;
     const ventaHtml=pV>0?`<span class="inv-monto accent">${fmt(pV)}</span>`:'<span class="inv-dash">—</span>';
-    const catLabel=(p.categoria||'').replace('ZAPATILLAS','Zapatillas').replace('ROPA','Ropa').replace('ACCESORIOS','Accesorios').replace('OTROS','Otros');
+    const catMap={'ZAPATILLAS':'cat-zap','ROPA':'cat-ropa','ACCESORIOS':'cat-acc','OTROS':'cat-otros'};
+    const catCls=catMap[(p.categoria||'').toUpperCase()]||'cat-otros';
+    const catLabel=p.categoria||'—';
 
-    return`<tr>
+    const rowCls=isCancelado||p.estado==='VENDIDO'?'row-dim':isPendiente?'row-pend':'';
+    return`<tr class="${rowCls}">
       <td class="inv-fecha">${fecha}</td>
       <td><span class="inv-cod">${p.codigo_producto}</span></td>
       <td class="inv-txt">${p.marca||'—'}</td>
       <td class="inv-txt-muted">${p.modelo||'—'}</td>
-      <td class="inv-txt-muted">${p.colorway||'—'}</td>
-      <td><span class="badge badge-accent" style="font-size:9px">${catLabel}</span></td>
+      <td class="inv-txt">${p.colorway||'—'}</td>
+      <td><span class="${catCls}">${catLabel}</span></td>
       <td class="inv-talla">${p.talla||'—'}</td>
       <td style="text-align:right">${pcHtml}</td>
       <td style="text-align:right">${costoHtml}</td>
       <td style="text-align:right">${finalHtml}</td>
       <td style="text-align:right">${ventaHtml}</td>
       <td style="text-align:center">${mg}</td>
-      <td class="inv-txt-muted">${p.orden_compra||'—'}</td>
+      <td class="inv-txt">${p.orden_compra||'—'}</td>
       <td>${estadoBadge}</td>
       <td>${pagoBadge}</td>
       <td class="inv-txt-muted">${p.factura||'—'}</td>
