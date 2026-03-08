@@ -1371,15 +1371,17 @@ async function loadOCs(){
 }
 
 function renderOCSelectExistente(){
+  // Compra crédito: solo OCs PENDIENTES
   const sel=document.getElementById('cp-oc-select');
   if(sel) sel.innerHTML='<option value="">— Seleccionar OC —</option>'+
-    ocCache.map(oc=>`<option value="${oc.codigo}">${oc.codigo} — ${oc.tipo} (${oc.estado})</option>`).join('');
-  // Also populate costo OC select
+    ocCache.filter(oc=>oc.estado==='PENDIENTE')
+      .map(oc=>`<option value="${oc.codigo}">${oc.codigo} — ${oc.tipo}</option>`).join('');
+  // Costo: todas las OCs con estado visible
   const csSel=document.getElementById('cs-oc-select');
   if(csSel){
     const prev=csSel.value;
     csSel.innerHTML='<option value="">— Sin OC —</option>'+
-      ocCache.map(oc=>`<option value="${oc.codigo}">${oc.codigo} — ${oc.tipo}</option>`).join('');
+      ocCache.map(oc=>`<option value="${oc.codigo}">${oc.codigo} — ${oc.tipo}${oc.estado==='COMPLETADA'?' ✓':''}</option>`).join('');
     if(prev) csSel.value=prev;
   }
 }
@@ -1520,6 +1522,7 @@ function setTipoPago(tipo){
   document.getElementById('cp-info-credito').style.display=tipo==='CREDITO'?'block':'none';
   document.getElementById('cp-card-contado').style.display=tipo==='CONTADO'?'block':'none';
   document.getElementById('cp-card-credito').style.display=tipo==='CREDITO'?'block':'none';
+  document.getElementById('cp-card-oc').style.display=tipo==='CREDITO'?'block':'none';
   document.getElementById('cp-card-factura-contado').style.display=tipo==='CONTADO'?'block':'none';
   document.getElementById('cp-card-factura-credito').style.display=tipo==='CREDITO'?'block':'none';
   if(tipo==='CREDITO') pregenOC();
