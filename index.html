@@ -607,70 +607,61 @@ input[list] { cursor: text; }
           <input type="number" id="cp-pventa-credito" placeholder="0.00" step="0.01">
         </div>
       </div>
-      <!-- OC -->
-      <div style="border-top:1px solid var(--border);margin-top:14px;padding-top:14px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <div class="card-label" style="margin:0">Orden de Compra</div>
-          <!-- Badge OC activa -->
-          <div id="cp-oc-badge" style="display:none;background:rgba(200,255,0,.1);border:1px solid rgba(200,255,0,.3);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;color:var(--accent);align-items:center;gap:6px">
-            <span>⬤</span><span id="cp-oc-badge-txt"></span>
-          </div>
-        </div>
+    </div>
 
-        <!-- Toggle Nueva / Existente -->
-        <div style="display:flex;gap:6px;margin-bottom:12px">
+    <!-- CRÉDITO: Orden de Compra -->
+    <div class="card" id="cp-card-oc" style="display:none">
+      <div class="card-label" style="margin-bottom:12px">Orden de Compra</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="display:flex;gap:6px">
           <button type="button" id="oc-btn-nueva" class="oc-toggle active" onclick="ocSetMode('nueva')">✦ Nueva OC</button>
           <button type="button" id="oc-btn-existente" class="oc-toggle" onclick="ocSetMode('existente')">↗ Agregar a existente</button>
         </div>
-
-        <!-- NUEVA OC -->
-        <div id="oc-panel-nueva">
-          <div class="form-grid g3">
-            <div class="field">
-              <label>Tipo</label>
-              <select id="cp-oc-tipo">
-                <option value="IMPORTACION">✈️ Importación</option>
-                <option value="LOCAL">🏪 Local</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>Código (auto)</label>
-              <input type="text" id="cp-oc-nueva" placeholder="OC-001" readonly
-                style="color:var(--accent);font-family:'Archivo Black'">
-            </div>
-            <div class="field">
-              <label>Notas (proveedor, URL...)</label>
-              <input type="text" id="cp-oc-notas" placeholder="Nike SNKRS, Goat...">
-            </div>
-          </div>
+        <div id="cp-oc-badge" style="display:none;background:rgba(200,255,0,.1);border:1px solid rgba(200,255,0,.3);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;color:var(--accent);align-items:center;gap:6px">
+          <span>⬤</span><span id="cp-oc-badge-txt"></span>
         </div>
-
-        <!-- EXISTENTE OC -->
-        <div id="oc-panel-existente" style="display:none">
-          <div class="field" style="margin-bottom:10px">
-            <label>Seleccionar OC</label>
-            <select id="cp-oc-select" onchange="ocExistenteChange()">
-              <option value="">— Seleccionar OC —</option>
+      </div>
+      <div id="oc-panel-nueva">
+        <div class="form-grid g3">
+          <div class="field">
+            <label>Tipo</label>
+            <select id="cp-oc-tipo">
+              <option value="IMPORTACION">✈️ Importación</option>
+              <option value="LOCAL">🏪 Local</option>
             </select>
           </div>
-          <!-- Mini card info OC -->
-          <div id="oc-info-card" style="display:none;background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:12px 14px">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-              <span id="oc-info-codigo" style="font-family:'Archivo Black';font-size:15px;color:var(--accent)"></span>
-              <span id="oc-info-tipo" style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted2)"></span>
-            </div>
-            <div style="display:flex;gap:16px">
-              <div><div style="font-size:9px;color:var(--muted2);letter-spacing:1px">PRODUCTOS</div><div id="oc-info-prods" style="font-family:'Archivo Black';font-size:18px;color:var(--text)">—</div></div>
-              <div><div style="font-size:9px;color:var(--muted2);letter-spacing:1px">MONTO</div><div id="oc-info-monto" style="font-family:'Archivo Black';font-size:18px;color:var(--accent)">—</div></div>
-              <div><div style="font-size:9px;color:var(--muted2);letter-spacing:1px">CREADA</div><div id="oc-info-fecha" style="font-size:13px;color:var(--muted2);margin-top:4px">—</div></div>
-            </div>
+          <div class="field">
+            <label>Código (auto)</label>
+            <input type="text" id="cp-oc-nueva" placeholder="OC-001" readonly
+              style="color:var(--accent);font-family:'Archivo Black'">
+          </div>
+          <div class="field">
+            <label>Notas (proveedor, URL...)</label>
+            <input type="text" id="cp-oc-notas" placeholder="Nike SNKRS, Goat...">
           </div>
         </div>
-
-        <!-- Contador sesión -->
-        <div id="oc-session-counter" style="display:none;margin-top:10px;font-size:11px;color:var(--muted2)">
-          Esta sesión: <span id="oc-session-count" style="color:var(--accent);font-weight:700">0</span> producto(s) en <span id="oc-session-codigo" style="color:var(--accent)"></span>
+      </div>
+      <div id="oc-panel-existente" style="display:none">
+        <div class="field" style="margin-bottom:10px">
+          <label>Seleccionar OC</label>
+          <select id="cp-oc-select" onchange="ocExistenteChange()">
+            <option value="">— Seleccionar OC —</option>
+          </select>
         </div>
+        <div id="oc-info-card" style="display:none;background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:12px 14px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <span id="oc-info-codigo" style="font-family:'Archivo Black';font-size:15px;color:var(--accent)"></span>
+            <span id="oc-info-tipo" style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted2)"></span>
+          </div>
+          <div style="display:flex;gap:16px">
+            <div><div style="font-size:9px;color:var(--muted2);letter-spacing:1px">PRODUCTOS</div><div id="oc-info-prods" style="font-family:'Archivo Black';font-size:18px;color:var(--text)">—</div></div>
+            <div><div style="font-size:9px;color:var(--muted2);letter-spacing:1px">MONTO</div><div id="oc-info-monto" style="font-family:'Archivo Black';font-size:18px;color:var(--accent)">—</div></div>
+            <div><div style="font-size:9px;color:var(--muted2);letter-spacing:1px">CREADA</div><div id="oc-info-fecha" style="font-size:13px;color:var(--muted2);margin-top:4px">—</div></div>
+          </div>
+        </div>
+      </div>
+      <div id="oc-session-counter" style="display:none;margin-top:10px;font-size:11px;color:var(--muted2)">
+        Esta sesión: <span id="oc-session-count" style="color:var(--accent);font-weight:700">0</span> producto(s) en <span id="oc-session-codigo" style="color:var(--accent)"></span>
       </div>
     </div>
     <!-- CONTADO: Factura & Notas -->
