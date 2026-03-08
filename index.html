@@ -570,14 +570,21 @@ input[list] { cursor: text; }
           <label>Precio venta sugerido S/.</label>
           <input type="number" id="cp-pventa" placeholder="0.00" step="0.01" oninput="calcPrecio()">
         </div>
-        <div class="field"><label>Factura</label><input type="text" id="cp-factura" placeholder="Nro. factura..."></div>
-        <div class="field span3"><label>Descripción del producto</label><input type="text" id="cp-desc-factura" placeholder="Descripción del producto..."></div>
-        <div class="field span3"><label>Comentarios</label><textarea id="cp-comentarios" placeholder="Condición, origen, notas..."></textarea></div>
       </div>
       <div class="precio-preview" id="cp-preview">
         <div class="pp-item"><div class="pp-label">Precio compra S/.</div><div class="pp-val" id="pp-soles" style="color:var(--red)">—</div></div>
         <div class="pp-item"><div class="pp-label">Precio venta sugerido</div><div class="pp-val" id="pp-venta" style="color:var(--accent)">—</div></div>
         <div class="pp-item"><div class="pp-label">Margen estimado</div><div class="pp-val" id="pp-margen" style="color:var(--green)">—</div></div>
+      </div>
+    </div>
+
+    <!-- CONTADO: Factura & Notas -->
+    <div class="card" id="cp-card-factura-contado">
+      <div class="card-label">Factura &amp; Notas</div>
+      <div class="form-grid g3">
+        <div class="field"><label>Factura</label><input type="text" id="cp-factura" placeholder="Nro. factura..."></div>
+        <div class="field span2"><label>Descripción del producto</label><input type="text" id="cp-desc-factura" placeholder="Descripción del producto..."></div>
+        <div class="field span3"><label>Comentarios</label><textarea id="cp-comentarios" placeholder="Condición, origen, notas..."></textarea></div>
       </div>
     </div>
 
@@ -608,9 +615,6 @@ input[list] { cursor: text; }
           <label>Precio venta sugerido S/.</label>
           <input type="number" id="cp-pventa-credito" placeholder="0.00" step="0.01">
         </div>
-        <div class="field"><label>Factura</label><input type="text" id="cp-factura-credito" placeholder="Nro. factura..."></div>
-        <div class="field span3"><label>Descripción del producto</label><input type="text" id="cp-desc-factura-credito" placeholder="Descripción del producto..."></div>
-        <div class="field span4"><label>Comentarios</label><textarea id="cp-comentarios-credito" placeholder="Proveedor, condiciones, notas..."></textarea></div>
       </div>
       <!-- OC -->
       <div style="border-top:1px solid var(--border);margin-top:14px;padding-top:14px">
@@ -1516,6 +1520,8 @@ function setTipoPago(tipo){
   document.getElementById('cp-info-credito').style.display=tipo==='CREDITO'?'block':'none';
   document.getElementById('cp-card-contado').style.display=tipo==='CONTADO'?'block':'none';
   document.getElementById('cp-card-credito').style.display=tipo==='CREDITO'?'block':'none';
+  document.getElementById('cp-card-factura-contado').style.display=tipo==='CONTADO'?'block':'none';
+  document.getElementById('cp-card-factura-credito').style.display=tipo==='CREDITO'?'block':'none';
   if(tipo==='CREDITO') pregenOC();
 }
 
