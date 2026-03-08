@@ -2581,7 +2581,7 @@ function renderFlujoTabla() {
       <td class="td-fecha">${fmtFecha(f.fecha)}</td>
       <td><span class="fc-accion-badge fc-accion-${accion}">${accion}</span></td>
       <td><span class="td-code">${f.referencia_id||'—'}</span></td>
-      <td class="td-desc">${(()=>{const d=f.descripcion||'—';const t=f.talla?` <span style="color:var(--muted2);font-size:10px">· ${f.talla}</span>`:'';return d+t;})()}</td>
+      <td class="td-desc">${[f.descripcion,f.talla].filter(Boolean).join(' ')|| '—'}</td>
       <td class="right">${ingHtml}</td>
       <td class="right">${egrHtml}</td>
       <td class="right">${pendS}</td>
