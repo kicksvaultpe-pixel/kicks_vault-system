@@ -320,6 +320,7 @@ input[list] { cursor: text; }
 .ind-utilidad-pos{border-color:rgba(200,255,0,.12)}.ind-utilidad-pos::before{background:linear-gradient(90deg,transparent,var(--accent),transparent)}
 .ind-utilidad-neg{border-color:rgba(255,23,68,.12)}.ind-utilidad-neg::before{background:linear-gradient(90deg,transparent,var(--red),transparent)}
 .ind-reinversion{border-color:rgba(124,77,255,.12)}.ind-reinversion::before{background:linear-gradient(90deg,transparent,var(--purple),transparent)}
+.ind-patrimonio{border-color:rgba(200,255,0,.12)}.ind-patrimonio::before{background:linear-gradient(90deg,transparent,var(--accent),transparent)}
 
 /* ── FLUJO DE CAJA ── */
 
@@ -338,6 +339,7 @@ input[list] { cursor: text; }
 .fc-bubble.inicio::after{background:linear-gradient(90deg,transparent,var(--border2),transparent)}
 .fc-bubble.actual::after{background:linear-gradient(90deg,transparent,var(--accent),transparent)}
 .fc-bubble.fin::after{background:linear-gradient(90deg,transparent,var(--blue),transparent)}
+.fc-bubble.fin{border-color:rgba(96,165,250,.18);background:linear-gradient(135deg,#111116 0%,rgba(96,165,250,.03) 100%)}
 .fc-bubble.actual{border-color:rgba(200,255,0,.18);background:linear-gradient(135deg,#111116 0%,rgba(200,255,0,.03) 100%)}
 
 /* Chip label */
@@ -1134,7 +1136,7 @@ input[list] { cursor: text; }
   <div class="ind-row">
 
     <!-- PATRIMONIO -->
-    <div class="ind-card">
+    <div class="ind-card ind-patrimonio">
       <div class="pat-chip">Patrimonio</div>
       <div class="pat-total" id="ind-patrimonio">—</div>
       <div class="pat-sub">Caja + Stock</div>
