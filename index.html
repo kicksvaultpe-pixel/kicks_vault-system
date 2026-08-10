@@ -463,19 +463,137 @@ input[list] { cursor: text; }
 .inv-monto.orange{color:var(--orange)}
 .inv-monto.purple{color:var(--purple)}
 .inv-dash{color:var(--muted2);font-size:11px;font-family:Arial,sans-serif}
+
+/* ═══════════════════════════════════════════════════════
+   MOBILE BOTTOM NAV
+═══════════════════════════════════════════════════════ */
+.mobile-header{
+  display:none;
+  position:sticky;top:0;z-index:201;
+  background:rgba(5,5,7,.98);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+  height:48px;align-items:center;padding:0 16px;gap:12px;
+}
+.mobile-header .nav-logo{font-family:'Archivo Black';font-size:13px;letter-spacing:5px;display:flex;align-items:center}
+.tab-icon{display:none;transition:transform .2s,opacity .2s}
+.tab-label{transition:color .2s}
+
+@media(max-width:768px){
+  /* Mostrar header de logo arriba */
+  .mobile-header{display:flex}
+
+  /* Mover tabs al fondo */
+  nav{
+    position:fixed;top:auto;bottom:0;left:0;right:0;
+    border-top:1px solid var(--border);border-bottom:none;
+    height:auto;min-height:58px;
+    padding:6px 0 0;padding-bottom:env(safe-area-inset-bottom,8px);
+    justify-content:space-around;
+    background:rgba(5,5,7,.98);
+  }
+  nav .nav-logo,nav .nav-divider{display:none}
+  nav .nav-tabs{width:100%;justify-content:space-around;overflow:visible}
+  .nav-tab{
+    flex:1;flex-direction:column;align-items:center;justify-content:center;
+    gap:3px;padding:4px 2px 4px;font-size:8px;letter-spacing:.3px;
+    display:flex;min-width:0;
+  }
+  .nav-tab::after{
+    bottom:auto;top:0;left:8px;right:8px;
+    border-radius:0 0 3px 3px;height:2px;
+  }
+  .nav-tab.active .tab-icon{transform:translateY(-2px);color:var(--accent)}
+  .tab-icon{display:block;flex-shrink:0}
+
+  /* Espacio para bottom nav + top header */
+  .view{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px));padding-top:16px}
+
+  /* Formularios más compactos */
+  .card{padding:16px 14px}
+  .tipo-selector{gap:3px;padding:4px}
+  .tipo-btn{padding:7px 10px;font-size:10px;letter-spacing:.5px}
+  .pago-toggle{gap:4px;padding:4px}
+  .page-title{font-size:17px;margin-bottom:16px}
+
+  /* Stat cards */
+  .stats-row{gap:8px;margin-bottom:12px}
+  .stat-card{padding:14px 16px}
+  .ind-row{gap:8px;margin-bottom:12px}
+  .ind-card{padding:12px 14px}
+
+  /* Tabla — scroll táctil suave */
+  .table-wrap{-webkit-overflow-scrolling:touch}
+  .table-toolbar{gap:6px}
+  .search-box{font-size:13px}
+
+  /* Modal full-width en mobile */
+  .modal{max-width:calc(100vw - 24px)}
+}
+
+@media(max-width:400px){
+  .tab-label{display:none}
+  .tab-icon svg{width:22px;height:22px}
+  .tipo-btn{padding:6px 7px;font-size:9px}
+  .card{padding:12px 10px}
+}
+
+/* ═══════════════════════════════════════════════════════
+   VISUAL REFINEMENTS
+═══════════════════════════════════════════════════════ */
+/* Tarjetas con transición suave */
+.card{transition:box-shadow .2s}
+/* Focus más visible */
+.field input:focus,.field select:focus,.field textarea:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(200,255,0,.09),0 0 20px rgba(200,255,0,.04);
+}
+/* Press feedback en botones */
+.btn:active:not(:disabled){transform:translateY(0) scale(.97)!important;transition:transform .08s}
+/* Modal con micro-bounce */
+.modal-overlay.open{animation:modalIn .2s cubic-bezier(.34,1.56,.64,1)}
+@keyframes modalIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+/* Scrollbar en tabla */
+.table-wrap{scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
+/* Tipo-selector wrap en pantallas pequeñas */
+.tipo-selector{flex-wrap:wrap}
+/* Toast sube un poco más en mobile */
+@media(max-width:768px){
+  #toast{bottom:calc(72px + env(safe-area-inset-bottom,0px) + 12px)}
+}
 </style>
 </head>
 <body>
+
+<!-- Header solo visible en mobile (logo) -->
+<div class="mobile-header">
+  <div class="nav-logo"><span class="kv-kicks">KICKS</span><span class="kv-vault">VAULT</span></div>
+</div>
 
 <nav>
   <div class="nav-logo"><span class="kv-kicks">KICKS</span><span class="kv-vault">VAULT</span></div>
   <div class="nav-divider"></div>
   <div class="nav-tabs">
-    <button class="nav-tab active" onclick="showView('registro',this)">Registro</button>
-    <button class="nav-tab" onclick="showView('inventario',this)">Inventario</button>
-    <button class="nav-tab" onclick="showView('ventas',this)">Ventas</button>
-    <button class="nav-tab" onclick="showView('flujo',this)">Flujo de Caja</button>
-    <button class="nav-tab" onclick="showView('clientes',this)">Clientes</button>
+    <button class="nav-tab active" onclick="showView('registro',this)">
+      <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5"/><path d="M17.5 3.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 7.5-7.5z"/></svg>
+      <span class="tab-label">Registro</span>
+    </button>
+    <button class="nav-tab" onclick="showView('inventario',this)">
+      <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="6" height="6" rx="1"/><rect x="9" y="3" width="6" height="6" rx="1"/><rect x="16" y="3" width="6" height="6" rx="1"/><rect x="2" y="12" width="6" height="6" rx="1"/><rect x="9" y="12" width="6" height="6" rx="1"/><rect x="16" y="12" width="6" height="6" rx="1"/></svg>
+      <span class="tab-label">Inventario</span>
+    </button>
+    <button class="nav-tab" onclick="showView('ventas',this)">
+      <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+      <span class="tab-label">Ventas</span>
+    </button>
+    <button class="nav-tab" onclick="showView('flujo',this)">
+      <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
+      <span class="tab-label">Flujo</span>
+    </button>
+    <button class="nav-tab" onclick="showView('clientes',this)">
+      <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span class="tab-label">Clientes</span>
+    </button>
   </div>
 </nav>
 
@@ -1047,7 +1165,43 @@ input[list] { cursor: text; }
 </div>
 
 <!-- Placeholders -->
-<div id="view-ventas" class="view"><div class="page-title"><div class="dot"></div> Ventas</div><div class="empty-state"><div class="empty-icon">↗</div><div class="empty-text">Próximamente</div></div></div>
+<div id="view-ventas" class="view">
+  <div class="page-title"><div class="dot"></div> Ventas</div>
+  <div style="max-width:600px;display:grid;gap:12px">
+    <div class="card" style="text-align:center;padding:44px 24px">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:16px;opacity:.7"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+      <div style="font-family:'Archivo Black';font-size:17px;margin-bottom:8px;color:var(--text)">Historial de Ventas</div>
+      <div style="font-size:13px;color:var(--muted2);line-height:1.7;max-width:380px;margin:0 auto">
+        Aquí verás todas tus ventas con márgenes, rentabilidad por producto y ranking MPD (Margen Por Día).
+      </div>
+    </div>
+    <div class="card" style="padding:20px 24px">
+      <div class="card-label">Próximas funciones</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div style="background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:14px 16px">
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px">Historial</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text)">Lista de ventas</div>
+          <div style="font-size:11px;color:var(--muted2);margin-top:3px">por fecha, canal y margen</div>
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:14px 16px">
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px">Ranking</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text)">MPD por producto</div>
+          <div style="font-size:11px;color:var(--muted2);margin-top:3px">mejor margen / día en stock</div>
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:14px 16px">
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px">Analytics</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text)">Por marca y canal</div>
+          <div style="font-size:11px;color:var(--muted2);margin-top:3px">Instagram, WhatsApp, Stand SL</div>
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:14px 16px">
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px">Break-even</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text)">Ventas vs meta</div>
+          <div style="font-size:11px;color:var(--muted2);margin-top:3px">cuánto falta para cubrir fijos</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 <div id="view-flujo" class="view">
   <div class="page-title"><div class="dot"></div> Flujo de Caja</div>
 
@@ -1213,7 +1367,43 @@ input[list] { cursor: text; }
     </table>
   </div>
 </div>
-<div id="view-clientes" class="view"><div class="page-title"><div class="dot"></div> Clientes</div><div class="empty-state"><div class="empty-icon">◎</div><div class="empty-text">Próximamente</div></div></div>
+<div id="view-clientes" class="view">
+  <div class="page-title"><div class="dot"></div> Clientes</div>
+  <div style="max-width:600px;display:grid;gap:12px">
+    <div class="card" style="text-align:center;padding:44px 24px">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:16px;opacity:.7"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <div style="font-family:'Archivo Black';font-size:17px;margin-bottom:8px;color:var(--text)">CRM de Clientes</div>
+      <div style="font-size:13px;color:var(--muted2);line-height:1.7;max-width:380px;margin:0 auto">
+        Gestiona tus clientes frecuentes, su historial de compras, tallas y preferencias de canal.
+      </div>
+    </div>
+    <div class="card" style="padding:20px 24px">
+      <div class="card-label">Próximas funciones</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div style="background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:14px 16px">
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px">Perfil</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text)">Ficha de cliente</div>
+          <div style="font-size:11px;color:var(--muted2);margin-top:3px">talla, canal, historial</div>
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:14px 16px">
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px">LTV</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text)">Valor de por vida</div>
+          <div style="font-size:11px;color:var(--muted2);margin-top:3px">total gastado, nº compras</div>
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:14px 16px">
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px">Seguimiento</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text)">Intereses activos</div>
+          <div style="font-size:11px;color:var(--muted2);margin-top:3px">qué marcas busca cada uno</div>
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:14px 16px">
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px">WhatsApp</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text)">Link directo</div>
+          <div style="font-size:11px;color:var(--muted2);margin-top:3px">escribir al cliente en 1 tap</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- MODAL PAGAR CRÉDITO -->
 <div class="modal-overlay" id="modal-pagar">
