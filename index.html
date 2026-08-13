@@ -128,7 +128,8 @@ nav{position:sticky;top:0;z-index:200;background:var(--card);border-bottom:1px s
 .filter-select{background:var(--surface);border:1px solid var(--border2);border-radius:9px;padding:10px 14px;color:var(--text);font-family:'Archivo';font-size:12px;outline:none;cursor:pointer;transition:border .15s}
 .filter-select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.07)}
 .table-wrap{overflow-x:auto;border-radius:14px;border:1px solid var(--border);box-shadow:var(--shadow);background:var(--card)}
-table{width:100%;border-collapse:collapse;font-size:11px;font-family:inherit;min-width:1200px}
+table{width:100%;border-collapse:collapse;font-size:11px;font-family:inherit}
+.table-wrap table{min-width:1200px}
 thead tr{background:var(--surface)}
 thead tr:first-child td{border-top:none}
 th{padding:9px 14px;text-align:left;font-size:9px;font-family:inherit;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);white-space:nowrap;border-bottom:1px solid var(--border)}
@@ -263,7 +264,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 input[list] { cursor: text; }
 
 /* COSTO TABLA BUSQUEDA */
-.cs-tabla-wrap{max-height:220px;overflow-y:auto;border:1px solid var(--border2);border-radius:8px}
+.cs-tabla-wrap{max-height:220px;overflow-y:auto;overflow-x:auto;border:1px solid var(--border2);border-radius:8px}
 .cs-tabla{width:100%;border-collapse:collapse}
 .cs-tabla thead th{padding:7px 10px;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);background:var(--bg);position:sticky;top:0}
 .cs-tabla tbody tr{border-top:1px solid var(--border);cursor:pointer;transition:background .1s}
@@ -411,8 +412,8 @@ input[list] { cursor: text; }
 .fc-pend-icon{font-size:28px;opacity:.3}
 
 /* Tabla movimientos */
-.fc-tabla-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-.fc-tabla{width:100%;border-collapse:collapse;font-size:11px;font-family:inherit}
+.fc-tabla-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.fc-tabla{width:100%;border-collapse:collapse;font-size:11px;font-family:inherit;min-width:820px}
 .fc-tabla thead{background:var(--surface)}
 .fc-tabla thead th{padding:8px 12px;font-size:9px;font-family:inherit;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);white-space:nowrap;border-bottom:1px solid var(--border);text-align:left}
 .fc-tabla thead th.right{text-align:right}
@@ -440,11 +441,6 @@ input[list] { cursor: text; }
 .fc-accion-CANCELACION{background:rgba(156,163,175,.08);color:var(--muted2);border:1px solid rgba(156,163,175,.18)}
 .fc-accion-PENDIENTE{background:rgba(180,83,9,.08);color:var(--yellow);border:1px solid rgba(180,83,9,.18)}
 
-/* ── MÓVIL: scroll horizontal en tabla ── */
-@media(max-width:700px){
-  .fc-tabla-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  .fc-tabla{min-width:820px}
-}
 
 /* DARK MODE TOGGLE */
 .theme-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:none;cursor:pointer;font-size:15px;color:var(--muted2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;margin-left:10px}
@@ -536,7 +532,7 @@ input[list] { cursor: text; }
   .ind-card{padding:12px 14px}
 
   /* Tabla — scroll táctil suave */
-  .table-wrap{-webkit-overflow-scrolling:touch}
+  .table-wrap,.fc-tabla-wrap{-webkit-overflow-scrolling:touch}
   .table-toolbar{gap:6px}
   .search-box{font-size:13px}
 
