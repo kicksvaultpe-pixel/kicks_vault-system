@@ -561,6 +561,23 @@ input[list] { cursor: text; }
 @media(max-width:768px){
   #toast{bottom:calc(72px + env(safe-area-inset-bottom,0px) + 12px)}
 }
+
+/* ── SELECCIÓN DE FILAS ── */
+tbody tr{cursor:pointer;user-select:none}
+tbody tr.row-selected>td{background:rgba(200,255,0,.06)!important;outline:1px solid rgba(200,255,0,.15)}
+tbody tr.row-selected:hover>td{background:rgba(200,255,0,.09)!important}
+
+/* ── UI SIMPLIFICADA — sin glows ── */
+.btn-primary{box-shadow:none}
+.btn-primary:hover:not(:disabled){box-shadow:none;filter:brightness(1.07);transform:translateY(-1px)}
+.tipo-btn.active.compra,.tipo-btn.active.venta,.tipo-btn.active.reserva,
+.tipo-btn.active.pago,.tipo-btn.active.costo{box-shadow:none}
+.ptoggle-btn.active.contado,.ptoggle-btn.active.credito{box-shadow:none}
+.stat-card::before{display:none}
+.stat-card:hover{transform:none;border-color:var(--border2)}
+/* Ventas stats responsive */
+@media(max-width:640px){#vt-stats-row{grid-template-columns:1fr 1fr!important}}
+@media(max-width:360px){#vt-stats-row{grid-template-columns:1fr!important}}
 </style>
 </head>
 <body>
@@ -1138,6 +1155,7 @@ input[list] { cursor: text; }
     </select>
     <button class="btn btn-ghost btn-sm" onclick="clearFiltros()">✕ Limpiar</button>
     <button class="btn btn-ghost btn-sm" onclick="loadInventario()" title="Recargar">↺</button>
+    <button class="btn btn-ghost btn-sm" onclick="exportInventarioCSV()" title="Exportar inventario a Excel">↓ Excel</button>
   </div>
 
   <div class="table-wrap">
@@ -1167,39 +1185,62 @@ input[list] { cursor: text; }
 <!-- Placeholders -->
 <div id="view-ventas" class="view">
   <div class="page-title"><div class="dot"></div> Ventas</div>
-  <div style="max-width:600px;display:grid;gap:12px">
-    <div class="card" style="text-align:center;padding:44px 24px">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:16px;opacity:.7"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-      <div style="font-family:'Archivo Black';font-size:17px;margin-bottom:8px;color:var(--text)">Historial de Ventas</div>
-      <div style="font-size:13px;color:var(--muted2);line-height:1.7;max-width:380px;margin:0 auto">
-        Aquí verás todas tus ventas con márgenes, rentabilidad por producto y ranking MPD (Margen Por Día).
-      </div>
+
+  <!-- Stats -->
+  <div id="vt-stats-row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
+    <div class="stat-card">
+      <div class="stat-label">Ventas</div>
+      <div style="font-family:'Archivo Black';font-size:28px;line-height:1;margin-top:6px" id="vt-n">—</div>
+      <div class="stat-sub" id="vt-sub-mes" style="margin-top:4px"></div>
     </div>
-    <div class="card" style="padding:20px 24px">
-      <div class="card-label">Próximas funciones</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div style="background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:14px 16px">
-          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px">Historial</div>
-          <div style="font-size:13px;font-weight:600;color:var(--text)">Lista de ventas</div>
-          <div style="font-size:11px;color:var(--muted2);margin-top:3px">por fecha, canal y margen</div>
-        </div>
-        <div style="background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:14px 16px">
-          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px">Ranking</div>
-          <div style="font-size:13px;font-weight:600;color:var(--text)">MPD por producto</div>
-          <div style="font-size:11px;color:var(--muted2);margin-top:3px">mejor margen / día en stock</div>
-        </div>
-        <div style="background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:14px 16px">
-          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px">Analytics</div>
-          <div style="font-size:13px;font-weight:600;color:var(--text)">Por marca y canal</div>
-          <div style="font-size:11px;color:var(--muted2);margin-top:3px">Instagram, WhatsApp, Stand SL</div>
-        </div>
-        <div style="background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:14px 16px">
-          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px">Break-even</div>
-          <div style="font-size:13px;font-weight:600;color:var(--text)">Ventas vs meta</div>
-          <div style="font-size:11px;color:var(--muted2);margin-top:3px">cuánto falta para cubrir fijos</div>
-        </div>
-      </div>
+    <div class="stat-card">
+      <div class="stat-label">Revenue</div>
+      <div style="font-family:'Archivo Black';font-size:18px;line-height:1;margin-top:6px" id="vt-rev">—</div>
     </div>
+    <div class="stat-card">
+      <div class="stat-label">Ganancia bruta</div>
+      <div style="font-family:'Archivo Black';font-size:18px;line-height:1;margin-top:6px;color:var(--green)" id="vt-gan">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Margen promedio</div>
+      <div style="font-family:'Archivo Black';font-size:28px;line-height:1;margin-top:6px;color:var(--accent)" id="vt-margen">—</div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="table-toolbar">
+    <input type="month" id="vt-mes" class="filter-select" onchange="loadVentas()" style="min-width:140px">
+    <select id="vt-canal" class="filter-select" onchange="loadVentas()">
+      <option value="">Todos los canales</option>
+      <option value="INSTAGRAM">Instagram</option>
+      <option value="WHATSAPP">WhatsApp</option>
+      <option value="PRESENCIAL">Presencial</option>
+      <option value="OTRO">Otro</option>
+    </select>
+    <div style="flex:1"></div>
+    <button class="btn btn-ghost btn-sm" onclick="exportVentasCSV()">↓ Excel</button>
+  </div>
+
+  <!-- Tabla -->
+  <div class="table-wrap">
+    <table id="vt-table" style="min-width:680px">
+      <thead><tr>
+        <th style="width:80px">Fecha</th>
+        <th style="width:90px">Código</th>
+        <th>Producto</th>
+        <th style="width:70px">Talla</th>
+        <th style="width:110px">Canal</th>
+        <th style="width:120px;text-align:right">Venta S/.</th>
+        <th style="width:120px;text-align:right">Ganancia</th>
+        <th style="width:80px;text-align:right">ROI</th>
+      </tr></thead>
+      <tbody id="vt-tbody">
+        <tr class="loading-row"><td colspan="8"><div class="spinner"></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div id="vt-hint" style="display:none;font-size:10px;color:var(--muted2);margin-top:8px;text-align:center;letter-spacing:.3px">
+    Click para seleccionar · Ctrl+C para copiar · Shift+click para rango
   </div>
 </div>
 <div id="view-flujo" class="view">
@@ -1680,6 +1721,8 @@ async function loadTCGlobal(){
 async function init(){
   setToday();
   await Promise.all([loadTCGlobal(), loadInventario(), loadClientes(), loadOCs()]);
+  initRowSel('inv-tbody');
+  initRowSel('vt-tbody');
 }
 
 function setToday(){
@@ -1696,8 +1739,10 @@ function showView(n,btn){
   document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
   document.getElementById('view-'+n).classList.add('active');
   if(btn)btn.classList.add('active');
+  _clearSel();
   if(n==='inventario') loadInventario();
   if(n==='flujo') loadFlujo();
+  if(n==='ventas') loadVentas();
 }
 
 function setTipo(tipo,btn){
@@ -2829,6 +2874,151 @@ function toast(msg,type='ok'){
   const el=document.getElementById('toast');
   el.textContent=msg;el.className=`show ${type}`;
   clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.className='',3500);
+}
+
+// ── VENTAS ──
+let ventasCache=[];
+
+async function loadVentas(){
+  const mesEl=document.getElementById('vt-mes');
+  if(!mesEl.value){
+    const now=new Date();
+    mesEl.value=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  }
+  const mes=mesEl.value;
+  const canal=document.getElementById('vt-canal').value;
+  const tbody=document.getElementById('vt-tbody');
+  if(tbody)tbody.innerHTML='<tr class="loading-row"><td colspan="8"><div class="spinner"></div></td></tr>';
+
+  let q=db.from('ventas')
+    .select('*,inventario(marca,silueta,colorway,talla,precio_final)')
+    .order('fecha',{ascending:false})
+    .order('codigo_venta',{ascending:false});
+
+  if(mes){
+    const[y,m]=mes.split('-');
+    const ld=new Date(parseInt(y),parseInt(m),0).getDate();
+    q=q.gte('fecha',`${y}-${m}-01`).lte('fecha',`${y}-${m}-${String(ld).padStart(2,'0')}`);
+  }
+  if(canal)q=q.eq('canal',canal);
+
+  const{data,error}=await q;
+  if(error){toast('Error: '+error.message,'err');return;}
+  ventasCache=data||[];
+  renderVentas(ventasCache);
+  updateVentasStats(ventasCache,mes);
+}
+
+function renderVentas(rows){
+  _clearSel();
+  const tbody=document.getElementById('vt-tbody');
+  const hint=document.getElementById('vt-hint');
+  if(!tbody)return;
+  if(!rows.length){
+    tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted2)">Sin ventas en este período</td></tr>';
+    if(hint)hint.style.display='none';
+    return;
+  }
+  if(hint)hint.style.display='';
+  const cb={'INSTAGRAM':'badge-purple','WHATSAPP':'badge-green','PRESENCIAL':'badge-accent','OTRO':'badge-muted'};
+  tbody.innerHTML=rows.map(v=>{
+    const inv=v.inventario||{};
+    const nombre=[inv.marca,inv.silueta||inv.modelo,inv.colorway].filter(Boolean).join(' ')||'—';
+    const fecha=v.fecha?v.fecha.substring(2).replace(/-/g,'/'):' —';
+    const gan=parseFloat(v.ganancia||0);
+    const roi=parseFloat(v.rentabilidad||0);
+    const gc=gan>=0?'var(--green)':'var(--red)';
+    const badge=cb[v.canal]||'badge-muted';
+    return`<tr>
+      <td class="td-code">${fecha}</td>
+      <td class="td-code" style="color:var(--accent)">${v.codigo_venta}</td>
+      <td class="td-main" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${nombre}</td>
+      <td>${inv.talla||'—'}</td>
+      <td><span class="badge ${badge}">${v.canal||'—'}</span></td>
+      <td class="td-amt" style="text-align:right;color:var(--accent)">${fmt(v.precio_venta_soles)}</td>
+      <td class="td-amt" style="text-align:right;color:${gc}">${gan>=0?'+':''}${fmt(gan)}</td>
+      <td style="text-align:right"><span class="badge ${roi>=0?'badge-green':'badge-red'}">${(roi*100).toFixed(0)}%</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function updateVentasStats(rows,mes){
+  const n=rows.length;
+  const rev=rows.reduce((s,v)=>s+parseFloat(v.precio_venta_soles||0),0);
+  const gan=rows.reduce((s,v)=>s+parseFloat(v.ganancia||0),0);
+  const avgRoi=n>0?rows.reduce((s,v)=>s+parseFloat(v.rentabilidad||0),0)/n:0;
+  const lbl=mes?new Date(mes+'-15').toLocaleDateString('es-PE',{month:'long',year:'numeric'}):'';
+  const s=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val;};
+  s('vt-n',n);s('vt-sub-mes',lbl);s('vt-rev',fmt(rev));
+  s('vt-gan',fmt(gan));s('vt-margen',(avgRoi*100).toFixed(0)+'%');
+}
+
+// ── SELECCIÓN DE FILAS + CTRL+C ──
+let _selRows=new Set(),_selLast=null;
+
+function _clearSel(){_selRows.forEach(r=>r.classList.remove('row-selected'));_selRows.clear();_selLast=null;}
+
+function initRowSel(tbodyId){
+  const tb=document.getElementById(tbodyId);
+  if(!tb||tb._selInit)return;
+  tb._selInit=true;
+  tb.addEventListener('click',function(e){
+    const row=e.target.closest('tr');
+    if(!row||['BUTTON','A','INPUT','SELECT'].includes(e.target.tagName))return;
+    if(e.shiftKey&&_selLast&&tb.contains(_selLast)){
+      const all=[...tb.querySelectorAll('tr')];
+      const a=all.indexOf(_selLast),b=all.indexOf(row);
+      const[lo,hi]=[Math.min(a,b),Math.max(a,b)];
+      if(!e.ctrlKey&&!e.metaKey){_selRows.forEach(r=>r.classList.remove('row-selected'));_selRows.clear();}
+      all.slice(lo,hi+1).forEach(r=>{_selRows.add(r);r.classList.add('row-selected');});
+    }else if(e.ctrlKey||e.metaKey){
+      if(_selRows.has(row)){_selRows.delete(row);row.classList.remove('row-selected');}
+      else{_selRows.add(row);row.classList.add('row-selected');}
+    }else{
+      _selRows.forEach(r=>r.classList.remove('row-selected'));_selRows.clear();
+      _selRows.add(row);row.classList.add('row-selected');
+    }
+    _selLast=row;
+  });
+}
+
+document.addEventListener('keydown',function(e){
+  if((e.ctrlKey||e.metaKey)&&e.key==='c'&&_selRows.size>0){
+    if(document.activeElement&&['INPUT','TEXTAREA'].includes(document.activeElement.tagName))return;
+    e.preventDefault();
+    const tsv=[..._selRows].map(row=>[...row.querySelectorAll('td')].map(td=>td.innerText.trim().replace(/\s+/g,' ')).join('\t')).join('\n');
+    navigator.clipboard.writeText(tsv).then(()=>toast('✓ '+_selRows.size+' fila'+(+_selRows.size!==1?'s':'')+' copiada'+(+_selRows.size!==1?'s':''),'ok'));
+  }
+});
+
+// ── EXPORT CSV ──
+function exportInventarioCSV(){
+  const h=['Fecha','Código','Marca','Modelo','Colorway','Talla','Categoría','Estado','P.Compra S/.','Costos S/.','P.Final S/.','P.Venta Sug.','Margen %','Tipo Pago'];
+  const r=inventarioCache.map(p=>{
+    const pF=parseFloat(p.precio_final||p.precio_compra_soles||0);
+    const pV=parseFloat(p.precio_venta_sugerido||0);
+    const mg=pF>0&&pV>0?Math.round((pV-pF)/pF*100):'';
+    return[p.fecha_compra||'',p.codigo_producto,p.marca||'',p.silueta||p.modelo||'',p.colorway||'',p.talla||'',p.categoria||'',p.estado||'',p.precio_compra_soles||0,p.total_costos||0,pF,pV,mg,p.tipo_pago||'']
+      .map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',');
+  });
+  _dlCSV([h.join(','),...r].join('\n'),`kv-inventario-${new Date().toISOString().slice(0,10)}.csv`);
+}
+
+function exportVentasCSV(){
+  const h=['Fecha','Código Venta','Marca','Modelo','Colorway','Talla','Canal','Comprador','Venta S/.','Ganancia S/.','ROI %'];
+  const r=ventasCache.map(v=>{
+    const inv=v.inventario||{};
+    return[v.fecha||'',v.codigo_venta,inv.marca||'',inv.silueta||inv.modelo||'',inv.colorway||'',inv.talla||'',v.canal||'',v.comprador||'',v.precio_venta_soles||0,v.ganancia||0,(parseFloat(v.rentabilidad||0)*100).toFixed(1)]
+      .map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',');
+  });
+  _dlCSV([h.join(','),...r].join('\n'),`kv-ventas-${new Date().toISOString().slice(0,10)}.csv`);
+}
+
+function _dlCSV(csv,name){
+  const b=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+  const u=URL.createObjectURL(b);
+  const a=document.createElement('a');a.href=u;a.download=name;a.click();
+  setTimeout(()=>URL.revokeObjectURL(u),1000);
 }
 
 init();
