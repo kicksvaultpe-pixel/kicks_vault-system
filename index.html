@@ -587,6 +587,64 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
 /* Ventas stats responsive */
 @media(max-width:640px){#vt-stats-row{grid-template-columns:1fr 1fr!important}}
 @media(max-width:360px){#vt-stats-row{grid-template-columns:1fr!important}}
+
+/* ── CRM CLIENTES ── */
+.cl-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+@media(max-width:600px){.cl-stats{grid-template-columns:1fr 1fr}}
+/* Client search */
+.cl-search-wrap{position:relative}
+.cl-search-input{width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:9px;padding:10px 14px;color:var(--text);font-family:'Archivo';font-size:12px;outline:none;transition:border .15s,box-shadow .15s}
+.cl-search-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.07)}
+.cl-search-drop{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--card);border:1px solid var(--border2);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.18);z-index:120;display:none;max-height:220px;overflow-y:auto}
+.cl-search-drop.open{display:block}
+.cl-si{padding:9px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .1s}
+.cl-si:hover{background:rgba(37,99,235,.06)}
+.cl-si-code{font-size:9px;font-weight:700;color:var(--accent);letter-spacing:.5px;flex-shrink:0;font-family:'Archivo'}
+.cl-si-name{font-size:12px;color:var(--text);flex:1;font-family:'Archivo'}
+.cl-si-talla{font-size:10px;color:var(--muted2);flex-shrink:0}
+.cl-si-empty{padding:9px 12px;font-size:12px;color:var(--muted2);text-align:center;font-family:'Archivo'}
+.cl-si-new{padding:8px 12px;font-size:11px;font-weight:700;color:var(--accent);cursor:pointer;border-top:1px solid var(--border);display:flex;align-items:center;gap:5px;transition:background .1s;font-family:'Archivo'}
+.cl-si-new:hover{background:rgba(37,99,235,.05)}
+/* Selected badge */
+.cl-sel{display:none;align-items:center;gap:8px;background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.2);border-radius:9px;padding:9px 12px;margin-top:0}
+.cl-sel.show{display:flex}
+.cl-sel-info{flex:1;min-width:0}
+.cl-sel-code{font-size:9px;font-weight:700;color:var(--accent);letter-spacing:.5px;font-family:'Archivo'}
+.cl-sel-name{font-size:12px;font-weight:600;color:var(--text);font-family:'Archivo';white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cl-sel-clear{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:18px;line-height:1;padding:0 2px;flex-shrink:0;transition:color .15s}
+.cl-sel-clear:hover{color:var(--neg)}
+/* Profile panel */
+.cl-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:250;display:none;backdrop-filter:blur(2px)}
+.cl-backdrop.open{display:block}
+.cl-panel{position:fixed;top:0;right:0;bottom:0;width:400px;max-width:100vw;background:var(--card);border-left:1px solid var(--border2);z-index:251;display:flex;flex-direction:column;transform:translateX(105%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.cl-panel.open{transform:none}
+.cl-panel-head{padding:20px 20px 16px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0}
+.cl-panel-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.cl-panel-code{font-size:9px;font-weight:700;letter-spacing:2px;color:var(--muted2);text-transform:uppercase;font-family:'Archivo'}
+.cl-panel-close{background:none;border:none;color:var(--muted2);font-size:22px;cursor:pointer;line-height:1;padding:2px 4px;transition:color .15s}
+.cl-panel-close:hover{color:var(--text)}
+.cl-panel-name{font-family:'Archivo Black';font-size:19px;color:var(--text);line-height:1.1;margin-bottom:8px}
+.cl-panel-body{flex:1;overflow-y:auto;padding:20px}
+.cl-section{margin-bottom:22px}
+.cl-section-lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:10px;display:flex;align-items:center;gap:8px;font-family:'Archivo'}
+.cl-section-lbl::after{content:'';flex:1;height:1px;background:var(--border)}
+.cl-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0}
+.cl-key{font-size:11px;color:var(--muted2);font-family:'Archivo'}
+.cl-val{font-size:12px;font-weight:600;color:var(--text);font-family:'Archivo'}
+.cl-val.accent{color:var(--accent)}.cl-val.green{color:var(--green)}
+.cl-mini-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px}
+.cl-ms{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.cl-ms-lbl{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:3px;font-family:'Archivo'}
+.cl-ms-val{font-family:'Archivo Black';font-size:17px;color:var(--text)}
+.cl-ms-val.green{color:var(--green)}.cl-ms-val.accent{color:var(--accent)}
+.cl-hist{width:100%;border-collapse:collapse;font-size:11px;font-family:'Archivo',inherit}
+.cl-hist th{padding:6px 8px;text-align:left;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);border-bottom:1px solid var(--border)}
+.cl-hist td{padding:7px 8px;border-top:1px solid var(--border);color:var(--text);font-family:'Archivo',inherit}
+.cl-hist td:first-child{border-top:none}
+.cl-hist .td-green{color:var(--green);font-weight:700}.cl-hist .td-accent{color:var(--accent);font-size:10px;font-weight:600}
+.cl-panel-foot{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;background:var(--surface);flex-shrink:0}
+/* Type badges */
+.badge-vip{background:rgba(180,83,9,.1);color:var(--yellow);border:1px solid rgba(180,83,9,.2)}
 </style>
 </head>
 <body>
@@ -871,7 +929,20 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <div class="field"><label>Canal</label>
           <select id="vt-canal"><option>INSTAGRAM</option><option>WHATSAPP</option><option>PRESENCIAL</option><option>OTRO</option></select>
         </div>
-        <div class="field"><label>Comprador (opcional)</label><input type="text" id="vt-comprador" placeholder="@usuario o nombre"></div>
+        <div class="field span2"><label>Cliente (opcional)</label>
+          <div class="cl-search-wrap" id="vt-cl-wrap">
+            <input class="cl-search-input" id="vt-cl-input" placeholder="Buscar por nombre o código…" autocomplete="off"
+              oninput="clSearch('vt')" onfocus="clSearchFocus('vt')" onblur="clSearchBlur('vt')" onkeydown="clSearchKey(event,'vt')">
+            <div class="cl-search-drop" id="vt-cl-drop"></div>
+          </div>
+          <div class="cl-sel" id="vt-cl-sel">
+            <div class="cl-sel-info">
+              <div class="cl-sel-code" id="vt-cl-sel-code"></div>
+              <div class="cl-sel-name" id="vt-cl-sel-name"></div>
+            </div>
+            <button class="cl-sel-clear" onclick="clClear('vt')" title="Quitar cliente">×</button>
+          </div>
+        </div>
       </div>
     </div>
     <button class="btn btn-green" id="btn-venta" onclick="registrarVenta()">✓ Registrar Venta</button>
@@ -924,8 +995,19 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
           <select id="rv-canal"><option>INSTAGRAM</option><option>WHATSAPP</option><option>PRESENCIAL</option><option>OTRO</option></select>
         </div>
         <div class="field"><label>Fecha límite</label><input type="date" id="rv-fecha-limite"></div>
-        <div class="field"><label>Cliente (opcional)</label>
-          <select id="rv-cliente"><option value="">— Sin cliente —</option></select>
+        <div class="field span2"><label>Cliente (opcional)</label>
+          <div class="cl-search-wrap" id="rv-cl-wrap">
+            <input class="cl-search-input" id="rv-cl-input" placeholder="Buscar por nombre o código…" autocomplete="off"
+              oninput="clSearch('rv')" onfocus="clSearchFocus('rv')" onblur="clSearchBlur('rv')" onkeydown="clSearchKey(event,'rv')">
+            <div class="cl-search-drop" id="rv-cl-drop"></div>
+          </div>
+          <div class="cl-sel" id="rv-cl-sel">
+            <div class="cl-sel-info">
+              <div class="cl-sel-code" id="rv-cl-sel-code"></div>
+              <div class="cl-sel-name" id="rv-cl-sel-name"></div>
+            </div>
+            <button class="cl-sel-clear" onclick="clClear('rv')" title="Quitar cliente">×</button>
+          </div>
         </div>
         <div class="field span2"><label>Notas</label><textarea id="rv-notas" placeholder="Detalles..."></textarea></div>
       </div>
@@ -1420,39 +1502,52 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
 </div>
 <div id="view-clientes" class="view">
   <div class="page-title"><div class="dot"></div> Clientes</div>
-  <div style="max-width:600px;display:grid;gap:12px">
-    <div class="card" style="text-align:center;padding:44px 24px">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:16px;opacity:.7"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      <div style="font-family:'Archivo Black';font-size:17px;margin-bottom:8px;color:var(--text)">CRM de Clientes</div>
-      <div style="font-size:13px;color:var(--muted2);line-height:1.7;max-width:380px;margin:0 auto">
-        Gestiona tus clientes frecuentes, su historial de compras, tallas y preferencias de canal.
-      </div>
+
+  <!-- Stats -->
+  <div class="cl-stats">
+    <div class="stat-card">
+      <div class="stat-label">Total clientes</div>
+      <div class="stat-val" id="cl-stat-total">—</div>
     </div>
-    <div class="card" style="padding:20px 24px">
-      <div class="card-label">Próximas funciones</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div style="background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:14px 16px">
-          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px">Perfil</div>
-          <div style="font-size:13px;font-weight:600;color:var(--text)">Ficha de cliente</div>
-          <div style="font-size:11px;color:var(--muted2);margin-top:3px">talla, canal, historial</div>
-        </div>
-        <div style="background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:14px 16px">
-          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px">LTV</div>
-          <div style="font-size:13px;font-weight:600;color:var(--text)">Valor de por vida</div>
-          <div style="font-size:11px;color:var(--muted2);margin-top:3px">total gastado, nº compras</div>
-        </div>
-        <div style="background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:14px 16px">
-          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px">Seguimiento</div>
-          <div style="font-size:13px;font-weight:600;color:var(--text)">Intereses activos</div>
-          <div style="font-size:11px;color:var(--muted2);margin-top:3px">qué marcas busca cada uno</div>
-        </div>
-        <div style="background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:14px 16px">
-          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px">WhatsApp</div>
-          <div style="font-size:13px;font-weight:600;color:var(--text)">Link directo</div>
-          <div style="font-size:11px;color:var(--muted2);margin-top:3px">escribir al cliente en 1 tap</div>
-        </div>
-      </div>
+    <div class="stat-card">
+      <div class="stat-label">Con ventas</div>
+      <div class="stat-val accent" id="cl-stat-activos" style="color:var(--accent)">—</div>
     </div>
+    <div class="stat-card">
+      <div class="stat-label">VIP</div>
+      <div class="stat-val" id="cl-stat-vip" style="color:var(--yellow)">—</div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="table-toolbar">
+    <input class="search-box" id="cl-search" placeholder="Buscar por nombre, código, teléfono…" oninput="filterClientes()">
+    <select class="filter-select" id="cl-filter-tipo" onchange="filterClientes()">
+      <option value="">Todos los tipos</option>
+      <option value="REGULAR">Regular</option>
+      <option value="VIP">VIP</option>
+      <option value="MAYORISTA">Mayorista</option>
+    </select>
+    <button class="btn btn-primary btn-sm" onclick="abrirModalCliente()">+ Nuevo Cliente</button>
+  </div>
+
+  <!-- Tabla -->
+  <div class="table-wrap">
+    <table style="min-width:750px">
+      <thead><tr>
+        <th>Código</th>
+        <th>Nombre</th>
+        <th>Teléfono</th>
+        <th>Instagram</th>
+        <th>Talla</th>
+        <th>Canal</th>
+        <th>Tipo</th>
+        <th></th>
+      </tr></thead>
+      <tbody id="cl-tbody">
+        <tr class="loading-row"><td colspan="8"><div class="spinner"></div></td></tr>
+      </tbody>
+    </table>
   </div>
 </div>
 
@@ -1478,6 +1573,93 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <button class="btn btn-primary" id="btn-modal-pagar" onclick="confirmarPago()">✓ Confirmar Pago</button>
       <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
     </div>
+  </div>
+</div>
+
+<!-- MODAL NUEVO / EDITAR CLIENTE -->
+<div class="modal-overlay" id="modal-nuevo-cliente">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-title">
+      <span id="modal-cl-title">+ Nuevo Cliente</span>
+      <button class="modal-close" onclick="cerrarModalCliente()">×</button>
+    </div>
+    <div class="form-grid g2">
+      <div class="field"><label>Nombre *</label><input type="text" id="cl-nombre" placeholder="Nombre"></div>
+      <div class="field"><label>Apellido</label><input type="text" id="cl-apellido" placeholder="Apellido"></div>
+      <div class="field"><label>Teléfono</label><input type="tel" id="cl-telefono" placeholder="+51 999 999 999"></div>
+      <div class="field"><label>Instagram</label><input type="text" id="cl-instagram" placeholder="@usuario"></div>
+      <div class="field"><label>DNI</label><input type="text" id="cl-dni" placeholder="12345678"></div>
+      <div class="field"><label>Talla habitual</label>
+        <div class="combo-wrap">
+          <input type="text" id="cl-talla" placeholder="10US / M" autocomplete="off"
+            oninput="comboFilter('cl-talla','cl-talla-list')"
+            onfocus="comboOpen('cl-talla','cl-talla-list')"
+            onblur="comboBlur('cl-talla-list')"
+            onkeydown="comboKey(event,'cl-talla','cl-talla-list')">
+          <span class="combo-arrow">▼</span>
+          <div class="combo-list" id="cl-talla-list"></div>
+        </div>
+      </div>
+      <div class="field"><label>Canal preferido</label>
+        <select id="cl-canal">
+          <option value="WHATSAPP">WhatsApp</option>
+          <option value="INSTAGRAM">Instagram</option>
+          <option value="PRESENCIAL">Presencial</option>
+          <option value="OTRO">Otro</option>
+        </select>
+      </div>
+      <div class="field"><label>Tipo</label>
+        <select id="cl-tipo">
+          <option value="REGULAR">Regular</option>
+          <option value="VIP">VIP</option>
+          <option value="MAYORISTA">Mayorista</option>
+        </select>
+      </div>
+      <div class="field span2"><label>Notas</label><textarea id="cl-notas" placeholder="Observaciones…" style="min-height:60px"></textarea></div>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:8px">
+      <button class="btn btn-primary" id="btn-guardar-cl" onclick="guardarCliente()">✓ Guardar</button>
+      <button class="btn btn-ghost" onclick="cerrarModalCliente()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CLIENTE RÁPIDO -->
+<div class="modal-overlay" id="modal-cl-rapido">
+  <div class="modal" style="max-width:340px">
+    <div class="modal-title">
+      <span>+ Cliente rápido</span>
+      <button class="modal-close" onclick="cerrarClRapido()">×</button>
+    </div>
+    <div class="form-grid">
+      <div class="field"><label>Nombre *</label><input type="text" id="clr-nombre" placeholder="Nombre completo"></div>
+      <div class="field"><label>Teléfono</label><input type="tel" id="clr-telefono" placeholder="+51 999 999 999"></div>
+      <div class="field"><label>Talla habitual</label><input type="text" id="clr-talla" placeholder="10US / M" list="dl-tallas-r"><datalist id="dl-tallas-r"></datalist></div>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:8px">
+      <button class="btn btn-primary" id="btn-cl-rapido" onclick="guardarClRapido()">✓ Crear y seleccionar</button>
+      <button class="btn btn-ghost" onclick="cerrarClRapido()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL PERFIL CLIENTE -->
+<div class="cl-backdrop" id="cl-backdrop" onclick="cerrarPerfil()"></div>
+<div class="cl-panel" id="cl-panel">
+  <div class="cl-panel-head">
+    <div class="cl-panel-top">
+      <span class="cl-panel-code" id="cl-pn-code"></span>
+      <button class="cl-panel-close" onclick="cerrarPerfil()">×</button>
+    </div>
+    <div class="cl-panel-name" id="cl-pn-name"></div>
+    <div id="cl-pn-tipo"></div>
+  </div>
+  <div class="cl-panel-body" id="cl-pn-body">
+    <div style="text-align:center;padding:40px"><div class="spinner"></div></div>
+  </div>
+  <div class="cl-panel-foot">
+    <button class="btn btn-primary btn-sm" onclick="editarCliente()">✏ Editar</button>
+    <button class="btn btn-ghost btn-sm" onclick="cerrarPerfil()">Cerrar</button>
   </div>
 </div>
 
@@ -1845,7 +2027,13 @@ function fillDataLists(){
 
 async function loadClientes(){
   const{data}=await db.from('clientes').select('*').order('nombre');
-  clientesCache=data||[];fillClienteSelect();
+  clientesCache=data||[];
+  // Calcular cuántos clientes tienen al menos una venta
+  const{data:vtIds}=await db.from('ventas').select('id_cliente').not('id_cliente','is',null);
+  const uniq=new Set((vtIds||[]).map(v=>v.id_cliente).filter(Boolean));
+  const elAct=document.getElementById('cl-stat-activos');
+  if(elAct)elAct.textContent=uniq.size;
+  renderClientes(clientesCache);
 }
 
 // ── RENDER ──
@@ -2056,10 +2244,263 @@ function fillProductoSelects(){
   const cs=document.getElementById('cs-producto');if(cs)cs.innerHTML=mkAll(inventarioCache);
 }
 
-function fillClienteSelect(){
-  const sel=document.getElementById('rv-cliente');if(!sel)return;
-  sel.innerHTML='<option value="">— Sin cliente —</option>'+
-    clientesCache.map(c=>`<option value="${c.id_cliente}">${c.nombre}${c.instagram?' · '+c.instagram:''}</option>`).join('');
+function fillClienteSelect(){ /* reemplazado por clSearch */ }
+
+// ══════════════════════════════════════════
+//  CRM CLIENTES
+// ══════════════════════════════════════════
+let clSelectedId={vt:null,rv:null};
+let clEditingId=null;
+let clPanelId=null;
+
+function clCodigo(id){ return 'C-'+String(id).padStart(3,'0'); }
+
+function tipoBadgeHTML(tipo){
+  if(tipo==='VIP') return '<span class="badge badge-vip">VIP</span>';
+  if(tipo==='MAYORISTA') return '<span class="badge badge-purple">Mayorista</span>';
+  return '<span class="badge badge-muted">Regular</span>';
+}
+
+// ── Render tabla clientes ──
+function renderClientes(data){
+  const tbody=document.getElementById('cl-tbody');
+  if(!tbody)return;
+  const total=clientesCache.length;
+  const vips=clientesCache.filter(c=>c.tipo==='VIP').length;
+  const elTotal=document.getElementById('cl-stat-total');
+  const elVip=document.getElementById('cl-stat-vip');
+  if(elTotal)elTotal.textContent=total;
+  if(elVip)elVip.textContent=vips;
+  if(!data.length){
+    tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:44px 20px;color:var(--muted2)"><div style="font-size:28px;margin-bottom:8px;opacity:.4">👥</div>Sin clientes aún</td></tr>`;
+    return;
+  }
+  tbody.innerHTML=data.map(c=>{
+    const cod=clCodigo(c.id_cliente);
+    const nombre=[c.nombre,c.apellido].filter(Boolean).join(' ')||'—';
+    const ig=c.instagram?`<span style="color:var(--accent)">${c.instagram}</span>`:'—';
+    return`<tr onclick="abrirPerfil(${c.id_cliente})">
+      <td><span class="td-code">${cod}</span></td>
+      <td><span class="td-main">${nombre}</span></td>
+      <td>${c.telefono||'—'}</td>
+      <td>${ig}</td>
+      <td>${c.talla_frecuente||'—'}</td>
+      <td>${c.canal_preferido||'—'}</td>
+      <td>${tipoBadgeHTML(c.tipo)}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();abrirModalCliente(${c.id_cliente})" style="padding:4px 10px">✏</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterClientes(){
+  const q=(document.getElementById('cl-search')?.value||'').toLowerCase();
+  const tipo=document.getElementById('cl-filter-tipo')?.value||'';
+  renderClientes(clientesCache.filter(c=>{
+    const txt=[c.nombre,c.apellido,c.instagram,c.telefono,clCodigo(c.id_cliente)].filter(Boolean).join(' ').toLowerCase();
+    return(!q||txt.includes(q))&&(!tipo||c.tipo===tipo);
+  }));
+}
+
+// ── Panel de perfil ──
+async function abrirPerfil(id){
+  clPanelId=id;
+  const c=clientesCache.find(x=>x.id_cliente===id);
+  if(!c)return;
+  document.getElementById('cl-pn-code').textContent=clCodigo(id);
+  document.getElementById('cl-pn-name').textContent=[c.nombre,c.apellido].filter(Boolean).join(' ')||c.nombre;
+  document.getElementById('cl-pn-tipo').innerHTML=tipoBadgeHTML(c.tipo);
+  document.getElementById('cl-pn-body').innerHTML='<div style="text-align:center;padding:40px"><div class="spinner"></div></div>';
+  document.getElementById('cl-backdrop').classList.add('open');
+  document.getElementById('cl-panel').classList.add('open');
+  const{data:ventas}=await db.from('ventas').select('*').eq('id_cliente',id).order('fecha',{ascending:false});
+  renderPerfil(c,ventas||[]);
+}
+
+function renderPerfil(c,ventas){
+  const totalGastado=ventas.reduce((s,v)=>s+parseFloat(v.precio_venta_soles||0),0);
+  const ultimaCompra=ventas.length?ventas[0].fecha:null;
+  const histRows=ventas.slice(0,10).map(v=>`
+    <tr>
+      <td>${v.fecha||'—'}</td>
+      <td class="td-accent">${v.codigo_producto||'—'}</td>
+      <td style="text-align:right">${fmt(v.precio_venta_soles)}</td>
+      <td class="td-green" style="text-align:right">${fmt(v.ganancia)}</td>
+    </tr>`).join('')||'<tr><td colspan="4" style="text-align:center;color:var(--muted2);padding:14px">Sin ventas registradas</td></tr>';
+  document.getElementById('cl-pn-body').innerHTML=`
+    <div class="cl-mini-stats">
+      <div class="cl-ms"><div class="cl-ms-lbl">Compras</div><div class="cl-ms-val accent">${ventas.length}</div></div>
+      <div class="cl-ms"><div class="cl-ms-lbl">Total gastado</div><div class="cl-ms-val green">${fmt(totalGastado)}</div></div>
+    </div>
+    <div class="cl-section">
+      <div class="cl-section-lbl">Contacto</div>
+      ${c.telefono?`<div class="cl-row"><span class="cl-key">Teléfono</span><span class="cl-val accent">${c.telefono}</span></div>`:''}
+      ${c.instagram?`<div class="cl-row"><span class="cl-key">Instagram</span><span class="cl-val accent">${c.instagram}</span></div>`:''}
+      ${c.dni?`<div class="cl-row"><span class="cl-key">DNI</span><span class="cl-val">${c.dni}</span></div>`:''}
+      <div class="cl-row"><span class="cl-key">Canal preferido</span><span class="cl-val">${c.canal_preferido||'—'}</span></div>
+      <div class="cl-row"><span class="cl-key">Talla habitual</span><span class="cl-val accent">${c.talla_frecuente||'—'}</span></div>
+      ${ultimaCompra?`<div class="cl-row"><span class="cl-key">Última compra</span><span class="cl-val">${ultimaCompra}</span></div>`:''}
+      ${c.notas?`<div style="margin-top:10px;font-size:11px;color:var(--muted2);background:var(--bg);border-radius:8px;padding:10px 12px;line-height:1.5">${c.notas}</div>`:''}
+    </div>
+    <div class="cl-section">
+      <div class="cl-section-lbl">Historial de compras</div>
+      <div style="overflow-x:auto">
+        <table class="cl-hist">
+          <thead><tr><th>Fecha</th><th>Producto</th><th style="text-align:right">Venta S/.</th><th style="text-align:right">Gan.</th></tr></thead>
+          <tbody>${histRows}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function cerrarPerfil(){
+  document.getElementById('cl-backdrop').classList.remove('open');
+  document.getElementById('cl-panel').classList.remove('open');
+  clPanelId=null;
+}
+
+// ── Modal nuevo/editar cliente ──
+function abrirModalCliente(id){
+  clEditingId=id||null;
+  document.getElementById('modal-cl-title').textContent=id?'Editar Cliente':'+ Nuevo Cliente';
+  if(id){
+    const c=clientesCache.find(x=>x.id_cliente===id);
+    if(c){
+      document.getElementById('cl-nombre').value=c.nombre||'';
+      document.getElementById('cl-apellido').value=c.apellido||'';
+      document.getElementById('cl-telefono').value=c.telefono||'';
+      document.getElementById('cl-instagram').value=c.instagram||'';
+      document.getElementById('cl-dni').value=c.dni||'';
+      document.getElementById('cl-talla').value=c.talla_frecuente||'';
+      document.getElementById('cl-canal').value=c.canal_preferido||'WHATSAPP';
+      document.getElementById('cl-tipo').value=c.tipo||'REGULAR';
+      document.getElementById('cl-notas').value=c.notas||'';
+    }
+  }else{
+    ['cl-nombre','cl-apellido','cl-telefono','cl-instagram','cl-dni','cl-talla','cl-notas'].forEach(id=>{ document.getElementById(id).value=''; });
+    document.getElementById('cl-canal').value='WHATSAPP';
+    document.getElementById('cl-tipo').value='REGULAR';
+  }
+  comboSetData('cl-talla-list',TALLAS);
+  document.getElementById('modal-nuevo-cliente').classList.add('open');
+}
+
+function cerrarModalCliente(){
+  document.getElementById('modal-nuevo-cliente').classList.remove('open');
+  clEditingId=null;
+}
+
+function editarCliente(){
+  if(clPanelId) abrirModalCliente(clPanelId);
+}
+
+async function guardarCliente(){
+  const nombre=document.getElementById('cl-nombre').value.trim();
+  if(!nombre){toast('Ingresa el nombre','warn');return;}
+  const btn=document.getElementById('btn-guardar-cl');
+  setLoading(btn,true);
+  const payload={
+    nombre,
+    apellido:document.getElementById('cl-apellido').value.trim()||null,
+    telefono:document.getElementById('cl-telefono').value.trim()||null,
+    instagram:document.getElementById('cl-instagram').value.trim()||null,
+    dni:document.getElementById('cl-dni').value.trim()||null,
+    talla_frecuente:document.getElementById('cl-talla').value.trim()||null,
+    canal_preferido:document.getElementById('cl-canal').value,
+    tipo:document.getElementById('cl-tipo').value,
+    notas:document.getElementById('cl-notas').value.trim()||null,
+  };
+  try{
+    if(clEditingId){
+      const{error}=await db.from('clientes').update(payload).eq('id_cliente',clEditingId);
+      if(error)throw error;
+      toast('✓ Cliente actualizado','ok');
+    }else{
+      const{error}=await db.from('clientes').insert(payload);
+      if(error)throw error;
+      toast('✓ Cliente creado','ok');
+    }
+    cerrarModalCliente();
+    await loadClientes();
+  }catch(e){toast('Error: '+e.message,'err');}
+  finally{setLoading(btn,false,'✓ Guardar');}
+}
+
+// ── Búsqueda de cliente en formularios ──
+function clSearch(ctx){
+  const q=document.getElementById(`${ctx}-cl-input`).value.toLowerCase().trim();
+  const drop=document.getElementById(`${ctx}-cl-drop`);
+  if(!q){drop.classList.remove('open');return;}
+  const matches=clientesCache.filter(c=>{
+    const txt=[c.nombre,c.apellido,c.instagram,c.telefono,clCodigo(c.id_cliente)].filter(Boolean).join(' ').toLowerCase();
+    return txt.includes(q);
+  }).slice(0,7);
+  const items=matches.map(c=>{
+    const nombre=[c.nombre,c.apellido].filter(Boolean).join(' ');
+    return`<div class="cl-si" onmousedown="clSelect('${ctx}',${c.id_cliente})">
+      <span class="cl-si-code">${clCodigo(c.id_cliente)}</span>
+      <span class="cl-si-name">${nombre}</span>
+      ${c.talla_frecuente?`<span class="cl-si-talla">${c.talla_frecuente}</span>`:''}
+    </div>`;
+  }).join('');
+  drop.innerHTML=(matches.length?items:`<div class="cl-si-empty">Sin resultados para "${q}"</div>`)+
+    `<div class="cl-si-new" onmousedown="abrirClRapido('${ctx}')">＋ Nuevo cliente</div>`;
+  drop.classList.add('open');
+}
+function clSearchFocus(ctx){clSearch(ctx);}
+function clSearchBlur(ctx){setTimeout(()=>document.getElementById(`${ctx}-cl-drop`)?.classList.remove('open'),200);}
+function clSearchKey(e,ctx){if(e.key==='Escape')document.getElementById(`${ctx}-cl-drop`)?.classList.remove('open');}
+
+function clSelect(ctx,id){
+  clSelectedId[ctx]=id;
+  const c=clientesCache.find(x=>x.id_cliente===id);
+  if(!c)return;
+  const nombre=[c.nombre,c.apellido].filter(Boolean).join(' ');
+  document.getElementById(`${ctx}-cl-input`).style.display='none';
+  document.getElementById(`${ctx}-cl-drop`).classList.remove('open');
+  document.getElementById(`${ctx}-cl-sel-code`).textContent=clCodigo(id);
+  document.getElementById(`${ctx}-cl-sel-name`).textContent=nombre+(c.talla_frecuente?' · '+c.talla_frecuente:'');
+  document.getElementById(`${ctx}-cl-sel`).classList.add('show');
+}
+
+function clClear(ctx){
+  clSelectedId[ctx]=null;
+  const inp=document.getElementById(`${ctx}-cl-input`);
+  if(inp){inp.style.display='';inp.value='';}
+  document.getElementById(`${ctx}-cl-sel`)?.classList.remove('show');
+}
+
+// ── Modal cliente rápido ──
+let _clRapidoCtx=null;
+function abrirClRapido(ctx){
+  _clRapidoCtx=ctx;
+  ['clr-nombre','clr-telefono','clr-talla'].forEach(id=>document.getElementById(id).value='');
+  const dl=document.getElementById('dl-tallas-r');
+  if(dl)dl.innerHTML=TALLAS.map(t=>`<option value="${t}">`).join('');
+  document.getElementById('modal-cl-rapido').classList.add('open');
+  setTimeout(()=>document.getElementById('clr-nombre').focus(),100);
+}
+function cerrarClRapido(){
+  document.getElementById('modal-cl-rapido').classList.remove('open');
+  _clRapidoCtx=null;
+}
+async function guardarClRapido(){
+  const nombre=document.getElementById('clr-nombre').value.trim();
+  if(!nombre){toast('Ingresa el nombre','warn');return;}
+  const btn=document.getElementById('btn-cl-rapido');
+  setLoading(btn,true);
+  try{
+    const{data,error}=await db.from('clientes').insert({
+      nombre,
+      telefono:document.getElementById('clr-telefono').value.trim()||null,
+      talla_frecuente:document.getElementById('clr-talla').value.trim()||null,
+    }).select().single();
+    if(error)throw error;
+    await loadClientes();
+    toast('✓ Cliente creado','ok');
+    cerrarClRapido();
+    if(_clRapidoCtx)clSelect(_clRapidoCtx,data.id_cliente);
+  }catch(e){toast('Error: '+e.message,'err');}
+  finally{setLoading(btn,false,'✓ Crear y seleccionar');}
 }
 
 // ── CALCULOS ──
@@ -2327,19 +2768,21 @@ async function registrarVenta(){
     const pF=parseFloat(prod?.precio_final||prod?.precio_compra_soles||0);
     const g=Math.round((precio-pF)*100)/100;
     const r=pF>0?Math.round(g/pF*10000)/10000:0;
+    const vtClId=clSelectedId.vt;
+    const vtCl=vtClId?clientesCache.find(c=>c.id_cliente===vtClId):null;
     const{error}=await db.from('ventas').insert({
       codigo_venta:cv,codigo_producto:codProd,precio_venta_soles:precio,
       canal:document.getElementById('vt-canal').value,
-      comprador:document.getElementById('vt-comprador').value.trim()||null,
+      comprador:vtCl?[vtCl.nombre,vtCl.apellido].filter(Boolean).join(' ')||null:null,
+      id_cliente:vtClId||null,
       ganancia:g,rentabilidad:r,
       fecha:document.getElementById('vt-fecha').value
     });
     if(error)throw error;
-    // UPDATE inventario estado=VENDIDO
     await db.from('inventario').update({estado:'VENDIDO'}).eq('codigo_producto',codProd);
-    // flujo_caja lo maneja trigger after_venta en Supabase
     toast(`✓ ${cv} — Ganancia: ${fmt(g)}`,'ok');
-    ['vt-precio','vt-comprador'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('vt-precio').value='';
+    clClear('vt');
     document.getElementById('vt-producto').value='';
     document.getElementById('vt-info').style.display='none';
     await loadInventario();
@@ -2367,7 +2810,7 @@ async function registrarReserva(){
     const{error}=await db.from('reservas').insert({
       codigo_producto:codProd,marca,modelo,colorway,
       talla:document.getElementById('rv-talla').value.trim()||null,
-      id_cliente:document.getElementById('rv-cliente').value||null,
+      id_cliente:clSelectedId.rv||null,
       monto_adelanto:parseFloat(document.getElementById('rv-adelanto').value)||0,
       canal:document.getElementById('rv-canal').value,tipo,
       fecha_limite:document.getElementById('rv-fecha-limite').value||null,
@@ -2392,6 +2835,7 @@ async function registrarReserva(){
     toast('✓ Reserva registrada','ok');
     ['rv-talla','rv-adelanto','rv-notas','rv-marca','rv-modelo','rv-colorway'].forEach(id=>document.getElementById(id).value='');
     ['rv-producto','rv-fecha-limite'].forEach(id=>document.getElementById(id).value='');
+    clClear('rv');
   }catch(e){toast('Error: '+e.message,'err');}
   finally{setLoading(btn,false,'✓ Registrar Reserva');}
 }
