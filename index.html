@@ -3381,7 +3381,7 @@ async function loadVentas(){
   if(tbody)tbody.innerHTML='<tr class="loading-row"><td colspan="8"><div class="spinner"></div></td></tr>';
 
   let q=db.from('ventas')
-    .select('*,inventario(marca,silueta,colorway,talla,precio_final)')
+    .select('*,inventario(marca,modelo,colorway,talla,precio_final)')
     .order('fecha',{ascending:false})
     .order('codigo_venta',{ascending:false});
 
@@ -3413,7 +3413,7 @@ function renderVentas(rows){
   const cb={'INSTAGRAM':'badge-purple','WHATSAPP':'badge-green','PRESENCIAL':'badge-accent','OTRO':'badge-muted'};
   tbody.innerHTML=rows.map(v=>{
     const inv=v.inventario||{};
-    const nombre=[inv.marca,inv.silueta||inv.modelo,inv.colorway].filter(Boolean).join(' ')||'—';
+    const nombre=[inv.marca,inv.modelo,inv.colorway].filter(Boolean).join(' ')||'—';
     const fecha=v.fecha?v.fecha.substring(2).replace(/-/g,'/'):' —';
     const gan=parseFloat(v.ganancia||0);
     const roi=parseFloat(v.rentabilidad||0);
@@ -3488,7 +3488,7 @@ function exportInventarioCSV(){
     const pF=parseFloat(p.precio_final||p.precio_compra_soles||0);
     const pV=parseFloat(p.precio_venta_sugerido||0);
     const mg=pF>0&&pV>0?Math.round((pV-pF)/pF*100):'';
-    return[p.fecha_compra||'',p.codigo_producto,p.marca||'',p.silueta||p.modelo||'',p.colorway||'',p.talla||'',p.categoria||'',p.estado||'',p.precio_compra_soles||0,p.total_costos||0,pF,pV,mg,p.tipo_pago||'']
+    return[p.fecha_compra||'',p.codigo_producto,p.marca||'',p.modelo||'',p.colorway||'',p.talla||'',p.categoria||'',p.estado||'',p.precio_compra_soles||0,p.total_costos||0,pF,pV,mg,p.tipo_pago||'']
       .map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',');
   });
   _dlCSV([h.join(','),...r].join('\n'),`kv-inventario-${new Date().toISOString().slice(0,10)}.csv`);
@@ -3498,7 +3498,7 @@ function exportVentasCSV(){
   const h=['Fecha','Código Venta','Marca','Modelo','Colorway','Talla','Canal','Comprador','Venta S/.','Ganancia S/.','ROI %'];
   const r=ventasCache.map(v=>{
     const inv=v.inventario||{};
-    return[v.fecha||'',v.codigo_venta,inv.marca||'',inv.silueta||inv.modelo||'',inv.colorway||'',inv.talla||'',v.canal||'',v.comprador||'',v.precio_venta_soles||0,v.ganancia||0,(parseFloat(v.rentabilidad||0)*100).toFixed(1)]
+    return[v.fecha||'',v.codigo_venta,inv.marca||'',inv.modelo||'',inv.colorway||'',inv.talla||'',v.canal||'',v.comprador||'',v.precio_venta_soles||0,v.ganancia||0,(parseFloat(v.rentabilidad||0)*100).toFixed(1)]
       .map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',');
   });
   _dlCSV([h.join(','),...r].join('\n'),`kv-ventas-${new Date().toISOString().slice(0,10)}.csv`);
