@@ -1037,7 +1037,15 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         </div>
         <div id="rv-stock-wrap" class="field span2">
           <label>Producto</label>
-          <select id="rv-producto" onchange="onSelectReservaProducto()"><option value="">— Seleccionar —</option></select>
+          <div class="combo-wrap">
+            <input type="text" id="rv-producto" placeholder="Buscar producto disponible…" autocomplete="off"
+              oninput="comboFilter('rv-producto','cl-rv-prod')"
+              onfocus="comboOpen('rv-producto','cl-rv-prod')"
+              onblur="comboBlur('cl-rv-prod')"
+              onkeydown="comboKey(event,'rv-producto','cl-rv-prod')">
+            <span class="combo-arrow">▼</span>
+            <div class="combo-list" id="cl-rv-prod"></div>
+          </div>
         </div>
         <div id="rv-pedido-wrap" style="display:none;grid-column:span 2">
           <div class="form-grid g3">
@@ -1180,9 +1188,15 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         </div>
         <div class="form-grid g2">
           <div class="field">
-            <select id="cs-oc-select" onchange="csOCChange()">
-              <option value="">— Sin filtro OC —</option>
-            </select>
+            <div class="combo-wrap">
+              <input type="text" id="cs-oc-select" placeholder="Sin filtro OC…" autocomplete="off"
+                oninput="comboFilter('cs-oc-select','cl-cs-oc-sel')"
+                onfocus="comboOpen('cs-oc-select','cl-cs-oc-sel')"
+                onblur="comboBlur('cl-cs-oc-sel')"
+                onkeydown="comboKey(event,'cs-oc-select','cl-cs-oc-sel')">
+              <span class="combo-arrow">▼</span>
+              <div class="combo-list" id="cl-cs-oc-sel"></div>
+            </div>
           </div>
           <div id="cs-oc-info" style="display:none" class="field">
             <div style="background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;font-size:12px;display:flex;gap:14px;align-items:center;height:100%">
@@ -1202,9 +1216,8 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <div class="card-label">Agregar producto a la lista</div>
       <!-- Buscador único -->
       <div style="margin-bottom:10px">
-        <input type="text" id="cs-f-buscar" placeholder="🔍 Buscar por código, marca, modelo, colorway o talla..."
-          autocomplete="off"
-          style="width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:9px;padding:10px 14px;color:var(--text);font-family:'Archivo';font-size:12px;outline:none;transition:border .15s"
+        <input type="text" id="cs-f-buscar" placeholder="Buscar por código, marca, modelo, colorway o talla…"
+          autocomplete="off" class="search-box" style="width:100%"
           oninput="buscarProductoCosto()"
           onkeydown="if(event.key==='Enter')buscarProductoCosto()">
       </div>
@@ -1835,7 +1848,17 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
     <div class="form-grid">
       <div class="field"><label>Nombre *</label><input type="text" id="clr-nombre" placeholder="Nombre completo"></div>
       <div class="field"><label>Teléfono</label><input type="tel" id="clr-telefono" placeholder="+51 999 999 999"></div>
-      <div class="field"><label>Talla habitual</label><input type="text" id="clr-talla" placeholder="10US / M" list="dl-tallas-r"><datalist id="dl-tallas-r"></datalist></div>
+      <div class="field"><label>Talla habitual</label>
+        <div class="combo-wrap">
+          <input type="text" id="clr-talla" placeholder="Talla…" autocomplete="off"
+            oninput="comboFilter('clr-talla','cl-clr-talla')"
+            onfocus="comboOpen('clr-talla','cl-clr-talla')"
+            onblur="comboBlur('cl-clr-talla')"
+            onkeydown="comboKey(event,'clr-talla','cl-clr-talla')">
+          <span class="combo-arrow">▼</span>
+          <div class="combo-list" id="cl-clr-talla"></div>
+        </div>
+      </div>
     </div>
     <div style="margin-top:16px;display:flex;gap:8px">
       <button class="btn btn-primary" id="btn-cl-rapido" onclick="guardarClRapido()">✓ Crear y seleccionar</button>
@@ -1945,6 +1968,8 @@ function comboPick(inputId, listId, val) {
   if (inputId === 'oc-f-estado' || inputId === 'oc-f-tipo') renderOCTab();
   if (inputId === 'cp-moneda') toggleMoneda();
   if (inputId === 'rv-tipo') toggleReservaTipo();
+  if (inputId === 'rv-producto') onPickRvProducto();
+  if (inputId === 'cs-oc-select') csOCChange();
 }
 
 function comboKey(e, inputId, listId) {
@@ -1990,14 +2015,8 @@ function renderOCSelectExistente(){
   // Compra crédito: solo OCs PENDIENTES → combobox
   const pendientes=ocCache.filter(oc=>oc.estado==='PENDIENTE');
   comboSetData('cl-oc-sel', pendientes.map(oc=>`${oc.codigo}${oc.nombre?' · '+oc.nombre:''} — ${oc.tipo}`));
-  // Costo: todas las OCs (sigue siendo select estándar)
-  const csSel=document.getElementById('cs-oc-select');
-  if(csSel){
-    const prev=csSel.value;
-    csSel.innerHTML='<option value="">— Sin OC —</option>'+
-      ocCache.map(oc=>`<option value="${oc.codigo}">${oc.codigo}${oc.nombre?' · '+oc.nombre:''} — ${oc.tipo}${oc.estado==='COMPLETADA'?' ✓':''}</option>`).join('');
-    if(prev) csSel.value=prev;
-  }
+  // Costo: combobox (todas las OCs)
+  comboSetData('cl-cs-oc-sel', ocCache.map(oc=>`${oc.codigo}${oc.nombre?' · '+oc.nombre:''} — ${oc.tipo}${oc.estado==='COMPLETADA'?' ✓':''}`));
 }
 
 function ocSetMode(modo){
@@ -2060,7 +2079,8 @@ async function pregenOC(){
 }
 
 function csOCChange(){
-  const cod=document.getElementById('cs-oc-select').value;
+  const raw=document.getElementById('cs-oc-select').value;
+  const cod=(raw.match(/^(OC-\d+)/)||[])[1]||'';
   const badge=document.getElementById('cs-oc-badge');
   const info=document.getElementById('cs-oc-info');
   if(!cod){
@@ -2552,10 +2572,8 @@ function fillProductoSelects(){
   const label=p=>{const n=[p.marca,p.modelo,p.colorway].filter(Boolean).join(' ');return`${p.codigo_producto} · ${n} (${p.talla||'—'})`;};
   // Venta: combobox (texto filtrable)
   comboSetData('cl-vt-prod', disp.map(label));
-  // Reserva: sigue siendo <select>
-  const rvSel=document.getElementById('rv-producto');
-  if(rvSel) rvSel.innerHTML='<option value="">— Seleccionar —</option>'+
-    disp.map(p=>`<option value="${p.codigo_producto}">${label(p)}</option>`).join('');
+  // Reserva: combobox (texto filtrable)
+  comboSetData('cl-rv-prod', disp.map(label));
   // Costo búsqueda: <select> con todos
   const cs=document.getElementById('cs-producto');
   if(cs) cs.innerHTML='<option value="">— Seleccionar —</option>'+
@@ -2569,6 +2587,7 @@ let clSelectedId={vt:null,rv:null};
 let clEditingId=null;
 let clPanelId=null;
 let vtProdSelected=null; // producto activo en form venta
+let rvProdSelected=null; // producto activo en form reserva
 
 function clCodigo(id){ return 'C-'+String(id).padStart(3,'0'); }
 
@@ -2818,8 +2837,7 @@ let _clRapidoCtx=null;
 function abrirClRapido(ctx){
   _clRapidoCtx=ctx;
   ['clr-nombre','clr-telefono','clr-talla'].forEach(id=>document.getElementById(id).value='');
-  const dl=document.getElementById('dl-tallas-r');
-  if(dl)dl.innerHTML=TALLAS.map(t=>`<option value="${t}">`).join('');
+  comboSetData('cl-clr-talla', TALLAS);
   document.getElementById('modal-cl-rapido').classList.add('open');
   setTimeout(()=>document.getElementById('clr-nombre').focus(),100);
 }
@@ -2891,6 +2909,13 @@ function onPickVtProducto(){
   const cod=(raw.match(/^([A-Z]+-\d+)/)||[])[1]||'';
   vtProdSelected=inventarioCache.find(p=>p.codigo_producto===cod&&p.estado==='DISPONIBLE')||null;
   onSelectProducto();
+}
+
+function onPickRvProducto(){
+  const raw=document.getElementById('rv-producto').value;
+  const cod=(raw.match(/^([A-Z]+-\d+)/)||[])[1]||'';
+  rvProdSelected=inventarioCache.find(p=>p.codigo_producto===cod&&p.estado==='DISPONIBLE')||null;
+  if(rvProdSelected) document.getElementById('rv-talla').value=rvProdSelected.talla||'';
 }
 
 function onSelectProducto(){
@@ -3141,10 +3166,9 @@ async function registrarReserva(){
   const tipo=noEmoji(document.getElementById('rv-tipo').value);
   let codProd=null,marca=null,modelo=null,colorway=null;
   if(tipo==='EN_STOCK'){
-    codProd=document.getElementById('rv-producto').value;
-    if(!codProd){toast('Selecciona un producto','warn');return;}
-    const p=inventarioCache.find(x=>x.codigo_producto===codProd);
-    if(p){marca=p.marca;modelo=p.modelo;colorway=p.colorway;}
+    if(!rvProdSelected){toast('Selecciona un producto','warn');return;}
+    codProd=rvProdSelected.codigo_producto;
+    marca=rvProdSelected.marca;modelo=rvProdSelected.modelo;colorway=rvProdSelected.colorway;
   }else{
     marca=document.getElementById('rv-marca').value.trim().toUpperCase();
     if(!marca){toast('Ingresa la marca','warn');return;}
@@ -3181,6 +3205,7 @@ async function registrarReserva(){
     toast('✓ Reserva registrada','ok');
     ['rv-talla','rv-adelanto','rv-notas','rv-marca','rv-modelo','rv-colorway'].forEach(id=>document.getElementById(id).value='');
     ['rv-producto','rv-fecha-limite'].forEach(id=>document.getElementById(id).value='');
+    rvProdSelected=null;
     clClear('rv');
   }catch(e){toast('Error: '+e.message,'err');}
   finally{setLoading(btn,false,'✓ Registrar Reserva');}
@@ -3214,7 +3239,8 @@ let costoLista=[];
 function buscarProductoCosto(){
   const q=(document.getElementById('cs-f-buscar')||{value:''}).value.toLowerCase().trim();
   const codigo=q, marca=q, modelo=q, colorway=q, talla=q;
-  const ocFiltro=(document.getElementById('cs-oc-select')||{value:''}).value;
+  const ocRaw=(document.getElementById('cs-oc-select')||{value:''}).value;
+  const ocFiltro=(ocRaw.match(/^(OC-\d+)/)||[])[1]||'';
   const body=document.getElementById('cs-resultados-body');
   const yaAgregados=new Set(costoLista.map(x=>x.codigo));
   const res=inventarioCache.filter(p=>
@@ -3313,7 +3339,8 @@ function limpiarSeleccionCosto(){
 async function registrarCosto(){
   if(!costoLista.length){toast('Agrega al menos un producto','warn');return;}
   const fecha=document.getElementById('cs-fecha').value;
-  const ocCosto=(document.getElementById('cs-oc-select')||{value:''}).value||null;
+  const ocCostoRaw=(document.getElementById('cs-oc-select')||{value:''}).value;
+  const ocCosto=(ocCostoRaw.match(/^(OC-\d+)/)||[])[1]||null;
   // Validar que todos tengan monto
   const sinMonto=costoLista.filter(x=>!parseFloat(x.soles));
   if(sinMonto.length){toast('Falta monto en: '+sinMonto.map(x=>x.codigo).join(', '),'warn');return;}
