@@ -218,8 +218,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .combo-arrow {
   position: absolute; right: 11px; top: 50%;
   transform: translateY(-50%);
-  pointer-events: none; color: var(--muted2); font-size: 10px;
+  pointer-events: all; color: var(--muted2); font-size: 10px;
+  cursor: pointer; padding: 4px; user-select: none; transition: color .15s;
 }
+.combo-arrow:hover { color: var(--text); }
 .combo-list {
   position: absolute; top: calc(100% + 4px); left: 0; right: 0;
   background: var(--surface); border: 1px solid var(--border2);
@@ -606,6 +608,9 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
 .tc-input{width:72px;background:transparent;border:none;border-bottom:2px solid var(--border2);color:var(--accent);font-family:'Archivo Black';font-size:15px;text-align:center;padding:2px 6px;outline:none;-moz-appearance:textfield;transition:border-color .15s}
 .tc-input::-webkit-inner-spin-button,.tc-input::-webkit-outer-spin-button{-webkit-appearance:none}
 .tc-input:focus{border-bottom-color:var(--accent)}
+.tc-save-btn{border:none;background:var(--accent);color:#fff;border-radius:7px;padding:5px 12px;font-family:'Archivo';font-size:10px;font-weight:700;letter-spacing:.5px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.tc-save-btn:hover{filter:brightness(1.12)}
+.tc-save-btn.saved{background:var(--green)}
 
 /* ══ MOBILE MEJORAS ══ */
 @media(max-width:768px){
@@ -665,8 +670,9 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   <div class="page-title"><div class="dot"></div> Registro</div>
 <div class="tc-widget">
   <span class="tc-label">TC S/.</span>
-  <input type="number" id="tc-global" class="tc-input" step="0.001" min="1" max="10" value="3.70" placeholder="3.70" oninput="saveTCGlobal(this.value)">
+  <input type="number" id="tc-global" class="tc-input" step="0.001" min="1" max="10" value="3.70" placeholder="3.70" oninput="saveTCGlobal(this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();confirmarTC();}">
   <span class="tc-label">/ USD</span>
+  <button class="tc-save-btn" id="tc-save-btn" onclick="confirmarTC()" title="Fijar tipo de cambio">Fijar TC</button>
 </div>
 
   <div class="tipo-selector">
@@ -1859,7 +1865,24 @@ function saveTCGlobal(val){
     if(!val||isNaN(parseFloat(val)))return;
     await db.from('configuracion')
       .upsert({clave:'tipo_cambio',valor:String(val),updated_at:new Date().toISOString()});
+    const btn=document.getElementById('tc-save-btn');
+    if(btn){btn.textContent='✓ Guardado';btn.classList.add('saved');
+      setTimeout(()=>{btn.textContent='Fijar TC';btn.classList.remove('saved');},1800);}
   },600);
+}
+async function confirmarTC(){
+  const input=document.getElementById('tc-global');
+  const val=input?.value;
+  if(!val||isNaN(parseFloat(val)))return;
+  const btn=document.getElementById('tc-save-btn');
+  clearTimeout(tcSaveTimer);
+  await db.from('configuracion')
+    .upsert({clave:'tipo_cambio',valor:String(val),updated_at:new Date().toISOString()});
+  const cpTc=document.getElementById('cp-tc');
+  if(cpTc)cpTc.value=val;
+  if(btn){btn.textContent='✓ Fijado';btn.classList.add('saved');
+    setTimeout(()=>{btn.textContent='Fijar TC';btn.classList.remove('saved');},2000);}
+  toast('TC fijado: S/. '+parseFloat(val).toFixed(3),'ok');
 }
 async function loadTCGlobal(){
   const{data}=await db.from('configuracion').select('valor').eq('clave','tipo_cambio').single();
@@ -1898,6 +1921,24 @@ function updateThemeBtn(){
   btn.textContent=isDark?'☾':'☀';
 }
 document.addEventListener('DOMContentLoaded',updateThemeBtn);
+
+// Flechas ▼ de combos: toggle al hacer mousedown (antes del blur que cierra la lista)
+document.addEventListener('mousedown',function(e){
+  const arrow=e.target.closest('.combo-arrow');
+  if(!arrow)return;
+  e.preventDefault();
+  const wrap=arrow.closest('.combo-wrap');
+  if(!wrap)return;
+  const input=wrap.querySelector('input');
+  const list=wrap.querySelector('.combo-list');
+  if(!input||!list)return;
+  if(list.classList.contains('open')){
+    list.classList.remove('open');
+  }else{
+    input.focus();
+    comboRender(input.id,list.id,'');
+  }
+});
 
 function showView(n,btn){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
@@ -1968,16 +2009,19 @@ function fillDataLists(){
   const colorways=[...new Set(inventarioCache.map(p=>p.colorway).filter(Boolean))].sort();
   const TALLAS_ALL=['4US','4.5US','5US','5.5US','6US','6.5US','7US','7.5US','8US','8.5US','9US','9.5US','10US','10.5US','11US','11.5US','12US','13US','14US','36EU','37EU','38EU','39EU','40EU','41EU','42EU','43EU','44EU','45EU','46EU','4Y','4.5Y','5Y','5.5Y','6Y','6.5Y','7Y','XS','S','M','L','XL','XXL','XXXL','-'];
   const MARCAS_BASE=['NIKE','ADIDAS','JORDAN','YEEZY','SUPREME','NEW BALANCE','OFF-WHITE','ESSENTIALS','FEAR OF GOD','STONE ISLAND','PALACE','BAPE','STUSSY','PUMA','REEBOK','CONVERSE','VANS','ASICS','SALOMON'];
+  const MODELOS_BASE=['AIR FORCE 1','AIR JORDAN 1','AIR JORDAN 3','AIR JORDAN 4','AIR JORDAN 11','AIR MAX 90','AIR MAX 95','AIR MAX 97','DUNK LOW','DUNK HIGH','BLAZER MID','FORUM LOW','FORUM HIGH','CAMPUS','GAZELLE','SAMBA','ULTRABOOST','YEEZY 350 V2','YEEZY 500','YEEZY 700','NB 550','NB 574','NB 990','TRAIL','HOODIE','TEE','CARGO PANTS'];
+  const COLORWAYS_BASE=['WHITE','BLACK','WHITE/WHITE','BLACK/WHITE','BRED','CHICAGO','SHADOW','PANDA','REVERSE PANDA','ROYAL','UNC','OG','INFRARED','OLIVE','COOL GREY','OREO','MOCHA','CEMENT','FIRE RED','PINE GREEN','UNIVERSITY BLUE','OBSIDIAN'];
   const allMarcas=[...new Set([...MARCAS_BASE,...marcas])].sort();
+  const allModelos=[...new Set([...MODELOS_BASE,...modelos])].sort();
+  const allColorways=[...new Set([...COLORWAYS_BASE,...colorways])].sort();
   comboSetData('cl-marca', allMarcas);   comboSetData('cl-rv-marca', allMarcas);  comboSetData('cl-inv-marca', allMarcas);
-  comboSetData('cl-modelo', modelos);  comboSetData('cl-rv-modelo', modelos); comboSetData('cl-inv-modelo', modelos);
-  comboSetData('cl-colorway', colorways);comboSetData('cl-rv-colorway', colorways);comboSetData('cl-inv-colorway', colorways);
+  comboSetData('cl-modelo', allModelos);  comboSetData('cl-rv-modelo', allModelos); comboSetData('cl-inv-modelo', allModelos);
+  comboSetData('cl-colorway', allColorways);comboSetData('cl-rv-colorway', allColorways);comboSetData('cl-inv-colorway', allColorways);
   comboSetData('cl-talla', TALLAS_ALL);  comboSetData('cl-rv-talla', TALLAS_ALL); comboSetData('cl-inv-talla', TALLAS_ALL);
   comboSetData('cl-inv-cat', ['ZAPATILLAS','ROPA','ACCESORIOS','OTROS']);
-  // Costo form combos
   comboSetData('cl-cs-marca', allMarcas);
-  comboSetData('cl-cs-modelo', modelos);
-  comboSetData('cl-cs-colorway', colorways);
+  comboSetData('cl-cs-modelo', allModelos);
+  comboSetData('cl-cs-colorway', allColorways);
   comboSetData('cl-cs-talla', TALLAS_ALL);
   comboSetData('cl-cs-concepto', ['IMPORTACION','ENVIO','OTROS']);
 }
