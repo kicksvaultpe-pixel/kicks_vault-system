@@ -1232,60 +1232,61 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   </div>
 
   <div class="table-toolbar">
-    <div class="combo-wrap" style="min-width:130px;flex:1">
-      <input type="text" id="inv-codigo" placeholder="🔍 Código..." autocomplete="off"
-        oninput="filterInventario()">
-    </div>
+    <input type="text" id="inv-codigo" class="search-box" placeholder="Buscar código…" oninput="filterInventario()" style="max-width:180px">
     <div class="combo-wrap" style="flex:1;min-width:130px">
-      <input type="text" id="inv-marca" placeholder="Marca..." autocomplete="off" onblur="comboBlur('cl-inv-marca')"
+      <input type="text" id="inv-marca" placeholder="Marca…" autocomplete="off"
         oninput="comboFilter('inv-marca','cl-inv-marca');filterInventario()"
         onfocus="comboOpen('inv-marca','cl-inv-marca')"
+        onblur="comboBlur('cl-inv-marca')"
         onkeydown="comboKey(event,'inv-marca','cl-inv-marca')">
       <span class="combo-arrow">▼</span>
       <div class="combo-list" id="cl-inv-marca"></div>
     </div>
     <div class="combo-wrap" style="flex:1;min-width:130px">
-      <input type="text" id="inv-modelo" placeholder="Modelo..." autocomplete="off" onblur="comboBlur('cl-inv-modelo')"
+      <input type="text" id="inv-modelo" placeholder="Modelo…" autocomplete="off"
         oninput="comboFilter('inv-modelo','cl-inv-modelo');filterInventario()"
         onfocus="comboOpen('inv-modelo','cl-inv-modelo')"
+        onblur="comboBlur('cl-inv-modelo')"
         onkeydown="comboKey(event,'inv-modelo','cl-inv-modelo')">
       <span class="combo-arrow">▼</span>
       <div class="combo-list" id="cl-inv-modelo"></div>
     </div>
     <div class="combo-wrap" style="flex:1;min-width:130px">
-      <input type="text" id="inv-colorway" placeholder="Colorway..." autocomplete="off" onblur="comboBlur('cl-inv-colorway')"
+      <input type="text" id="inv-colorway" placeholder="Colorway…" autocomplete="off"
         oninput="comboFilter('inv-colorway','cl-inv-colorway');filterInventario()"
         onfocus="comboOpen('inv-colorway','cl-inv-colorway')"
+        onblur="comboBlur('cl-inv-colorway')"
         onkeydown="comboKey(event,'inv-colorway','cl-inv-colorway')">
       <span class="combo-arrow">▼</span>
       <div class="combo-list" id="cl-inv-colorway"></div>
     </div>
-    <div class="combo-wrap" style="min-width:100px">
-      <input type="text" id="inv-talla" placeholder="Talla..." autocomplete="off" onblur="comboBlur('cl-inv-talla')"
+    <div class="combo-wrap" style="min-width:110px">
+      <input type="text" id="inv-talla" placeholder="Talla…" autocomplete="off"
         oninput="comboFilter('inv-talla','cl-inv-talla');filterInventario()"
         onfocus="comboOpen('inv-talla','cl-inv-talla')"
+        onblur="comboBlur('cl-inv-talla')"
         onkeydown="comboKey(event,'inv-talla','cl-inv-talla')">
       <span class="combo-arrow">▼</span>
       <div class="combo-list" id="cl-inv-talla"></div>
     </div>
-    <div class="combo-wrap" style="min-width:130px">
-      <input type="text" id="inv-cat" placeholder="Categoría..." autocomplete="off" onblur="comboBlur('cl-inv-cat')"
-        oninput="comboFilter('inv-cat','cl-inv-cat');filterInventario()"
-        onfocus="comboOpen('inv-cat','cl-inv-cat')"
-        onkeydown="comboKey(event,'inv-cat','cl-inv-cat')">
-      <span class="combo-arrow">▼</span>
-      <div class="combo-list" id="cl-inv-cat"></div>
-    </div>
-    <select class="filter-select" id="inv-estado" onchange="filterInventario()" style="min-width:130px">
-      <option value="">Todos</option>
-      <option value="DISPONIBLE">● Disponible</option>
-      <option value="VENDIDO">● Vendido</option>
-      <option value="PENDIENTE">● Pendiente pago</option>
-      <option value="CANCELADO">✕ Cancelados</option>
+    <select class="filter-select" id="inv-cat" onchange="filterInventario()">
+      <option value="">Categoría</option>
+      <option value="ZAPATILLAS">Zapatillas</option>
+      <option value="ROPA">Ropa</option>
+      <option value="ACCESORIOS">Accesorios</option>
+      <option value="OTROS">Otros</option>
     </select>
+    <select class="filter-select" id="inv-estado" onchange="filterInventario()">
+      <option value="">Estado</option>
+      <option value="DISPONIBLE">Disponible</option>
+      <option value="VENDIDO">Vendido</option>
+      <option value="PENDIENTE">Pendiente pago</option>
+      <option value="CANCELADO">Cancelado</option>
+    </select>
+    <div style="flex:1"></div>
     <button class="btn btn-ghost btn-sm" onclick="clearFiltros()">✕ Limpiar</button>
     <button class="btn btn-ghost btn-sm" onclick="loadInventario()" title="Recargar">↺</button>
-    <button class="btn btn-ghost btn-sm" onclick="exportInventarioCSV()" title="Exportar inventario a Excel">↓ Excel</button>
+    <button class="btn btn-ghost btn-sm" onclick="exportInventarioCSV()" title="Exportar a Excel">↓ Excel</button>
   </div>
 
   <div class="table-wrap">
@@ -2203,7 +2204,6 @@ function fillDataLists(){
   comboSetData('cl-modelo', allModelos);  comboSetData('cl-rv-modelo', allModelos); comboSetData('cl-inv-modelo', allModelos);
   comboSetData('cl-colorway', allColorways);comboSetData('cl-rv-colorway', allColorways);comboSetData('cl-inv-colorway', allColorways);
   comboSetData('cl-talla', TALLAS_ALL);  comboSetData('cl-rv-talla', TALLAS_ALL); comboSetData('cl-inv-talla', TALLAS_ALL);
-  comboSetData('cl-inv-cat', ['ZAPATILLAS','ROPA','ACCESORIOS','OTROS']);
   comboSetData('cl-cs-marca', allMarcas);
   comboSetData('cl-cs-modelo', allModelos);
   comboSetData('cl-cs-colorway', allColorways);
@@ -2358,9 +2358,10 @@ function set(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
 let sortCol=null,sortDir=1;
 
 function clearFiltros(){
-  ['inv-codigo','inv-marca','inv-modelo','inv-colorway','inv-talla','inv-cat'].forEach(id=>{
+  ['inv-codigo','inv-marca','inv-modelo','inv-colorway','inv-talla'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.value='';
   });
+  document.getElementById('inv-cat').value='';
   document.getElementById('inv-estado').value='';
   sortCol=null; sortDir=1;
   document.querySelectorAll('[id^="sort-"]').forEach(el=>el.textContent='');
