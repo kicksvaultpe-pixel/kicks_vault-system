@@ -223,6 +223,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 .combo-wrap input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,.07); }
 .combo-wrap input::placeholder { color: var(--muted); }
+.combo-wrap input[readonly] { cursor: pointer; }
 .combo-arrow {
   position: absolute; right: 11px; top: 50%;
   transform: translateY(-50%);
@@ -773,7 +774,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <div class="field">
           <label>Categoría</label>
           <div class="combo-wrap">
-            <input type="text" id="cp-cat" placeholder="Categoría…" autocomplete="off"
+            <input type="text" id="cp-cat" placeholder="Categoría…" autocomplete="off" readonly
               oninput="comboFilter('cp-cat','cl-cp-cat')"
               onfocus="comboOpen('cp-cat','cl-cp-cat')"
               onblur="comboBlurStrict('cp-cat','cl-cp-cat')"
@@ -815,7 +816,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <div class="field">
           <label>Moneda</label>
           <div class="combo-wrap">
-            <input type="text" id="cp-moneda" placeholder="Moneda…" autocomplete="off"
+            <input type="text" id="cp-moneda" placeholder="Moneda…" autocomplete="off" readonly
               oninput="comboFilter('cp-moneda','cl-cp-moneda')"
               onfocus="comboOpen('cp-moneda','cl-cp-moneda')"
               onblur="comboBlurStrict('cp-moneda','cl-cp-moneda')"
@@ -860,7 +861,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
           <div class="field">
             <label>Tipo</label>
             <div class="combo-wrap">
-              <input type="text" id="cp-oc-tipo" placeholder="Tipo…" autocomplete="off"
+              <input type="text" id="cp-oc-tipo" placeholder="Tipo…" autocomplete="off" readonly
                 oninput="comboFilter('cp-oc-tipo','cl-cp-oc-tipo')"
                 onfocus="comboOpen('cp-oc-tipo','cl-cp-oc-tipo')"
                 onblur="comboBlurStrict('cp-oc-tipo','cl-cp-oc-tipo')"
@@ -990,7 +991,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <!-- Canal + Medio de pago -->
         <div class="field"><label>Canal</label>
           <div class="combo-wrap">
-            <input type="text" id="vt-canal" placeholder="Canal…" autocomplete="off"
+            <input type="text" id="vt-canal" placeholder="Canal…" autocomplete="off" readonly
               oninput="comboFilter('vt-canal','cl-vt-canal')"
               onfocus="comboOpen('vt-canal','cl-vt-canal')"
               onblur="comboBlurStrict('vt-canal','cl-vt-canal')"
@@ -1001,7 +1002,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         </div>
         <div class="field"><label>Medio de pago</label>
           <div class="combo-wrap">
-            <input type="text" id="vt-medio-pago" placeholder="Medio de pago…" autocomplete="off"
+            <input type="text" id="vt-medio-pago" placeholder="Medio de pago…" autocomplete="off" readonly
               oninput="comboFilter('vt-medio-pago','cl-vt-medio-pago')"
               onfocus="comboOpen('vt-medio-pago','cl-vt-medio-pago')"
               onblur="comboBlurStrict('vt-medio-pago','cl-vt-medio-pago')"
@@ -1026,7 +1027,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <div class="form-grid g2">
         <div class="field span2"><label>Tipo</label>
           <div class="combo-wrap">
-            <input type="text" id="rv-tipo" placeholder="Tipo…" autocomplete="off"
+            <input type="text" id="rv-tipo" placeholder="Tipo…" autocomplete="off" readonly
               oninput="comboFilter('rv-tipo','cl-rv-tipo')"
               onfocus="comboOpen('rv-tipo','cl-rv-tipo')"
               onblur="comboBlurStrict('rv-tipo','cl-rv-tipo')"
@@ -1102,7 +1103,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <div class="field"><label>Adelanto S/.</label><input type="number" id="rv-adelanto" placeholder="0.00" step="0.01"></div>
         <div class="field"><label>Canal</label>
           <div class="combo-wrap">
-            <input type="text" id="rv-canal" placeholder="Canal…" autocomplete="off"
+            <input type="text" id="rv-canal" placeholder="Canal…" autocomplete="off" readonly
               oninput="comboFilter('rv-canal','cl-rv-canal')"
               onfocus="comboOpen('rv-canal','cl-rv-canal')"
               onblur="comboBlurStrict('rv-canal','cl-rv-canal')"
@@ -1140,7 +1141,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <div class="field span2"><label>Concepto</label><input type="text" id="pg-concepto" placeholder="STAND SL / SUNAT / WEB..."></div>
         <div class="field"><label>Categoría</label>
           <div class="combo-wrap">
-            <input type="text" id="pg-cat" placeholder="Categoría…" autocomplete="off"
+            <input type="text" id="pg-cat" placeholder="Categoría…" autocomplete="off" readonly
               oninput="comboFilter('pg-cat','cl-pg-cat')"
               onfocus="comboOpen('pg-cat','cl-pg-cat')"
               onblur="comboBlurStrict('pg-cat','cl-pg-cat')"
@@ -1165,7 +1166,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <div class="field">
           <label>Concepto de costo</label>
           <div class="combo-wrap">
-            <input type="text" id="cs-concepto-global" placeholder="Concepto…" autocomplete="off"
+            <input type="text" id="cs-concepto-global" placeholder="Concepto…" autocomplete="off" readonly
               oninput="comboFilter('cs-concepto-global','cl-cs-concepto');csActualizarConceptos()"
               onfocus="comboOpen('cs-concepto-global','cl-cs-concepto')"
               onblur="comboBlurStrict('cs-concepto-global','cl-cs-concepto')"
@@ -1809,7 +1810,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       </div>
       <div class="field"><label>Canal preferido</label>
         <div class="combo-wrap">
-          <input type="text" id="cl-canal" placeholder="Canal…" autocomplete="off"
+          <input type="text" id="cl-canal" placeholder="Canal…" autocomplete="off" readonly
             oninput="comboFilter('cl-canal','cl-cl-canal')"
             onfocus="comboOpen('cl-canal','cl-cl-canal')"
             onblur="comboBlurStrict('cl-canal','cl-cl-canal')"
@@ -1820,7 +1821,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       </div>
       <div class="field"><label>Tipo</label>
         <div class="combo-wrap">
-          <input type="text" id="cl-tipo" placeholder="Tipo…" autocomplete="off"
+          <input type="text" id="cl-tipo" placeholder="Tipo…" autocomplete="off" readonly
             oninput="comboFilter('cl-tipo','cl-cl-tipo')"
             onfocus="comboOpen('cl-tipo','cl-cl-tipo')"
             onblur="comboBlurStrict('cl-tipo','cl-cl-tipo')"
