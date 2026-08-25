@@ -798,8 +798,8 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
           <input type="number" id="cp-usd" placeholder="0.00" step="0.01" oninput="calcSolesCredito()">
         </div>
         <div class="field" id="cp-tc-wrap">
-          <label>TC referencial</label>
-          <input type="number" id="cp-tc" value="3.70" step="0.001" oninput="calcSolesCredito()">
+          <label>TC referencial <span style="font-size:9px;opacity:.6;font-weight:400">(desde widget)</span></label>
+          <input type="number" id="cp-tc" value="3.70" step="0.001" readonly tabindex="-1" style="background:var(--surface);cursor:default;color:var(--muted2);border-bottom-color:var(--border)">
         </div>
         <div class="field" id="cp-soles-wrap">
           <label id="cp-soles-label">S/. estimado</label>
@@ -1858,35 +1858,47 @@ function csOCChange(){
 
 // ── TC GLOBAL ──
 let tcSaveTimer=null;
+async function _saveTCToDB(val){
+  // Delete existing rows for this key, then insert one — funciona sin necesidad de UNIQUE constraint
+  await db.from('configuracion').delete().eq('clave','tipo_cambio');
+  const{error}=await db.from('configuracion').insert({clave:'tipo_cambio',valor:String(val)});
+  if(error)throw error;
+}
+function _applyTC(val){
+  const cpTc=document.getElementById('cp-tc');
+  if(cpTc){cpTc.value=val; calcSolesCredito();}
+}
 function saveTCGlobal(val){
-  ['cp-tc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=val;});
+  _applyTC(val);
   clearTimeout(tcSaveTimer);
   tcSaveTimer=setTimeout(async()=>{
     if(!val||isNaN(parseFloat(val)))return;
-    await db.from('configuracion')
-      .upsert({clave:'tipo_cambio',valor:String(val),updated_at:new Date().toISOString()});
-    const btn=document.getElementById('tc-save-btn');
-    if(btn){btn.textContent='✓ Guardado';btn.classList.add('saved');
-      setTimeout(()=>{btn.textContent='Fijar TC';btn.classList.remove('saved');},1800);}
+    try{
+      await _saveTCToDB(val);
+      const btn=document.getElementById('tc-save-btn');
+      if(btn){btn.textContent='✓ Guardado';btn.classList.add('saved');
+        setTimeout(()=>{btn.textContent='Fijar TC';btn.classList.remove('saved');},1800);}
+    }catch(e){toast('Error TC: '+e.message,'err');}
   },600);
 }
 async function confirmarTC(){
-  const input=document.getElementById('tc-global');
-  const val=input?.value;
+  const val=document.getElementById('tc-global')?.value;
   if(!val||isNaN(parseFloat(val)))return;
   const btn=document.getElementById('tc-save-btn');
   clearTimeout(tcSaveTimer);
-  await db.from('configuracion')
-    .upsert({clave:'tipo_cambio',valor:String(val),updated_at:new Date().toISOString()});
-  const cpTc=document.getElementById('cp-tc');
-  if(cpTc)cpTc.value=val;
-  if(btn){btn.textContent='✓ Fijado';btn.classList.add('saved');
-    setTimeout(()=>{btn.textContent='Fijar TC';btn.classList.remove('saved');},2000);}
-  toast('TC fijado: S/. '+parseFloat(val).toFixed(3),'ok');
+  try{
+    await _saveTCToDB(val);
+    _applyTC(val);
+    if(btn){btn.textContent='✓ Fijado';btn.classList.add('saved');
+      setTimeout(()=>{btn.textContent='Fijar TC';btn.classList.remove('saved');},2000);}
+    toast('TC fijado: S/. '+parseFloat(val).toFixed(3),'ok');
+  }catch(e){toast('Error guardando TC: '+e.message,'err');}
 }
 async function loadTCGlobal(){
-  const{data}=await db.from('configuracion').select('valor').eq('clave','tipo_cambio').single();
-  const val=data?.valor||'3.70';
+  // Usa limit(1) + array para evitar error de .single() con filas duplicadas
+  const{data}=await db.from('configuracion')
+    .select('valor').eq('clave','tipo_cambio').limit(1);
+  const val=(data&&data[0]?.valor)||'3.70';
   ['tc-global','cp-tc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=val;});
 }
 
