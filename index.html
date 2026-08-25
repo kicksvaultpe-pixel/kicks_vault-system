@@ -776,7 +776,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
             <input type="text" id="cp-cat" placeholder="Categoría…" autocomplete="off"
               oninput="comboFilter('cp-cat','cl-cp-cat')"
               onfocus="comboOpen('cp-cat','cl-cp-cat')"
-              onblur="comboBlur('cl-cp-cat')"
+              onblur="comboBlurStrict('cp-cat','cl-cp-cat')"
               onkeydown="comboKey(event,'cp-cat','cl-cp-cat')">
             <span class="combo-arrow">▼</span>
             <div class="combo-list" id="cl-cp-cat"></div>
@@ -818,7 +818,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
             <input type="text" id="cp-moneda" placeholder="Moneda…" autocomplete="off"
               oninput="comboFilter('cp-moneda','cl-cp-moneda')"
               onfocus="comboOpen('cp-moneda','cl-cp-moneda')"
-              onblur="comboBlur('cl-cp-moneda')"
+              onblur="comboBlurStrict('cp-moneda','cl-cp-moneda')"
               onkeydown="comboKey(event,'cp-moneda','cl-cp-moneda')">
             <span class="combo-arrow">▼</span>
             <div class="combo-list" id="cl-cp-moneda"></div>
@@ -863,7 +863,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
               <input type="text" id="cp-oc-tipo" placeholder="Tipo…" autocomplete="off"
                 oninput="comboFilter('cp-oc-tipo','cl-cp-oc-tipo')"
                 onfocus="comboOpen('cp-oc-tipo','cl-cp-oc-tipo')"
-                onblur="comboBlur('cl-cp-oc-tipo')"
+                onblur="comboBlurStrict('cp-oc-tipo','cl-cp-oc-tipo')"
                 onkeydown="comboKey(event,'cp-oc-tipo','cl-cp-oc-tipo')">
               <span class="combo-arrow">▼</span>
               <div class="combo-list" id="cl-cp-oc-tipo"></div>
@@ -993,7 +993,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
             <input type="text" id="vt-canal" placeholder="Canal…" autocomplete="off"
               oninput="comboFilter('vt-canal','cl-vt-canal')"
               onfocus="comboOpen('vt-canal','cl-vt-canal')"
-              onblur="comboBlur('cl-vt-canal')"
+              onblur="comboBlurStrict('vt-canal','cl-vt-canal')"
               onkeydown="comboKey(event,'vt-canal','cl-vt-canal')">
             <span class="combo-arrow">▼</span>
             <div class="combo-list" id="cl-vt-canal"></div>
@@ -1004,7 +1004,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
             <input type="text" id="vt-medio-pago" placeholder="Medio de pago…" autocomplete="off"
               oninput="comboFilter('vt-medio-pago','cl-vt-medio-pago')"
               onfocus="comboOpen('vt-medio-pago','cl-vt-medio-pago')"
-              onblur="comboBlur('cl-vt-medio-pago')"
+              onblur="comboBlurStrict('vt-medio-pago','cl-vt-medio-pago')"
               onkeydown="comboKey(event,'vt-medio-pago','cl-vt-medio-pago')">
             <span class="combo-arrow">▼</span>
             <div class="combo-list" id="cl-vt-medio-pago"></div>
@@ -1029,7 +1029,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
             <input type="text" id="rv-tipo" placeholder="Tipo…" autocomplete="off"
               oninput="comboFilter('rv-tipo','cl-rv-tipo')"
               onfocus="comboOpen('rv-tipo','cl-rv-tipo')"
-              onblur="comboBlur('cl-rv-tipo')"
+              onblur="comboBlurStrict('rv-tipo','cl-rv-tipo')"
               onkeydown="comboKey(event,'rv-tipo','cl-rv-tipo')">
             <span class="combo-arrow">▼</span>
             <div class="combo-list" id="cl-rv-tipo"></div>
@@ -1105,7 +1105,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
             <input type="text" id="rv-canal" placeholder="Canal…" autocomplete="off"
               oninput="comboFilter('rv-canal','cl-rv-canal')"
               onfocus="comboOpen('rv-canal','cl-rv-canal')"
-              onblur="comboBlur('cl-rv-canal')"
+              onblur="comboBlurStrict('rv-canal','cl-rv-canal')"
               onkeydown="comboKey(event,'rv-canal','cl-rv-canal')">
             <span class="combo-arrow">▼</span>
             <div class="combo-list" id="cl-rv-canal"></div>
@@ -1143,7 +1143,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
             <input type="text" id="pg-cat" placeholder="Categoría…" autocomplete="off"
               oninput="comboFilter('pg-cat','cl-pg-cat')"
               onfocus="comboOpen('pg-cat','cl-pg-cat')"
-              onblur="comboBlur('cl-pg-cat')"
+              onblur="comboBlurStrict('pg-cat','cl-pg-cat')"
               onkeydown="comboKey(event,'pg-cat','cl-pg-cat')">
             <span class="combo-arrow">▼</span>
             <div class="combo-list" id="cl-pg-cat"></div>
@@ -1168,7 +1168,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
             <input type="text" id="cs-concepto-global" placeholder="Concepto…" autocomplete="off"
               oninput="comboFilter('cs-concepto-global','cl-cs-concepto');csActualizarConceptos()"
               onfocus="comboOpen('cs-concepto-global','cl-cs-concepto')"
-              onblur="comboBlur('cl-cs-concepto')"
+              onblur="comboBlurStrict('cs-concepto-global','cl-cs-concepto')"
               onkeydown="comboKey(event,'cs-concepto-global','cl-cs-concepto')">
             <span class="combo-arrow">▼</span>
             <div class="combo-list" id="cl-cs-concepto"></div>
@@ -1812,7 +1812,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
           <input type="text" id="cl-canal" placeholder="Canal…" autocomplete="off"
             oninput="comboFilter('cl-canal','cl-cl-canal')"
             onfocus="comboOpen('cl-canal','cl-cl-canal')"
-            onblur="comboBlur('cl-cl-canal')"
+            onblur="comboBlurStrict('cl-canal','cl-cl-canal')"
             onkeydown="comboKey(event,'cl-canal','cl-cl-canal')">
           <span class="combo-arrow">▼</span>
           <div class="combo-list" id="cl-cl-canal"></div>
@@ -1823,7 +1823,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
           <input type="text" id="cl-tipo" placeholder="Tipo…" autocomplete="off"
             oninput="comboFilter('cl-tipo','cl-cl-tipo')"
             onfocus="comboOpen('cl-tipo','cl-cl-tipo')"
-            onblur="comboBlur('cl-cl-tipo')"
+            onblur="comboBlurStrict('cl-tipo','cl-cl-tipo')"
             onkeydown="comboKey(event,'cl-tipo','cl-cl-tipo')">
           <span class="combo-arrow">▼</span>
           <div class="combo-list" id="cl-cl-tipo"></div>
@@ -1929,6 +1929,17 @@ function comboBlur(listId){
     const list=document.getElementById(listId);
     if(list) list.classList.remove('open');
   },160);
+}
+
+function comboBlurStrict(inputId, listId){
+  setTimeout(()=>{
+    const list=document.getElementById(listId);
+    if(list) list.classList.remove('open');
+    const el=document.getElementById(inputId);
+    if(!el||!el.value) return;
+    const opts=COMBO_DATA[listId]||[];
+    if(!opts.includes(el.value)) el.value='';
+  },200);
 }
 
 function comboFilter(inputId, listId) {
