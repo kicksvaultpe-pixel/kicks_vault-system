@@ -772,12 +772,15 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         </div>
         <div class="field">
           <label>Categoría</label>
-          <select id="cp-cat">
-            <option value="ZAPATILLAS">👟 Zapatillas</option>
-            <option value="ROPA">👕 Ropa</option>
-            <option value="ACCESORIOS">🧢 Accesorios</option>
-            <option value="OTROS">📦 Otros</option>
-          </select>
+          <div class="combo-wrap">
+            <input type="text" id="cp-cat" placeholder="Categoría…" autocomplete="off"
+              oninput="comboFilter('cp-cat','cl-cp-cat')"
+              onfocus="comboOpen('cp-cat','cl-cp-cat')"
+              onblur="comboBlur('cl-cp-cat')"
+              onkeydown="comboKey(event,'cp-cat','cl-cp-cat')">
+            <span class="combo-arrow">▼</span>
+            <div class="combo-list" id="cl-cp-cat"></div>
+          </div>
         </div>
         <div class="field"><label>Fecha de compra</label><input type="date" id="cp-fecha"></div>
 
@@ -811,10 +814,15 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <div class="form-grid g3">
         <div class="field">
           <label>Moneda</label>
-          <select id="cp-moneda" onchange="toggleMoneda()">
-            <option value="USD">🇺🇸 USD — Dólares</option>
-            <option value="SOLES">🇵🇪 SOLES</option>
-          </select>
+          <div class="combo-wrap">
+            <input type="text" id="cp-moneda" placeholder="Moneda…" autocomplete="off"
+              oninput="comboFilter('cp-moneda','cl-cp-moneda')"
+              onfocus="comboOpen('cp-moneda','cl-cp-moneda')"
+              onblur="comboBlur('cl-cp-moneda')"
+              onkeydown="comboKey(event,'cp-moneda','cl-cp-moneda')">
+            <span class="combo-arrow">▼</span>
+            <div class="combo-list" id="cl-cp-moneda"></div>
+          </div>
         </div>
         <div class="field" id="cp-usd-wrap">
           <label>Monto USD $</label>
@@ -851,10 +859,15 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <div class="form-grid g2" style="margin-bottom:10px">
           <div class="field">
             <label>Tipo</label>
-            <select id="cp-oc-tipo">
-              <option value="IMPORTACION">✈️ Importación</option>
-              <option value="LOCAL">🏪 Local</option>
-            </select>
+            <div class="combo-wrap">
+              <input type="text" id="cp-oc-tipo" placeholder="Tipo…" autocomplete="off"
+                oninput="comboFilter('cp-oc-tipo','cl-cp-oc-tipo')"
+                onfocus="comboOpen('cp-oc-tipo','cl-cp-oc-tipo')"
+                onblur="comboBlur('cl-cp-oc-tipo')"
+                onkeydown="comboKey(event,'cp-oc-tipo','cl-cp-oc-tipo')">
+              <span class="combo-arrow">▼</span>
+              <div class="combo-list" id="cl-cp-oc-tipo"></div>
+            </div>
           </div>
           <div class="field">
             <label>Código (auto)</label>
@@ -976,10 +989,26 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         </div>
         <!-- Canal + Medio de pago -->
         <div class="field"><label>Canal</label>
-          <select id="vt-canal"><option>INSTAGRAM</option><option>WHATSAPP</option><option>PRESENCIAL</option><option>OTRO</option></select>
+          <div class="combo-wrap">
+            <input type="text" id="vt-canal" placeholder="Canal…" autocomplete="off"
+              oninput="comboFilter('vt-canal','cl-vt-canal')"
+              onfocus="comboOpen('vt-canal','cl-vt-canal')"
+              onblur="comboBlur('cl-vt-canal')"
+              onkeydown="comboKey(event,'vt-canal','cl-vt-canal')">
+            <span class="combo-arrow">▼</span>
+            <div class="combo-list" id="cl-vt-canal"></div>
+          </div>
         </div>
         <div class="field"><label>Medio de pago</label>
-          <select id="vt-medio-pago"><option>EFECTIVO</option><option>TRANSFERENCIA</option><option>TARJETA</option><option>YAPE</option><option>PLIN</option></select>
+          <div class="combo-wrap">
+            <input type="text" id="vt-medio-pago" placeholder="Medio de pago…" autocomplete="off"
+              oninput="comboFilter('vt-medio-pago','cl-vt-medio-pago')"
+              onfocus="comboOpen('vt-medio-pago','cl-vt-medio-pago')"
+              onblur="comboBlur('cl-vt-medio-pago')"
+              onkeydown="comboKey(event,'vt-medio-pago','cl-vt-medio-pago')">
+            <span class="combo-arrow">▼</span>
+            <div class="combo-list" id="cl-vt-medio-pago"></div>
+          </div>
         </div>
         <!-- Comentarios -->
         <div class="field span2"><label>Comentarios <span style="font-size:9px;opacity:.6;font-weight:400">(opcional)</span></label>
@@ -996,10 +1025,15 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <div class="card-label">Nueva Reserva</div>
       <div class="form-grid g2">
         <div class="field span2"><label>Tipo</label>
-          <select id="rv-tipo" onchange="toggleReservaTipo()">
-            <option value="EN_STOCK">📦 En stock</option>
-            <option value="A_PEDIDO">🔍 A pedido</option>
-          </select>
+          <div class="combo-wrap">
+            <input type="text" id="rv-tipo" placeholder="Tipo…" autocomplete="off"
+              oninput="comboFilter('rv-tipo','cl-rv-tipo')"
+              onfocus="comboOpen('rv-tipo','cl-rv-tipo')"
+              onblur="comboBlur('cl-rv-tipo')"
+              onkeydown="comboKey(event,'rv-tipo','cl-rv-tipo')">
+            <span class="combo-arrow">▼</span>
+            <div class="combo-list" id="cl-rv-tipo"></div>
+          </div>
         </div>
         <div id="rv-stock-wrap" class="field span2">
           <label>Producto</label>
@@ -1059,7 +1093,15 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         </div>
         <div class="field"><label>Adelanto S/.</label><input type="number" id="rv-adelanto" placeholder="0.00" step="0.01"></div>
         <div class="field"><label>Canal</label>
-          <select id="rv-canal"><option>INSTAGRAM</option><option>WHATSAPP</option><option>PRESENCIAL</option><option>OTRO</option></select>
+          <div class="combo-wrap">
+            <input type="text" id="rv-canal" placeholder="Canal…" autocomplete="off"
+              oninput="comboFilter('rv-canal','cl-rv-canal')"
+              onfocus="comboOpen('rv-canal','cl-rv-canal')"
+              onblur="comboBlur('cl-rv-canal')"
+              onkeydown="comboKey(event,'rv-canal','cl-rv-canal')">
+            <span class="combo-arrow">▼</span>
+            <div class="combo-list" id="cl-rv-canal"></div>
+          </div>
         </div>
         <div class="field"><label>Fecha límite</label><input type="date" id="rv-fecha-limite"></div>
         <div class="field span2"><label>Cliente (opcional)</label>
@@ -1089,12 +1131,15 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <div class="form-grid g2">
         <div class="field span2"><label>Concepto</label><input type="text" id="pg-concepto" placeholder="STAND SL / SUNAT / WEB..."></div>
         <div class="field"><label>Categoría</label>
-          <select id="pg-cat">
-            <option value="OPERATIVO">🏪 Operativo</option>
-            <option value="PERSONAL">👤 Personal</option>
-            <option value="IMPORTACION">📦 Importación</option>
-            <option value="MARKETING">📣 Marketing</option>
-          </select>
+          <div class="combo-wrap">
+            <input type="text" id="pg-cat" placeholder="Categoría…" autocomplete="off"
+              oninput="comboFilter('pg-cat','cl-pg-cat')"
+              onfocus="comboOpen('pg-cat','cl-pg-cat')"
+              onblur="comboBlur('cl-pg-cat')"
+              onkeydown="comboKey(event,'pg-cat','cl-pg-cat')">
+            <span class="combo-arrow">▼</span>
+            <div class="combo-list" id="cl-pg-cat"></div>
+          </div>
         </div>
         <div class="field"><label>Monto S/.</label><input type="number" id="pg-monto" placeholder="100.00" step="0.01" min="0"></div>
         <div class="field"><label>Fecha</label><input type="date" id="pg-fecha"></div>
@@ -1740,7 +1785,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <div class="field"><label>DNI</label><input type="text" id="cl-dni" placeholder="12345678"></div>
       <div class="field"><label>Talla habitual</label>
         <div class="combo-wrap">
-          <input type="text" id="cl-talla" placeholder="10US / M" autocomplete="off"
+          <input type="text" id="cl-talla" placeholder="Talla…" autocomplete="off"
             oninput="comboFilter('cl-talla','cl-talla-list')"
             onfocus="comboOpen('cl-talla','cl-talla-list')"
             onblur="comboBlur('cl-talla-list')"
@@ -1750,19 +1795,26 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         </div>
       </div>
       <div class="field"><label>Canal preferido</label>
-        <select id="cl-canal">
-          <option value="WHATSAPP">WhatsApp</option>
-          <option value="INSTAGRAM">Instagram</option>
-          <option value="PRESENCIAL">Presencial</option>
-          <option value="OTRO">Otro</option>
-        </select>
+        <div class="combo-wrap">
+          <input type="text" id="cl-canal" placeholder="Canal…" autocomplete="off"
+            oninput="comboFilter('cl-canal','cl-cl-canal')"
+            onfocus="comboOpen('cl-canal','cl-cl-canal')"
+            onblur="comboBlur('cl-cl-canal')"
+            onkeydown="comboKey(event,'cl-canal','cl-cl-canal')">
+          <span class="combo-arrow">▼</span>
+          <div class="combo-list" id="cl-cl-canal"></div>
+        </div>
       </div>
       <div class="field"><label>Tipo</label>
-        <select id="cl-tipo">
-          <option value="REGULAR">Regular</option>
-          <option value="VIP">VIP</option>
-          <option value="MAYORISTA">Mayorista</option>
-        </select>
+        <div class="combo-wrap">
+          <input type="text" id="cl-tipo" placeholder="Tipo…" autocomplete="off"
+            oninput="comboFilter('cl-tipo','cl-cl-tipo')"
+            onfocus="comboOpen('cl-tipo','cl-cl-tipo')"
+            onblur="comboBlur('cl-cl-tipo')"
+            onkeydown="comboKey(event,'cl-tipo','cl-cl-tipo')">
+          <span class="combo-arrow">▼</span>
+          <div class="combo-list" id="cl-cl-tipo"></div>
+        </div>
       </div>
       <div class="field span2"><label>Notas</label><textarea id="cl-notas" placeholder="Observaciones…" style="min-height:60px"></textarea></div>
     </div>
@@ -1891,6 +1943,8 @@ function comboPick(inputId, listId, val) {
   if (inputId === 'vt-f-canal') loadVentas();
   if (inputId === 'clf-tipo') filterClientes();
   if (inputId === 'oc-f-estado' || inputId === 'oc-f-tipo') renderOCTab();
+  if (inputId === 'cp-moneda') toggleMoneda();
+  if (inputId === 'rv-tipo') toggleReservaTipo();
 }
 
 function comboKey(e, inputId, listId) {
@@ -2033,8 +2087,8 @@ function csOCChange(){
 
 // ── OC TAB ──
 function renderOCTab(){
-  const estadoF=document.getElementById('oc-f-estado')?.value||'';
-  const tipoF=document.getElementById('oc-f-tipo')?.value||'';
+  const estadoF=noEmoji(document.getElementById('oc-f-estado')?.value||'');
+  const tipoF=noEmoji(document.getElementById('oc-f-tipo')?.value||'');
   // Stats
   const s=el=>document.getElementById(el);
   if(s('oc-stat-total')) s('oc-stat-total').textContent=ocCache.length;
@@ -2212,7 +2266,7 @@ function setTipoPago(tipo){
 
 // ── MONEDA TOGGLE ──
 function toggleMoneda(){
-  const m=document.getElementById('cp-moneda').value;
+  const m=noEmoji(document.getElementById('cp-moneda').value);
   const isUSD=m==='USD';
   document.getElementById('cp-usd-wrap').style.display=isUSD?'flex':'none';
   document.getElementById('cp-tc-wrap').style.display=isUSD?'flex':'none';
@@ -2239,6 +2293,8 @@ async function loadInventario(){
   fillDataLists();
 }
 
+const noEmoji=s=>s.replace(/^[^A-Za-z0-9À-ɏ]*/,'').trim();
+
 function fillDataLists(){
   const marcas=[...new Set(inventarioCache.map(p=>p.marca).filter(Boolean))].sort();
   const modelos=[...new Set(inventarioCache.map(p=>p.modelo).filter(Boolean))].sort();
@@ -2259,14 +2315,31 @@ function fillDataLists(){
   comboSetData('cl-inv-modelo', modelos);
   comboSetData('cl-inv-colorway', colorways);
   comboSetData('cl-inv-talla', tallas);
-  // Opciones fijas — inventario
+  // Opciones fijas — inventario filtros
   comboSetData('cl-inv-cat', ['👟 ZAPATILLAS','👕 ROPA','💎 ACCESORIOS','📦 OTROS']);
   comboSetData('cl-inv-estado', ['✅ DISPONIBLE','💰 VENDIDO','⏳ PENDIENTE','❌ CANCELADO']);
-  // Opciones fijas — filtros otros tabs
-  comboSetData('cl-vt-f-canal', ['INSTAGRAM','WHATSAPP','PRESENCIAL','OTRO']);
-  comboSetData('cl-clf-tipo', ['REGULAR','VIP','MAYORISTA']);
-  comboSetData('cl-oc-f-estado', ['PENDIENTE','COMPLETADA','CANCELADA']);
-  comboSetData('cl-oc-f-tipo', ['IMPORTACION','LOCAL']);
+  // Opciones fijas — toolbars otros tabs
+  comboSetData('cl-vt-f-canal', ['📸 INSTAGRAM','💬 WHATSAPP','🏪 PRESENCIAL','🔹 OTRO']);
+  comboSetData('cl-clf-tipo', ['👤 REGULAR','⭐ VIP','📦 MAYORISTA']);
+  comboSetData('cl-oc-f-estado', ['⏳ PENDIENTE','✅ COMPLETADA','❌ CANCELADA']);
+  comboSetData('cl-oc-f-tipo', ['✈️ IMPORTACION','🏪 LOCAL']);
+  // Opciones fijas — formularios registro
+  comboSetData('cl-cp-cat', ['👟 ZAPATILLAS','👕 ROPA','🧢 ACCESORIOS','📦 OTROS']);
+  comboSetData('cl-cp-moneda', ['🇺🇸 USD','🇵🇪 SOLES']);
+  comboSetData('cl-cp-oc-tipo', ['✈️ IMPORTACION','🏪 LOCAL']);
+  comboSetData('cl-vt-canal', ['📸 INSTAGRAM','💬 WHATSAPP','🏪 PRESENCIAL','🔹 OTRO']);
+  comboSetData('cl-vt-medio-pago', ['💵 EFECTIVO','🏦 TRANSFERENCIA','💳 TARJETA','💜 YAPE','💙 PLIN']);
+  comboSetData('cl-rv-tipo', ['📦 EN_STOCK','🔍 A_PEDIDO']);
+  comboSetData('cl-rv-canal', ['📸 INSTAGRAM','💬 WHATSAPP','🏪 PRESENCIAL','🔹 OTRO']);
+  comboSetData('cl-pg-cat', ['🏪 OPERATIVO','👤 PERSONAL','📦 IMPORTACION','📣 MARKETING']);
+  comboSetData('cl-cl-canal', ['📸 INSTAGRAM','💬 WHATSAPP','🏪 PRESENCIAL','🔹 OTRO']);
+  comboSetData('cl-cl-tipo', ['👤 REGULAR','⭐ VIP','📦 MAYORISTA']);
+  // Defaults iniciales para combos que arrancan con un valor fijo
+  const elMoneda=document.getElementById('cp-moneda');
+  if(elMoneda&&!elMoneda.value) elMoneda.value='🇺🇸 USD';
+  const elRvTipo=document.getElementById('rv-tipo');
+  if(elRvTipo&&!elRvTipo.value) elRvTipo.value='📦 EN_STOCK';
+  toggleReservaTipo();
 }
 
 async function loadClientes(){
@@ -2439,7 +2512,6 @@ function filterInventario(){
   const modelo=g('inv-modelo').toLowerCase();
   const colorway=g('inv-colorway').toLowerCase();
   const talla=g('inv-talla').toLowerCase();
-  const noEmoji=s=>s.replace(/^[^A-Z]*/,'');
   const estado=noEmoji(g('inv-estado'));
   const cat=noEmoji(g('inv-cat')).toUpperCase();
 
@@ -2547,7 +2619,7 @@ function renderClientes(data){
 
 function filterClientes(){
   const q=(document.getElementById('cl-search')?.value||'').toLowerCase();
-  const tipo=document.getElementById('clf-tipo')?.value||'';
+  const tipo=noEmoji(document.getElementById('clf-tipo')?.value||'');
   renderClientes(clientesCache.filter(c=>{
     const txt=[c.nombre,c.apellido,c.instagram,c.telefono,clCodigo(c.id_cliente)].filter(Boolean).join(' ').toLowerCase();
     return(!q||txt.includes(q))&&(!tipo||c.tipo===tipo);
@@ -2658,8 +2730,8 @@ async function guardarCliente(){
     instagram:document.getElementById('cl-instagram').value.trim()||null,
     dni:document.getElementById('cl-dni').value.trim()||null,
     talla_frecuente:document.getElementById('cl-talla').value.trim()||null,
-    canal_preferido:document.getElementById('cl-canal').value,
-    tipo:document.getElementById('cl-tipo').value,
+    canal_preferido:noEmoji(document.getElementById('cl-canal').value),
+    tipo:noEmoji(document.getElementById('cl-tipo').value),
     notas:document.getElementById('cl-notas').value.trim()||null,
   };
   try{
@@ -2845,7 +2917,7 @@ function calcVentaGanancia(){
 }
 
 function toggleReservaTipo(){
-  const t=document.getElementById('rv-tipo').value;
+  const t=noEmoji(document.getElementById('rv-tipo').value);
   document.getElementById('rv-stock-wrap').style.display=t==='EN_STOCK'?'flex':'none';
   document.getElementById('rv-pedido-wrap').style.display=t==='A_PEDIDO'?'block':'none';
 }
@@ -2940,7 +3012,7 @@ async function registrarCompra(){
   const marca=document.getElementById('cp-marca').value.trim().toUpperCase();
   const modelo=document.getElementById('cp-modelo').value.trim().toUpperCase();
   const colorway=document.getElementById('cp-colorway').value.trim().toUpperCase();
-  const moneda=document.getElementById('cp-moneda').value;
+  const moneda=noEmoji(document.getElementById('cp-moneda').value);
   let usd=null,tc=null,soles=null,pventa=null,pc=null,monedaVal='SOLES';
 
   if(tipoPagoActual==='CONTADO'){
@@ -2948,7 +3020,7 @@ async function registrarCompra(){
     pventa=parseFloat(document.getElementById('cp-pventa').value)||null;
     if(!pc){toast('Ingresa el precio de compra','warn');return;}
   }else{
-    monedaVal=document.getElementById('cp-moneda').value;
+    monedaVal=noEmoji(document.getElementById('cp-moneda').value);
     usd=monedaVal==='USD'?(parseFloat(document.getElementById('cp-usd').value)||null):null;
     tc=monedaVal==='USD'?(parseFloat(document.getElementById('cp-tc').value)||null):null;
     soles=parseFloat(document.getElementById('cp-soles').value)||null;
@@ -2968,7 +3040,7 @@ async function registrarCompra(){
     if(esCredito){
       if(ocModo==='nueva'){
         const ocCod=document.getElementById('cp-oc-nueva').value;
-        const ocTipo=document.getElementById('cp-oc-tipo').value;
+        const ocTipo=noEmoji(document.getElementById('cp-oc-tipo').value);
         const ocNombre=document.getElementById('cp-oc-nombre')?.value.trim()||null;
         const ocNotas=document.getElementById('cp-oc-notas').value.trim()||null;
         const{error:eOC}=await db.from('ordenes_compra').upsert({
@@ -2993,7 +3065,7 @@ async function registrarCompra(){
       codigo_producto:cod,
       fecha_compra:document.getElementById('cp-fecha').value,
       marca,modelo,colorway,
-      categoria:document.getElementById('cp-cat').value,
+      categoria:noEmoji(document.getElementById('cp-cat').value),
       talla:document.getElementById('cp-talla').value.trim()||'-',
       precio_compra_usd:usd,
       tipo_cambio:tc,
@@ -3042,8 +3114,8 @@ async function registrarVenta(){
     const vtCl=vtClId?clientesCache.find(c=>c.id_cliente===vtClId):null;
     const{error}=await db.from('ventas').insert({
       codigo_venta:cv,codigo_producto:codProd,precio_venta_soles:precio,
-      canal:document.getElementById('vt-canal').value,
-      medio_pago:document.getElementById('vt-medio-pago').value,
+      canal:noEmoji(document.getElementById('vt-canal').value),
+      medio_pago:noEmoji(document.getElementById('vt-medio-pago').value),
       comentarios:document.getElementById('vt-comentarios').value.trim()||null,
       comprador:vtCl?[vtCl.nombre,vtCl.apellido].filter(Boolean).join(' ')||null:null,
       id_cliente:vtClId||null,
@@ -3066,7 +3138,7 @@ async function registrarVenta(){
 
 // ── REGISTRAR RESERVA ──
 async function registrarReserva(){
-  const tipo=document.getElementById('rv-tipo').value;
+  const tipo=noEmoji(document.getElementById('rv-tipo').value);
   let codProd=null,marca=null,modelo=null,colorway=null;
   if(tipo==='EN_STOCK'){
     codProd=document.getElementById('rv-producto').value;
@@ -3086,7 +3158,7 @@ async function registrarReserva(){
       talla:document.getElementById('rv-talla').value.trim()||null,
       id_cliente:clSelectedId.rv||null,
       monto_adelanto:parseFloat(document.getElementById('rv-adelanto').value)||0,
-      canal:document.getElementById('rv-canal').value,tipo,
+      canal:noEmoji(document.getElementById('rv-canal').value),tipo,
       fecha_limite:document.getElementById('rv-fecha-limite').value||null,
       notas:document.getElementById('rv-notas').value.trim()||null
     });
@@ -3124,7 +3196,7 @@ async function registrarPago(){
   try{
     const{error}=await db.from('pagos').insert({
       concepto,monto_soles:-Math.abs(monto),
-      categoria:document.getElementById('pg-cat').value,
+      categoria:noEmoji(document.getElementById('pg-cat').value),
       fecha:document.getElementById('pg-fecha').value
     });
     if(error)throw error;
@@ -3623,7 +3695,7 @@ async function loadVentas(){
     mesEl.value=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
   }
   const mes=mesEl.value;
-  const canal=document.getElementById('vt-f-canal').value;
+  const canal=noEmoji(document.getElementById('vt-f-canal').value);
   const tbody=document.getElementById('vt-tbody');
   if(tbody)tbody.innerHTML='<tr class="loading-row"><td colspan="8"><div class="spinner"></div></td></tr>';
 
