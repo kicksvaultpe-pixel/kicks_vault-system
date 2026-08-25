@@ -909,10 +909,20 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
     <div class="card">
       <div class="card-label">Nueva Venta</div>
       <div class="form-grid g2">
+        <!-- Producto disponible (combobox) -->
         <div class="field span2">
           <label>Producto disponible</label>
-          <select id="vt-producto" onchange="onSelectProducto()"><option value="">— Seleccionar —</option></select>
+          <div class="combo-wrap">
+            <input type="text" id="vt-producto" placeholder="Buscar por código, marca, modelo, talla…" autocomplete="off"
+              oninput="vtProdSelected=null;onSelectProducto();comboFilter('vt-producto','cl-vt-prod')"
+              onfocus="comboOpen('vt-producto','cl-vt-prod')"
+              onblur="comboBlur('cl-vt-prod')"
+              onkeydown="comboKey(event,'vt-producto','cl-vt-prod')">
+            <span class="combo-arrow">▼</span>
+            <div class="combo-list" id="cl-vt-prod"></div>
+          </div>
         </div>
+        <!-- Preview precios -->
         <div id="vt-info" style="display:none;grid-column:span 2">
           <div class="precio-preview show">
             <div class="pp-item"><div class="pp-label">Precio Final S/.</div><div class="pp-val" id="vt-precio-final" style="color:var(--red)">—</div></div>
@@ -920,24 +930,34 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
             <div class="pp-item"><div class="pp-label">Ganancia estimada</div><div class="pp-val" id="vt-ganancia-prev" style="color:var(--green)">—</div></div>
           </div>
         </div>
+        <!-- Precio + Fecha -->
         <div class="field"><label>Precio de venta S/.</label><input type="number" id="vt-precio" placeholder="0.00" step="0.01" oninput="calcVentaGanancia()"></div>
         <div class="field"><label>Fecha</label><input type="date" id="vt-fecha"></div>
-        <div class="field"><label>Canal</label>
-          <select id="vt-canal"><option>INSTAGRAM</option><option>WHATSAPP</option><option>PRESENCIAL</option><option>OTRO</option></select>
-        </div>
-        <div class="field span2"><label>Cliente (opcional)</label>
-          <div class="cl-search-wrap" id="vt-cl-wrap">
-            <input class="cl-search-input" id="vt-cl-input" placeholder="Buscar por nombre o código…" autocomplete="off"
-              oninput="clSearch('vt')" onfocus="clSearchFocus('vt')" onblur="clSearchBlur('vt')" onkeydown="clSearchKey(event,'vt')">
-            <div class="cl-search-drop" id="vt-cl-drop"></div>
+        <!-- Cliente (combobox) -->
+        <div class="field span2">
+          <label>Cliente <span style="font-size:9px;opacity:.6;font-weight:400">(opcional)</span>
+            <button type="button" onclick="abrirClRapido('vt')" style="margin-left:8px;border:none;background:none;color:var(--accent);font-size:10px;font-weight:700;cursor:pointer;font-family:'Archivo';padding:0">+ Nuevo</button>
+          </label>
+          <div class="combo-wrap">
+            <input type="text" id="vt-cl-input" placeholder="Buscar cliente por nombre o código…" autocomplete="off"
+              oninput="comboFilter('vt-cl-input','cl-vt-cl')"
+              onfocus="comboOpen('vt-cl-input','cl-vt-cl')"
+              onblur="comboBlur('cl-vt-cl')"
+              onkeydown="comboKey(event,'vt-cl-input','cl-vt-cl')">
+            <span class="combo-arrow">▼</span>
+            <div class="combo-list" id="cl-vt-cl"></div>
           </div>
-          <div class="cl-sel" id="vt-cl-sel">
+          <div class="cl-sel" id="vt-cl-sel" style="margin-top:6px">
             <div class="cl-sel-info">
               <div class="cl-sel-code" id="vt-cl-sel-code"></div>
               <div class="cl-sel-name" id="vt-cl-sel-name"></div>
             </div>
             <button class="cl-sel-clear" onclick="clClear('vt')" title="Quitar cliente">×</button>
           </div>
+        </div>
+        <!-- Canal -->
+        <div class="field span2"><label>Canal</label>
+          <select id="vt-canal"><option>INSTAGRAM</option><option>WHATSAPP</option><option>PRESENCIAL</option><option>OTRO</option></select>
         </div>
       </div>
     </div>
@@ -1784,6 +1804,8 @@ function comboPick(inputId, listId, val) {
   if (inputId.startsWith('inv-')) filterInventario();
   if (inputId.startsWith('cs-f-')) buscarProductoCosto();
   if (inputId === 'cp-oc-select') ocExistenteChange();
+  if (inputId === 'vt-producto') onPickVtProducto();
+  if (inputId === 'vt-cl-input') onPickVtCliente();
 }
 
 function comboKey(e, inputId, listId) {
@@ -2164,6 +2186,7 @@ async function loadClientes(){
   const elAct=document.getElementById('cl-stat-activos');
   if(elAct)elAct.textContent=uniq.size;
   renderClientes(clientesCache);
+  fillClienteCombos();
 }
 
 // ── RENDER ──
@@ -2362,16 +2385,17 @@ function filterInventario(){
 // ── SELECTS ──
 function fillProductoSelects(){
   const disp=inventarioCache.filter(p=>p.estado==='DISPONIBLE');
-  const mk=arr=>'<option value="">— Seleccionar —</option>'+arr.map(p=>{
-    const n=[p.marca,p.modelo,p.colorway].filter(Boolean).join(' ');
-    return`<option value="${p.codigo_producto}" data-final="${p.precio_final||p.precio_compra_soles||0}" data-sug="${p.precio_venta_sugerido||0}">${p.codigo_producto} · ${n} (${p.talla||'—'})</option>`;
-  }).join('');
-  const mkAll=arr=>'<option value="">— Seleccionar —</option>'+arr.map(p=>{
-    const n=[p.marca,p.modelo,p.colorway].filter(Boolean).join(' ');
-    return`<option value="${p.codigo_producto}">${p.codigo_producto} · ${n} (${p.talla||'—'})</option>`;
-  }).join('');
-  ['vt-producto','rv-producto'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=mk(disp);});
-  const cs=document.getElementById('cs-producto');if(cs)cs.innerHTML=mkAll(inventarioCache);
+  const label=p=>{const n=[p.marca,p.modelo,p.colorway].filter(Boolean).join(' ');return`${p.codigo_producto} · ${n} (${p.talla||'—'})`;};
+  // Venta: combobox (texto filtrable)
+  comboSetData('cl-vt-prod', disp.map(label));
+  // Reserva: sigue siendo <select>
+  const rvSel=document.getElementById('rv-producto');
+  if(rvSel) rvSel.innerHTML='<option value="">— Seleccionar —</option>'+
+    disp.map(p=>`<option value="${p.codigo_producto}">${label(p)}</option>`).join('');
+  // Costo búsqueda: <select> con todos
+  const cs=document.getElementById('cs-producto');
+  if(cs) cs.innerHTML='<option value="">— Seleccionar —</option>'+
+    inventarioCache.map(p=>`<option value="${p.codigo_producto}">${label(p)}</option>`).join('');
 }
 
 // ══════════════════════════════════════════
@@ -2380,8 +2404,17 @@ function fillProductoSelects(){
 let clSelectedId={vt:null,rv:null};
 let clEditingId=null;
 let clPanelId=null;
+let vtProdSelected=null; // producto activo en form venta
 
 function clCodigo(id){ return 'C-'+String(id).padStart(3,'0'); }
+
+function fillClienteCombos(){
+  const items=clientesCache.map(c=>{
+    const nombre=[c.nombre,c.apellido].filter(Boolean).join(' ');
+    return `${clCodigo(c.id_cliente)} · ${nombre}${c.talla_frecuente?' · '+c.talla_frecuente:''}`;
+  });
+  comboSetData('cl-vt-cl', items);
+}
 
 function tipoBadgeHTML(tipo){
   if(tipo==='VIP') return '<span class="badge badge-vip">VIP</span>';
@@ -2554,6 +2587,14 @@ async function guardarCliente(){
 }
 
 // ── Búsqueda de cliente en formularios ──
+function onPickVtCliente(){
+  const raw=document.getElementById('vt-cl-input').value;
+  const code=(raw.match(/^(C-\d+)/)||[])[1]||'';
+  if(!code)return;
+  const id=parseInt(code.replace('C-',''));
+  clSelect('vt',id);
+}
+
 function clSearch(ctx){
   const q=document.getElementById(`${ctx}-cl-input`).value.toLowerCase().trim();
   const drop=document.getElementById(`${ctx}-cl-drop`);
@@ -2583,8 +2624,16 @@ function clSelect(ctx,id){
   const c=clientesCache.find(x=>x.id_cliente===id);
   if(!c)return;
   const nombre=[c.nombre,c.apellido].filter(Boolean).join(' ');
-  document.getElementById(`${ctx}-cl-input`).style.display='none';
-  document.getElementById(`${ctx}-cl-drop`).classList.remove('open');
+  const inp=document.getElementById(`${ctx}-cl-input`);
+  if(ctx==='vt'){
+    // Combo: solo limpiar el texto y cerrar el dropdown
+    if(inp)inp.value='';
+    document.getElementById('cl-vt-cl')?.classList.remove('open');
+  }else{
+    // Sistema viejo (rv): ocultar el input
+    if(inp)inp.style.display='none';
+    document.getElementById(`${ctx}-cl-drop`)?.classList.remove('open');
+  }
   document.getElementById(`${ctx}-cl-sel-code`).textContent=clCodigo(id);
   document.getElementById(`${ctx}-cl-sel-name`).textContent=nombre+(c.talla_frecuente?' · '+c.talla_frecuente:'');
   document.getElementById(`${ctx}-cl-sel`).classList.add('show');
@@ -2593,7 +2642,10 @@ function clSelect(ctx,id){
 function clClear(ctx){
   clSelectedId[ctx]=null;
   const inp=document.getElementById(`${ctx}-cl-input`);
-  if(inp){inp.style.display='';inp.value='';}
+  if(inp){
+    if(ctx!=='vt')inp.style.display=''; // rv: mostrar de nuevo
+    inp.value='';
+  }
   document.getElementById(`${ctx}-cl-sel`)?.classList.remove('show');
 }
 
@@ -2670,13 +2722,19 @@ function calcPrecio(){
   }else prev.classList.remove('show');
 }
 
+function onPickVtProducto(){
+  const raw=document.getElementById('vt-producto').value;
+  const cod=(raw.match(/^([A-Z]+-\d+)/)||[])[1]||'';
+  vtProdSelected=inventarioCache.find(p=>p.codigo_producto===cod&&p.estado==='DISPONIBLE')||null;
+  onSelectProducto();
+}
+
 function onSelectProducto(){
-  const sel=document.getElementById('vt-producto');
-  const opt=sel.options[sel.selectedIndex];
+  const prod=vtProdSelected;
   const info=document.getElementById('vt-info');
-  const pF=parseFloat(opt?.dataset?.final||0);
-  const pS=parseFloat(opt?.dataset?.sug||0);
-  if(opt?.value){
+  if(prod){
+    const pF=parseFloat(prod.precio_final||prod.precio_compra_soles||0);
+    const pS=parseFloat(prod.precio_venta_sugerido||0);
     info.style.display='block';
     document.getElementById('vt-precio-final').textContent=fmt(pF);
     document.getElementById('vt-precio-sug').textContent=pS>0?fmt(pS):'—';
@@ -2686,9 +2744,7 @@ function onSelectProducto(){
 }
 
 function calcVentaGanancia(){
-  const sel=document.getElementById('vt-producto');
-  const opt=sel.options[sel.selectedIndex];
-  const pF=parseFloat(opt?.dataset?.final||0);
+  const pF=parseFloat(vtProdSelected?.precio_final||vtProdSelected?.precio_compra_soles||0);
   const precio=parseFloat(document.getElementById('vt-precio').value)||0;
   if(!pF||!precio)return;
   const g=precio-pF;
@@ -2879,11 +2935,11 @@ async function registrarCompra(){
 
 // ── REGISTRAR VENTA ──
 async function registrarVenta(){
-  const codProd=document.getElementById('vt-producto').value;
+  if(!vtProdSelected){toast('Selecciona un producto','warn');return;}
+  const codProd=vtProdSelected.codigo_producto;
   const precio=parseFloat(document.getElementById('vt-precio').value)||0;
-  if(!codProd){toast('Selecciona un producto','warn');return;}
   if(!precio){toast('Ingresa el precio de venta','warn');return;}
-  const prod=inventarioCache.find(p=>p.codigo_producto===codProd);
+  const prod=vtProdSelected;
   const btn=document.getElementById('btn-venta');setLoading(btn,true);
   try{
     const cv=await genCodigo('venta');
@@ -2904,9 +2960,10 @@ async function registrarVenta(){
     await db.from('inventario').update({estado:'VENDIDO'}).eq('codigo_producto',codProd);
     toast(`✓ ${cv} — Ganancia: ${fmt(g)}`,'ok');
     document.getElementById('vt-precio').value='';
-    clClear('vt');
     document.getElementById('vt-producto').value='';
+    vtProdSelected=null;
     document.getElementById('vt-info').style.display='none';
+    clClear('vt');
     await loadInventario();
   }catch(e){toast('Error: '+e.message,'err');}
   finally{setLoading(btn,false,'✓ Registrar Venta');}
