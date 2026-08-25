@@ -724,47 +724,51 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <div class="form-grid g4">
         <div class="field">
           <label>Marca</label>
-<div class="field combo-wrap">
-          <input type="text" id="cp-marca" placeholder="NIKE" autocomplete="off" onblur="comboBlur('cl-marca')"
-            oninput="comboFilter('cp-marca','cl-marca')"
-            onfocus="comboOpen('cp-marca','cl-marca')"
-            onkeydown="comboKey(event,'cp-marca','cl-marca')">
-          <span class="combo-arrow">▼</span>
-          <div class="combo-list" id="cl-marca"></div>
-        </div>
+          <div class="combo-wrap">
+            <input type="text" id="cp-marca" placeholder="Marca…" autocomplete="off"
+              oninput="comboFilter('cp-marca','cl-marca')"
+              onfocus="comboOpen('cp-marca','cl-marca')"
+              onblur="comboBlur('cl-marca')"
+              onkeydown="comboKey(event,'cp-marca','cl-marca')">
+            <span class="combo-arrow">▼</span>
+            <div class="combo-list" id="cl-marca"></div>
+          </div>
         </div>
         <div class="field">
           <label>Modelo</label>
-<div class="field combo-wrap">
-          <input type="text" id="cp-modelo" placeholder="JORDAN 1" autocomplete="off" onblur="comboBlur('cl-modelo')"
-            oninput="comboFilter('cp-modelo','cl-modelo')"
-            onfocus="comboOpen('cp-modelo','cl-modelo')"
-            onkeydown="comboKey(event,'cp-modelo','cl-modelo')">
-          <span class="combo-arrow">▼</span>
-          <div class="combo-list" id="cl-modelo"></div>
-        </div>
+          <div class="combo-wrap">
+            <input type="text" id="cp-modelo" placeholder="Modelo…" autocomplete="off"
+              oninput="comboFilter('cp-modelo','cl-modelo')"
+              onfocus="comboOpen('cp-modelo','cl-modelo')"
+              onblur="comboBlur('cl-modelo')"
+              onkeydown="comboKey(event,'cp-modelo','cl-modelo')">
+            <span class="combo-arrow">▼</span>
+            <div class="combo-list" id="cl-modelo"></div>
+          </div>
         </div>
         <div class="field">
           <label>Colorway</label>
-<div class="field combo-wrap">
-          <input type="text" id="cp-colorway" placeholder="CHICAGO" autocomplete="off" onblur="comboBlur('cl-colorway')"
-            oninput="comboFilter('cp-colorway','cl-colorway')"
-            onfocus="comboOpen('cp-colorway','cl-colorway')"
-            onkeydown="comboKey(event,'cp-colorway','cl-colorway')">
-          <span class="combo-arrow">▼</span>
-          <div class="combo-list" id="cl-colorway"></div>
-        </div>
+          <div class="combo-wrap">
+            <input type="text" id="cp-colorway" placeholder="Colorway…" autocomplete="off"
+              oninput="comboFilter('cp-colorway','cl-colorway')"
+              onfocus="comboOpen('cp-colorway','cl-colorway')"
+              onblur="comboBlur('cl-colorway')"
+              onkeydown="comboKey(event,'cp-colorway','cl-colorway')">
+            <span class="combo-arrow">▼</span>
+            <div class="combo-list" id="cl-colorway"></div>
+          </div>
         </div>
         <div class="field">
           <label>Talla</label>
-<div class="field combo-wrap">
-          <input type="text" id="cp-talla" placeholder="8US / M / -" autocomplete="off" onblur="comboBlur('cl-talla')"
-            oninput="comboFilter('cp-talla','cl-talla')"
-            onfocus="comboOpen('cp-talla','cl-talla')"
-            onkeydown="comboKey(event,'cp-talla','cl-talla')">
-          <span class="combo-arrow">▼</span>
-          <div class="combo-list" id="cl-talla"></div>
-        </div>
+          <div class="combo-wrap">
+            <input type="text" id="cp-talla" placeholder="Talla…" autocomplete="off"
+              oninput="comboFilter('cp-talla','cl-talla')"
+              onfocus="comboOpen('cp-talla','cl-talla')"
+              onblur="comboBlur('cl-talla')"
+              onkeydown="comboKey(event,'cp-talla','cl-talla')">
+            <span class="combo-arrow">▼</span>
+            <div class="combo-list" id="cl-talla"></div>
+          </div>
         </div>
         <div class="field">
           <label>Categoría</label>
@@ -1005,28 +1009,53 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
           <div class="form-grid g3">
             <div class="field">
               <label>Marca</label>
-              <select id="rv-marca"><option value="">— Marca —</option></select>
+              <div class="combo-wrap">
+                <input type="text" id="rv-marca" placeholder="Marca…" autocomplete="off"
+                  oninput="comboFilter('rv-marca','cl-rv-marca')"
+                  onfocus="comboOpen('rv-marca','cl-rv-marca')"
+                  onblur="comboBlur('cl-rv-marca')"
+                  onkeydown="comboKey(event,'rv-marca','cl-rv-marca')">
+                <span class="combo-arrow">▼</span>
+                <div class="combo-list" id="cl-rv-marca"></div>
+              </div>
             </div>
             <div class="field">
               <label>Modelo</label>
-              <select id="rv-modelo"><option value="">— Modelo —</option></select>
+              <div class="combo-wrap">
+                <input type="text" id="rv-modelo" placeholder="Modelo…" autocomplete="off"
+                  oninput="comboFilter('rv-modelo','cl-rv-modelo')"
+                  onfocus="comboOpen('rv-modelo','cl-rv-modelo')"
+                  onblur="comboBlur('cl-rv-modelo')"
+                  onkeydown="comboKey(event,'rv-modelo','cl-rv-modelo')">
+                <span class="combo-arrow">▼</span>
+                <div class="combo-list" id="cl-rv-modelo"></div>
+              </div>
             </div>
             <div class="field">
               <label>Colorway</label>
-              <select id="rv-colorway"><option value="">— Colorway —</option></select>
+              <div class="combo-wrap">
+                <input type="text" id="rv-colorway" placeholder="Colorway…" autocomplete="off"
+                  oninput="comboFilter('rv-colorway','cl-rv-colorway')"
+                  onfocus="comboOpen('rv-colorway','cl-rv-colorway')"
+                  onblur="comboBlur('cl-rv-colorway')"
+                  onkeydown="comboKey(event,'rv-colorway','cl-rv-colorway')">
+                <span class="combo-arrow">▼</span>
+                <div class="combo-list" id="cl-rv-colorway"></div>
+              </div>
             </div>
           </div>
         </div>
         <div class="field">
           <label>Talla</label>
-<div class="field combo-wrap">
-          <input type="text" id="rv-talla" placeholder="8US / M" autocomplete="off" onblur="comboBlur('cl-rv-talla')"
-            oninput="comboFilter('rv-talla','cl-rv-talla')"
-            onfocus="comboOpen('rv-talla','cl-rv-talla')"
-            onkeydown="comboKey(event,'rv-talla','cl-rv-talla')">
-          <span class="combo-arrow">▼</span>
-          <div class="combo-list" id="cl-rv-talla"></div>
-        </div>
+          <div class="combo-wrap">
+            <input type="text" id="rv-talla" placeholder="Talla…" autocomplete="off"
+              oninput="comboFilter('rv-talla','cl-rv-talla')"
+              onfocus="comboOpen('rv-talla','cl-rv-talla')"
+              onblur="comboBlur('cl-rv-talla')"
+              onkeydown="comboKey(event,'rv-talla','cl-rv-talla')">
+            <span class="combo-arrow">▼</span>
+            <div class="combo-list" id="cl-rv-talla"></div>
+          </div>
         </div>
         <div class="field"><label>Adelanto S/.</label><input type="number" id="rv-adelanto" placeholder="0.00" step="0.01"></div>
         <div class="field"><label>Canal</label>
@@ -1080,15 +1109,17 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
     <div class="card" style="margin-bottom:12px">
       <div class="card-label">Configuración global</div>
       <div class="form-grid g2">
-        <div class="field combo-wrap">
+        <div class="field">
           <label>Concepto de costo</label>
-          <input type="text" id="cs-concepto-global" placeholder="IMPORTACION / ENVIO / OTROS..." autocomplete="off"
-            onblur="comboBlur('cl-cs-concepto')"
-            oninput="comboFilter('cs-concepto-global','cl-cs-concepto');csActualizarConceptos()"
-            onfocus="comboOpen('cs-concepto-global','cl-cs-concepto')"
-            onkeydown="comboKey(event,'cs-concepto-global','cl-cs-concepto')">
-          <span class="combo-arrow">▼</span>
-          <div class="combo-list" id="cl-cs-concepto"></div>
+          <div class="combo-wrap">
+            <input type="text" id="cs-concepto-global" placeholder="Concepto…" autocomplete="off"
+              oninput="comboFilter('cs-concepto-global','cl-cs-concepto');csActualizarConceptos()"
+              onfocus="comboOpen('cs-concepto-global','cl-cs-concepto')"
+              onblur="comboBlur('cl-cs-concepto')"
+              onkeydown="comboKey(event,'cs-concepto-global','cl-cs-concepto')">
+            <span class="combo-arrow">▼</span>
+            <div class="combo-list" id="cl-cs-concepto"></div>
+          </div>
         </div>
         <div class="field">
           <label>Fecha</label>
