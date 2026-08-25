@@ -955,9 +955,16 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
             <button class="cl-sel-clear" onclick="clClear('vt')" title="Quitar cliente">×</button>
           </div>
         </div>
-        <!-- Canal -->
-        <div class="field span2"><label>Canal</label>
+        <!-- Canal + Medio de pago -->
+        <div class="field"><label>Canal</label>
           <select id="vt-canal"><option>INSTAGRAM</option><option>WHATSAPP</option><option>PRESENCIAL</option><option>OTRO</option></select>
+        </div>
+        <div class="field"><label>Medio de pago</label>
+          <select id="vt-medio-pago"><option>EFECTIVO</option><option>TRANSFERENCIA</option><option>TARJETA</option><option>YAPE</option><option>PLIN</option></select>
+        </div>
+        <!-- Comentarios -->
+        <div class="field span2"><label>Comentarios <span style="font-size:9px;opacity:.6;font-weight:400">(opcional)</span></label>
+          <input type="text" id="vt-comentarios" placeholder="Número de pedido, condiciones, notas…">
         </div>
       </div>
     </div>
@@ -2951,6 +2958,8 @@ async function registrarVenta(){
     const{error}=await db.from('ventas').insert({
       codigo_venta:cv,codigo_producto:codProd,precio_venta_soles:precio,
       canal:document.getElementById('vt-canal').value,
+      medio_pago:document.getElementById('vt-medio-pago').value,
+      comentarios:document.getElementById('vt-comentarios').value.trim()||null,
       comprador:vtCl?[vtCl.nombre,vtCl.apellido].filter(Boolean).join(' ')||null:null,
       id_cliente:vtClId||null,
       ganancia:g,rentabilidad:r,
@@ -2961,6 +2970,7 @@ async function registrarVenta(){
     toast(`✓ ${cv} — Ganancia: ${fmt(g)}`,'ok');
     document.getElementById('vt-precio').value='';
     document.getElementById('vt-producto').value='';
+    document.getElementById('vt-comentarios').value='';
     vtProdSelected=null;
     document.getElementById('vt-info').style.display='none';
     clClear('vt');
