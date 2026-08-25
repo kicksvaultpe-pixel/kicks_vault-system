@@ -1360,7 +1360,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <div class="combo-list" id="cl-inv-talla"></div>
     </div>
     <div class="combo-wrap" style="min-width:130px">
-      <input type="text" id="inv-cat" placeholder="Categoría…" autocomplete="off"
+      <input type="text" id="inv-cat" placeholder="Categoría…" autocomplete="off" readonly
         oninput="comboFilter('inv-cat','cl-inv-cat');filterInventario()"
         onfocus="comboOpen('inv-cat','cl-inv-cat')"
         onblur="comboBlur('cl-inv-cat')"
@@ -1369,7 +1369,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <div class="combo-list" id="cl-inv-cat"></div>
     </div>
     <div class="combo-wrap" style="min-width:130px">
-      <input type="text" id="inv-estado" placeholder="Estado…" autocomplete="off"
+      <input type="text" id="inv-estado" placeholder="Estado…" autocomplete="off" readonly
         oninput="comboFilter('inv-estado','cl-inv-estado');filterInventario()"
         onfocus="comboOpen('inv-estado','cl-inv-estado')"
         onblur="comboBlur('cl-inv-estado')"
@@ -1439,7 +1439,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   <div class="table-toolbar">
     <input type="month" id="vt-mes" class="filter-select" onchange="loadVentas()" style="min-width:140px">
     <div class="combo-wrap" style="min-width:150px">
-      <input type="text" id="vt-f-canal" placeholder="Canal…" autocomplete="off"
+      <input type="text" id="vt-f-canal" placeholder="Canal…" autocomplete="off" readonly
         oninput="comboFilter('vt-f-canal','cl-vt-f-canal');loadVentas()"
         onfocus="comboOpen('vt-f-canal','cl-vt-f-canal')"
         onblur="comboBlur('cl-vt-f-canal')"
@@ -1667,7 +1667,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   <div class="table-toolbar">
     <input class="search-box" id="cl-search" placeholder="Buscar por nombre, código, teléfono…" oninput="filterClientes()">
     <div class="combo-wrap" style="min-width:150px">
-      <input type="text" id="clf-tipo" placeholder="Tipo…" autocomplete="off"
+      <input type="text" id="clf-tipo" placeholder="Tipo…" autocomplete="off" readonly
         oninput="comboFilter('clf-tipo','cl-clf-tipo');filterClientes()"
         onfocus="comboOpen('clf-tipo','cl-clf-tipo')"
         onblur="comboBlur('cl-clf-tipo')"
@@ -1724,7 +1724,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
 
   <div class="table-toolbar" style="margin-bottom:12px">
     <div class="combo-wrap" style="min-width:160px">
-      <input type="text" id="oc-f-estado" placeholder="Estado…" autocomplete="off"
+      <input type="text" id="oc-f-estado" placeholder="Estado…" autocomplete="off" readonly
         oninput="comboFilter('oc-f-estado','cl-oc-f-estado');renderOCTab()"
         onfocus="comboOpen('oc-f-estado','cl-oc-f-estado')"
         onblur="comboBlur('cl-oc-f-estado')"
@@ -1733,7 +1733,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <div class="combo-list" id="cl-oc-f-estado"></div>
     </div>
     <div class="combo-wrap" style="min-width:150px">
-      <input type="text" id="oc-f-tipo" placeholder="Tipo…" autocomplete="off"
+      <input type="text" id="oc-f-tipo" placeholder="Tipo…" autocomplete="off" readonly
         oninput="comboFilter('oc-f-tipo','cl-oc-f-tipo');renderOCTab()"
         onfocus="comboOpen('oc-f-tipo','cl-oc-f-tipo')"
         onblur="comboBlur('cl-oc-f-tipo')"
@@ -1909,6 +1909,15 @@ const TALLAS=[...TALLAS_ZAP,...TALLAS_ROPA];
 
 
 
+// Click anywhere inside combo-wrap focuses the input (opens dropdown)
+document.addEventListener('click', e => {
+  if (e.target.closest('.combo-opt')) return;
+  const wrap = e.target.closest('.combo-wrap');
+  if (!wrap) return;
+  const input = wrap.querySelector('input');
+  if (input && document.activeElement !== input) input.focus();
+});
+
 // Close AC on outside click
 
 
@@ -1921,7 +1930,8 @@ function comboSetData(listId, items) {
 }
 
 function comboOpen(inputId, listId) {
-  const val = document.getElementById(inputId).value.toUpperCase().trim();
+  const input = document.getElementById(inputId);
+  const val = (input && input.readOnly) ? '' : (input ? input.value.toUpperCase().trim() : '');
   comboRender(inputId, listId, val || '');
 }
 
@@ -1967,7 +1977,7 @@ function comboRender(inputId, listId, val) {
 
 function comboPick(inputId, listId, val) {
   const el = document.getElementById(inputId);
-  if (el) el.value = val;
+  if (el) el.value = val.startsWith('— ') ? '' : val;
   const list = document.getElementById(listId);
   if (list) list.classList.remove('open');
   if (inputId.startsWith('inv-')) filterInventario();
@@ -2348,13 +2358,13 @@ function fillDataLists(){
   comboSetData('cl-inv-colorway', colorways);
   comboSetData('cl-inv-talla', tallas);
   // Opciones fijas — inventario filtros
-  comboSetData('cl-inv-cat', ['👟 ZAPATILLAS','👕 ROPA','💎 ACCESORIOS','📦 OTROS']);
-  comboSetData('cl-inv-estado', ['✅ DISPONIBLE','💰 VENDIDO','⏳ PENDIENTE','❌ CANCELADO']);
+  comboSetData('cl-inv-cat', ['— Todos —','👟 ZAPATILLAS','👕 ROPA','💎 ACCESORIOS','📦 OTROS']);
+  comboSetData('cl-inv-estado', ['— Todos —','✅ DISPONIBLE','💰 VENDIDO','⏳ PENDIENTE','❌ CANCELADO']);
   // Opciones fijas — toolbars otros tabs
-  comboSetData('cl-vt-f-canal', ['📸 INSTAGRAM','💬 WHATSAPP','🏪 PRESENCIAL','🔹 OTRO']);
-  comboSetData('cl-clf-tipo', ['👤 REGULAR','⭐ VIP','📦 MAYORISTA']);
-  comboSetData('cl-oc-f-estado', ['⏳ PENDIENTE','✅ COMPLETADA','❌ CANCELADA']);
-  comboSetData('cl-oc-f-tipo', ['✈️ IMPORTACION','🏪 LOCAL']);
+  comboSetData('cl-vt-f-canal', ['— Todos —','📸 INSTAGRAM','💬 WHATSAPP','🏪 PRESENCIAL','🔹 OTRO']);
+  comboSetData('cl-clf-tipo', ['— Todos —','👤 REGULAR','⭐ VIP','📦 MAYORISTA']);
+  comboSetData('cl-oc-f-estado', ['— Todos —','⏳ PENDIENTE','✅ COMPLETADA','❌ CANCELADA']);
+  comboSetData('cl-oc-f-tipo', ['— Todos —','✈️ IMPORTACION','🏪 LOCAL']);
   // Opciones fijas — formularios registro
   comboSetData('cl-cp-cat', ['👟 ZAPATILLAS','👕 ROPA','🧢 ACCESORIOS','📦 OTROS']);
   comboSetData('cl-cp-moneda', ['🇺🇸 USD','🇵🇪 SOLES']);
