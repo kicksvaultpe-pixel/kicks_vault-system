@@ -2833,7 +2833,9 @@ async function registrarCompra(){
         // Switch to existente mode so next product joins same OC
         if(ocSessionCodigo!==ocCod){ocSessionCodigo=ocCod;ocSessionCount=0;}
       } else {
-        ordenCompra=document.getElementById('cp-oc-select').value||null;
+        // cp-oc-select es combobox — extrae solo el código "OC-001" del texto completo
+        const rawOC=document.getElementById('cp-oc-select').value||'';
+        ordenCompra=(rawOC.match(/^(OC-\d+)/)||[])[1]||null;
         if(ocSessionCodigo!==ordenCompra){ocSessionCodigo=ordenCompra;ocSessionCount=0;}
       }
       if(ordenCompra) ocSessionCount++;
