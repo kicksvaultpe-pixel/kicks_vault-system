@@ -1348,13 +1348,15 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   <!-- Toolbar -->
   <div class="table-toolbar">
     <input type="month" id="vt-mes" class="filter-select" onchange="loadVentas()" style="min-width:140px">
-    <select id="vt-canal" class="filter-select" onchange="loadVentas()">
-      <option value="">Todos los canales</option>
-      <option value="INSTAGRAM">Instagram</option>
-      <option value="WHATSAPP">WhatsApp</option>
-      <option value="PRESENCIAL">Presencial</option>
-      <option value="OTRO">Otro</option>
-    </select>
+    <div class="combo-wrap" style="min-width:150px">
+      <input type="text" id="vt-f-canal" placeholder="Canal…" autocomplete="off"
+        oninput="comboFilter('vt-f-canal','cl-vt-f-canal');loadVentas()"
+        onfocus="comboOpen('vt-f-canal','cl-vt-f-canal')"
+        onblur="comboBlur('cl-vt-f-canal')"
+        onkeydown="comboKey(event,'vt-f-canal','cl-vt-f-canal')">
+      <span class="combo-arrow">▼</span>
+      <div class="combo-list" id="cl-vt-f-canal"></div>
+    </div>
     <div style="flex:1"></div>
     <button class="btn btn-ghost btn-sm" onclick="exportVentasCSV()">↓ Excel</button>
   </div>
@@ -1574,12 +1576,15 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   <!-- Toolbar -->
   <div class="table-toolbar">
     <input class="search-box" id="cl-search" placeholder="Buscar por nombre, código, teléfono…" oninput="filterClientes()">
-    <select class="filter-select" id="cl-filter-tipo" onchange="filterClientes()">
-      <option value="">Todos los tipos</option>
-      <option value="REGULAR">Regular</option>
-      <option value="VIP">VIP</option>
-      <option value="MAYORISTA">Mayorista</option>
-    </select>
+    <div class="combo-wrap" style="min-width:150px">
+      <input type="text" id="clf-tipo" placeholder="Tipo…" autocomplete="off"
+        oninput="comboFilter('clf-tipo','cl-clf-tipo');filterClientes()"
+        onfocus="comboOpen('clf-tipo','cl-clf-tipo')"
+        onblur="comboBlur('cl-clf-tipo')"
+        onkeydown="comboKey(event,'clf-tipo','cl-clf-tipo')">
+      <span class="combo-arrow">▼</span>
+      <div class="combo-list" id="cl-clf-tipo"></div>
+    </div>
     <button class="btn btn-primary btn-sm" onclick="abrirModalCliente()">+ Nuevo Cliente</button>
   </div>
 
@@ -1627,18 +1632,25 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
     </div>
   </div>
 
-  <div class="filters-row" style="margin-bottom:12px">
-    <select id="oc-f-estado" onchange="renderOCTab()">
-      <option value="">Todos los estados</option>
-      <option value="PENDIENTE">Pendiente</option>
-      <option value="COMPLETADA">Completada</option>
-      <option value="CANCELADA">Cancelada</option>
-    </select>
-    <select id="oc-f-tipo" onchange="renderOCTab()">
-      <option value="">Todos los tipos</option>
-      <option value="IMPORTACION">✈️ Importación</option>
-      <option value="LOCAL">🏪 Local</option>
-    </select>
+  <div class="table-toolbar" style="margin-bottom:12px">
+    <div class="combo-wrap" style="min-width:160px">
+      <input type="text" id="oc-f-estado" placeholder="Estado…" autocomplete="off"
+        oninput="comboFilter('oc-f-estado','cl-oc-f-estado');renderOCTab()"
+        onfocus="comboOpen('oc-f-estado','cl-oc-f-estado')"
+        onblur="comboBlur('cl-oc-f-estado')"
+        onkeydown="comboKey(event,'oc-f-estado','cl-oc-f-estado')">
+      <span class="combo-arrow">▼</span>
+      <div class="combo-list" id="cl-oc-f-estado"></div>
+    </div>
+    <div class="combo-wrap" style="min-width:150px">
+      <input type="text" id="oc-f-tipo" placeholder="Tipo…" autocomplete="off"
+        oninput="comboFilter('oc-f-tipo','cl-oc-f-tipo');renderOCTab()"
+        onfocus="comboOpen('oc-f-tipo','cl-oc-f-tipo')"
+        onblur="comboBlur('cl-oc-f-tipo')"
+        onkeydown="comboKey(event,'oc-f-tipo','cl-oc-f-tipo')">
+      <span class="combo-arrow">▼</span>
+      <div class="combo-list" id="cl-oc-f-tipo"></div>
+    </div>
   </div>
 
   <div class="table-wrap">
@@ -1845,6 +1857,9 @@ function comboPick(inputId, listId, val) {
   if (inputId === 'cp-oc-select') ocExistenteChange();
   if (inputId === 'vt-producto') onPickVtProducto();
   if (inputId === 'vt-cl-input') onPickVtCliente();
+  if (inputId === 'vt-f-canal') loadVentas();
+  if (inputId === 'clf-tipo') filterClientes();
+  if (inputId === 'oc-f-estado' || inputId === 'oc-f-tipo') renderOCTab();
 }
 
 function comboKey(e, inputId, listId) {
@@ -2213,9 +2228,14 @@ function fillDataLists(){
   comboSetData('cl-inv-modelo', modelos);
   comboSetData('cl-inv-colorway', colorways);
   comboSetData('cl-inv-talla', tallas);
-  // Opciones fijas
+  // Opciones fijas — inventario
   comboSetData('cl-inv-cat', ['👟 ZAPATILLAS','👕 ROPA','💎 ACCESORIOS','📦 OTROS']);
   comboSetData('cl-inv-estado', ['✅ DISPONIBLE','💰 VENDIDO','⏳ PENDIENTE','❌ CANCELADO']);
+  // Opciones fijas — filtros otros tabs
+  comboSetData('cl-vt-f-canal', ['INSTAGRAM','WHATSAPP','PRESENCIAL','OTRO']);
+  comboSetData('cl-clf-tipo', ['REGULAR','VIP','MAYORISTA']);
+  comboSetData('cl-oc-f-estado', ['PENDIENTE','COMPLETADA','CANCELADA']);
+  comboSetData('cl-oc-f-tipo', ['IMPORTACION','LOCAL']);
 }
 
 async function loadClientes(){
@@ -2496,7 +2516,7 @@ function renderClientes(data){
 
 function filterClientes(){
   const q=(document.getElementById('cl-search')?.value||'').toLowerCase();
-  const tipo=document.getElementById('cl-filter-tipo')?.value||'';
+  const tipo=document.getElementById('clf-tipo')?.value||'';
   renderClientes(clientesCache.filter(c=>{
     const txt=[c.nombre,c.apellido,c.instagram,c.telefono,clCodigo(c.id_cliente)].filter(Boolean).join(' ').toLowerCase();
     return(!q||txt.includes(q))&&(!tipo||c.tipo===tipo);
@@ -3572,7 +3592,7 @@ async function loadVentas(){
     mesEl.value=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
   }
   const mes=mesEl.value;
-  const canal=document.getElementById('vt-canal').value;
+  const canal=document.getElementById('vt-f-canal').value;
   const tbody=document.getElementById('vt-tbody');
   if(tbody)tbody.innerHTML='<tr class="loading-row"><td colspan="8"><div class="spinner"></div></td></tr>';
 
