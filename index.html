@@ -51,7 +51,7 @@ nav{position:sticky;top:0;z-index:200;background:var(--card);border-bottom:1px s
 .page-title{font-family:'Archivo Black';font-size:20px;letter-spacing:.5px;margin-bottom:24px;display:flex;align-items:center;gap:10px;color:var(--text)}
 .page-title .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
 .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:16px;box-shadow:var(--shadow);transition:box-shadow .2s}
-.card-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:14px;display:flex;align-items:center;gap:8px}.card-label::after{content:"";flex:1;height:1px;background:var(--border);opacity:.6}
+.card-label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:16px;display:flex;align-items:center;gap:8px;padding-left:10px;border-left:3px solid var(--accent)}.card-label::after{content:"";flex:1;height:1px;background:var(--border);opacity:.5}
 
 /* TIPO SELECTOR */
 .tipo-selector{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:24px;padding:6px;background:var(--surface);border-radius:12px;border:1px solid var(--border)}
@@ -130,16 +130,18 @@ thead tr{background:var(--surface)}
 thead tr:first-child td{border-top:none}
 th{padding:9px 14px;text-align:left;font-size:10px;font-family:inherit;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);white-space:nowrap;border-bottom:1px solid var(--border)}
 th[onclick]:hover{color:var(--accent);background:rgba(37,99,235,.04);cursor:pointer}
-td{padding:9px 14px;border-top:1px solid var(--border);vertical-align:middle;white-space:nowrap;color:var(--text);font-size:11px;font-family:inherit}
+td{padding:10px 14px;border-top:1px solid var(--border);vertical-align:middle;white-space:nowrap;color:var(--text);font-size:11px;font-family:inherit}
 tbody tr:last-child td{border-bottom:none}
 tbody tr:hover td{background:rgba(37,99,235,.06)}
 tbody tr.row-pend{opacity:.9;background:rgba(180,83,9,.04)}
 tbody tr.row-pend:hover td{background:rgba(180,83,9,.07)}
 tbody tr.row-dim{opacity:.45}
-.td-main{font-size:11px;font-weight:700;color:var(--text);font-family:inherit}
+.td-main{font-size:12px;font-weight:600;color:var(--text);font-family:inherit}
 .td-code{font-size:10px;font-weight:600;color:var(--muted2);font-family:inherit;font-variant-numeric:tabular-nums}
 .td-amt{font-size:11px;font-weight:700;font-family:inherit;font-variant-numeric:tabular-nums}
 .td-unit{font-size:10px;color:var(--muted2);font-family:inherit}
+.right{text-align:right}
+.td-trunc{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* BADGES */
 .badge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:10px;font-family:'Archivo',sans-serif;font-weight:700;letter-spacing:.5px;white-space:nowrap}
@@ -159,7 +161,7 @@ tbody tr.row-dim{opacity:.45}
 .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:0;transition:opacity .2s}
 .stat-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 4px 16px rgba(37,99,235,.1)}.stat-card:hover::before{opacity:.5}
 @media(min-width:1100px){.stats3{grid-template-columns:1.4fr 1fr 1fr}}
-.stat-label{font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:12px}
+.stat-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:10px}
 /* fila normal */
 .sg-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0}
 .sg-cat{font-size:11px;color:var(--muted2);letter-spacing:.3px}
@@ -182,6 +184,12 @@ tbody tr.row-dim{opacity:.45}
 .sg-mn-tot.red{color:var(--red)}
 .stat-val{font-family:"Archivo Black";font-size:20px;margin-top:4px;line-height:1.1}
 .stat-sub{font-size:10px;color:var(--muted2);margin-top:2px}
+.page-hd{margin-bottom:20px}
+.page-hd .page-title{margin-bottom:4px}
+.page-sub{font-size:13px;color:var(--muted2);font-family:'Archivo',sans-serif;line-height:1.5;letter-spacing:.1px}
+.page-hd-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.page-hd-row .page-hd{margin-bottom:0}
+.page-hd-row .tc-widget{margin-bottom:0;align-self:center;flex-shrink:0}
 
 /* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;display:none;align-items:center;justify-content:center;padding:16px}
@@ -258,7 +266,7 @@ input[list] { cursor: text; }
 .cs-tabla thead th{padding:7px 10px;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);background:var(--bg);position:sticky;top:0}
 .cs-tabla tbody tr{border-top:1px solid var(--border);cursor:pointer;transition:background .1s}
 .cs-tabla tbody tr:hover{background:rgba(37,99,235,.06)}
-.cs-tabla tbody td{padding:8px 10px;font-size:12px;color:var(--text)}
+.cs-tabla tbody td{padding:8px 10px;font-size:11px;color:var(--text)}
 .cs-selected-item{background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.2);border-radius:8px;padding:10px 14px;font-size:13px;display:flex;justify-content:space-between;align-items:center}
 .cs-selected-item button{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:16px;padding:0 4px}
 .cs-selected-item button:hover{color:var(--red)}
@@ -393,20 +401,20 @@ input[list] { cursor: text; }
 
 
 /* Tabla movimientos */
-.fc-tabla-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.fc-tabla-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow-x:auto;-webkit-overflow-scrolling:touch;box-shadow:var(--shadow)}
 .fc-tabla{width:100%;border-collapse:collapse;font-size:11px;font-family:inherit;min-width:820px}
 .fc-tabla thead{background:var(--surface)}
-.fc-tabla thead th{padding:8px 12px;font-size:10px;font-family:inherit;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);white-space:nowrap;border-bottom:1px solid var(--border);text-align:left}
+.fc-tabla thead th{padding:9px 14px;font-size:10px;font-family:inherit;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);white-space:nowrap;border-bottom:1px solid var(--border);text-align:left}
 .fc-tabla thead th.right{text-align:right}
 .fc-tabla tbody tr{border-top:1px solid var(--border);transition:background .15s}
-.fc-tabla tbody tr:hover{background:rgba(37,99,235,.04)}
+.fc-tabla tbody tr:hover{background:rgba(37,99,235,.06)}
 .fc-tabla tbody tr.row-pend{opacity:.75;background:rgba(180,83,9,.02)}
 .fc-tabla tbody tr.row-pend:hover{background:rgba(180,83,9,.04)}
-.fc-tabla tbody td{padding:8px 12px;color:var(--text);vertical-align:middle;white-space:nowrap;font-size:11px;font-family:inherit}
-.fc-tabla .td-fecha{color:var(--text);font-size:11px;font-family:inherit;font-variant-numeric:tabular-nums}
-.fc-tabla .td-desc{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:var(--text);font-family:inherit}
+.fc-tabla tbody td{padding:10px 14px;color:var(--text);vertical-align:middle;white-space:nowrap;font-size:11px;font-family:inherit}
+.fc-tabla .td-fecha{color:var(--muted2);font-size:10px;font-weight:600;font-family:inherit;font-variant-numeric:tabular-nums}
+.fc-tabla .td-desc{max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:600;color:var(--text);font-family:inherit}
 .fc-tabla .td-talla{color:var(--text);font-size:11px;font-family:inherit}
-.fc-tabla .td-code{color:var(--text);font-size:11px;font-weight:400}
+.fc-tabla .td-code{color:var(--muted2);font-size:10px;font-weight:600;font-variant-numeric:tabular-nums}
 .fc-tabla .td-ing{font-family:inherit;font-size:11px;font-weight:700;color:var(--green);text-align:right;font-variant-numeric:tabular-nums}
 .fc-tabla .td-egr{font-family:inherit;font-size:11px;font-weight:700;color:var(--red);text-align:right;font-variant-numeric:tabular-nums}
 .fc-tabla .td-egr-usd{font-family:inherit;font-size:11px;font-weight:700;color:var(--orange);text-align:right;font-variant-numeric:tabular-nums}
@@ -444,16 +452,16 @@ input[list] { cursor: text; }
 .cat-ropa{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:10px;font-family:'Archivo',sans-serif;font-weight:700;letter-spacing:.5px;background:rgba(96,165,250,.08);color:var(--blue);border:1px solid rgba(96,165,250,.15)}
 .cat-acc{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:10px;font-family:'Archivo',sans-serif;font-weight:700;letter-spacing:.5px;background:rgba(109,40,217,.08);color:var(--purple);border:1px solid rgba(109,40,217,.15)}
 .cat-otros{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:10px;font-family:'Archivo',sans-serif;font-weight:700;letter-spacing:.5px;background:var(--surface);color:var(--muted2);border:1px solid var(--border)}
-.inv-fecha{font-size:11px;color:var(--text);font-family:inherit;font-variant-numeric:tabular-nums}
-.inv-cod{font-size:11px;font-weight:700;color:var(--accent);font-family:inherit;letter-spacing:.3px}
-.inv-txt{font-size:11px;color:var(--text);font-family:inherit}
-.inv-txt-muted{font-size:11px;color:var(--muted2);font-family:inherit}
-.inv-talla{font-size:11px;color:var(--text);font-family:inherit;text-align:center}
-.inv-monto{font-size:11px;font-family:inherit}
+.inv-fecha{font-size:10px;font-weight:600;color:var(--muted2);font-family:inherit;font-variant-numeric:tabular-nums}
+.inv-cod{font-size:10px;font-weight:700;color:var(--accent);font-family:inherit;letter-spacing:.3px;font-variant-numeric:tabular-nums}
+.inv-txt{font-size:12px;font-weight:600;color:var(--text);font-family:inherit}
+.inv-txt-muted{font-size:10px;color:var(--muted2);font-family:inherit}
+.inv-talla{font-size:11px;font-weight:700;color:var(--text);font-family:inherit;text-align:center}
+.inv-monto{font-size:11px;font-weight:700;font-family:inherit;font-variant-numeric:tabular-nums}
 .inv-monto.accent{color:var(--accent)}
 .inv-monto.orange{color:var(--orange)}
 .inv-monto.purple{color:var(--purple)}
-.inv-dash{color:var(--muted2);font-size:11px;font-family:inherit}
+.inv-dash{color:var(--muted2);font-size:10px;font-family:inherit}
 
 /* ═══════════════════════════════════════════════════════
    MOBILE BOTTOM NAV
@@ -505,6 +513,8 @@ input[list] { cursor: text; }
   .tipo-btn{padding:7px 10px;font-size:10px;letter-spacing:.5px}
   .pago-toggle{gap:4px;padding:4px}
   .page-title{font-size:17px;margin-bottom:16px}
+  .page-sub{font-size:12px}
+  .page-hd-row{gap:10px}
 
   /* Stat cards */
   .stats-row{gap:8px;margin-bottom:12px}
@@ -671,12 +681,17 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
      REGISTRO
 ══════════════════════════════════ -->
 <div id="view-registro" class="view active">
-  <div class="page-title"><div class="dot"></div> Registro</div>
-<div class="tc-widget">
-  <span class="tc-label">TC S/.</span>
-  <input type="number" id="tc-global" class="tc-input" step="0.001" min="1" max="10" value="3.70" placeholder="3.70" oninput="saveTCGlobal(this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();confirmarTC();}">
-  <span class="tc-label">/ USD</span>
-  <button class="tc-save-btn" id="tc-save-btn" onclick="confirmarTC()" title="Fijar tipo de cambio">Fijar TC</button>
+<div class="page-hd-row">
+  <div class="page-hd">
+    <div class="page-title"><div class="dot"></div> Registro</div>
+    <div class="page-sub">Compras, ventas, reservas, pagos y costos operativos</div>
+  </div>
+  <div class="tc-widget">
+    <span class="tc-label">TC S/.</span>
+    <input type="number" id="tc-global" class="tc-input" step="0.001" min="1" max="10" value="3.70" placeholder="3.70" oninput="saveTCGlobal(this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();confirmarTC();}">
+    <span class="tc-label">/ USD</span>
+    <button class="tc-save-btn" id="tc-save-btn" onclick="confirmarTC()" title="Fijar tipo de cambio">Fijar TC</button>
+  </div>
 </div>
 
   <div class="tipo-selector">
@@ -1299,26 +1314,29 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
 
 <!-- Placeholders -->
 <div id="view-ventas" class="view">
-  <div class="page-title"><div class="dot"></div> Ventas</div>
+  <div class="page-hd">
+    <div class="page-title"><div class="dot"></div> Ventas</div>
+    <div class="page-sub">Historial y métricas de ventas registradas</div>
+  </div>
 
   <!-- Stats -->
-  <div id="vt-stats-row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
+  <div id="vt-stats-row" class="stats-row" style="grid-template-columns:repeat(4,1fr)">
     <div class="stat-card">
       <div class="stat-label">Ventas</div>
-      <div style="font-family:'Archivo Black';font-size:28px;line-height:1;margin-top:6px" id="vt-n">—</div>
-      <div class="stat-sub" id="vt-sub-mes" style="margin-top:4px"></div>
+      <div class="stat-val" id="vt-n">—</div>
+      <div class="stat-sub" id="vt-sub-mes"></div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Revenue</div>
-      <div style="font-family:'Archivo Black';font-size:18px;line-height:1;margin-top:6px" id="vt-rev">—</div>
+      <div class="stat-label">Ingresos S/.</div>
+      <div class="stat-val" id="vt-rev">—</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Ganancia bruta</div>
-      <div style="font-family:'Archivo Black';font-size:18px;line-height:1;margin-top:6px;color:var(--green)" id="vt-gan">—</div>
+      <div class="stat-val" style="color:var(--green)" id="vt-gan">—</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Margen promedio</div>
-      <div style="font-family:'Archivo Black';font-size:28px;line-height:1;margin-top:6px;color:var(--accent)" id="vt-margen">—</div>
+      <div class="stat-val" style="color:var(--accent)" id="vt-margen">—</div>
     </div>
   </div>
 
@@ -1343,11 +1361,11 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <th style="width:80px">Fecha</th>
         <th style="width:90px">Código</th>
         <th>Producto</th>
-        <th style="width:70px">Talla</th>
+        <th style="width:60px">Talla</th>
         <th style="width:110px">Canal</th>
-        <th style="width:120px;text-align:right">Venta S/.</th>
-        <th style="width:120px;text-align:right">Ganancia</th>
-        <th style="width:80px;text-align:right">ROI</th>
+        <th class="right" style="width:120px">Venta S/.</th>
+        <th class="right" style="width:120px">Ganancia</th>
+        <th class="right" style="width:70px">ROI</th>
       </tr></thead>
       <tbody id="vt-tbody">
         <tr class="loading-row"><td colspan="8"><div class="spinner"></div></td></tr>
@@ -1359,7 +1377,10 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   </div>
 </div>
 <div id="view-flujo" class="view">
-  <div class="page-title"><div class="dot"></div> Flujo de Caja</div>
+  <div class="page-hd">
+    <div class="page-title"><div class="dot"></div> Flujo de Caja</div>
+    <div class="page-sub">Balance mensual de ingresos, egresos y caja disponible</div>
+  </div>
 
   <!-- Navegación de mes -->
   <div class="fc-nav">
@@ -1524,7 +1545,10 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   </div>
 </div>
 <div id="view-clientes" class="view">
-  <div class="page-title"><div class="dot"></div> Clientes</div>
+  <div class="page-hd">
+    <div class="page-title"><div class="dot"></div> Clientes</div>
+    <div class="page-sub">Directorio de clientes y su historial de compras</div>
+  </div>
 
   <!-- Stats -->
   <div class="cl-stats">
@@ -1578,7 +1602,10 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
      ÓRDENES DE COMPRA
 ══════════════════════════════════ -->
 <div id="view-oc" class="view">
-  <div class="page-title"><div class="dot"></div> Órdenes de Compra</div>
+  <div class="page-hd">
+    <div class="page-title"><div class="dot"></div> Órdenes de Compra</div>
+    <div class="page-sub">Gestión de órdenes de importación y compra local</div>
+  </div>
 
   <div class="stats-row stats3">
     <div class="stat-card">
@@ -1610,12 +1637,12 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   </div>
 
   <div class="table-wrap">
-    <table class="tbl">
+    <table style="min-width:820px">
       <thead>
         <tr>
-          <th>Código</th><th>Nombre</th><th>Tipo</th><th>Estado</th>
-          <th class="right">Productos</th><th class="right">Monto S/.</th>
-          <th>Notas</th><th>Fecha</th>
+          <th style="width:90px">Código</th><th>Nombre</th><th style="width:100px">Tipo</th><th style="width:110px">Estado</th>
+          <th class="right" style="width:80px">Prods.</th><th class="right" style="width:120px">Monto S/.</th>
+          <th>Notas</th><th style="width:80px">Fecha</th>
         </tr>
       </thead>
       <tbody id="oc-tbody">
@@ -1973,23 +2000,23 @@ function renderOCTab(){
     return;
   }
   const ESTADO_BADGE={
-    PENDIENTE:'<span style="background:rgba(234,179,8,.15);color:#ca8a04;border:1px solid rgba(234,179,8,.3);border-radius:20px;padding:2px 10px;font-size:10px;font-weight:700;letter-spacing:.5px">PENDIENTE</span>',
-    COMPLETADA:'<span style="background:rgba(22,163,74,.15);color:var(--green);border:1px solid rgba(22,163,74,.3);border-radius:20px;padding:2px 10px;font-size:10px;font-weight:700;letter-spacing:.5px">COMPLETADA</span>',
-    CANCELADA:'<span style="background:rgba(220,38,38,.1);color:var(--neg);border:1px solid rgba(220,38,38,.25);border-radius:20px;padding:2px 10px;font-size:10px;font-weight:700;letter-spacing:.5px">CANCELADA</span>'
+    PENDIENTE:'<span class="badge badge-yellow">PENDIENTE</span>',
+    COMPLETADA:'<span class="badge badge-green">COMPLETADA</span>',
+    CANCELADA:'<span class="badge badge-red">CANCELADA</span>'
   };
   tbody.innerHTML=ocs.map(oc=>{
     const prods=inventarioCache.filter(p=>p.orden_compra===oc.codigo);
     const monto=prods.reduce((sum,p)=>sum+parseFloat(p.precio_compra_soles||0),0);
     const fecha=oc.fecha?oc.fecha.substring(2,10):'—';
     return `<tr>
-      <td><span style="font-family:'Archivo Black';color:var(--accent)">${oc.codigo}</span></td>
-      <td style="font-weight:600">${oc.nombre||'<span style="color:var(--muted2)">—</span>'}</td>
-      <td style="font-size:12px">${oc.tipo==='IMPORTACION'?'✈️ Import.':'🏪 Local'}</td>
+      <td><span class="td-code" style="color:var(--accent)">${oc.codigo}</span></td>
+      <td class="td-main">${oc.nombre||'<span class="td-unit">—</span>'}</td>
+      <td>${oc.tipo==='IMPORTACION'?'<span class="badge badge-accent">Import.</span>':'<span class="badge badge-muted">Local</span>'}</td>
       <td>${ESTADO_BADGE[oc.estado]||oc.estado}</td>
-      <td class="right" style="font-family:'Archivo Black'">${prods.length}</td>
-      <td class="right" style="font-family:'Archivo Black';color:var(--accent)">${fmt(monto)}</td>
-      <td style="font-size:12px;color:var(--muted2);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${oc.notas||''}">${oc.notas||'—'}</td>
-      <td style="font-size:12px;color:var(--muted2)">${fecha}</td>
+      <td class="td-amt right">${prods.length}</td>
+      <td class="td-amt right" style="color:var(--accent)">${fmt(monto)}</td>
+      <td class="td-unit td-trunc" title="${oc.notas||''}">${oc.notas||'—'}</td>
+      <td class="td-code">${fecha}</td>
     </tr>`;
   }).join('');
 }
@@ -2213,24 +2240,24 @@ function renderInventario(rows){
     // Estado badge
     let estadoBadge;
     if(isCancelado)
-      estadoBadge='<span class="fc-accion-badge" style="background:rgba(255,255,255,.04);color:var(--muted2);border:1px solid var(--border2)">✕ CANCELADO</span>';
+      estadoBadge='<span class="badge badge-muted">CANCELADO</span>';
     else if(isPendiente)
-      estadoBadge='<span class="fc-accion-badge fc-accion-PAGO">⏳ PAGO PENDIENTE</span>';
+      estadoBadge='<span class="badge badge-yellow">PAGO PEND.</span>';
     else if(p.estado==='DISPONIBLE')
-      estadoBadge='<span class="fc-accion-badge fc-accion-VENTA">● DISPONIBLE</span>';
+      estadoBadge='<span class="badge badge-green">DISPONIBLE</span>';
     else
-      estadoBadge='<span class="fc-accion-badge fc-accion-COMPRA">✓ VENDIDO</span>';
+      estadoBadge='<span class="badge badge-accent">VENDIDO</span>';
 
     // Pago badge + botón
     let pagoBadge;
     if(isCancelado)
-      pagoBadge='<span style="color:var(--muted2)">—</span>';
+      pagoBadge='<span class="td-unit">—</span>';
     else if(p.tipo_pago==='CREDITO'&&isPendiente)
-      pagoBadge=`<button class="btn-pay" onclick="abrirModalPago('${p.codigo_producto}')">💳 PAGAR</button>`;
+      pagoBadge=`<button class="btn-pay" onclick="abrirModalPago('${p.codigo_producto}')">PAGAR</button>`;
     else if(p.tipo_pago==='CREDITO')
       pagoBadge='<span class="badge badge-muted">CRÉDITO ✓</span>';
     else
-      pagoBadge='<span style="color:var(--muted);font-size:11px">Contado</span>';
+      pagoBadge='<span class="badge badge-muted">CONTADO</span>';
 
     // Botón cancelar — solo si no está cancelado ni vendido
     const btnCancel=(!isCancelado&&p.estado!=='VENDIDO')
@@ -2249,7 +2276,7 @@ function renderInventario(rows){
 
     const pcHtml=p.precio_compra_soles>0?`<span class="inv-monto">${fmt(p.precio_compra_soles)}</span>`:'<span class="inv-dash">—</span>';
     const costoHtml=p.total_costos>0?`<span class="inv-monto purple">${fmt(p.total_costos)}</span>`:'<span class="inv-dash">—</span>';
-    const finalHtml=`<span class="inv-monto${isPendiente?' orange':''}" style="font-weight:700">${fmt(pF)}</span>`;
+    const finalHtml=`<span class="inv-monto${isPendiente?' orange':''}">${fmt(pF)}</span>`;
     const ventaHtml=pV>0?`<span class="inv-monto accent">${fmt(pV)}</span>`:'<span class="inv-dash">—</span>';
     const catMap={'ZAPATILLAS':'cat-zap','ROPA':'cat-ropa','ACCESORIOS':'cat-acc','OTROS':'cat-otros'};
     const catCls=catMap[(p.categoria||'').toUpperCase()]||'cat-otros';
@@ -2264,11 +2291,11 @@ function renderInventario(rows){
       <td class="inv-txt">${p.colorway||'—'}</td>
       <td><span class="${catCls}">${catLabel}</span></td>
       <td class="inv-talla">${p.talla||'—'}</td>
-      <td style="text-align:right">${pcHtml}</td>
-      <td style="text-align:right">${costoHtml}</td>
-      <td style="text-align:right">${finalHtml}</td>
-      <td style="text-align:right">${ventaHtml}</td>
-      <td style="text-align:center">${mg}</td>
+      <td class="right">${pcHtml}</td>
+      <td class="right">${costoHtml}</td>
+      <td class="right">${finalHtml}</td>
+      <td class="right">${ventaHtml}</td>
+      <td class="right">${mg}</td>
       <td class="inv-txt">${p.orden_compra||'—'}</td>
       <td>${estadoBadge}</td>
       <td>${pagoBadge}</td>
@@ -2449,11 +2476,11 @@ function renderClientes(data){
     const ig=c.instagram?`<span style="color:var(--accent)">${c.instagram}</span>`:'—';
     return`<tr onclick="abrirPerfil(${c.id_cliente})">
       <td><span class="td-code">${cod}</span></td>
-      <td><span class="td-main">${nombre}</span></td>
-      <td>${c.telefono||'—'}</td>
+      <td class="td-main">${nombre}</td>
+      <td class="td-unit">${c.telefono||'—'}</td>
       <td>${ig}</td>
-      <td>${c.talla_frecuente||'—'}</td>
-      <td>${c.canal_preferido||'—'}</td>
+      <td class="td-unit">${c.talla_frecuente||'—'}</td>
+      <td class="td-unit">${c.canal_preferido||'—'}</td>
       <td>${tipoBadgeHTML(c.tipo)}</td>
       <td><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();abrirModalCliente(${c.id_cliente})" style="padding:4px 10px">✏</button></td>
     </tr>`;
@@ -2489,10 +2516,10 @@ function renderPerfil(c,ventas){
   const ultimaCompra=ventas.length?ventas[0].fecha:null;
   const histRows=ventas.slice(0,10).map(v=>`
     <tr>
-      <td>${v.fecha||'—'}</td>
+      <td class="td-unit">${v.fecha||'—'}</td>
       <td class="td-accent">${v.codigo_producto||'—'}</td>
-      <td style="text-align:right">${fmt(v.precio_venta_soles)}</td>
-      <td class="td-green" style="text-align:right">${fmt(v.ganancia)}</td>
+      <td class="right">${fmt(v.precio_venta_soles)}</td>
+      <td class="td-green right">${fmt(v.ganancia)}</td>
     </tr>`).join('')||'<tr><td colspan="4" style="text-align:center;color:var(--muted2);padding:14px">Sin ventas registradas</td></tr>';
   document.getElementById('cl-pn-body').innerHTML=`
     <div class="cl-mini-stats">
@@ -2513,7 +2540,7 @@ function renderPerfil(c,ventas){
       <div class="cl-section-lbl">Historial de compras</div>
       <div style="overflow-x:auto">
         <table class="cl-hist">
-          <thead><tr><th>Fecha</th><th>Producto</th><th style="text-align:right">Venta S/.</th><th style="text-align:right">Gan.</th></tr></thead>
+          <thead><tr><th>Fecha</th><th>Producto</th><th class="right">Venta S/.</th><th class="right">Gan.</th></tr></thead>
           <tbody>${histRows}</tbody>
         </table>
       </div>
@@ -3078,12 +3105,12 @@ function buscarProductoCosto(){
     body.innerHTML=res.map(p=>`
       <tr onclick="csAgregarProducto('${p.codigo_producto}')">
         <td><span class="td-code">${p.codigo_producto}</span></td>
-        <td>${p.marca||'—'}</td>
-        <td style="color:var(--muted2)">${p.modelo||'—'}</td>
-        <td style="color:var(--muted2)">${p.colorway||'—'}</td>
-        <td><strong>${p.talla||'—'}</strong></td>
-        <td style="color:var(--accent)">${fmt(p.precio_final||p.precio_compra_soles||0)}</td>
-        <td><span style="color:var(--accent);font-size:11px">+ Agregar</span></td>
+        <td class="td-main">${p.marca||'—'}</td>
+        <td class="td-unit">${p.modelo||'—'}</td>
+        <td class="td-unit">${p.colorway||'—'}</td>
+        <td class="td-main">${p.talla||'—'}</td>
+        <td class="td-amt" style="color:var(--accent)">${fmt(p.precio_final||p.precio_compra_soles||0)}</td>
+        <td class="td-unit" style="color:var(--accent)">+ Agregar</td>
       </tr>`).join('');
   }
 }
@@ -3485,7 +3512,7 @@ function renderFlujoTabla() {
       <td class="right">${egrHtml}</td>
       <td class="right">${pendS}</td>
       <td class="right">${pendU}</td>
-      <td class="td-fecha" style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${esPend?'CRÉDITO':f.categoria||f.tipo||''}</td>
+      <td>${esPend?'<span class="badge badge-yellow">CRÉDITO</span>':`<span class="td-unit">${f.categoria||f.tipo||'—'}</span>`}</td>
     </tr>`;
   });
 
@@ -3504,7 +3531,7 @@ function renderFlujoTabla() {
       <td class="td-muted">—</td>
       <td class="right">${pendS}</td>
       <td class="right">${pendU}</td>
-      <td class="td-fecha" style="color:var(--yellow)">CRÉDITO</td>
+      <td><span class="badge badge-yellow">CRÉDITO</span></td>
     </tr>`;
   });
 
@@ -3584,12 +3611,12 @@ function renderVentas(rows){
     return`<tr>
       <td class="td-code">${fecha}</td>
       <td class="td-code" style="color:var(--accent)">${v.codigo_venta}</td>
-      <td class="td-main" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${nombre}</td>
-      <td>${inv.talla||'—'}</td>
+      <td class="td-main td-trunc">${nombre}</td>
+      <td class="td-unit">${inv.talla||'—'}</td>
       <td><span class="badge ${badge}">${v.canal||'—'}</span></td>
-      <td class="td-amt" style="text-align:right;color:var(--accent)">${fmt(v.precio_venta_soles)}</td>
-      <td class="td-amt" style="text-align:right;color:${gc}">${gan>=0?'+':''}${fmt(gan)}</td>
-      <td style="text-align:right"><span class="badge ${roi>=0?'badge-green':'badge-red'}">${(roi*100).toFixed(0)}%</span></td>
+      <td class="td-amt right" style="color:var(--accent)">${fmt(v.precio_venta_soles)}</td>
+      <td class="td-amt right" style="color:${gc}">${gan>=0?'+':''}${fmt(gan)}</td>
+      <td class="right"><span class="badge ${roi>=0?'badge-green':'badge-red'}">${(roi*100).toFixed(0)}%</span></td>
     </tr>`;
   }).join('');
 }
