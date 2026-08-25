@@ -659,6 +659,10 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       <span class="tab-label">Clientes</span>
     </button>
+    <button class="nav-tab" onclick="showView('oc',this)">
+      <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <span class="tab-label">OCs</span>
+    </button>
   </div>
   <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Modo oscuro"></button>
 </nav>
@@ -825,7 +829,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         </div>
       </div>
       <div id="oc-panel-nueva">
-        <div class="form-grid g3">
+        <div class="form-grid g2" style="margin-bottom:10px">
           <div class="field">
             <label>Tipo</label>
             <select id="cp-oc-tipo">
@@ -838,18 +842,30 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
             <input type="text" id="cp-oc-nueva" placeholder="OC-001" readonly
               style="color:var(--accent);font-family:'Archivo Black'">
           </div>
+        </div>
+        <div class="form-grid g2">
+          <div class="field">
+            <label>Nombre de OC</label>
+            <input type="text" id="cp-oc-nombre" placeholder="Nike SNKRS Feb 2025...">
+          </div>
           <div class="field">
             <label>Notas (proveedor, URL...)</label>
-            <input type="text" id="cp-oc-notas" placeholder="Nike SNKRS, Goat...">
+            <input type="text" id="cp-oc-notas" placeholder="goat.com/product/...">
           </div>
         </div>
       </div>
       <div id="oc-panel-existente" style="display:none">
         <div class="field" style="margin-bottom:10px">
           <label>Seleccionar OC</label>
-          <select id="cp-oc-select" onchange="ocExistenteChange()">
-            <option value="">— Seleccionar OC —</option>
-          </select>
+          <div class="combo-wrap">
+            <input type="text" id="cp-oc-select" placeholder="Buscar OC..." autocomplete="off"
+              oninput="comboFilter('cp-oc-select','cl-oc-sel')"
+              onfocus="comboOpen('cp-oc-select','cl-oc-sel')"
+              onblur="comboBlur('cl-oc-sel')"
+              onkeydown="comboKey(event,'cp-oc-select','cl-oc-sel')">
+            <span class="combo-arrow">▼</span>
+            <div class="combo-list" id="cl-oc-sel"></div>
+          </div>
         </div>
         <div id="oc-info-card" style="display:none;background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:12px 14px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
@@ -1531,6 +1547,57 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   </div>
 </div>
 
+<!-- ══════════════════════════════════
+     ÓRDENES DE COMPRA
+══════════════════════════════════ -->
+<div id="view-oc" class="view">
+  <div class="page-title"><div class="dot"></div> Órdenes de Compra</div>
+
+  <div class="stats-row stats3">
+    <div class="stat-card">
+      <div class="stat-label">Total OCs</div>
+      <div class="stat-val" id="oc-stat-total">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Pendientes</div>
+      <div class="stat-val" id="oc-stat-pendiente" style="color:var(--accent)">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Completadas</div>
+      <div class="stat-val" id="oc-stat-completada" style="color:var(--green)">—</div>
+    </div>
+  </div>
+
+  <div class="filters-row" style="margin-bottom:12px">
+    <select id="oc-f-estado" onchange="renderOCTab()">
+      <option value="">Todos los estados</option>
+      <option value="PENDIENTE">Pendiente</option>
+      <option value="COMPLETADA">Completada</option>
+      <option value="CANCELADA">Cancelada</option>
+    </select>
+    <select id="oc-f-tipo" onchange="renderOCTab()">
+      <option value="">Todos los tipos</option>
+      <option value="IMPORTACION">✈️ Importación</option>
+      <option value="LOCAL">🏪 Local</option>
+    </select>
+  </div>
+
+  <div class="table-wrap">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>Código</th><th>Nombre</th><th>Tipo</th><th>Estado</th>
+          <th class="right">Productos</th><th class="right">Monto S/.</th>
+          <th>Notas</th><th>Fecha</th>
+        </tr>
+      </thead>
+      <tbody id="oc-tbody">
+        <tr class="loading-row"><td colspan="8"><div class="spinner"></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
 <!-- MODAL PAGAR CRÉDITO -->
 <div class="modal-overlay" id="modal-pagar">
   <div class="modal">
@@ -1716,6 +1783,7 @@ function comboPick(inputId, listId, val) {
   if (list) list.classList.remove('open');
   if (inputId.startsWith('inv-')) filterInventario();
   if (inputId.startsWith('cs-f-')) buscarProductoCosto();
+  if (inputId === 'cp-oc-select') ocExistenteChange();
 }
 
 function comboKey(e, inputId, listId) {
@@ -1758,17 +1826,15 @@ async function loadOCs(){
 }
 
 function renderOCSelectExistente(){
-  // Compra crédito: solo OCs PENDIENTES
-  const sel=document.getElementById('cp-oc-select');
-  if(sel) sel.innerHTML='<option value="">— Seleccionar OC —</option>'+
-    ocCache.filter(oc=>oc.estado==='PENDIENTE')
-      .map(oc=>`<option value="${oc.codigo}">${oc.codigo} — ${oc.tipo}</option>`).join('');
-  // Costo: todas las OCs con estado visible
+  // Compra crédito: solo OCs PENDIENTES → combobox
+  const pendientes=ocCache.filter(oc=>oc.estado==='PENDIENTE');
+  comboSetData('cl-oc-sel', pendientes.map(oc=>`${oc.codigo}${oc.nombre?' · '+oc.nombre:''} — ${oc.tipo}`));
+  // Costo: todas las OCs (sigue siendo select estándar)
   const csSel=document.getElementById('cs-oc-select');
   if(csSel){
     const prev=csSel.value;
     csSel.innerHTML='<option value="">— Sin OC —</option>'+
-      ocCache.map(oc=>`<option value="${oc.codigo}">${oc.codigo} — ${oc.tipo}${oc.estado==='COMPLETADA'?' ✓':''}</option>`).join('');
+      ocCache.map(oc=>`<option value="${oc.codigo}">${oc.codigo}${oc.nombre?' · '+oc.nombre:''} — ${oc.tipo}${oc.estado==='COMPLETADA'?' ✓':''}</option>`).join('');
     if(prev) csSel.value=prev;
   }
 }
@@ -1782,7 +1848,9 @@ function ocSetMode(modo){
 }
 
 function ocExistenteChange(){
-  const cod=document.getElementById('cp-oc-select').value;
+  // El combobox muestra "OC-001 · Nombre — TIPO", extraer solo el código
+  const raw=document.getElementById('cp-oc-select').value;
+  const cod=(raw.match(/^(OC-\d+)/)||[])[1]||'';
   const card=document.getElementById('oc-info-card');
   if(!cod){card.style.display='none';return;}
   const oc=ocCache.find(o=>o.codigo===cod);
@@ -1854,6 +1922,47 @@ function csOCChange(){
   info.style.display='';
   // Refrescar tabla con productos de esta OC
   buscarProductoCosto();
+}
+
+// ── OC TAB ──
+function renderOCTab(){
+  const estadoF=document.getElementById('oc-f-estado')?.value||'';
+  const tipoF=document.getElementById('oc-f-tipo')?.value||'';
+  // Stats
+  const s=el=>document.getElementById(el);
+  if(s('oc-stat-total')) s('oc-stat-total').textContent=ocCache.length;
+  if(s('oc-stat-pendiente')) s('oc-stat-pendiente').textContent=ocCache.filter(o=>o.estado==='PENDIENTE').length;
+  if(s('oc-stat-completada')) s('oc-stat-completada').textContent=ocCache.filter(o=>o.estado==='COMPLETADA').length;
+  // Filter
+  let ocs=ocCache;
+  if(estadoF) ocs=ocs.filter(o=>o.estado===estadoF);
+  if(tipoF) ocs=ocs.filter(o=>o.tipo===tipoF);
+  const tbody=document.getElementById('oc-tbody');
+  if(!tbody) return;
+  if(!ocs.length){
+    tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--muted2)">Sin órdenes de compra</td></tr>';
+    return;
+  }
+  const ESTADO_BADGE={
+    PENDIENTE:'<span style="background:rgba(234,179,8,.15);color:#ca8a04;border:1px solid rgba(234,179,8,.3);border-radius:20px;padding:2px 10px;font-size:10px;font-weight:700;letter-spacing:.5px">PENDIENTE</span>',
+    COMPLETADA:'<span style="background:rgba(22,163,74,.15);color:var(--green);border:1px solid rgba(22,163,74,.3);border-radius:20px;padding:2px 10px;font-size:10px;font-weight:700;letter-spacing:.5px">COMPLETADA</span>',
+    CANCELADA:'<span style="background:rgba(220,38,38,.1);color:var(--neg);border:1px solid rgba(220,38,38,.25);border-radius:20px;padding:2px 10px;font-size:10px;font-weight:700;letter-spacing:.5px">CANCELADA</span>'
+  };
+  tbody.innerHTML=ocs.map(oc=>{
+    const prods=inventarioCache.filter(p=>p.orden_compra===oc.codigo);
+    const monto=prods.reduce((sum,p)=>sum+parseFloat(p.precio_compra_soles||0),0);
+    const fecha=oc.fecha?oc.fecha.substring(2,10):'—';
+    return `<tr>
+      <td><span style="font-family:'Archivo Black';color:var(--accent)">${oc.codigo}</span></td>
+      <td style="font-weight:600">${oc.nombre||'<span style="color:var(--muted2)">—</span>'}</td>
+      <td style="font-size:12px">${oc.tipo==='IMPORTACION'?'✈️ Import.':'🏪 Local'}</td>
+      <td>${ESTADO_BADGE[oc.estado]||oc.estado}</td>
+      <td class="right" style="font-family:'Archivo Black'">${prods.length}</td>
+      <td class="right" style="font-family:'Archivo Black';color:var(--accent)">${fmt(monto)}</td>
+      <td style="font-size:12px;color:var(--muted2);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${oc.notas||''}">${oc.notas||'—'}</td>
+      <td style="font-size:12px;color:var(--muted2)">${fecha}</td>
+    </tr>`;
+  }).join('');
 }
 
 // ── TC GLOBAL ──
@@ -1950,6 +2059,7 @@ function showView(n,btn){
   if(n==='inventario') loadInventario();
   if(n==='flujo') loadFlujo();
   if(n==='ventas') loadVentas();
+  if(n==='oc') renderOCTab();
 }
 
 function setTipo(tipo,btn){
@@ -2693,9 +2803,10 @@ async function registrarCompra(){
       if(ocModo==='nueva'){
         const ocCod=document.getElementById('cp-oc-nueva').value;
         const ocTipo=document.getElementById('cp-oc-tipo').value;
+        const ocNombre=document.getElementById('cp-oc-nombre')?.value.trim()||null;
         const ocNotas=document.getElementById('cp-oc-notas').value.trim()||null;
         const{error:eOC}=await db.from('ordenes_compra').upsert({
-          codigo:ocCod, tipo:ocTipo,
+          codigo:ocCod, tipo:ocTipo, nombre:ocNombre,
           fecha:document.getElementById('cp-fecha').value,
           estado:'PENDIENTE', notas:ocNotas
         },{onConflict:'codigo'});
@@ -2733,7 +2844,7 @@ async function registrarCompra(){
     if(error)throw error;
     // flujo_caja lo maneja trigger after_compra en Supabase
     toast(`✓ ${cod} registrado${esCredito?' — ● PENDIENTE':''}`, 'ok');
-    ['cp-marca','cp-modelo','cp-colorway','cp-talla','cp-usd','cp-soles','cp-pventa','cp-factura','cp-desc-factura','cp-comentarios','cp-soles-contado','cp-pventa-credito','cp-factura-credito','cp-desc-factura-credito','cp-comentarios-credito'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    ['cp-marca','cp-modelo','cp-colorway','cp-talla','cp-usd','cp-soles','cp-pventa','cp-factura','cp-desc-factura','cp-comentarios','cp-soles-contado','cp-pventa-credito','cp-factura-credito','cp-desc-factura-credito','cp-comentarios-credito','cp-oc-nombre','cp-oc-notas'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     document.getElementById('cp-tc').value=document.getElementById('tc-global').value||'3.70';
     await loadOCs();
     if(ocModo==='nueva'){ pregenOC(); }
