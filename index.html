@@ -414,7 +414,7 @@ input[list] { cursor: text; }
 .fc-tabla .td-fecha{color:var(--muted2);font-size:10px;font-weight:600;font-family:inherit;font-variant-numeric:tabular-nums}
 .fc-tabla .td-desc{max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:600;color:var(--text);font-family:inherit}
 .fc-tabla .td-talla{color:var(--text);font-size:11px;font-family:inherit}
-.fc-tabla .td-code{color:var(--muted2);font-size:10px;font-weight:600;font-variant-numeric:tabular-nums}
+.fc-tabla .td-code{color:var(--accent);font-size:10px;font-weight:600;font-variant-numeric:tabular-nums}
 .fc-tabla .td-ing{font-family:inherit;font-size:11px;font-weight:700;color:var(--green);text-align:right;font-variant-numeric:tabular-nums}
 .fc-tabla .td-egr{font-family:inherit;font-size:11px;font-weight:700;color:var(--red);text-align:right;font-variant-numeric:tabular-nums}
 .fc-tabla .td-egr-usd{font-family:inherit;font-size:11px;font-weight:700;color:var(--orange);text-align:right;font-variant-numeric:tabular-nums}
@@ -2475,7 +2475,7 @@ function renderClientes(data){
     const nombre=[c.nombre,c.apellido].filter(Boolean).join(' ')||'—';
     const ig=c.instagram?`<span style="color:var(--accent)">${c.instagram}</span>`:'—';
     return`<tr onclick="abrirPerfil(${c.id_cliente})">
-      <td><span class="td-code">${cod}</span></td>
+      <td><span class="td-code" style="color:var(--accent)">${cod}</span></td>
       <td class="td-main">${nombre}</td>
       <td class="td-unit">${c.telefono||'—'}</td>
       <td>${ig}</td>
