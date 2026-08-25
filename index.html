@@ -1269,20 +1269,24 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <span class="combo-arrow">▼</span>
       <div class="combo-list" id="cl-inv-talla"></div>
     </div>
-    <select class="filter-select" id="inv-cat" onchange="filterInventario()">
-      <option value="">Categoría</option>
-      <option value="ZAPATILLAS">Zapatillas</option>
-      <option value="ROPA">Ropa</option>
-      <option value="ACCESORIOS">Accesorios</option>
-      <option value="OTROS">Otros</option>
-    </select>
-    <select class="filter-select" id="inv-estado" onchange="filterInventario()">
-      <option value="">Estado</option>
-      <option value="DISPONIBLE">Disponible</option>
-      <option value="VENDIDO">Vendido</option>
-      <option value="PENDIENTE">Pendiente pago</option>
-      <option value="CANCELADO">Cancelado</option>
-    </select>
+    <div class="combo-wrap" style="min-width:130px">
+      <input type="text" id="inv-cat" placeholder="Categoría…" autocomplete="off"
+        oninput="comboFilter('inv-cat','cl-inv-cat');filterInventario()"
+        onfocus="comboOpen('inv-cat','cl-inv-cat')"
+        onblur="comboBlur('cl-inv-cat')"
+        onkeydown="comboKey(event,'inv-cat','cl-inv-cat')">
+      <span class="combo-arrow">▼</span>
+      <div class="combo-list" id="cl-inv-cat"></div>
+    </div>
+    <div class="combo-wrap" style="min-width:130px">
+      <input type="text" id="inv-estado" placeholder="Estado…" autocomplete="off"
+        oninput="comboFilter('inv-estado','cl-inv-estado');filterInventario()"
+        onfocus="comboOpen('inv-estado','cl-inv-estado')"
+        onblur="comboBlur('cl-inv-estado')"
+        onkeydown="comboKey(event,'inv-estado','cl-inv-estado')">
+      <span class="combo-arrow">▼</span>
+      <div class="combo-list" id="cl-inv-estado"></div>
+    </div>
     <div style="flex:1"></div>
     <button class="btn btn-ghost btn-sm" onclick="clearFiltros()">✕ Limpiar</button>
     <button class="btn btn-ghost btn-sm" onclick="loadInventario()" title="Recargar">↺</button>
@@ -2193,22 +2197,25 @@ function fillDataLists(){
   const marcas=[...new Set(inventarioCache.map(p=>p.marca).filter(Boolean))].sort();
   const modelos=[...new Set(inventarioCache.map(p=>p.modelo).filter(Boolean))].sort();
   const colorways=[...new Set(inventarioCache.map(p=>p.colorway).filter(Boolean))].sort();
-  const TALLAS_ALL=['4US','4.5US','5US','5.5US','6US','6.5US','7US','7.5US','8US','8.5US','9US','9.5US','10US','10.5US','11US','11.5US','12US','13US','14US','36EU','37EU','38EU','39EU','40EU','41EU','42EU','43EU','44EU','45EU','46EU','4Y','4.5Y','5Y','5.5Y','6Y','6.5Y','7Y','XS','S','M','L','XL','XXL','XXXL','-'];
-  const MARCAS_BASE=['NIKE','ADIDAS','JORDAN','YEEZY','SUPREME','NEW BALANCE','OFF-WHITE','ESSENTIALS','FEAR OF GOD','STONE ISLAND','PALACE','BAPE','STUSSY','PUMA','REEBOK','CONVERSE','VANS','ASICS','SALOMON'];
-  const MODELOS_BASE=['AIR FORCE 1','AIR JORDAN 1','AIR JORDAN 3','AIR JORDAN 4','AIR JORDAN 11','AIR MAX 90','AIR MAX 95','AIR MAX 97','DUNK LOW','DUNK HIGH','BLAZER MID','FORUM LOW','FORUM HIGH','CAMPUS','GAZELLE','SAMBA','ULTRABOOST','YEEZY 350 V2','YEEZY 500','YEEZY 700','NB 550','NB 574','NB 990','TRAIL','HOODIE','TEE','CARGO PANTS'];
-  const COLORWAYS_BASE=['WHITE','BLACK','WHITE/WHITE','BLACK/WHITE','BRED','CHICAGO','SHADOW','PANDA','REVERSE PANDA','ROYAL','UNC','OG','INFRARED','OLIVE','COOL GREY','OREO','MOCHA','CEMENT','FIRE RED','PINE GREEN','UNIVERSITY BLUE','OBSIDIAN'];
-  const allMarcas=[...new Set([...MARCAS_BASE,...marcas])].sort();
-  const allModelos=[...new Set([...MODELOS_BASE,...modelos])].sort();
-  const allColorways=[...new Set([...COLORWAYS_BASE,...colorways])].sort();
-  comboSetData('cl-marca', allMarcas);   comboSetData('cl-rv-marca', allMarcas);  comboSetData('cl-inv-marca', allMarcas);
-  comboSetData('cl-modelo', allModelos);  comboSetData('cl-rv-modelo', allModelos); comboSetData('cl-inv-modelo', allModelos);
-  comboSetData('cl-colorway', allColorways);comboSetData('cl-rv-colorway', allColorways);comboSetData('cl-inv-colorway', allColorways);
-  comboSetData('cl-talla', TALLAS_ALL);  comboSetData('cl-rv-talla', TALLAS_ALL); comboSetData('cl-inv-talla', TALLAS_ALL);
-  comboSetData('cl-cs-marca', allMarcas);
-  comboSetData('cl-cs-modelo', allModelos);
-  comboSetData('cl-cs-colorway', allColorways);
-  comboSetData('cl-cs-talla', TALLAS_ALL);
+  const tallas=[...new Set(inventarioCache.map(p=>p.talla).filter(Boolean))].sort();
+  // Compra / Reserva / Costo — sugerencias desde inventario real
+  comboSetData('cl-marca', marcas);    comboSetData('cl-rv-marca', marcas);
+  comboSetData('cl-modelo', modelos);  comboSetData('cl-rv-modelo', modelos);
+  comboSetData('cl-colorway', colorways); comboSetData('cl-rv-colorway', colorways);
+  comboSetData('cl-talla', tallas);    comboSetData('cl-rv-talla', tallas);
+  comboSetData('cl-cs-marca', marcas);
+  comboSetData('cl-cs-modelo', modelos);
+  comboSetData('cl-cs-colorway', colorways);
+  comboSetData('cl-cs-talla', tallas);
   comboSetData('cl-cs-concepto', ['IMPORTACION','ENVIO','OTROS']);
+  // Inventario filtros — solo lo que existe en el inventario
+  comboSetData('cl-inv-marca', marcas);
+  comboSetData('cl-inv-modelo', modelos);
+  comboSetData('cl-inv-colorway', colorways);
+  comboSetData('cl-inv-talla', tallas);
+  // Opciones fijas
+  comboSetData('cl-inv-cat', ['ZAPATILLAS','ROPA','ACCESORIOS','OTROS']);
+  comboSetData('cl-inv-estado', ['DISPONIBLE','VENDIDO','PENDIENTE','CANCELADO']);
 }
 
 async function loadClientes(){
@@ -2358,11 +2365,9 @@ function set(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
 let sortCol=null,sortDir=1;
 
 function clearFiltros(){
-  ['inv-codigo','inv-marca','inv-modelo','inv-colorway','inv-talla'].forEach(id=>{
+  ['inv-codigo','inv-marca','inv-modelo','inv-colorway','inv-talla','inv-cat','inv-estado'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.value='';
   });
-  document.getElementById('inv-cat').value='';
-  document.getElementById('inv-estado').value='';
   sortCol=null; sortDir=1;
   document.querySelectorAll('[id^="sort-"]').forEach(el=>el.textContent='');
   renderInventario(inventarioCache);
