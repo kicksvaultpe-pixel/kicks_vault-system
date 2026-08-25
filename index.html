@@ -1966,44 +1966,62 @@ function renderOCTab(){
 }
 
 // ── TC GLOBAL ──
-const TC_KEY='kv-tc';
+// Guardado en tabla `configuracion` (clave='tipo_cambio') — requiere RLS desactivado
 let tcSaveTimer=null;
 function _applyTC(val){
   const cpTc=document.getElementById('cp-tc');
   if(cpTc){cpTc.value=val; calcSolesCredito();}
 }
+async function _saveTCDB(val){
+  // delete + insert para evitar problema de duplicados (no requiere UNIQUE en clave)
+  await db.from('configuracion').delete().eq('clave','tipo_cambio');
+  const{error}=await db.from('configuracion')
+    .insert({clave:'tipo_cambio', valor:String(val)});
+  if(error) throw error;
+}
 function saveTCGlobal(val){
   _applyTC(val);
   clearTimeout(tcSaveTimer);
-  tcSaveTimer=setTimeout(()=>{
+  tcSaveTimer=setTimeout(async()=>{
     if(!val||isNaN(parseFloat(val)))return;
-    localStorage.setItem(TC_KEY,String(val));
-    const btn=document.getElementById('tc-save-btn');
-    if(btn){btn.textContent='✓ Guardado';btn.classList.add('saved');
-      setTimeout(()=>{btn.textContent='Fijar TC';btn.classList.remove('saved');},1800);}
-  },600);
+    try{
+      await _saveTCDB(val);
+    }catch(e){
+      // Silencioso en auto-save — el botón explícito sí muestra error
+    }
+  },800);
 }
-function confirmarTC(){
+async function confirmarTC(){
   const val=document.getElementById('tc-global')?.value;
   if(!val||isNaN(parseFloat(val)))return;
   clearTimeout(tcSaveTimer);
-  localStorage.setItem(TC_KEY,String(val));
-  _applyTC(val);
   const btn=document.getElementById('tc-save-btn');
-  if(btn){btn.textContent='✓ Fijado';btn.classList.add('saved');
-    setTimeout(()=>{btn.textContent='Fijar TC';btn.classList.remove('saved');},2000);}
-  toast('TC fijado: S/. '+parseFloat(val).toFixed(3),'ok');
+  try{
+    await _saveTCDB(val);
+    _applyTC(val);
+    if(btn){btn.textContent='✓ Fijado';btn.classList.add('saved');
+      setTimeout(()=>{btn.textContent='Fijar TC';btn.classList.remove('saved');},2000);}
+    toast('TC fijado: S/. '+parseFloat(val).toFixed(3)+' — guardado en DB','ok');
+  }catch(e){
+    toast('Error guardando TC (verifica RLS en tabla configuracion): '+e.message,'err');
+  }
 }
-function loadTCGlobal(){
-  const val=localStorage.getItem(TC_KEY)||'3.70';
-  ['tc-global','cp-tc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=val;});
+async function loadTCGlobal(){
+  try{
+    const{data}=await db.from('configuracion')
+      .select('valor').eq('clave','tipo_cambio').limit(1);
+    const val=(data&&data[0]?.valor)||'3.70';
+    ['tc-global','cp-tc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=val;});
+  }catch{
+    // Fallback a valor por defecto si hay error de conexión
+    ['tc-global','cp-tc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='3.70';});
+  }
 }
 
 // ── INIT ──
 async function init(){
   setToday();
-  loadTCGlobal();
-  await Promise.all([loadInventario(), loadClientes(), loadOCs()]);
+  await Promise.all([loadTCGlobal(), loadInventario(), loadClientes(), loadOCs()]);
   initRowSel('inv-tbody');
   initRowSel('vt-tbody');
 }
