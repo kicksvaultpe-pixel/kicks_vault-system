@@ -1200,14 +1200,15 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         </div>
       </div>
 
-      <!-- OC como filtro -->
+      <!-- Filtros opcionales -->
       <div style="border-top:1px solid var(--border);margin-top:12px;padding-top:12px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <div class="card-label" style="margin:0">Filtrar por Orden de Compra <span style="color:var(--muted2);font-weight:400;font-size:10px">(opcional)</span></div>
+          <div class="card-label" style="margin:0">Filtros <span style="color:var(--muted2);font-weight:400;font-size:10px">(opcional)</span></div>
           <div id="cs-oc-badge" style="display:none;background:rgba(37,99,235,.1);border:1px solid rgba(37,99,235,.3);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;color:var(--accent)"></div>
         </div>
         <div class="form-grid g2">
           <div class="field">
+            <label>Orden de Compra</label>
             <div class="combo-wrap">
               <input type="text" id="cs-oc-select" placeholder="Sin filtro OC…" autocomplete="off"
                 oninput="comboFilter('cs-oc-select','cl-cs-oc-sel')"
@@ -1218,14 +1219,26 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
               <div class="combo-list" id="cl-cs-oc-sel"></div>
             </div>
           </div>
-          <div id="cs-oc-info" style="display:none" class="field">
-            <div style="background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;font-size:12px;display:flex;gap:14px;align-items:center;height:100%">
-              <span id="cs-oc-tipo" style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted2)"></span>
-              <span style="color:var(--muted)">·</span>
-              <span id="cs-oc-prods" style="color:var(--text)"></span>
-              <span style="color:var(--muted)">·</span>
-              <span id="cs-oc-monto" style="color:var(--accent);font-weight:700"></span>
+          <div class="field">
+            <label>Código de Producto</label>
+            <div class="combo-wrap">
+              <input type="text" id="cs-prod-select" placeholder="Sin filtro producto…" autocomplete="off"
+                oninput="comboFilter('cs-prod-select','cl-cs-prod')"
+                onfocus="comboOpen('cs-prod-select','cl-cs-prod')"
+                onblur="comboBlur('cl-cs-prod')"
+                onkeydown="comboKey(event,'cs-prod-select','cl-cs-prod')">
+              <span class="combo-arrow">▼</span>
+              <div class="combo-list" id="cl-cs-prod"></div>
             </div>
+          </div>
+        </div>
+        <div id="cs-oc-info" style="display:none;margin-top:8px">
+          <div style="background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;font-size:12px;display:flex;gap:14px;align-items:center">
+            <span id="cs-oc-tipo" style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted2)"></span>
+            <span style="color:var(--muted)">·</span>
+            <span id="cs-oc-prods" style="color:var(--text)"></span>
+            <span style="color:var(--muted)">·</span>
+            <span id="cs-oc-monto" style="color:var(--accent);font-weight:700"></span>
           </div>
         </div>
       </div>
@@ -2053,6 +2066,7 @@ function comboPick(inputId, listId, val) {
   if (inputId === 'rv-tipo') toggleReservaTipo();
   if (inputId === 'rv-producto') onPickRvProducto();
   if (inputId === 'cs-oc-select') csOCChange();
+  if (inputId === 'cs-prod-select') csProdChange();
   if (inputId === 'cs-concepto-global') csActualizarConceptos();
 }
 
@@ -2175,6 +2189,7 @@ function csOCChange(){
   }
   const oc=ocCache.find(o=>o.codigo===cod);
   if(!oc){ badge.style.display='none'; info.style.display='none'; return; }
+  document.getElementById('cs-prod-select').value='';
   // Badge
   badge.textContent=cod;
   badge.style.display='';
@@ -2186,6 +2201,17 @@ function csOCChange(){
   document.getElementById('cs-oc-monto').textContent=fmt(monto);
   info.style.display='';
   // Refrescar tabla con productos de esta OC
+  buscarProductoCosto();
+}
+
+function csProdChange(){
+  const raw=document.getElementById('cs-prod-select').value;
+  const cod=(raw.match(/(P-\d+)/)||[])[1]||'';
+  if(cod){
+    document.getElementById('cs-oc-select').value='';
+    document.getElementById('cs-oc-badge').style.display='none';
+    document.getElementById('cs-oc-info').style.display='none';
+  }
   buscarProductoCosto();
 }
 
@@ -2669,14 +2695,11 @@ function filterInventario(){
 function fillProductoSelects(){
   const disp=inventarioCache.filter(p=>p.estado==='DISPONIBLE');
   const label=p=>{const n=[p.marca,p.modelo,p.colorway].filter(Boolean).join(' ');return`${p.codigo_producto} · ${n} (${p.talla||'—'})`;};
-  // Venta: combobox (texto filtrable)
   comboSetData('cl-vt-prod', disp.map(label));
-  // Reserva: combobox (texto filtrable)
   comboSetData('cl-rv-prod', disp.map(label));
-  // Costo búsqueda: <select> con todos
-  const cs=document.getElementById('cs-producto');
-  if(cs) cs.innerHTML='<option value="">— Seleccionar —</option>'+
-    inventarioCache.map(p=>`<option value="${p.codigo_producto}">${label(p)}</option>`).join('');
+  // Costo: todos los no cancelados
+  const allCosto=inventarioCache.filter(p=>p.estado!=='CANCELADO');
+  comboSetData('cl-cs-prod', allCosto.map(label));
 }
 
 // ══════════════════════════════════════════
@@ -3344,15 +3367,17 @@ let costoLista=[];
 
 function buscarProductoCosto(){
   const q=(document.getElementById('cs-f-buscar')||{value:''}).value.toLowerCase().trim();
-  const codigo=q, marca=q, modelo=q, colorway=q, talla=q;
   const ocRaw=(document.getElementById('cs-oc-select')||{value:''}).value;
   const ocFiltro=(ocRaw.match(/^(OC-\d+)/)||[])[1]||'';
+  const prodRaw=(document.getElementById('cs-prod-select')||{value:''}).value;
+  const prodFiltro=(prodRaw.match(/(P-\d+)/)||[])[1]||'';
   const body=document.getElementById('cs-resultados-body');
   const yaAgregados=new Set(costoLista.map(x=>x.codigo));
   const res=inventarioCache.filter(p=>
     p.estado!=='CANCELADO'&&p.estado!=='VENDIDO'&&
     !yaAgregados.has(p.codigo_producto)&&
     (!ocFiltro||(p.orden_compra===ocFiltro))&&
+    (!prodFiltro||(p.codigo_producto===prodFiltro))&&
     (!q||(
       (p.codigo_producto||'').toLowerCase().includes(q)||
       (p.marca||'').toLowerCase().includes(q)||
@@ -3439,6 +3464,7 @@ function limpiarSeleccionCosto(){
 
   document.getElementById('cs-concepto-global').value='';
   const buscarEl=document.getElementById('cs-f-buscar');if(buscarEl)buscarEl.value='';
+  const prodEl=document.getElementById('cs-prod-select');if(prodEl)prodEl.value='';
   csRenderLista();
 }
 
