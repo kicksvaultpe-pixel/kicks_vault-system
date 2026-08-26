@@ -544,12 +544,10 @@ input[list] { cursor: text; }
   .table-wrap table, #vt-table { min-width: 800px !important; }
   /* cl-sel bubble en mobile */
   .cl-sel { flex-wrap: nowrap; }
-  /* Stat cards 2 columnas en mobile */
-  .stats-row { grid-template-columns: 1fr 1fr !important; }
-  /* Reducir texto en stat cards para que quepan en 2 columnas */
-  .sg-h { font-size: 8px !important; min-width: 0 !important; }
-  .sg-mn, .sg-mn-tot { font-size: 10px !important; min-width: 0 !important; }
-  .sg-mc, .sg-mc-tot { font-size: 9px !important; }
+  /* Stat cards: columna única para que el contenido no se trunque */
+  .stats-row { grid-template-columns: 1fr !important; }
+  /* Quitar min-width inline de los cols internos de stat cards */
+  .sg-h, .sg-mn, .sg-mn-tot { min-width: 0 !important; }
 }
 
 @media(max-width:400px){
@@ -2439,6 +2437,14 @@ function fillDataLists(){
   const elRvTipo=document.getElementById('rv-tipo');
   if(elRvTipo&&!elRvTipo.value) elRvTipo.value='📦 EN_STOCK';
   toggleReservaTipo();
+  // Suprimir autocomplete/autocorrect del browser en todos los combos
+  document.querySelectorAll('.combo-wrap input').forEach(el=>{
+    el.setAttribute('autocomplete','nope');
+    el.setAttribute('autocorrect','off');
+    el.setAttribute('autocapitalize','none');
+    el.setAttribute('spellcheck','false');
+    if(el.readOnly)el.setAttribute('inputmode','none');
+  });
 }
 
 let clMontoMap={};
@@ -2896,11 +2902,10 @@ function clSelect(ctx,id){
   const nombre=[c.nombre,c.apellido].filter(Boolean).join(' ');
   const inp=document.getElementById(`${ctx}-cl-input`);
   if(ctx==='vt'){
-    // Combo: solo limpiar el texto y cerrar el dropdown
-    if(inp)inp.value='';
+    const wrap=inp?.closest('.combo-wrap');
+    if(wrap)wrap.style.display='none';
     document.getElementById('cl-vt-cl')?.classList.remove('open');
   }else{
-    // Sistema viejo (rv): ocultar el input
     if(inp)inp.style.display='none';
     document.getElementById(`${ctx}-cl-drop`)?.classList.remove('open');
   }
@@ -2913,7 +2918,12 @@ function clClear(ctx){
   clSelectedId[ctx]=null;
   const inp=document.getElementById(`${ctx}-cl-input`);
   if(inp){
-    if(ctx!=='vt')inp.style.display=''; // rv: mostrar de nuevo
+    if(ctx==='vt'){
+      const wrap=inp.closest('.combo-wrap');
+      if(wrap)wrap.style.display=''; // restaurar combo-wrap
+    }else{
+      inp.style.display=''; // rv: mostrar de nuevo
+    }
     inp.value='';
   }
   document.getElementById(`${ctx}-cl-sel`)?.classList.remove('show');
@@ -3306,7 +3316,10 @@ async function registrarPago(){
   if(!monto){toast('Ingresa el monto','warn');return;}
   const btn=document.getElementById('btn-pago');setLoading(btn,true);
   try{
+    const{count:pgCount}=await db.from('pagos').select('*',{count:'exact',head:true});
+    const codigoPago='PG-'+String((pgCount||0)+1).padStart(4,'0');
     const{error}=await db.from('pagos').insert({
+      codigo_pago:codigoPago,
       concepto,monto_soles:-Math.abs(monto),
       categoria:noEmoji(document.getElementById('pg-cat').value),
       fecha:document.getElementById('pg-fecha').value
