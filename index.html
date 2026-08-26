@@ -2671,15 +2671,15 @@ function updateStats(mes='',vendidosMes=[],vendidosDespues=[]){
     // ── MENSUAL: estado al fin del mes ──
     const[y,m]=mes.split('-');
     const fechaFin=new Date(parseInt(y),parseInt(m),0).toISOString().substring(0,10);
-    // Un producto existía al fin del mes si fue comprado antes/ese mes
-    // Estaba disponible al fin si: DISPONIBLE ahora  O  vendido después del mes
-    const enStock=p=>p.fecha_compra&&p.fecha_compra<=fechaFin&&p.estado!=='CANCELADO';
-    const dispAtFin=p=>enStock(p)&&(p.estado==='DISPONIBLE'||vendDespSet.has(p.codigo_producto));
-    allZap=inventarioCache.filter(p=>enStock(p)&&p.categoria==='ZAPATILLAS');
-    allRopa=inventarioCache.filter(p=>enStock(p)&&p.categoria!=='ZAPATILLAS');
-    dispZap=allZap.filter(p=>dispAtFin(p)&&p.pago_estado!=='PENDIENTE');
-    dispRopa=allRopa.filter(p=>dispAtFin(p)&&p.pago_estado!=='PENDIENTE');
-    dispAll=inventarioCache.filter(p=>dispAtFin(p)&&p.pago_estado!=='PENDIENTE');
+    // Estaba en inventario al cierre del mes: comprado <= fechaFin, no cancelado,
+    // y no vendido durante o antes del mes (= DISPONIBLE ahora  O  vendido después del mes)
+    const atFin=p=>p.fecha_compra&&p.fecha_compra<=fechaFin&&p.estado!=='CANCELADO'&&
+      (p.estado==='DISPONIBLE'||vendDespSet.has(p.codigo_producto));
+    allZap=inventarioCache.filter(p=>atFin(p)&&p.categoria==='ZAPATILLAS');
+    allRopa=inventarioCache.filter(p=>atFin(p)&&p.categoria!=='ZAPATILLAS');
+    dispZap=allZap.filter(p=>p.pago_estado!=='PENDIENTE');
+    dispRopa=allRopa.filter(p=>p.pago_estado!=='PENDIENTE');
+    dispAll=inventarioCache.filter(p=>atFin(p)&&p.pago_estado!=='PENDIENTE');
     // Vendidos = vendidos DURANTE ese mes
     vendZap=inventarioCache.filter(p=>p.categoria==='ZAPATILLAS'&&vendMesSet.has(p.codigo_producto)).length;
     vendRopa=inventarioCache.filter(p=>p.categoria!=='ZAPATILLAS'&&vendMesSet.has(p.codigo_producto)).length;
