@@ -530,6 +530,22 @@ input[list] { cursor: text; }
 
   /* Modal full-width en mobile */
   .modal{max-width:calc(100vw - 24px)}
+  /* Fix iOS zoom on input focus */
+  input, select, textarea, .filter-select { font-size: 16px !important; }
+  /* Combo-wrap full width en mobile */
+  .table-toolbar .combo-wrap { min-width: 0 !important; flex: 1; }
+  .table-toolbar { flex-wrap: wrap; }
+  /* Form grid en mobile: 1 columna */
+  .form-grid.g2, .form-grid.g3 { grid-template-columns: 1fr !important; }
+  .form-grid .span2, .form-grid .span3 { grid-column: span 1 !important; }
+  /* Cards más compactas */
+  .card-label { font-size: 10px; }
+  /* Tabla min-width más chica para scroll */
+  .table-wrap table, #vt-table { min-width: 800px !important; }
+  /* cl-sel bubble en mobile */
+  .cl-sel { flex-wrap: wrap; gap: 4px; }
+  /* Stat cards 2 columnas en mobile */
+  .stats-row { grid-template-columns: 1fr 1fr !important; }
 }
 
 @media(max-width:400px){
@@ -537,6 +553,7 @@ input[list] { cursor: text; }
   .tab-icon svg{width:22px;height:22px}
   .tipo-btn{padding:6px 7px;font-size:10px}
   .card{padding:12px 10px}
+  .form-grid.g2, .form-grid.g3 { grid-template-columns: 1fr !important; }
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -573,13 +590,13 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
 .cl-si-new{padding:8px 12px;font-size:11px;font-weight:700;color:var(--accent);cursor:pointer;border-top:1px solid var(--border);display:flex;align-items:center;gap:5px;transition:background .1s;font-family:'Archivo'}
 .cl-si-new:hover{background:rgba(37,99,235,.05)}
 /* Selected badge */
-.cl-sel{display:none;align-items:center;gap:8px;background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.2);border-radius:9px;padding:9px 12px;margin-top:0}
+.cl-sel{display:none;align-items:center;gap:8px;background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.2);border-radius:10px;padding:8px 12px;margin-top:6px}
 .cl-sel.show{display:flex}
 .cl-sel-info{flex:1;min-width:0}
-.cl-sel-code{font-size:10px;font-weight:700;color:var(--accent);letter-spacing:.5px;font-family:'Archivo'}
-.cl-sel-name{font-size:12px;font-weight:600;color:var(--text);font-family:'Archivo';white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cl-sel-clear{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:18px;line-height:1;padding:0 2px;flex-shrink:0;transition:color .15s}
-.cl-sel-clear:hover{color:var(--neg)}
+.cl-sel-code{font-size:10px;font-weight:700;color:var(--accent);letter-spacing:.5px}
+.cl-sel-name{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cl-sel-clear{border:none;background:none;color:var(--muted2);font-size:18px;cursor:pointer;padding:0 4px;line-height:1;flex-shrink:0}
+.cl-sel-clear:hover{color:var(--red)}
 /* Profile panel */
 .cl-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:250;display:none;backdrop-filter:blur(2px)}
 .cl-backdrop.open{display:block}
@@ -1393,9 +1410,9 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <th>Colorway</th>
         <th>Categoría</th>
         <th onclick="sortTable('talla')" style="cursor:pointer">Talla <span id="sort-talla"></span></th>
-        <th onclick="sortTable('precio_compra_soles')" style="cursor:pointer">P. Compra <span id="sort-precio_compra_soles"></span></th>
-        <th>Costos</th>
-        <th onclick="sortTable('precio_final')" style="cursor:pointer">P. Final <span id="sort-precio_final"></span></th>
+        <th onclick="sortTable('precio_compra_soles')" style="cursor:pointer">Costo Prod. <span id="sort-precio_compra_soles"></span></th>
+        <th>Costo Adic.</th>
+        <th onclick="sortTable('precio_final')" style="cursor:pointer">Costo Final <span id="sort-precio_final"></span></th>
         <th onclick="sortTable('precio_venta_sugerido')" style="cursor:pointer">P. Venta <span id="sort-precio_venta_sugerido"></span></th>
         <th onclick="sortTable('margen')" style="cursor:pointer">Margen <span id="sort-margen"></span></th>
         <th>OC</th><th>Estado</th><th>Pago</th><th>Factura</th><th></th>
@@ -1437,8 +1454,9 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
 
   <!-- Toolbar -->
   <div class="table-toolbar">
-    <input type="month" id="vt-mes" class="filter-select" onchange="loadVentas()" style="min-width:140px">
-    <div class="combo-wrap" style="min-width:150px">
+    <input type="month" id="vt-mes" class="filter-select" onchange="loadVentas()" style="min-width:130px">
+    <button class="btn btn-ghost btn-sm" id="vt-btn-historico" onclick="vtToggleHistorico()" title="Ver todas las ventas">🕐</button>
+    <div class="combo-wrap" style="min-width:140px">
       <input type="text" id="vt-f-canal" placeholder="Canal…" autocomplete="off" readonly
         oninput="comboFilter('vt-f-canal','cl-vt-f-canal');loadVentas()"
         onfocus="comboOpen('vt-f-canal','cl-vt-f-canal')"
@@ -1447,25 +1465,31 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <span class="combo-arrow">▼</span>
       <div class="combo-list" id="cl-vt-f-canal"></div>
     </div>
+    <input type="text" id="vt-buscar" class="search-box" placeholder="Buscar código o producto…" oninput="renderVentas(filterVentasLocal())" style="min-width:180px">
+    <button class="btn btn-ghost btn-sm" onclick="vtLimpiarFiltros()" title="Limpiar filtros">× Limpiar</button>
     <div style="flex:1"></div>
     <button class="btn btn-ghost btn-sm" onclick="exportVentasCSV()">↓ Excel</button>
   </div>
 
   <!-- Tabla -->
   <div class="table-wrap">
-    <table id="vt-table" style="min-width:680px">
+    <table id="vt-table" style="min-width:1020px">
       <thead><tr>
-        <th style="width:80px">Fecha</th>
-        <th style="width:90px">Código</th>
+        <th style="width:75px">Fecha</th>
+        <th style="width:85px">Cód. Venta</th>
+        <th style="width:85px">Cód. Prod.</th>
         <th>Producto</th>
-        <th style="width:60px">Talla</th>
-        <th style="width:110px">Canal</th>
-        <th class="right" style="width:120px">Venta S/.</th>
-        <th class="right" style="width:120px">Ganancia</th>
-        <th class="right" style="width:70px">ROI</th>
+        <th style="width:55px">Talla</th>
+        <th style="width:85px">Cód. Cliente</th>
+        <th style="width:130px">Cliente</th>
+        <th style="width:100px">Canal</th>
+        <th class="right" style="width:100px">Costo Final</th>
+        <th class="right" style="width:100px">Venta S/.</th>
+        <th class="right" style="width:100px">Ganancia</th>
+        <th class="right" style="width:60px">ROI</th>
       </tr></thead>
       <tbody id="vt-tbody">
-        <tr class="loading-row"><td colspan="8"><div class="spinner"></div></td></tr>
+        <tr class="loading-row"><td colspan="12"><div class="spinner"></div></td></tr>
       </tbody>
     </table>
   </div>
@@ -1622,18 +1646,24 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   </div>
 
   <!-- Tabla movimientos -->
+  <!-- Buscador flujo -->
+  <div style="margin-bottom:10px">
+    <input type="text" id="fc-buscar" class="search-box" style="width:100%;max-width:400px"
+      placeholder="Buscar en flujo por código, descripción…"
+      oninput="renderFlujoTabla()">
+  </div>
   <div class="fc-tabla-wrap">
     <table class="fc-tabla">
       <thead><tr>
-        <th style="width:90px">Fecha</th>
-        <th style="width:110px">Acción</th>
-        <th style="width:90px">Código</th>
+        <th style="width:85px">Fecha</th>
+        <th style="width:100px">Acción</th>
+        <th style="width:85px">Cod. Op.</th>
+        <th style="width:85px">Cod. Ref.</th>
         <th>Descripción</th>
-        <th class="right" style="width:120px">Ingreso S/.</th>
-        <th class="right" style="width:120px">Egreso S/.</th>
-        <th class="right" style="width:130px">Pend. S/.</th>
-        <th class="right" style="width:110px">Pend. $</th>
-        <th style="width:120px">Información</th>
+        <th class="right" style="width:110px">Ingreso S/.</th>
+        <th class="right" style="width:110px">Egreso S/.</th>
+        <th class="right" style="width:110px">Pend. S/.</th>
+        <th class="right" style="width:100px">Pend. $</th>
       </tr></thead>
       <tbody id="fc-tabla-body">
         <tr><td colspan="9" style="text-align:center;padding:30px;color:var(--muted2)">Cargando...</td></tr>
@@ -1680,7 +1710,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
 
   <!-- Tabla -->
   <div class="table-wrap">
-    <table style="min-width:750px">
+    <table style="min-width:850px">
       <thead><tr>
         <th>Código</th>
         <th>Nombre</th>
@@ -1689,10 +1719,11 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <th>Talla</th>
         <th>Canal</th>
         <th>Tipo</th>
+        <th class="right">Monto Compra</th>
         <th></th>
       </tr></thead>
       <tbody id="cl-tbody">
-        <tr class="loading-row"><td colspan="8"><div class="spinner"></div></td></tr>
+        <tr class="loading-row"><td colspan="9"><div class="spinner"></div></td></tr>
       </tbody>
     </table>
   </div>
@@ -1915,7 +1946,17 @@ document.addEventListener('click', e => {
   const wrap = e.target.closest('.combo-wrap');
   if (!wrap) return;
   const input = wrap.querySelector('input');
-  if (input && document.activeElement !== input) input.focus();
+  const list = wrap.querySelector('.combo-list');
+  if (!input) return;
+  if (list && list.classList.contains('open')) {
+    list.classList.remove('open');
+    return;
+  }
+  if (document.activeElement !== input) {
+    input.focus();
+  } else {
+    comboOpen(input.id, list ? list.id : '');
+  }
 });
 
 // Close AC on outside click
@@ -1992,6 +2033,7 @@ function comboPick(inputId, listId, val) {
   if (inputId === 'rv-tipo') toggleReservaTipo();
   if (inputId === 'rv-producto') onPickRvProducto();
   if (inputId === 'cs-oc-select') csOCChange();
+  if (inputId === 'cs-concepto-global') csActualizarConceptos();
 }
 
 function comboKey(e, inputId, listId) {
@@ -2351,7 +2393,7 @@ function fillDataLists(){
   comboSetData('cl-cs-modelo', modelos);
   comboSetData('cl-cs-colorway', colorways);
   comboSetData('cl-cs-talla', tallas);
-  comboSetData('cl-cs-concepto', ['IMPORTACION','ENVIO','OTROS']);
+  comboSetData('cl-cs-concepto', ['📦 IMPORTACION','🚚 ENVIO','📋 OTROS']);
   // Inventario filtros — solo lo que existe en el inventario
   comboSetData('cl-inv-marca', marcas);
   comboSetData('cl-inv-modelo', modelos);
@@ -2384,12 +2426,18 @@ function fillDataLists(){
   toggleReservaTipo();
 }
 
+let clMontoMap={};
+
 async function loadClientes(){
   const{data}=await db.from('clientes').select('*').order('nombre');
   clientesCache=data||[];
-  // Calcular cuántos clientes tienen al menos una venta
-  const{data:vtIds}=await db.from('ventas').select('id_cliente').not('id_cliente','is',null);
-  const uniq=new Set((vtIds||[]).map(v=>v.id_cliente).filter(Boolean));
+  // Calcular ventas por cliente
+  const{data:vtData}=await db.from('ventas').select('id_cliente,precio_venta_soles').not('id_cliente','is',null);
+  const uniq=new Set((vtData||[]).map(v=>v.id_cliente).filter(Boolean));
+  clMontoMap={};
+  (vtData||[]).forEach(v=>{
+    if(v.id_cliente) clMontoMap[v.id_cliente]=(clMontoMap[v.id_cliente]||0)+parseFloat(v.precio_venta_soles||0);
+  });
   const elAct=document.getElementById('cl-stat-activos');
   if(elAct)elAct.textContent=uniq.size;
   renderClientes(clientesCache);
@@ -2638,13 +2686,14 @@ function renderClientes(data){
   if(elTotal)elTotal.textContent=total;
   if(elVip)elVip.textContent=vips;
   if(!data.length){
-    tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:44px 20px;color:var(--muted2)"><div style="font-size:28px;margin-bottom:8px;opacity:.4">👥</div>Sin clientes aún</td></tr>`;
+    tbody.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:44px 20px;color:var(--muted2)"><div style="font-size:28px;margin-bottom:8px;opacity:.4">👥</div>Sin clientes aún</td></tr>`;
     return;
   }
   tbody.innerHTML=data.map(c=>{
     const cod=clCodigo(c.id_cliente);
     const nombre=[c.nombre,c.apellido].filter(Boolean).join(' ')||'—';
     const ig=c.instagram?`<span style="color:var(--accent)">${c.instagram}</span>`:'—';
+    const monto=clMontoMap[c.id_cliente]||0;
     return`<tr onclick="abrirPerfil(${c.id_cliente})">
       <td><span class="td-code" style="color:var(--accent)">${cod}</span></td>
       <td class="td-main">${nombre}</td>
@@ -2653,6 +2702,7 @@ function renderClientes(data){
       <td class="td-unit">${c.talla_frecuente||'—'}</td>
       <td class="td-unit">${c.canal_preferido||'—'}</td>
       <td>${tipoBadgeHTML(c.tipo)}</td>
+      <td class="td-amt right" style="color:${monto>0?'var(--accent)':'var(--muted2)'}">${monto>0?fmt(monto):'—'}</td>
       <td><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();abrirModalCliente(${c.id_cliente})" style="padding:4px 10px">✏</button></td>
     </tr>`;
   }).join('');
@@ -3241,7 +3291,10 @@ async function registrarPago(){
   if(!monto){toast('Ingresa el monto','warn');return;}
   const btn=document.getElementById('btn-pago');setLoading(btn,true);
   try{
+    const cpRaw=await genCodigo('pago').catch(()=>null);
+    const codigoPago=cpRaw?(String(cpRaw).includes('-')?cpRaw:'PG-'+String(cpRaw).padStart(4,'0')):null;
     const{error}=await db.from('pagos').insert({
+      ...(codigoPago?{codigo_pago:codigoPago}:{}),
       concepto,monto_soles:-Math.abs(monto),
       categoria:noEmoji(document.getElementById('pg-cat').value),
       fecha:document.getElementById('pg-fecha').value
@@ -3305,7 +3358,7 @@ function csAgregarProducto(codigo){
 }
 
 function csActualizarConceptos(){
-  const global=document.getElementById('cs-concepto-global').value||'';
+  const global=noEmoji(document.getElementById('cs-concepto-global').value)||'';
   // Solo actualiza ítems que no han sido personalizados
   costoLista.forEach((item,i)=>{
     const el=document.getElementById('cs-concepto-'+i);
@@ -3682,16 +3735,29 @@ function renderFlujoTabla() {
     // Pendiente S/. o $ según moneda
     const pendS = esPend && !esUsdPend && egr>0 ? `<span class="td-pend">⏳ ${fmt(egr)}</span>` : '<span class="td-muted">—</span>';
     const pendU = esUsdPend ? `<span class="td-egr-usd">⏳ ${fmtUsdAmt(egrUsd)}</span>` : '<span class="td-muted">—</span>';
+    // Descripción estandarizada
+    const refProd=f.referencia_id?inventarioCache.find(p=>p.codigo_producto===f.referencia_id):null;
+    let desc='—';
+    if(refProd){
+      desc=[refProd.marca,refProd.modelo,refProd.colorway].filter(Boolean).join(' ');
+      if(refProd.talla) desc+=` · ${refProd.talla}`;
+    } else if(f.descripcion){
+      // Para pagos y otros sin producto, mostrar concepto/categoria sin prefijo genérico
+      const raw=(f.descripcion||'').replace(/^(venta|compra|costo|pago|reserva|cancelacion)[—\s-]*/i,'').trim();
+      desc=raw||f.categoria||f.tipo||'—';
+    }
+    // Cod. Operación (ej: V-0001 para ventas, o el id interno)
+    const codOp=f.codigo_operacion||'—';
     return `<tr class="${trClass}">
       <td class="td-fecha">${fmtFecha(f.fecha)}</td>
       <td><span class="fc-accion-badge fc-accion-${accion}">${accion}</span></td>
+      <td><span class="td-code">${codOp}</span></td>
       <td><span class="td-code">${f.referencia_id||'—'}</span></td>
-      <td class="td-desc">${[f.descripcion,f.talla].filter(Boolean).join(' ')|| '—'}</td>
+      <td class="td-desc">${desc}</td>
       <td class="right">${ingHtml}</td>
       <td class="right">${egrHtml}</td>
       <td class="right">${pendS}</td>
       <td class="right">${pendU}</td>
-      <td>${esPend?'<span class="badge badge-yellow">CRÉDITO</span>':`<span class="td-unit">${f.categoria||f.tipo||'—'}</span>`}</td>
     </tr>`;
   });
 
@@ -3704,17 +3770,23 @@ function renderFlujoTabla() {
     return `<tr class="row-pend">
       <td class="td-fecha">${fmtFecha(p.fecha_compra)}</td>
       <td><span class="fc-accion-badge fc-accion-PENDIENTE">PENDIENTE</span></td>
+      <td class="td-muted">—</td>
       <td><span class="td-code">${p.codigo_producto}</span></td>
       <td class="td-desc">${desc}</td>
       <td class="right">—</td>
       <td class="td-muted">—</td>
       <td class="right">${pendS}</td>
       <td class="right">${pendU}</td>
-      <td><span class="badge badge-yellow">CRÉDITO</span></td>
     </tr>`;
   });
 
-  body.innerHTML = [...rows, ...pendRows2].join('');
+  // Filtrar por buscador
+  const fcQ=(document.getElementById('fc-buscar')?.value||'').toLowerCase().trim();
+  const filterFlujo=row=>{
+    if(!fcQ) return true;
+    return row.toLowerCase().includes(fcQ);
+  };
+  body.innerHTML=[...rows.filter(filterFlujo),...pendRows2.filter(filterFlujo)].join('');
 }
 
 // ── GENERAR CODIGO ──
@@ -3737,19 +3809,21 @@ function toast(msg,type='ok'){
 // ── VENTAS ──
 let ventasCache=[];
 
+let vtHistorico=false;
+
 async function loadVentas(){
   const mesEl=document.getElementById('vt-mes');
-  if(!mesEl.value){
+  if(!vtHistorico && !mesEl.value){
     const now=new Date();
     mesEl.value=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
   }
-  const mes=mesEl.value;
+  const mes=vtHistorico?'':mesEl.value;
   const canal=noEmoji(document.getElementById('vt-f-canal').value);
   const tbody=document.getElementById('vt-tbody');
-  if(tbody)tbody.innerHTML='<tr class="loading-row"><td colspan="8"><div class="spinner"></div></td></tr>';
+  if(tbody)tbody.innerHTML='<tr class="loading-row"><td colspan="12"><div class="spinner"></div></td></tr>';
 
   let q=db.from('ventas')
-    .select('*,inventario(marca,modelo,colorway,talla,precio_final)')
+    .select('*,inventario(marca,modelo,colorway,talla,precio_final),clientes(nombre,apellido)')
     .order('fecha',{ascending:false})
     .order('codigo_venta',{ascending:false});
 
@@ -3763,8 +3837,41 @@ async function loadVentas(){
   const{data,error}=await q;
   if(error){toast('Error: '+error.message,'err');return;}
   ventasCache=data||[];
-  renderVentas(ventasCache);
+  renderVentas(filterVentasLocal());
   updateVentasStats(ventasCache,mes);
+}
+
+function vtToggleHistorico(){
+  vtHistorico=!vtHistorico;
+  const btn=document.getElementById('vt-btn-historico');
+  if(btn){btn.style.color=vtHistorico?'var(--accent)':'';btn.title=vtHistorico?'Volviendo al mes actual':'Ver todas las ventas';}
+  const mesEl=document.getElementById('vt-mes');
+  if(vtHistorico && mesEl) mesEl.value='';
+  loadVentas();
+}
+
+function vtLimpiarFiltros(){
+  vtHistorico=false;
+  const now=new Date();
+  const mesEl=document.getElementById('vt-mes');
+  if(mesEl) mesEl.value=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  const canalEl=document.getElementById('vt-f-canal');
+  if(canalEl) canalEl.value='';
+  const buscarEl=document.getElementById('vt-buscar');
+  if(buscarEl) buscarEl.value='';
+  const btn=document.getElementById('vt-btn-historico');
+  if(btn){btn.style.color='';btn.title='Ver todas las ventas';}
+  loadVentas();
+}
+
+function filterVentasLocal(){
+  const q=(document.getElementById('vt-buscar')?.value||'').toLowerCase().trim();
+  if(!q) return ventasCache;
+  return ventasCache.filter(v=>{
+    const inv=v.inventario||{};
+    const nombre=[inv.marca,inv.modelo,inv.colorway].filter(Boolean).join(' ').toLowerCase();
+    return (v.codigo_producto||'').toLowerCase().includes(q)||nombre.includes(q)||(v.codigo_venta||'').toLowerCase().includes(q);
+  });
 }
 
 function renderVentas(rows){
@@ -3773,7 +3880,7 @@ function renderVentas(rows){
   const hint=document.getElementById('vt-hint');
   if(!tbody)return;
   if(!rows.length){
-    tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted2)">Sin ventas en este período</td></tr>';
+    tbody.innerHTML='<tr><td colspan="12" style="text-align:center;padding:40px;color:var(--muted2)">Sin ventas en este período</td></tr>';
     if(hint)hint.style.display='none';
     return;
   }
@@ -3781,18 +3888,26 @@ function renderVentas(rows){
   const cb={'INSTAGRAM':'badge-purple','WHATSAPP':'badge-green','PRESENCIAL':'badge-accent','OTRO':'badge-muted'};
   tbody.innerHTML=rows.map(v=>{
     const inv=v.inventario||{};
+    const cl=v.clientes||{};
     const nombre=[inv.marca,inv.modelo,inv.colorway].filter(Boolean).join(' ')||'—';
     const fecha=v.fecha?v.fecha.substring(2).replace(/-/g,'/'):' —';
     const gan=parseFloat(v.ganancia||0);
     const roi=parseFloat(v.rentabilidad||0);
     const gc=gan>=0?'var(--green)':'var(--red)';
     const badge=cb[v.canal]||'badge-muted';
+    const costoFinal=parseFloat(inv.precio_final||0);
+    const clId=v.id_cliente?'C-'+String(v.id_cliente).padStart(3,'0'):'—';
+    const clNombre=[cl.nombre,cl.apellido].filter(Boolean).join(' ')||'—';
     return`<tr>
       <td class="td-code">${fecha}</td>
       <td class="td-code" style="color:var(--accent)">${v.codigo_venta}</td>
+      <td class="td-code">${v.codigo_producto||'—'}</td>
       <td class="td-main td-trunc">${nombre}</td>
       <td class="td-unit">${inv.talla||'—'}</td>
+      <td class="td-code">${v.id_cliente?`<span style="color:var(--accent)">${clId}</span>`:'—'}</td>
+      <td class="td-unit">${clNombre}</td>
       <td><span class="badge ${badge}">${v.canal||'—'}</span></td>
+      <td class="td-amt right" style="color:var(--muted2)">${costoFinal>0?fmt(costoFinal):'—'}</td>
       <td class="td-amt right" style="color:var(--accent)">${fmt(v.precio_venta_soles)}</td>
       <td class="td-amt right" style="color:${gc}">${gan>=0?'+':''}${fmt(gan)}</td>
       <td class="right"><span class="badge ${roi>=0?'badge-green':'badge-red'}">${(roi*100).toFixed(0)}%</span></td>
