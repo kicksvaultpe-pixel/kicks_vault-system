@@ -1001,8 +1001,8 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
           </div>
           <div class="cl-sel" id="vt-cl-sel" style="margin-top:6px">
             <div class="cl-sel-info">
-              <div class="cl-sel-code" id="vt-cl-sel-code"></div>
               <div class="cl-sel-name" id="vt-cl-sel-name"></div>
+              <div class="cl-sel-code" id="vt-cl-sel-code"></div>
             </div>
             <button class="cl-sel-clear" onclick="clClear('vt')" title="Quitar cliente">×</button>
           </div>
@@ -2685,7 +2685,8 @@ function clCodigo(id){ return 'C-'+String(id).padStart(3,'0'); }
 function fillClienteCombos(){
   const items=clientesCache.map(c=>{
     const nombre=[c.nombre,c.apellido].filter(Boolean).join(' ');
-    return `${clCodigo(c.id_cliente)} · ${nombre}${c.talla_frecuente?' · '+c.talla_frecuente:''}`;
+    const extra=c.talla_frecuente?' · T:'+c.talla_frecuente:'';
+    return `${nombre}${extra} — ${clCodigo(c.id_cliente)}`;
   });
   comboSetData('cl-vt-cl', items);
 }
@@ -2865,7 +2866,7 @@ async function guardarCliente(){
 // ── Búsqueda de cliente en formularios ──
 function onPickVtCliente(){
   const raw=document.getElementById('vt-cl-input').value;
-  const code=(raw.match(/^(C-\d+)/)||[])[1]||'';
+  const code=(raw.match(/(C-\d+)/)||[])[1]||'';
   if(!code)return;
   const id=parseInt(code.replace('C-',''));
   clSelect('vt',id);
@@ -3316,17 +3317,14 @@ async function registrarPago(){
   if(!monto){toast('Ingresa el monto','warn');return;}
   const btn=document.getElementById('btn-pago');setLoading(btn,true);
   try{
-    const{count:pgCount}=await db.from('pagos').select('*',{count:'exact',head:true});
-    const codigoPago='PG-'+String((pgCount||0)+1).padStart(4,'0');
-    const{error}=await db.from('pagos').insert({
-      codigo_pago:codigoPago,
+    const{data:pgData,error}=await db.from('pagos').insert({
       concepto,monto_soles:-Math.abs(monto),
       categoria:noEmoji(document.getElementById('pg-cat').value),
       fecha:document.getElementById('pg-fecha').value
-    });
+    }).select('id').single();
     if(error)throw error;
-    // flujo_caja lo maneja trigger after_pago en Supabase
-    toast('✓ Pago registrado','ok');
+    const codPg=pgData?.id?'PG-'+String(pgData.id).padStart(4,'0'):'';
+    toast('✓ Pago registrado'+(codPg?' · '+codPg:''),'ok');
     ['pg-concepto','pg-monto'].forEach(id=>document.getElementById(id).value='');
   }catch(e){toast('Error: '+e.message,'err');}
   finally{setLoading(btn,false,'✓ Registrar Pago');}
