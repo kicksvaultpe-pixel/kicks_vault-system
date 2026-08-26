@@ -198,6 +198,29 @@ tbody tr.row-dim{opacity:.45}
 .sc-grid.g2{grid-template-columns:1fr auto;column-gap:16px}
 .sc-grid.g3{grid-template-columns:1fr auto auto;column-gap:14px}
 .sc-grid.g4{grid-template-columns:1.2fr auto auto auto;column-gap:12px}
+/* Tab Ingresos */
+.st-big-num{font-family:"Archivo Black";font-size:26px;line-height:1.1;margin:8px 0 4px;font-variant-numeric:tabular-nums}
+.st-big-num.accent{color:var(--accent)}.st-big-num.green{color:var(--green)}.st-big-num.red{color:var(--red)}
+.sc-venta.stat-card::before{opacity:.3}.sc-venta.stat-card:hover::before{opacity:.55}
+.sc-venta .sc-chip::before{background:var(--accent)}
+.sc-ganancia.stat-card::before{opacity:.3;background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.sc-ganancia.stat-card:hover::before{opacity:.55;background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.sc-ganancia .sc-chip::before{background:var(--green)}
+.sc-utilidad .sc-chip::before{background:var(--muted2)}
+.vt-meta-bar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:20px;padding:10px 18px;background:var(--card);border:1px solid var(--border);border-radius:12px}
+.vt-meta-item{display:flex;align-items:center;gap:8px}
+.vt-meta-lbl{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2)}
+.vt-meta-val{font-family:"Archivo Black";font-size:14px;color:var(--text);font-variant-numeric:tabular-nums}
+.vt-meta-val.red{color:var(--red)}
+.vt-meta-sep{color:var(--border2);font-size:18px;line-height:1;user-select:none}
+.vt-resultado{background:var(--card);border:1px solid var(--border2);border-radius:14px;padding:20px 24px;margin-top:20px;max-width:420px;margin-left:auto}
+.vt-res-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0}
+.vt-res-lbl{font-size:12px;color:var(--muted2);font-family:'Archivo',sans-serif}
+.vt-res-val{font-family:"Archivo Black";font-size:15px;font-variant-numeric:tabular-nums}
+.vt-res-val.green{color:var(--green)}.vt-res-val.red{color:var(--red)}
+.vt-res-lbl-tot{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2)}
+.vt-res-val-tot{font-family:"Archivo Black";font-size:22px;font-variant-numeric:tabular-nums}
+@media(max-width:768px){.vt-resultado{max-width:100%;margin-left:0}}
 .stat-val{font-family:"Archivo Black";font-size:20px;margin-top:4px;line-height:1.1}
 .stat-sub{font-size:10px;color:var(--muted2);margin-top:2px}
 .page-hd{margin-bottom:20px}
@@ -1469,8 +1492,8 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
 <!-- Placeholders -->
 <div id="view-ventas" class="view">
   <div class="page-hd">
-    <div class="page-title"><div class="dot"></div> Ventas</div>
-    <div class="page-sub">Historial y métricas de ventas registradas</div>
+    <div class="page-title"><div class="dot"></div> Ingresos</div>
+    <div class="page-sub">Ventas del mes, pagos del negocio y utilidad neta</div>
   </div>
 
   <!-- Navegación de mes -->
@@ -1480,31 +1503,48 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <div class="fc-mes-label" id="vt-mes-label" style="font-size:16px">—</div>
       <button class="fc-nav-btn" onclick="vtMesSiguiente()">›</button>
     </div>
-    <button class="btn btn-ghost btn-sm" id="vt-btn-historico" onclick="vtToggleHistorico()" title="Ver todas las ventas" style="height:34px">🕐 Historia</button>
+    <button class="btn btn-ghost btn-sm" id="vt-btn-historico" onclick="vtToggleHistorico()" title="Ver todo el historial" style="height:34px">🕐 Historia</button>
   </div>
 
-  <!-- Stats -->
-  <div id="vt-stats-row" class="stats-row" style="grid-template-columns:repeat(4,1fr)">
-    <div class="stat-card">
-      <div class="stat-label">Ventas</div>
-      <div class="stat-val" id="vt-n">—</div>
+  <!-- Fila 1: 3 cards principales -->
+  <div class="stats-row stats3">
+    <div class="stat-card sc-venta">
+      <div class="sc-chip">Precio de Venta</div>
+      <div class="st-big-num accent" id="vt-rev">—</div>
       <div class="stat-sub" id="vt-sub-mes"></div>
     </div>
-    <div class="stat-card">
-      <div class="stat-label">Ingresos S/.</div>
-      <div class="stat-val" id="vt-rev">—</div>
+    <div class="stat-card sc-ganancia">
+      <div class="sc-chip">Ganancia Bruta</div>
+      <div class="st-big-num green" id="vt-gan">—</div>
+      <div class="stat-sub" id="vt-margen">—</div>
     </div>
-    <div class="stat-card">
-      <div class="stat-label">Ganancia bruta</div>
-      <div class="stat-val" style="color:var(--green)" id="vt-gan">—</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Margen promedio</div>
-      <div class="stat-val" style="color:var(--accent)" id="vt-margen">—</div>
+    <div class="stat-card sc-utilidad">
+      <div class="sc-chip">Utilidad Neta</div>
+      <div class="st-big-num" id="vt-utilidad">—</div>
+      <div class="stat-sub">ganancia − pagos</div>
     </div>
   </div>
 
-  <!-- Toolbar -->
+  <!-- Fila 2: desglose compacto -->
+  <div class="vt-meta-bar">
+    <div class="vt-meta-item">
+      <span class="vt-meta-lbl">Precio Compra</span>
+      <span class="vt-meta-val" id="vt-costo">—</span>
+    </div>
+    <span class="vt-meta-sep">·</span>
+    <div class="vt-meta-item">
+      <span class="vt-meta-lbl">Pagos del negocio</span>
+      <span class="vt-meta-val red" id="vt-pagos-stat">—</span>
+    </div>
+    <span class="vt-meta-sep">·</span>
+    <div class="vt-meta-item">
+      <span class="vt-meta-lbl">N° Ventas</span>
+      <span class="vt-meta-val" id="vt-n">—</span>
+    </div>
+  </div>
+
+  <!-- SECCIÓN VENTAS -->
+  <div class="card-label" style="margin-bottom:12px">Ventas</div>
   <div class="table-toolbar">
     <input type="text" id="vt-buscar" class="search-box" placeholder="Buscar código o producto…" oninput="renderVentas(filterVentasLocal())" style="min-width:180px">
     <div class="combo-wrap" style="min-width:140px">
@@ -1520,8 +1560,6 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
     <div style="flex:1"></div>
     <button class="btn btn-ghost btn-sm" onclick="exportVentasCSV()">↓ Excel</button>
   </div>
-
-  <!-- Tabla -->
   <div class="table-wrap">
     <table id="vt-table" style="min-width:1020px">
       <thead><tr>
@@ -1545,6 +1583,52 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   </div>
   <div id="vt-hint" style="display:none;font-size:10px;color:var(--muted2);margin-top:8px;text-align:center;letter-spacing:.3px">
     Click para seleccionar · Ctrl+C para copiar · Shift+click para rango
+  </div>
+
+  <!-- SECCIÓN PAGOS DEL NEGOCIO -->
+  <div class="card-label" style="margin-top:28px;margin-bottom:12px">Pagos del Negocio</div>
+  <div class="table-toolbar">
+    <input type="text" id="pg-buscar" class="search-box" placeholder="Buscar concepto…" oninput="renderPagos(filterPagosLocal())" style="min-width:180px">
+    <div class="combo-wrap" style="min-width:160px">
+      <input type="text" id="pg-f-cat" placeholder="Categoría…" autocomplete="off" readonly
+        oninput="comboFilter('pg-f-cat','cl-pg-f-cat');renderPagos(filterPagosLocal())"
+        onfocus="comboOpen('pg-f-cat','cl-pg-f-cat')"
+        onblur="comboBlur('cl-pg-f-cat')"
+        onkeydown="comboKey(event,'pg-f-cat','cl-pg-f-cat')">
+      <span class="combo-arrow">▼</span>
+      <div class="combo-list" id="cl-pg-f-cat"></div>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="pgLimpiarFiltros()">× Limpiar</button>
+  </div>
+  <div class="table-wrap">
+    <table id="pg-table" style="min-width:580px">
+      <thead><tr>
+        <th style="width:80px">Fecha</th>
+        <th>Concepto</th>
+        <th style="width:140px">Categoría</th>
+        <th class="right" style="width:120px">Monto S/.</th>
+      </tr></thead>
+      <tbody id="pg-tbody">
+        <tr class="loading-row"><td colspan="4"><div class="spinner"></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- RESULTADO FINAL -->
+  <div class="vt-resultado">
+    <div class="vt-res-row">
+      <span class="vt-res-lbl">Ganancia de Ventas</span>
+      <span class="vt-res-val green" id="vt-res-gan">—</span>
+    </div>
+    <div class="vt-res-row">
+      <span class="vt-res-lbl">− Pagos del Negocio</span>
+      <span class="vt-res-val red" id="vt-res-pag">—</span>
+    </div>
+    <div class="sg-divider" style="margin:8px 0"></div>
+    <div class="vt-res-row">
+      <span class="vt-res-lbl-tot">Utilidad Neta</span>
+      <span class="vt-res-val-tot" id="vt-res-util">—</span>
+    </div>
   </div>
 </div>
 <div id="view-flujo" class="view">
@@ -4025,8 +4109,9 @@ function toast(msg,type='ok'){
   clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.className='',3500);
 }
 
-// ── VENTAS ──
+// ── VENTAS / INGRESOS ──
 let ventasCache=[];
+let pagosCache=[];
 
 let vtHistorico=false;
 let vtMesActual='';
@@ -4064,24 +4149,34 @@ async function loadVentas(){
   const canal=noEmoji(document.getElementById('vt-f-canal').value);
   const tbody=document.getElementById('vt-tbody');
   if(tbody)tbody.innerHTML='<tr class="loading-row"><td colspan="12"><div class="spinner"></div></td></tr>';
+  const pgBody=document.getElementById('pg-tbody');
+  if(pgBody)pgBody.innerHTML='<tr class="loading-row"><td colspan="4"><div class="spinner"></div></td></tr>';
 
   let q=db.from('ventas')
     .select('*,inventario(marca,modelo,colorway,talla,precio_final),clientes(nombre,apellido)')
     .order('fecha',{ascending:false})
     .order('codigo_venta',{ascending:false});
+  let pq=db.from('pagos').select('*').order('fecha',{ascending:false});
 
   if(mes){
     const[y,m]=mes.split('-');
     const ld=new Date(parseInt(y),parseInt(m),0).getDate();
-    q=q.gte('fecha',`${y}-${m}-01`).lte('fecha',`${y}-${m}-${String(ld).padStart(2,'0')}`);
+    const ini=`${y}-${m}-01`;
+    const fin=`${y}-${m}-${String(ld).padStart(2,'0')}`;
+    q=q.gte('fecha',ini).lte('fecha',fin);
+    pq=pq.gte('fecha',ini).lte('fecha',fin);
   }
   if(canal)q=q.eq('canal',canal);
 
-  const{data,error}=await q;
+  const[{data,error},{data:pgData}]=await Promise.all([q,pq]);
   if(error){toast('Error: '+error.message,'err');return;}
   ventasCache=data||[];
+  pagosCache=pgData||[];
+
   renderVentas(filterVentasLocal());
-  updateVentasStats(ventasCache,mes);
+  renderPagos(filterPagosLocal());
+  updateVentasStats(ventasCache,pagosCache,mes);
+  fillPagoCatCombo();
 }
 
 function vtToggleHistorico(){
@@ -4149,15 +4244,81 @@ function renderVentas(rows){
   }).join('');
 }
 
-function updateVentasStats(rows,mes){
+function updateVentasStats(rows,pagos,mes){
   const n=rows.length;
   const rev=rows.reduce((s,v)=>s+parseFloat(v.precio_venta_soles||0),0);
   const gan=rows.reduce((s,v)=>s+parseFloat(v.ganancia||0),0);
   const avgRoi=n>0?rows.reduce((s,v)=>s+parseFloat(v.rentabilidad||0),0)/n:0;
-  const lbl=mes?new Date(mes+'-15').toLocaleDateString('es-PE',{month:'long',year:'numeric'}):'';
+  const costo=rev-gan;
+  const pagosTotal=(pagos||[]).reduce((s,p)=>s+Math.abs(parseFloat(p.monto_soles||0)),0);
+  const utilidad=gan-pagosTotal;
+  const lbl=mes?new Date(mes+'-15').toLocaleDateString('es-PE',{month:'long',year:'numeric'}):'Historia';
   const s=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val;};
-  s('vt-n',n);s('vt-sub-mes',lbl);s('vt-rev',fmt(rev));
-  s('vt-gan',fmt(gan));s('vt-margen',(avgRoi*100).toFixed(0)+'%');
+  // Fila 1
+  s('vt-rev',fmt(rev));
+  s('vt-sub-mes',lbl);
+  s('vt-gan',fmt(gan));
+  s('vt-margen',(avgRoi*100).toFixed(0)+'% margen promedio');
+  const utilEl=document.getElementById('vt-utilidad');
+  if(utilEl){
+    utilEl.textContent=(utilidad>=0?'+ ':'-')+fmt(Math.abs(utilidad));
+    utilEl.className='st-big-num '+(utilidad>=0?'green':'red');
+  }
+  // Fila 2 meta bar
+  s('vt-costo',fmt(costo));
+  s('vt-pagos-stat',fmt(pagosTotal));
+  s('vt-n',n+' ud'+(n!==1?'s':''));
+  // Resultado final
+  s('vt-res-gan',fmt(gan));
+  s('vt-res-pag',fmt(pagosTotal));
+  const resEl=document.getElementById('vt-res-util');
+  if(resEl){
+    resEl.textContent=(utilidad>=0?'+ ':'-')+fmt(Math.abs(utilidad));
+    resEl.style.color=utilidad>=0?'var(--green)':'var(--red)';
+  }
+}
+
+function renderPagos(rows){
+  const tbody=document.getElementById('pg-tbody');
+  if(!tbody)return;
+  if(!rows.length){
+    tbody.innerHTML='<tr><td colspan="4" style="text-align:center;padding:32px;color:var(--muted2)">Sin pagos en este período</td></tr>';
+    return;
+  }
+  const catBadge={'OPERATIVO':'badge-muted','MARKETING':'badge-purple','PERSONAL':'badge-accent','IMPORTACION':'badge-accent','PAGO':'badge-muted'};
+  tbody.innerHTML=rows.map(p=>{
+    const monto=Math.abs(parseFloat(p.monto_soles||0));
+    const cat=(p.categoria||'—').toUpperCase();
+    const badge=catBadge[cat]||'badge-muted';
+    const fecha=p.fecha?p.fecha.substring(2).replace(/-/g,'/'):'—';
+    return`<tr>
+      <td class="td-code">${fecha}</td>
+      <td class="td-main">${p.concepto||'—'}</td>
+      <td><span class="badge ${badge}">${cat}</span></td>
+      <td class="td-amt right" style="color:var(--red)">− ${fmt(monto)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function filterPagosLocal(){
+  const q=(document.getElementById('pg-buscar')?.value||'').toLowerCase().trim();
+  const cat=noEmoji(document.getElementById('pg-f-cat')?.value||'').trim().toUpperCase();
+  return pagosCache.filter(p=>{
+    if(cat&&(p.categoria||'').toUpperCase()!==cat)return false;
+    if(q&&!(p.concepto||'').toLowerCase().includes(q))return false;
+    return true;
+  });
+}
+
+function pgLimpiarFiltros(){
+  const b=document.getElementById('pg-buscar');if(b)b.value='';
+  const c=document.getElementById('pg-f-cat');if(c)c.value='';
+  renderPagos(filterPagosLocal());
+}
+
+function fillPagoCatCombo(){
+  const cats=[...new Set(pagosCache.map(p=>p.categoria).filter(Boolean))].sort();
+  comboSetData('cl-pg-f-cat',cats);
 }
 
 // ── SELECCIÓN DE FILAS + CTRL+C ──
