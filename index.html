@@ -1648,12 +1648,18 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   </div>
 
   <!-- Tabla movimientos -->
-  <!-- Buscador flujo -->
-  <div style="margin-bottom:10px;display:flex;gap:8px;align-items:center">
-    <input type="text" id="fc-buscar" class="search-box" style="flex:1;max-width:400px"
-      placeholder="Buscar en flujo por código, descripción…"
-      oninput="renderFlujoTabla()">
-    <button onclick="document.getElementById('fc-buscar').value='';renderFlujoTabla()" style="flex-shrink:0;padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--muted2);font-size:11px;cursor:pointer;white-space:nowrap;font-family:inherit" title="Limpiar búsqueda">× Limpiar</button>
+  <div class="table-toolbar" style="margin-bottom:10px">
+    <input type="text" id="fc-buscar" class="search-box" style="flex:1;min-width:160px"
+      placeholder="Buscar código, descripción…" oninput="renderFlujoTabla()">
+    <div class="combo-wrap" style="min-width:140px">
+      <input type="text" id="fc-accion" placeholder="Acción…" autocomplete="nope" readonly
+        onfocus="comboOpen('fc-accion','cl-fc-accion')"
+        onblur="comboBlurStrict('fc-accion','cl-fc-accion')"
+        onkeydown="comboKey(event,'fc-accion','cl-fc-accion')">
+      <span class="combo-arrow">▼</span>
+      <div class="combo-list" id="cl-fc-accion"></div>
+    </div>
+    <button onclick="document.getElementById('fc-buscar').value='';document.getElementById('fc-accion').value='';renderFlujoTabla()" style="flex-shrink:0;padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--muted2);font-size:11px;cursor:pointer;white-space:nowrap;font-family:inherit">× Limpiar</button>
   </div>
   <div class="fc-tabla-wrap">
     <table class="fc-tabla">
@@ -2042,6 +2048,7 @@ function comboPick(inputId, listId, val) {
   if (inputId === 'vt-f-canal') loadVentas();
   if (inputId === 'clf-tipo') filterClientes();
   if (inputId === 'oc-f-estado' || inputId === 'oc-f-tipo') renderOCTab();
+  if (inputId === 'fc-accion') renderFlujoTabla();
   if (inputId === 'cp-moneda') toggleMoneda();
   if (inputId === 'rv-tipo') toggleReservaTipo();
   if (inputId === 'rv-producto') onPickRvProducto();
@@ -2420,6 +2427,7 @@ function fillDataLists(){
   comboSetData('cl-clf-tipo', ['— Todos —','👤 REGULAR','⭐ VIP','📦 MAYORISTA']);
   comboSetData('cl-oc-f-estado', ['— Todos —','⏳ PENDIENTE','✅ COMPLETADA','❌ CANCELADA']);
   comboSetData('cl-oc-f-tipo', ['— Todos —','✈️ IMPORTACION','🏪 LOCAL']);
+  comboSetData('cl-fc-accion', ['— Todos —','VENTA','COMPRA','COSTO','PAGO','PENDIENTE','RESERVA','CANCELACION']);
   // Opciones fijas — formularios registro
   comboSetData('cl-cp-cat', ['👟 ZAPATILLAS','👕 ROPA','🧢 ACCESORIOS','📦 OTROS']);
   comboSetData('cl-cp-moneda', ['🇺🇸 USD','🇵🇪 SOLES']);
@@ -3727,16 +3735,21 @@ function renderFlujoTabla() {
   const dFin = new Date(y, m, 0);
   const fechaFinStr = dFin.toISOString().substring(0,10);
 
+  // Filtro por acción
+  const fcAccion=(document.getElementById('fc-accion')?.value||'').trim();
+  const accionActiva=fcAccion&&!fcAccion.startsWith('— ')?fcAccion:'';
+  const flujoFiltrado=accionActiva?flujoCache.filter(f=>(f.categoria||f.tipo||'').toUpperCase()===accionActiva):flujoCache;
+
   // Créditos del mes del inventario que NO tienen fila en flujo_caja todavía (antiguos)
   const codigosEnFlujo = new Set(flujoCache.filter(f=>(f.tipo||'').toUpperCase()==='PENDIENTE').map(f=>f.referencia_id));
-  const pendRows = inventarioCache.filter(p =>
+  const pendRows = (!accionActiva||accionActiva==='PENDIENTE') ? inventarioCache.filter(p =>
     p.pago_estado === 'PENDIENTE' &&
     p.fecha_compra >= fechaInicio &&
     p.fecha_compra <= fechaFinStr &&
     !codigosEnFlujo.has(p.codigo_producto)
-  );
+  ) : [];
 
-  if(!flujoCache.length && !pendRows.length) {
+  if(!flujoFiltrado.length && !pendRows.length) {
     body.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--muted2)">Sin movimientos este mes</td></tr>';
     return;
   }
@@ -3751,7 +3764,7 @@ function renderFlujoTabla() {
   const fmtUsdAmt = v => parseFloat(v||0) > 0 ? '$ '+parseFloat(v).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
 
   // Filas flujo_caja
-  let rows = flujoCache.map(f => {
+  let rows = flujoFiltrado.map(f => {
     const ing   = parseFloat(f.ingreso_soles||0);
     const egr   = parseFloat(f.egreso_soles||0);
     const fcCat = (f.categoria||f.tipo||'').toUpperCase();
