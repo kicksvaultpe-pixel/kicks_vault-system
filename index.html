@@ -1420,7 +1420,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <div class="combo-list" id="cl-inv-estado"></div>
     </div>
     <div style="flex:1"></div>
-    <button class="btn btn-ghost btn-sm" onclick="clearFiltros()">✕ Limpiar</button>
+    <button class="btn btn-ghost btn-sm" onclick="clearFiltros()">× Limpiar</button>
     <button class="btn btn-ghost btn-sm" onclick="loadInventario()" title="Recargar">↺</button>
     <button class="btn btn-ghost btn-sm" onclick="exportInventarioCSV()" title="Exportar a Excel">↓ Excel</button>
   </div>
@@ -1456,6 +1456,16 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
     <div class="page-sub">Historial y métricas de ventas registradas</div>
   </div>
 
+  <!-- Navegación de mes -->
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+    <div class="fc-nav" id="vt-nav" style="margin-bottom:0">
+      <button class="fc-nav-btn" onclick="vtMesAnterior()">‹</button>
+      <div class="fc-mes-label" id="vt-mes-label" style="font-size:16px">—</div>
+      <button class="fc-nav-btn" onclick="vtMesSiguiente()">›</button>
+    </div>
+    <button class="btn btn-ghost btn-sm" id="vt-btn-historico" onclick="vtToggleHistorico()" title="Ver todas las ventas" style="height:34px">🕐 Historia</button>
+  </div>
+
   <!-- Stats -->
   <div id="vt-stats-row" class="stats-row" style="grid-template-columns:repeat(4,1fr)">
     <div class="stat-card">
@@ -1479,8 +1489,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
 
   <!-- Toolbar -->
   <div class="table-toolbar">
-    <input type="month" id="vt-mes" class="filter-select" onchange="loadVentas()" style="min-width:130px">
-    <button class="btn btn-ghost btn-sm" id="vt-btn-historico" onclick="vtToggleHistorico()" title="Ver todas las ventas">🕐</button>
+    <input type="text" id="vt-buscar" class="search-box" placeholder="Buscar código o producto…" oninput="renderVentas(filterVentasLocal())" style="min-width:180px">
     <div class="combo-wrap" style="min-width:140px">
       <input type="text" id="vt-f-canal" placeholder="Canal…" autocomplete="off" readonly
         oninput="comboFilter('vt-f-canal','cl-vt-f-canal');loadVentas()"
@@ -1490,8 +1499,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <span class="combo-arrow">▼</span>
       <div class="combo-list" id="cl-vt-f-canal"></div>
     </div>
-    <input type="text" id="vt-buscar" class="search-box" placeholder="Buscar código o producto…" oninput="renderVentas(filterVentasLocal())" style="min-width:180px">
-    <button class="btn btn-ghost btn-sm" onclick="vtLimpiarFiltros()" title="Limpiar filtros">× Limpiar</button>
+    <button class="btn btn-ghost btn-sm" onclick="vtLimpiarFiltros()">× Limpiar</button>
     <div style="flex:1"></div>
     <button class="btn btn-ghost btn-sm" onclick="exportVentasCSV()">↓ Excel</button>
   </div>
@@ -2471,7 +2479,7 @@ async function loadInventario(){
     ...p,
     total_costos:(p.costos||[]).reduce((s,c)=>s+parseFloat(c.costo_soles||0),0)
   }));
-  // Queries extra para stats mensuales
+  // Queries extra para stats mensuales y filtro de tabla
   let vendidosMes=[],vendidosDespues=[];
   if(!invHistorico&&invMesActual){
     const[y,m]=invMesActual.split('-');
@@ -2482,7 +2490,9 @@ async function loadInventario(){
     vendidosMes=vm||[];
     vendidosDespues=vd||[];
   }
-  renderInventario(inventarioCache);
+  window._invVendMesSet=new Set(vendidosMes.map(v=>v.codigo_producto).filter(Boolean));
+  window._invVendDespSet=new Set(vendidosDespues.map(v=>v.codigo_producto).filter(Boolean));
+  renderInventario(invBaseRows());
   updateStats(invHistorico?'':invMesActual,vendidosMes,vendidosDespues);
   fillProductoSelects();
   fillDataLists();
@@ -2732,7 +2742,7 @@ function clearFiltros(){
   });
   sortCol=null; sortDir=1;
   document.querySelectorAll('[id^="sort-"]').forEach(el=>el.textContent='');
-  renderInventario(inventarioCache);
+  renderInventario(invBaseRows());
 }
 
 function sortTable(col){
@@ -2741,6 +2751,18 @@ function sortTable(col){
   const el=document.getElementById('sort-'+col);
   if(el)el.textContent=sortDir===1?' ↑':' ↓';
   filterInventario();
+}
+
+function invBaseRows(){
+  if(invHistorico||!invMesActual)return inventarioCache;
+  const[y,m]=invMesActual.split('-');
+  const fechaFin=new Date(parseInt(y),parseInt(m),0).toISOString().substring(0,10);
+  const vm=window._invVendMesSet||new Set();
+  const vd=window._invVendDespSet||new Set();
+  return inventarioCache.filter(p=>
+    p.fecha_compra&&p.fecha_compra<=fechaFin&&
+    (p.estado==='DISPONIBLE'||vm.has(p.codigo_producto)||vd.has(p.codigo_producto))
+  );
 }
 
 function filterInventario(){
@@ -2753,7 +2775,7 @@ function filterInventario(){
   const estado=noEmoji(g('inv-estado'));
   const cat=noEmoji(g('inv-cat')).toUpperCase();
 
-  let rows=inventarioCache.filter(p=>{
+  let rows=invBaseRows().filter(p=>{
     const matchCod=!codigo||(p.codigo_producto||'').toUpperCase().includes(codigo);
     const matchM=!marca||(p.marca||'').toLowerCase().includes(marca);
     const matchS=!modelo||(p.modelo||'').toLowerCase().includes(modelo);
@@ -3990,14 +4012,38 @@ function toast(msg,type='ok'){
 let ventasCache=[];
 
 let vtHistorico=false;
+let vtMesActual='';
+
+function vtNavUpdate(){
+  const lbl=document.getElementById('vt-mes-label');
+  const btn=document.getElementById('vt-btn-historico');
+  const nav=document.getElementById('vt-nav');
+  if(lbl)lbl.textContent=vtHistorico?'Historia':invMesLabel(vtMesActual);
+  if(nav){nav.querySelectorAll('.fc-nav-btn').forEach(b=>b.disabled=vtHistorico);nav.style.opacity=vtHistorico?'.4':'1';}
+  if(btn){btn.style.color=vtHistorico?'var(--accent)':'';}
+}
+async function vtMesAnterior(){
+  if(!vtMesActual){const n=new Date();vtMesActual=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0');}
+  const[y,m]=vtMesActual.split('-').map(Number);
+  const d=new Date(y,m-2,1);
+  vtMesActual=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+  await loadVentas();
+}
+async function vtMesSiguiente(){
+  if(!vtMesActual){const n=new Date();vtMesActual=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0');}
+  const[y,m]=vtMesActual.split('-').map(Number);
+  const d=new Date(y,m,1);
+  vtMesActual=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+  await loadVentas();
+}
 
 async function loadVentas(){
-  const mesEl=document.getElementById('vt-mes');
-  if(!vtHistorico && !mesEl.value){
+  if(!vtHistorico&&!vtMesActual){
     const now=new Date();
-    mesEl.value=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+    vtMesActual=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
   }
-  const mes=vtHistorico?'':mesEl.value;
+  vtNavUpdate();
+  const mes=vtHistorico?'':vtMesActual;
   const canal=noEmoji(document.getElementById('vt-f-canal').value);
   const tbody=document.getElementById('vt-tbody');
   if(tbody)tbody.innerHTML='<tr class="loading-row"><td colspan="12"><div class="spinner"></div></td></tr>';
@@ -4023,24 +4069,15 @@ async function loadVentas(){
 
 function vtToggleHistorico(){
   vtHistorico=!vtHistorico;
-  const btn=document.getElementById('vt-btn-historico');
-  if(btn){btn.style.color=vtHistorico?'var(--accent)':'';btn.title=vtHistorico?'Volviendo al mes actual':'Ver todas las ventas';}
-  const mesEl=document.getElementById('vt-mes');
-  if(vtHistorico && mesEl) mesEl.value='';
   loadVentas();
 }
 
 function vtLimpiarFiltros(){
   vtHistorico=false;
   const now=new Date();
-  const mesEl=document.getElementById('vt-mes');
-  if(mesEl) mesEl.value=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
-  const canalEl=document.getElementById('vt-f-canal');
-  if(canalEl) canalEl.value='';
-  const buscarEl=document.getElementById('vt-buscar');
-  if(buscarEl) buscarEl.value='';
-  const btn=document.getElementById('vt-btn-historico');
-  if(btn){btn.style.color='';btn.title='Ver todas las ventas';}
+  vtMesActual=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  const canalEl=document.getElementById('vt-f-canal');if(canalEl)canalEl.value='';
+  const buscarEl=document.getElementById('vt-buscar');if(buscarEl)buscarEl.value='';
   loadVentas();
 }
 
