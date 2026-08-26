@@ -3758,24 +3758,41 @@ function renderFlujoTabla() {
     // Pendiente S/. o $ según moneda
     const pendS = esPend && !esUsdPend && egr>0 ? `<span class="td-pend">⏳ ${fmt(egr)}</span>` : '<span class="td-muted">—</span>';
     const pendU = esUsdPend ? `<span class="td-egr-usd">⏳ ${fmtUsdAmt(egrUsd)}</span>` : '<span class="td-muted">—</span>';
-    // Descripción estandarizada
-    const refProd=f.referencia_id?inventarioCache.find(p=>p.codigo_producto===f.referencia_id):null;
-    let desc='—';
-    if(refProd){
-      desc=[refProd.marca,refProd.modelo,refProd.colorway].filter(Boolean).join(' ');
-      if(refProd.talla) desc+=` · ${refProd.talla}`;
-    } else if(f.descripcion){
-      // Para pagos y otros sin producto, mostrar concepto/categoria sin prefijo genérico
-      const raw=(f.descripcion||'').replace(/^(venta|compra|costo|pago|reserva|cancelacion)[—\s-]*/i,'').trim();
-      desc=raw||f.categoria||f.tipo||'—';
+    // Códigos y descripción según tipo de movimiento
+    const buildProdDesc=p=>[p.marca,p.modelo,p.colorway].filter(Boolean).join(' ')+(p.talla?` · ${p.talla}`:'');
+    const cleanDesc=s=>(s||'').replace(/^[:\s—\-]*/,'').replace(/^(venta|compra|costo|pago|reserva|cancelacion)[—:\s\-]*/i,'').trim();
+    let codOp='—',codRef='—',desc='—';
+    if(accion==='VENTA'){
+      codOp=f.referencia_id||f.codigo_operacion||'—';
+      const vt=ventasCache.find(v=>v.codigo_venta===f.referencia_id);
+      codRef=vt?.codigo_producto||'—';
+      const prod=vt?inventarioCache.find(p=>p.codigo_producto===vt.codigo_producto):null;
+      desc=prod?buildProdDesc(prod):(cleanDesc(f.descripcion)||'—');
+    } else if(accion==='COMPRA'){
+      codOp=f.referencia_id||'—';
+      const prod=f.referencia_id?inventarioCache.find(p=>p.codigo_producto===f.referencia_id):null;
+      desc=prod?buildProdDesc(prod):(cleanDesc(f.descripcion)||'—');
+    } else if(accion==='COSTO'){
+      codRef=f.referencia_id||'—';
+      const prod=f.referencia_id?inventarioCache.find(p=>p.codigo_producto===f.referencia_id):null;
+      desc=prod?buildProdDesc(prod):(cleanDesc(f.descripcion)||'—');
+    } else if(accion==='PAGO'){
+      const n=parseInt(f.referencia_id)||0;
+      codOp=n?'PG-'+String(n).padStart(4,'0'):(f.codigo_operacion||'—');
+      desc=cleanDesc(f.descripcion)||f.categoria||'—';
+    } else {
+      // PENDIENTE, RESERVA, CANCELACION
+      codRef=f.referencia_id||'—';
+      const prod=f.referencia_id?inventarioCache.find(p=>p.codigo_producto===f.referencia_id):null;
+      desc=prod?buildProdDesc(prod):(cleanDesc(f.descripcion)||'—');
     }
-    // Cod. Operación (ej: V-0001 para ventas, o el id interno)
-    const codOp=f.codigo_operacion||'—';
+    const tdCodOp=codOp!=='—'?`<span class="td-code">${codOp}</span>`:'<span class="td-muted">—</span>';
+    const tdCodRef=codRef!=='—'?`<span class="td-code">${codRef}</span>`:'<span class="td-muted">—</span>';
     return `<tr class="${trClass}">
       <td class="td-fecha">${fmtFecha(f.fecha)}</td>
       <td><span class="fc-accion-badge fc-accion-${accion}">${accion}</span></td>
-      <td><span class="td-code">${codOp}</span></td>
-      <td><span class="td-code">${f.referencia_id||'—'}</span></td>
+      <td>${tdCodOp}</td>
+      <td>${tdCodRef}</td>
       <td class="td-desc">${desc}</td>
       <td class="right">${ingHtml}</td>
       <td class="right">${egrHtml}</td>
