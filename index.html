@@ -3296,8 +3296,7 @@ async function registrarReserva(){
         descripcion:'Adelanto reserva — '+descRv,
         ingreso_soles:adelantoRv,
         egreso_soles:0,
-        referencia_id:codProd||null,
-        talla:document.getElementById('rv-talla').value.trim()||null
+        referencia_id:codProd||null
       });
     }
     toast('✓ Reserva registrada','ok');
@@ -3597,8 +3596,8 @@ async function loadFlujo() {
   // GANANCIAS — ventas del mes
   const {data:ventasMes} = await db.from('ventas')
     .select('ganancia')
-    .gte('fecha_venta', fechaInicio)
-    .lte('fecha_venta', fechaFinStr);
+    .gte('fecha', fechaInicio)
+    .lte('fecha', fechaFinStr);
   const ganancias = (ventasMes||[]).reduce((s,v) => s + parseFloat(v.ganancia||0), 0);
 
   // CÁLCULOS — egresos son positivos en BD, se restan
