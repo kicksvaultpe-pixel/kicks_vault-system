@@ -2683,10 +2683,10 @@ let rvProdSelected=null; // producto activo en form reserva
 function clCodigo(id){ return 'C-'+String(id).padStart(3,'0'); }
 
 function fillClienteCombos(){
-  const items=clientesCache.map(c=>{
+  const sorted=[...clientesCache].sort((a,b)=>a.id_cliente-b.id_cliente);
+  const items=sorted.map(c=>{
     const nombre=[c.nombre,c.apellido].filter(Boolean).join(' ');
-    const extra=c.talla_frecuente?' · T:'+c.talla_frecuente:'';
-    return `${nombre}${extra} — ${clCodigo(c.id_cliente)}`;
+    return `${clCodigo(c.id_cliente)} · ${nombre}`;
   });
   comboSetData('cl-vt-cl', items);
 }
@@ -3317,14 +3317,15 @@ async function registrarPago(){
   if(!monto){toast('Ingresa el monto','warn');return;}
   const btn=document.getElementById('btn-pago');setLoading(btn,true);
   try{
-    const{data:pgData,error}=await db.from('pagos').insert({
+    const codigoPago=await genCodigo('pago');
+    const{error}=await db.from('pagos').insert({
+      codigo_pago:codigoPago,
       concepto,monto_soles:-Math.abs(monto),
       categoria:noEmoji(document.getElementById('pg-cat').value),
       fecha:document.getElementById('pg-fecha').value
-    }).select('id').single();
+    });
     if(error)throw error;
-    const codPg=pgData?.id?'PG-'+String(pgData.id).padStart(4,'0'):'';
-    toast('✓ Pago registrado'+(codPg?' · '+codPg:''),'ok');
+    toast('✓ Pago registrado · '+codigoPago,'ok');
     ['pg-concepto','pg-monto'].forEach(id=>document.getElementById(id).value='');
   }catch(e){toast('Error: '+e.message,'err');}
   finally{setLoading(btn,false,'✓ Registrar Pago');}
