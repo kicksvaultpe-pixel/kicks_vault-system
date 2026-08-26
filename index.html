@@ -2612,14 +2612,12 @@ function updateStats(){
     p.fecha_compra&&p.fecha_compra.startsWith(mesActual)&&
     (p.tipo_pago==='CONTADO'||(p.tipo_pago==='CREDITO'&&p.pago_estado==='PAGADO'))
   );
-  const costosMes=inventarioCache
-    .filter(p=>p.fecha_compra&&p.fecha_compra.startsWith(mesActual))
-    .reduce((s,p)=>s+parseFloat(p.total_costos||0),0);
-  const montoMes=mesPagados.reduce((s,p)=>s+parseFloat(p.precio_compra_soles||0),0)+costosMes;
   const mesZap=mesPagados.filter(p=>p.categoria==='ZAPATILLAS');
   const mesRopa=mesPagados.filter(p=>p.categoria!=='ZAPATILLAS');
-  const costosMesZap=inventarioCache.filter(p=>p.fecha_compra&&p.fecha_compra.startsWith(mesActual)&&p.categoria==='ZAPATILLAS').reduce((s,p)=>s+parseFloat(p.total_costos||0),0);
-  const costosMesRopa=inventarioCache.filter(p=>p.fecha_compra&&p.fecha_compra.startsWith(mesActual)&&p.categoria!=='ZAPATILLAS').reduce((s,p)=>s+parseFloat(p.total_costos||0),0);
+  const costosMesZap=mesZap.reduce((s,p)=>s+parseFloat(p.total_costos||0),0);
+  const costosMesRopa=mesRopa.reduce((s,p)=>s+parseFloat(p.total_costos||0),0);
+  const costosMes=costosMesZap+costosMesRopa;
+  const montoMes=mesPagados.reduce((s,p)=>s+parseFloat(p.precio_compra_soles||0),0)+costosMes;
   const montoZap=mesZap.reduce((s,p)=>s+parseFloat(p.precio_compra_soles||0),0)+costosMesZap;
   const montoRopa=mesRopa.reduce((s,p)=>s+parseFloat(p.precio_compra_soles||0),0)+costosMesRopa;
   set('st-mes-zap-uds', mesZap.length);
@@ -3600,9 +3598,9 @@ async function loadFlujo() {
   const dPrevEnd = new Date(y, m-2, 0); // último día mes anterior
   const prevEndStr = dPrevEnd.toISOString().substring(0,10);
   const stockInicioProds = inventarioCache.filter(p =>
-    p.estado === 'DISPONIBLE' &&
     p.pago_estado === 'PAGADO' &&
-    p.fecha_compra <= prevEndStr
+    p.fecha_compra <= prevEndStr &&
+    (p.estado === 'DISPONIBLE' || (p.estado === 'VENDIDO' && vendidosMesSet.has(p.codigo_producto)))
   );
   const stockInicio = stockInicioProds.reduce((s,p) => s + parseFloat(p.precio_final||0), 0);
 
@@ -3637,10 +3635,11 @@ async function loadFlujo() {
 
   // GANANCIAS — ventas del mes
   const {data:ventasMes} = await db.from('ventas')
-    .select('ganancia')
+    .select('ganancia,codigo_producto')
     .gte('fecha', fechaInicio)
     .lte('fecha', fechaFinStr);
   const ganancias = (ventasMes||[]).reduce((s,v) => s + parseFloat(v.ganancia||0), 0);
+  const vendidosMesSet = new Set((ventasMes||[]).map(v=>v.codigo_producto).filter(Boolean));
 
   // CÁLCULOS — egresos son positivos en BD, se restan
   const totalAntesGanancias = cajaInicio + stockInicio;
