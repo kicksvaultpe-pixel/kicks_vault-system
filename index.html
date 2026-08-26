@@ -532,9 +532,9 @@ input[list] { cursor: text; }
   .modal{max-width:calc(100vw - 24px)}
   /* Fix iOS zoom on input focus */
   input, select, textarea, .filter-select { font-size: 16px !important; }
-  /* Combo-wrap full width en mobile */
-  .table-toolbar .combo-wrap { min-width: 0 !important; flex: 1; }
-  .table-toolbar { flex-wrap: wrap; }
+  /* Toolbar en mobile: scroll horizontal para no aplastar combos */
+  .table-toolbar { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; }
+  .table-toolbar .search-box { flex-shrink: 0; }
   /* Form grid en mobile: 1 columna */
   .form-grid.g2, .form-grid.g3 { grid-template-columns: 1fr !important; }
   .form-grid .span2, .form-grid .span3 { grid-column: span 1 !important; }
@@ -543,9 +543,13 @@ input[list] { cursor: text; }
   /* Tabla min-width más chica para scroll */
   .table-wrap table, #vt-table { min-width: 800px !important; }
   /* cl-sel bubble en mobile */
-  .cl-sel { flex-wrap: wrap; gap: 4px; }
+  .cl-sel { flex-wrap: nowrap; }
   /* Stat cards 2 columnas en mobile */
   .stats-row { grid-template-columns: 1fr 1fr !important; }
+  /* Reducir texto en stat cards para que quepan en 2 columnas */
+  .sg-h { font-size: 8px !important; min-width: 0 !important; }
+  .sg-mn, .sg-mn-tot { font-size: 10px !important; min-width: 0 !important; }
+  .sg-mc, .sg-mc-tot { font-size: 9px !important; }
 }
 
 @media(max-width:400px){
@@ -1647,10 +1651,11 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
 
   <!-- Tabla movimientos -->
   <!-- Buscador flujo -->
-  <div style="margin-bottom:10px">
-    <input type="text" id="fc-buscar" class="search-box" style="width:100%;max-width:400px"
+  <div style="margin-bottom:10px;display:flex;gap:8px;align-items:center">
+    <input type="text" id="fc-buscar" class="search-box" style="flex:1;max-width:400px"
       placeholder="Buscar en flujo por código, descripción…"
       oninput="renderFlujoTabla()">
+    <button onclick="document.getElementById('fc-buscar').value='';renderFlujoTabla()" style="flex-shrink:0;padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--muted2);font-size:11px;cursor:pointer;white-space:nowrap;font-family:inherit" title="Limpiar búsqueda">× Limpiar</button>
   </div>
   <div class="fc-tabla-wrap">
     <table class="fc-tabla">
@@ -1940,7 +1945,18 @@ const TALLAS=[...TALLAS_ZAP,...TALLAS_ROPA];
 
 
 
-// Click anywhere inside combo-wrap focuses the input (opens dropdown)
+// Combo-wrap toggle: mousedown prevents blur when list is open (fix mobile 300ms delay)
+let _comboClosing = null;
+document.addEventListener('mousedown', e => {
+  if (e.target.closest('.combo-opt')) return;
+  const wrap = e.target.closest('.combo-wrap');
+  if (!wrap) return;
+  const list = wrap.querySelector('.combo-list');
+  if (list && list.classList.contains('open')) {
+    e.preventDefault();
+    _comboClosing = list;
+  }
+});
 document.addEventListener('click', e => {
   if (e.target.closest('.combo-opt')) return;
   const wrap = e.target.closest('.combo-wrap');
@@ -1948,15 +1964,14 @@ document.addEventListener('click', e => {
   const input = wrap.querySelector('input');
   const list = wrap.querySelector('.combo-list');
   if (!input) return;
-  if (list && list.classList.contains('open')) {
+  if (list && list === _comboClosing) {
     list.classList.remove('open');
+    _comboClosing = null;
     return;
   }
-  if (document.activeElement !== input) {
-    input.focus();
-  } else {
-    comboOpen(input.id, list ? list.id : '');
-  }
+  _comboClosing = null;
+  if (document.activeElement !== input) input.focus();
+  else comboOpen(input.id, list ? list.id : '');
 });
 
 // Close AC on outside click
@@ -3291,10 +3306,7 @@ async function registrarPago(){
   if(!monto){toast('Ingresa el monto','warn');return;}
   const btn=document.getElementById('btn-pago');setLoading(btn,true);
   try{
-    const cpRaw=await genCodigo('pago').catch(()=>null);
-    const codigoPago=cpRaw?(String(cpRaw).includes('-')?cpRaw:'PG-'+String(cpRaw).padStart(4,'0')):null;
     const{error}=await db.from('pagos').insert({
-      ...(codigoPago?{codigo_pago:codigoPago}:{}),
       concepto,monto_soles:-Math.abs(monto),
       categoria:noEmoji(document.getElementById('pg-cat').value),
       fecha:document.getElementById('pg-fecha').value
