@@ -3711,6 +3711,14 @@ async function loadFlujo() {
     cajaInicio = cajaPrevFin;
   }
 
+  // GANANCIAS y vendidos del mes — se necesita antes de stockInicio
+  const {data:ventasMes} = await db.from('ventas')
+    .select('ganancia,codigo_producto')
+    .gte('fecha', fechaInicio)
+    .lte('fecha', fechaFinStr);
+  const ganancias = (ventasMes||[]).reduce((s,v) => s + parseFloat(v.ganancia||0), 0);
+  const vendidosMesSet = new Set((ventasMes||[]).map(v=>v.codigo_producto).filter(Boolean));
+
   // STOCK INICIO — productos DISPONIBLES + PAGADO al último día del mes anterior
   const dPrevEnd = new Date(y, m-2, 0); // último día mes anterior
   const prevEndStr = dPrevEnd.toISOString().substring(0,10);
@@ -3749,14 +3757,6 @@ async function loadFlujo() {
 
   // RESERVAS del mes (adelantos)
   const reservasMes = flujoCache.filter(f=>(f.categoria||f.tipo||'')==='RESERVA').reduce((s,f)=>s+parseFloat(f.ingreso_soles||0),0);
-
-  // GANANCIAS — ventas del mes
-  const {data:ventasMes} = await db.from('ventas')
-    .select('ganancia,codigo_producto')
-    .gte('fecha', fechaInicio)
-    .lte('fecha', fechaFinStr);
-  const ganancias = (ventasMes||[]).reduce((s,v) => s + parseFloat(v.ganancia||0), 0);
-  const vendidosMesSet = new Set((ventasMes||[]).map(v=>v.codigo_producto).filter(Boolean));
 
   // CÁLCULOS — egresos son positivos en BD, se restan
   const totalAntesGanancias = cajaInicio + stockInicio;
