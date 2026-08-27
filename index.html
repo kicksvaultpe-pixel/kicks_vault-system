@@ -438,6 +438,9 @@ input[list] { cursor: text; }
 .fc-main-num.red{color:var(--red)}
 .fc-main-num.green{color:var(--green)}
 .fc-main-lbl{font-size:11px;font-family:'Archivo',sans-serif;color:var(--muted2);margin-bottom:16px;letter-spacing:.2px}
+.fc-real-row{display:flex;align-items:baseline;justify-content:space-between;margin:2px 0 10px}
+.fc-real-lbl{font-size:10px;color:var(--muted2);font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+.fc-real-val{font-family:"Archivo Black";font-size:18px;color:var(--purple);font-variant-numeric:tabular-nums;letter-spacing:-.5px}
 
 /* Divisor interno */
 .fc-inner-div{border-top:1px solid var(--border);margin:14px 0}
@@ -1791,6 +1794,10 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <span class="fc-row-val" id="fc-stock-inicio">—</span>
       </div>
       <div class="fc-row">
+        <span class="fc-row-lbl muted">Activo fijo</span>
+        <span class="fc-row-val muted" id="fc-activo-inicio">—</span>
+      </div>
+      <div class="fc-row">
         <span class="fc-row-lbl">Margen del mes</span>
         <span class="fc-row-val green" id="fc-ganancias">—</span>
       </div>
@@ -1804,6 +1811,10 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
     <div class="fc-bubble actual">
       <div class="fc-chip"><div class="fc-chip-dot"></div>Flujo de Caja</div>
       <div class="fc-main-num accent" id="fc-caja-actual">—</div>
+      <div class="fc-real-row">
+        <span class="fc-real-lbl">Caja real</span>
+        <span class="fc-real-val" id="fc-caja-real-actual">—</span>
+      </div>
       <div class="fc-main-lbl">apertura ± movimientos del mes</div>
       <div class="fc-inner-div"></div>
       <div class="fc-row">
@@ -1818,6 +1829,10 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <span class="fc-row-lbl">− Costos y gastos</span>
         <span class="fc-row-val red" id="fc-egr-costos-gastos">—</span>
       </div>
+      <div class="fc-bot">
+        <span class="fc-bot-lbl">Neto del mes</span>
+        <span class="fc-bot-val" id="fc-neto-mes">—</span>
+      </div>
       <div class="fc-inner-div" style="margin:10px 0 6px"></div>
       <div class="fc-row">
         <span class="fc-row-lbl" title="Total abonado en reservas activas (desaparece cuando la reserva se completa o cancela)">🔒 Adelantos reservas</span>
@@ -1831,16 +1846,16 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <span class="fc-row-lbl">⏳ Compras pend. $</span>
         <span class="fc-row-val yellow" id="fc-pend-usd">$ 0.00</span>
       </div>
-      <div class="fc-bot">
-        <span class="fc-bot-lbl">Neto del mes</span>
-        <span class="fc-bot-val" id="fc-neto-mes">—</span>
-      </div>
     </div>
 
     <!-- FIN DE MES -->
     <div class="fc-bubble fin">
       <div class="fc-chip"><div class="fc-chip-dot"></div>Cierre</div>
       <div class="fc-main-num blue" id="fc-caja-fin">—</div>
+      <div class="fc-real-row">
+        <span class="fc-real-lbl">Caja real</span>
+        <span class="fc-real-val" id="fc-caja-real-fin">—</span>
+      </div>
       <div class="fc-main-lbl">Caja al cierre del mes</div>
       <div class="fc-inner-div"></div>
       <div class="fc-row">
@@ -1848,7 +1863,12 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <span class="fc-row-val blue" id="fc-stock-fin">—</span>
       </div>
       <div class="fc-row">
-        <span class="fc-row-lbl">Patrimonio final</span>
+        <span class="fc-row-lbl muted">Activo fijo</span>
+        <span class="fc-row-val muted" id="fc-activo-fin">—</span>
+      </div>
+      <div class="fc-inner-div" style="margin:8px 0 4px"></div>
+      <div class="fc-row">
+        <span class="fc-row-lbl">Patrimonio fin</span>
         <span class="fc-row-val" id="fc-total-label">—</span>
       </div>
       <div class="fc-bot">
@@ -4565,17 +4585,26 @@ async function loadFlujo() {
   reinvTrend.textContent = reinvPos ? '↑ Stock creció este mes' : '↓ Stock redujo este mes';
 
   // ── RENDER BURBUJAS ──
+  const cajaReal = cajaActual - reservasMes;
+
   // Inicio
   document.getElementById('fc-caja-inicio').textContent  = fmt(cajaInicio);
   document.getElementById('fc-stock-inicio').textContent = fmt(stockInicio);
   document.getElementById('fc-ganancias').textContent    = ganancias > 0 ? '+ ' + fmt(ganancias) : fmt(ganancias);
   document.getElementById('fc-total-antes').textContent  = fmt(totalAntesGanancias);
+  document.getElementById('fc-activo-inicio').textContent = '—';
   // Actual
   document.getElementById('fc-caja-actual').textContent  = fmt(cajaActual);
+  const realColor = cajaReal >= 0 ? 'var(--blue)' : 'var(--red)';
+  const crActEl = document.getElementById('fc-caja-real-actual');
+  if(crActEl){ crActEl.textContent = fmt(cajaReal); crActEl.style.color = realColor; }
   // Fin
   document.getElementById('fc-caja-fin').textContent     = fmt(cajaFin);
   document.getElementById('fc-stock-fin').textContent    = fmt(stockFin);
   document.getElementById('fc-total-label').textContent  = fmt(totalFin);
+  document.getElementById('fc-activo-fin').textContent   = '—';
+  const crFinEl = document.getElementById('fc-caja-real-fin');
+  if(crFinEl){ crFinEl.textContent = fmt(cajaReal); crFinEl.style.color = realColor; }
   // Control
   const ctrlEl    = document.getElementById('fc-control');
   const ctrlBadge = document.getElementById('fc-control-badge');
