@@ -202,6 +202,7 @@ tbody tr.row-dim{opacity:.45}
 .sc-grid.g2{grid-template-columns:1fr auto;column-gap:16px}
 .sc-grid.g3{grid-template-columns:1fr auto auto;column-gap:14px}
 .sc-grid.g4{grid-template-columns:1.2fr auto auto auto;column-gap:12px}
+.sc-grid.g5{grid-template-columns:1.2fr auto auto auto auto;column-gap:10px}
 /* Tab Ingresos */
 .st-big-num{font-family:"Archivo Black";font-size:26px;line-height:1.1;margin:8px 0 4px;font-variant-numeric:tabular-nums}
 .st-big-num.accent{color:var(--accent)}.st-big-num.green{color:var(--green)}.st-big-num.red{color:var(--red)}
@@ -1426,25 +1427,29 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
     <!-- STOCK: Total + Disponibles + Del mes -->
     <div class="stat-card sc-stock">
       <div class="sc-chip">Stock</div>
-      <div class="sc-grid g4">
+      <div class="sc-grid g5">
         <span></span>
         <span class="sg-h">Total</span>
-        <span class="sg-h">Disp.</span>
+        <span class="sg-h" style="color:var(--green)">Disp.</span>
+        <span class="sg-h" style="color:var(--purple)">Reserv.</span>
         <span class="sg-h" id="sg-h-vend">Del mes</span>
         <span class="sg-mc">👟 Zapatillas</span>
         <span class="sg-mn" id="st-zap-total">—</span>
         <span class="sg-mn green" id="st-zap-disp">—</span>
+        <span class="sg-mn" style="color:var(--purple)" id="st-zap-rsv">—</span>
         <span class="sg-mn" id="st-zap-vend">—</span>
         <span class="sg-mc">👕 Ropa &amp; Otros</span>
         <span class="sg-mn" id="st-ropa-total">—</span>
         <span class="sg-mn green" id="st-ropa-disp">—</span>
+        <span class="sg-mn" style="color:var(--purple)" id="st-ropa-rsv">—</span>
         <span class="sg-mn" id="st-ropa-vend">—</span>
       </div>
       <div class="sg-divider"></div>
-      <div class="sc-grid g4">
+      <div class="sc-grid g5">
         <span class="sg-mc-tot">Total</span>
         <span class="sg-mn-tot" id="st-total">—</span>
         <span class="sg-mn-tot green" id="st-disp">—</span>
+        <span class="sg-mn-tot" style="color:var(--purple)" id="st-rsv">—</span>
         <span class="sg-mn-tot" id="st-vend">—</span>
       </div>
     </div>
@@ -1461,8 +1466,12 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       </div>
       <div class="sg-divider"></div>
       <div class="sc-grid g2">
-        <span class="sg-mc-tot">Total</span>
+        <span class="sg-mc-tot">Disp.</span>
         <span class="sg-mn-tot accent" id="st-total-val">—</span>
+      </div>
+      <div class="sc-grid g2" style="margin-top:5px">
+        <span class="sg-mc-tot" style="color:var(--purple)">🔒 Reserv.</span>
+        <span class="sg-mn-tot" style="color:var(--purple)" id="st-rsv-val">—</span>
       </div>
     </div>
     <!-- COMPRAS DEL MES -->
@@ -1755,8 +1764,8 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       </div>
       <div class="fc-inner-div" style="margin:10px 0 6px"></div>
       <div class="fc-row">
-        <span class="fc-row-lbl">⏳ Reservas S/.</span>
-        <span class="fc-row-val yellow" id="fc-pend-reservas">S/. 0.00</span>
+        <span class="fc-row-lbl" title="Adelantos recibidos de reservas activas este mes (no cuentan como ingreso hasta ejecutar la venta)">🟣 Adelantos S/.</span>
+        <span class="fc-row-val" style="color:var(--purple)" id="fc-pend-reservas">S/. 0.00</span>
       </div>
       <div class="fc-row">
         <span class="fc-row-lbl">⏳ Compras S/.</span>
@@ -1776,7 +1785,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
     <div class="fc-bubble fin">
       <div class="fc-chip"><div class="fc-chip-dot"></div>Fin de Mes</div>
       <div class="fc-main-num blue" id="fc-caja-fin">—</div>
-      <div class="fc-main-lbl">Caja − adelantos reservas</div>
+      <div class="fc-main-lbl">Caja al cierre del mes</div>
       <div class="fc-inner-div"></div>
       <div class="fc-row">
         <span class="fc-row-lbl">Stock fin de mes</span>
@@ -3161,18 +3170,18 @@ function renderInventario(rows){
     const isPendiente=p.pago_estado==='PENDIENTE';
 
     const isCancelado=p.estado==='CANCELADO';
-    // Estado badge
+    // Estado badge — muestra estado real, pago_estado va en columna separada
     let estadoBadge;
     if(isCancelado)
       estadoBadge='<span class="badge badge-muted">CANCELADO</span>';
-    else if(isPendiente)
-      estadoBadge='<span class="badge badge-yellow">PAGO PEND.</span>';
     else if(p.estado==='DISPONIBLE')
       estadoBadge='<span class="badge badge-green">DISPONIBLE</span>';
     else if(p.estado==='RESERVADO')
       estadoBadge='<span class="badge badge-purple">RESERVADO</span>';
-    else
+    else if(p.estado==='VENDIDO')
       estadoBadge='<span class="badge badge-accent">VENDIDO</span>';
+    else
+      estadoBadge='<span class="badge badge-muted">—</span>';
 
     // Pago badge + botón
     let pagoBadge;
@@ -3208,7 +3217,7 @@ function renderInventario(rows){
     const catCls=catMap[(p.categoria||'').toUpperCase()]||'cat-otros';
     const catLabel=p.categoria||'—';
 
-    const rowCls=isCancelado||p.estado==='VENDIDO'?'row-dim':isPendiente?'row-pend':p.estado==='RESERVADO'?'row-rsv':'';
+    const rowCls=isCancelado||p.estado==='VENDIDO'?'row-dim':p.estado==='RESERVADO'?'row-rsv':isPendiente?'row-pend':'';
     return`<tr class="${rowCls}">
       <td class="inv-fecha">${fecha}</td>
       <td><span class="inv-cod">${p.codigo_producto}</span></td>
@@ -3237,7 +3246,7 @@ function updateStats(mes='',vendidosMes=[],vendidosDespues=[]){
   const vendMesSet=new Set(vendidosMes.map(v=>v.codigo_producto).filter(Boolean));
   const vendDespSet=new Set(vendidosDespues.map(v=>v.codigo_producto).filter(Boolean));
 
-  let allZap,allRopa,dispZap,dispRopa,dispAll,vendZap,vendRopa,vendAll;
+  let allZap,allRopa,dispZap,dispRopa,dispAll,rsvZap,rsvRopa,rsvAll,vendZap,vendRopa,vendAll;
 
   if(!mes){
     // ── HISTORIA: estado actual ──
@@ -3246,6 +3255,9 @@ function updateStats(mes='',vendidosMes=[],vendidosDespues=[]){
     dispZap=allZap.filter(p=>p.estado==='DISPONIBLE'&&p.pago_estado!=='PENDIENTE');
     dispRopa=allRopa.filter(p=>p.estado==='DISPONIBLE'&&p.pago_estado!=='PENDIENTE');
     dispAll=inventarioCache.filter(p=>p.estado==='DISPONIBLE'&&p.pago_estado!=='PENDIENTE');
+    rsvZap=allZap.filter(p=>p.estado==='RESERVADO');
+    rsvRopa=allRopa.filter(p=>p.estado==='RESERVADO');
+    rsvAll=inventarioCache.filter(p=>p.estado==='RESERVADO');
     vendZap=allZap.filter(p=>p.estado==='VENDIDO').length;
     vendRopa=allRopa.filter(p=>p.estado==='VENDIDO').length;
     vendAll=inventarioCache.filter(p=>p.estado==='VENDIDO').length;
@@ -3262,6 +3274,8 @@ function updateStats(mes='',vendidosMes=[],vendidosDespues=[]){
     dispZap=allZap.filter(p=>p.pago_estado!=='PENDIENTE');
     dispRopa=allRopa.filter(p=>p.pago_estado!=='PENDIENTE');
     dispAll=inventarioCache.filter(p=>atFin(p)&&p.pago_estado!=='PENDIENTE');
+    // Reservados históricos no se trackean por mes, se muestra 0
+    rsvZap=[]; rsvRopa=[]; rsvAll=[];
     // Vendidos = vendidos DURANTE ese mes
     vendZap=inventarioCache.filter(p=>p.categoria==='ZAPATILLAS'&&vendMesSet.has(p.codigo_producto)).length;
     vendRopa=inventarioCache.filter(p=>p.categoria!=='ZAPATILLAS'&&vendMesSet.has(p.codigo_producto)).length;
@@ -3276,6 +3290,10 @@ function updateStats(mes='',vendidosMes=[],vendidosDespues=[]){
   set('st-zap-disp', dispZap.length);
   set('st-ropa-disp', dispRopa.length);
   set('st-disp', dispAll.length);
+  // Reservados
+  set('st-zap-rsv', rsvZap.length||'—');
+  set('st-ropa-rsv', rsvRopa.length||'—');
+  set('st-rsv', rsvAll.length||'—');
   // Vendidos
   set('st-zap-vend', vendZap);
   set('st-ropa-vend', vendRopa);
@@ -3284,6 +3302,7 @@ function updateStats(mes='',vendidosMes=[],vendidosDespues=[]){
   set('st-zap-val', fmt(dispZap.reduce((s,p)=>s+parseFloat(p.precio_final||0),0)));
   set('st-ropa-val', fmt(dispRopa.reduce((s,p)=>s+parseFloat(p.precio_final||0),0)));
   set('st-total-val', fmt(dispAll.reduce((s,p)=>s+parseFloat(p.precio_final||0),0)));
+  set('st-rsv-val', fmt(rsvAll.reduce((s,p)=>s+parseFloat(p.precio_final||0),0)));
   // Compras del mes (usa mesCompras: mes seleccionado o mes actual en historia)
   const mesPagados=inventarioCache.filter(p=>
     p.fecha_compra&&p.fecha_compra.startsWith(mesCompras)&&
@@ -3357,7 +3376,7 @@ function filterInventario(){
     const matchS=!modelo||(p.modelo||'').toLowerCase().includes(modelo);
     const matchC=!colorway||(p.colorway||'').toLowerCase().includes(colorway);
     const matchT=!talla||(p.talla||'').toLowerCase().includes(talla);
-    const matchE=!estado||(estado==='PENDIENTE'?p.pago_estado==='PENDIENTE':p.estado===estado&&p.pago_estado!=='PENDIENTE');
+    const matchE=!estado||(estado==='PENDIENTE'?p.pago_estado==='PENDIENTE':estado==='DISPONIBLE'?(p.estado==='DISPONIBLE'&&p.pago_estado!=='PENDIENTE'):p.estado===estado);
     const matchCat=!cat||(p.categoria||'').toUpperCase().includes(cat);
     const showCancelado=estado==='CANCELADO';
     if(p.estado==='CANCELADO'&&!showCancelado) return false;
@@ -4320,8 +4339,7 @@ async function loadFlujo() {
     const pEgrC  = fp.filter(f=>pcat(f)==='COMPRA').reduce((s,f)=>s+parseFloat(f.egreso_soles||0),0);
     const pEgrCo = fp.filter(f=>pcat(f)==='COSTO').reduce((s,f)=>s+parseFloat(f.egreso_soles||0),0);
     const pEgrG  = fp.filter(f=>['OPERATIVO','MARKETING','PERSONAL','IMPORTACION','PAGO'].includes(pcat(f))).reduce((s,f)=>s+parseFloat(f.egreso_soles||0),0);
-    const pReserv= fp.filter(f=>pcat(f)==='RESERVA').reduce((s,f)=>s+parseFloat(f.ingreso_soles||0),0);
-    const cajaPrevFin = cajaPrevInicio + pIngV - pEgrC - pEgrCo - pEgrG - pReserv;
+    const cajaPrevFin = cajaPrevInicio + pIngV - pEgrC - pEgrCo - pEgrG;
     cajaInicio = cajaPrevFin;
   }
 
@@ -4377,7 +4395,7 @@ async function loadFlujo() {
   const total = totalAntesGanancias + ganancias;
   const netoMes = ingVentas - egrCompras - egrCostos - egrGastos;
   const cajaActual = cajaInicio + netoMes;
-  const cajaFin = cajaActual - reservasMes;
+  const cajaFin = cajaActual;
   const totalFin = cajaFin + stockFin;
   const control = Math.round((total - totalFin) * 100) / 100;
 
