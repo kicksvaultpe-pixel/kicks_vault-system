@@ -719,9 +719,41 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   #inv-edit-overlay.open #inv-edit-panel{transform:translateY(0)}
   .iep-section .form-grid.g2{grid-template-columns:1fr}
   .btn-edit-inv{width:36px;height:36px;font-size:15px}
+  #rsv-panel{width:100vw;max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;top:auto;bottom:0;border-left:none;border-top:1px solid var(--border);border-radius:16px 16px 0 0;transform:translateY(100%)}
+  #rsv-overlay.open #rsv-panel{transform:translateY(0)}
+  .rsv-filter-btn{min-height:36px}
 }
 
 
+/* ── RESERVAS FORM TOGGLE ── */
+.rv-tipo-wrap{display:flex;gap:6px;margin-bottom:16px;padding:5px;background:var(--surface);border:1px solid var(--border);border-radius:10px}
+.rv-tipo-btn{flex:1;padding:9px;border:1px solid transparent;background:none;color:var(--muted2);font-family:'Archivo';font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border-radius:7px;transition:all .2s;text-align:center}
+.rv-tipo-btn.stock-act{background:var(--yellow);color:#000;border-color:transparent}
+.rv-tipo-btn.pedido-act{background:var(--purple);color:#fff;border-color:transparent}
+/* ── RESERVAS VIEW ── */
+.rsv-badge-activa{background:rgba(37,99,235,.1);color:var(--accent);border:1px solid rgba(37,99,235,.2);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;letter-spacing:.5px;white-space:nowrap}
+.rsv-badge-completada{background:rgba(22,163,74,.1);color:var(--green);border:1px solid rgba(22,163,74,.2);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;letter-spacing:.5px;white-space:nowrap}
+.rsv-badge-cancelada{background:rgba(220,38,38,.08);color:var(--red);border:1px solid rgba(220,38,38,.2);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;letter-spacing:.5px;white-space:nowrap}
+.rsv-tipo-stock{background:rgba(180,83,9,.12);color:var(--yellow);border:1px solid rgba(180,83,9,.25);border-radius:5px;padding:2px 7px;font-size:10px;font-weight:700;white-space:nowrap}
+.rsv-tipo-pedido{background:rgba(109,40,217,.1);color:var(--purple);border:1px solid rgba(109,40,217,.25);border-radius:5px;padding:2px 7px;font-size:10px;font-weight:700;white-space:nowrap}
+.rsv-filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+/* ── RESERVAS DETAIL PANEL ── */
+#rsv-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:none;opacity:0;transition:opacity .2s;pointer-events:none}
+#rsv-overlay.open{display:block;opacity:1;pointer-events:all}
+#rsv-panel{position:fixed;right:0;top:0;bottom:0;width:460px;max-width:100vw;background:var(--card);border-left:1px solid var(--border);z-index:201;overflow-y:auto;padding:24px 24px 40px;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1)}
+#rsv-overlay.open #rsv-panel{transform:translateX(0)}
+.rsv-abono-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)}
+.rsv-abono-fecha{font-size:10px;color:var(--muted2);width:54px;flex-shrink:0;font-variant-numeric:tabular-nums}
+.rsv-abono-nota{flex:1;font-size:12px;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rsv-abono-monto{font-size:13px;font-weight:700;color:var(--green);font-variant-numeric:tabular-nums;white-space:nowrap}
+.rsv-abono-final{color:var(--accent)}
+.rsv-progress{height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin:8px 0}
+.rsv-progress-bar{height:100%;background:var(--accent);border-radius:4px;transition:width .4s ease}
+.rsv-progress-bar.done{background:var(--green)}
+.rsv-saldo-row{display:flex;justify-content:space-between;align-items:baseline;margin-top:4px}
+.rsv-saldo-lbl{font-size:11px;color:var(--muted2)}
+.rsv-saldo-val{font-size:15px;font-weight:700;color:var(--accent);font-family:'Archivo Black';font-variant-numeric:tabular-nums}
+.rsv-saldo-val.pagado{color:var(--green)}
 /* ══ FOCUS RING GLOBAL ══ */
 .nav-tab:focus-visible,.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 </style>
@@ -760,6 +792,10 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
     <button class="nav-tab" onclick="showView('oc',this)">
       <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
       <span class="tab-label">OCs</span>
+    </button>
+    <button class="nav-tab" onclick="showView('reservas',this)">
+      <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <span class="tab-label">Reservas</span>
     </button>
   </div>
   <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Modo oscuro"></button>
@@ -1110,22 +1146,25 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   <div id="form-reserva" class="form-panel">
     <div class="card">
       <div class="card-label">Nueva Reserva</div>
+
+      <!-- Toggle Stock / Pedido -->
+      <div class="rv-tipo-wrap">
+        <button class="rv-tipo-btn stock-act" id="rv-btn-stock" onclick="setRvTipo('STOCK')">📦 Stock</button>
+        <button class="rv-tipo-btn" id="rv-btn-pedido" onclick="setRvTipo('PEDIDO')">🔍 Pedido</button>
+      </div>
+      <div id="rv-info-stock" class="info-box info-purple" style="margin-bottom:16px">
+        💼 <strong>Stock:</strong> Reserva un producto ya disponible en tu inventario. El estado pasará a RESERVADO.
+      </div>
+      <div id="rv-info-pedido" class="info-box info-orange" style="display:none;margin-bottom:16px">
+        🔍 <strong>Pedido:</strong> El producto aún no está en stock — detalla la solicitud para conseguirlo.
+      </div>
+
       <div class="form-grid g2">
-        <div class="field span2"><label>Tipo</label>
-          <div class="combo-wrap">
-            <input type="text" id="rv-tipo" placeholder="Tipo…" autocomplete="off" readonly
-              oninput="comboFilter('rv-tipo','cl-rv-tipo')"
-              onfocus="comboOpen('rv-tipo','cl-rv-tipo')"
-              onblur="comboBlurStrict('rv-tipo','cl-rv-tipo')"
-              onkeydown="comboKey(event,'rv-tipo','cl-rv-tipo')">
-            <span class="combo-arrow">▼</span>
-            <div class="combo-list" id="cl-rv-tipo"></div>
-          </div>
-        </div>
+        <!-- STOCK: selector de producto disponible -->
         <div id="rv-stock-wrap" class="field span2">
-          <label>Producto</label>
+          <label>Producto disponible *</label>
           <div class="combo-wrap">
-            <input type="text" id="rv-producto" placeholder="Buscar producto disponible…" autocomplete="off"
+            <input type="text" id="rv-producto" placeholder="Buscar por código, marca o modelo…" autocomplete="off"
               oninput="comboFilter('rv-producto','cl-rv-prod')"
               onfocus="comboOpen('rv-producto','cl-rv-prod')"
               onblur="comboBlur('cl-rv-prod')"
@@ -1134,10 +1173,12 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
             <div class="combo-list" id="cl-rv-prod"></div>
           </div>
         </div>
+
+        <!-- PEDIDO: campos de producto -->
         <div id="rv-pedido-wrap" style="display:none;grid-column:span 2">
-          <div class="form-grid g3">
+          <div class="form-grid g2" style="gap:12px">
             <div class="field">
-              <label>Marca</label>
+              <label>Marca *</label>
               <div class="combo-wrap">
                 <input type="text" id="rv-marca" placeholder="Marca…" autocomplete="off"
                   oninput="comboFilter('rv-marca','cl-rv-marca')"
@@ -1172,34 +1213,24 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
                 <div class="combo-list" id="cl-rv-colorway"></div>
               </div>
             </div>
+            <div class="field">
+              <label>Talla</label>
+              <div class="combo-wrap">
+                <input type="text" id="rv-talla" placeholder="Talla…" autocomplete="off"
+                  oninput="comboFilter('rv-talla','cl-rv-talla')"
+                  onfocus="comboOpen('rv-talla','cl-rv-talla')"
+                  onblur="comboBlur('cl-rv-talla')"
+                  onkeydown="comboKey(event,'rv-talla','cl-rv-talla')">
+                <span class="combo-arrow">▼</span>
+                <div class="combo-list" id="cl-rv-talla"></div>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="field">
-          <label>Talla</label>
-          <div class="combo-wrap">
-            <input type="text" id="rv-talla" placeholder="Talla…" autocomplete="off"
-              oninput="comboFilter('rv-talla','cl-rv-talla')"
-              onfocus="comboOpen('rv-talla','cl-rv-talla')"
-              onblur="comboBlur('cl-rv-talla')"
-              onkeydown="comboKey(event,'rv-talla','cl-rv-talla')">
-            <span class="combo-arrow">▼</span>
-            <div class="combo-list" id="cl-rv-talla"></div>
-          </div>
-        </div>
-        <div class="field"><label>Adelanto S/.</label><input type="number" id="rv-adelanto" placeholder="0.00" step="0.01"></div>
-        <div class="field"><label>Canal</label>
-          <div class="combo-wrap">
-            <input type="text" id="rv-canal" placeholder="Canal…" autocomplete="off" readonly
-              oninput="comboFilter('rv-canal','cl-rv-canal')"
-              onfocus="comboOpen('rv-canal','cl-rv-canal')"
-              onblur="comboBlurStrict('rv-canal','cl-rv-canal')"
-              onkeydown="comboKey(event,'rv-canal','cl-rv-canal')">
-            <span class="combo-arrow">▼</span>
-            <div class="combo-list" id="cl-rv-canal"></div>
-          </div>
-        </div>
-        <div class="field"><label>Fecha límite</label><input type="date" id="rv-fecha-limite"></div>
-        <div class="field span2"><label>Cliente (opcional)</label>
+
+        <!-- Cliente -->
+        <div class="field span2">
+          <label>Cliente *</label>
           <div class="cl-search-wrap" id="rv-cl-wrap">
             <input class="cl-search-input" id="rv-cl-input" placeholder="Buscar por nombre o código…" autocomplete="off"
               oninput="clSearch('rv')" onfocus="clSearchFocus('rv')" onblur="clSearchBlur('rv')" onkeydown="clSearchKey(event,'rv')">
@@ -1213,7 +1244,30 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
             <button class="cl-sel-clear" onclick="clClear('rv')" title="Quitar cliente">×</button>
           </div>
         </div>
-        <div class="field span2"><label>Notas</label><textarea id="rv-notas" placeholder="Detalles..."></textarea></div>
+
+        <!-- Precio acordado -->
+        <div class="field">
+          <label>Precio Acordado S/. *</label>
+          <div style="position:relative">
+            <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--muted2);pointer-events:none">S/.</span>
+            <input type="number" id="rv-precio" step="0.01" min="0" placeholder="0.00" style="padding-left:30px">
+          </div>
+        </div>
+
+        <!-- Primer abono -->
+        <div class="field">
+          <label>Primer Abono S/. <span style="font-size:9px;font-weight:400;opacity:.6">(opcional)</span></label>
+          <div style="position:relative">
+            <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--muted2);pointer-events:none">S/.</span>
+            <input type="number" id="rv-adelanto" step="0.01" min="0" placeholder="0.00" style="padding-left:30px">
+          </div>
+        </div>
+
+        <!-- Notas -->
+        <div class="field span2">
+          <label>Notas <span style="font-size:9px;font-weight:400;opacity:.6">(opcional)</span></label>
+          <textarea id="rv-notas" placeholder="Detalles del pedido, condiciones, referencias…"></textarea>
+        </div>
       </div>
     </div>
     <button class="btn btn-yellow" id="btn-reserva" onclick="registrarReserva()">✓ Registrar Reserva</button>
@@ -1941,6 +1995,62 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   </div>
 </div>
 
+<!-- ══════════════════════════════════
+     RESERVAS
+══════════════════════════════════ -->
+<div id="view-reservas" class="view">
+  <div class="page-hd">
+    <div class="page-title"><div class="dot"></div> Reservas</div>
+    <div class="page-sub">Pedidos y reservas con abonos parciales de clientes</div>
+  </div>
+
+  <div class="stats-row stats3">
+    <div class="stat-card">
+      <div class="stat-label">Activas</div>
+      <div class="stat-val" id="rsv-stat-activas" style="color:var(--accent)">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Por cobrar</div>
+      <div class="stat-val" id="rsv-stat-saldo" style="color:var(--yellow);font-size:16px">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">En pedido</div>
+      <div class="stat-val" id="rsv-stat-pedido" style="color:var(--purple)">—</div>
+    </div>
+  </div>
+
+  <div class="table-toolbar" style="flex-wrap:wrap;gap:8px;margin-bottom:12px">
+    <input type="search" id="rsv-search" class="search-input" placeholder="Buscar código, cliente, producto…" oninput="filtrarReservas()" style="flex:1;min-width:180px">
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn btn-ghost btn-sm rsv-filter-btn active" data-estado="" onclick="setRsvFiltro('',this)">Todas</button>
+      <button class="btn btn-ghost btn-sm rsv-filter-btn" data-estado="ACTIVA" onclick="setRsvFiltro('ACTIVA',this)">Activas</button>
+      <button class="btn btn-ghost btn-sm rsv-filter-btn" data-estado="COMPLETADA" onclick="setRsvFiltro('COMPLETADA',this)">Completadas</button>
+      <button class="btn btn-ghost btn-sm rsv-filter-btn" data-estado="CANCELADA" onclick="setRsvFiltro('CANCELADA',this)">Canceladas</button>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table style="min-width:680px">
+      <thead>
+        <tr>
+          <th style="width:88px">Código</th>
+          <th style="width:68px">Tipo</th>
+          <th>Cliente</th>
+          <th>Producto</th>
+          <th class="right" style="width:100px">Acordado</th>
+          <th class="right" style="width:88px">Abonado</th>
+          <th class="right" style="width:88px">Saldo</th>
+          <th style="width:92px">Estado</th>
+          <th style="width:36px"></th>
+        </tr>
+      </thead>
+      <tbody id="rsv-tbody">
+        <tr class="loading-row"><td colspan="9"><div class="spinner"></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
 <!-- MODAL PAGAR CRÉDITO -->
 <div class="modal-overlay" id="modal-pagar">
   <div class="modal">
@@ -2192,7 +2302,6 @@ function comboPick(inputId, listId, val) {
   if (inputId === 'oc-f-estado' || inputId === 'oc-f-tipo') renderOCTab();
   if (inputId === 'fc-accion') renderFlujoTabla();
   if (inputId === 'cp-moneda') toggleMoneda();
-  if (inputId === 'rv-tipo') toggleReservaTipo();
   if (inputId === 'rv-producto') onPickRvProducto();
   if (inputId === 'cs-oc-select') csOCChange();
   if (inputId === 'cs-prod-select') csProdChange();
@@ -2438,10 +2547,256 @@ async function loadTCGlobal(){
   }
 }
 
+// ══════════════════════════════════════════
+//  RESERVAS
+// ══════════════════════════════════════════
+let reservasCache=[];
+let rsvFiltroEstado='';
+let rsvCodigoActivo=null;
+
+async function loadReservas(){
+  const tbody=document.getElementById('rsv-tbody');
+  if(tbody)tbody.innerHTML='<tr class="loading-row"><td colspan="9"><div class="spinner"></div></td></tr>';
+  const{data,error}=await db.from('reservas').select('*, abonos(*)').order('created_at',{ascending:false});
+  if(error){toast('Error cargando reservas: '+error.message,'err');return;}
+  reservasCache=(data||[]).map(r=>({
+    ...r,
+    total_abonado:(r.abonos||[]).reduce((s,a)=>s+parseFloat(a.monto||0),0)
+  }));
+  renderReservas();
+  updateRsvStats();
+}
+
+function updateRsvStats(){
+  const activas=reservasCache.filter(r=>r.estado==='ACTIVA');
+  const totalSaldo=activas.reduce((s,r)=>s+(parseFloat(r.precio_acordado||0)-r.total_abonado),0);
+  const pedidos=activas.filter(r=>r.tipo==='PEDIDO').length;
+  const elA=document.getElementById('rsv-stat-activas');
+  const elS=document.getElementById('rsv-stat-saldo');
+  const elP=document.getElementById('rsv-stat-pedido');
+  if(elA)elA.textContent=activas.length;
+  if(elS)elS.textContent=fmt(totalSaldo);
+  if(elP)elP.textContent=pedidos;
+}
+
+function setRsvFiltro(estado,btn){
+  rsvFiltroEstado=estado;
+  document.querySelectorAll('.rsv-filter-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  renderReservas();
+}
+
+function filtrarReservas(){renderReservas();}
+
+function renderReservas(){
+  const tbody=document.getElementById('rsv-tbody');
+  if(!tbody)return;
+  const q=(document.getElementById('rsv-search')?.value||'').toUpperCase().trim();
+  let rows=reservasCache;
+  if(rsvFiltroEstado)rows=rows.filter(r=>r.estado===rsvFiltroEstado);
+  if(q)rows=rows.filter(r=>
+    (r.codigo_reserva||'').toUpperCase().includes(q)||
+    (r.nombre_cliente||'').toUpperCase().includes(q)||
+    (r.marca||'').toUpperCase().includes(q)||
+    (r.modelo||'').toUpperCase().includes(q)||
+    (r.colorway||'').toUpperCase().includes(q)||
+    (r.codigo_producto||'').toUpperCase().includes(q)
+  );
+  if(!rows.length){
+    tbody.innerHTML=`<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">🔖</div><div class="empty-text">Sin reservas</div></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML=rows.map(r=>{
+    const fecha=r.fecha?r.fecha.slice(8,10)+'/'+r.fecha.slice(5,7)+'/'+r.fecha.slice(2,4):'—';
+    const partes=[r.marca,r.modelo,r.colorway].filter(Boolean).join(' ');
+    const producto=partes||(r.codigo_producto||'—');
+    const productoFull=r.talla?`${producto} (${r.talla})`:producto;
+    const saldo=Math.max(0,parseFloat(r.precio_acordado||0)-r.total_abonado);
+    const estadoBadge=
+      r.estado==='ACTIVA'?`<span class="rsv-badge-activa">Activa</span>`:
+      r.estado==='COMPLETADA'?`<span class="rsv-badge-completada">Completada</span>`:
+      `<span class="rsv-badge-cancelada">Cancelada</span>`;
+    const tipoBadge=r.tipo==='STOCK'?`<span class="rsv-tipo-stock">Stock</span>`:`<span class="rsv-tipo-pedido">Pedido</span>`;
+    return`<tr onclick="abrirReservaDetalle('${r.codigo_reserva}')" style="cursor:pointer">
+      <td><span class="td-code" style="color:var(--accent)">${r.codigo_reserva}</span><div style="font-size:9px;color:var(--muted2);margin-top:1px">${fecha}</div></td>
+      <td>${tipoBadge}</td>
+      <td class="td-main">${r.nombre_cliente||'—'}</td>
+      <td class="td-trunc" style="max-width:160px;font-size:11px;color:var(--muted)">${productoFull}</td>
+      <td class="right td-amt">${fmt(r.precio_acordado)}</td>
+      <td class="right td-amt" style="color:var(--green)">${fmt(r.total_abonado)}</td>
+      <td class="right td-amt" style="${saldo<=0?'color:var(--green)':'color:var(--accent)'}">${fmt(saldo)}</td>
+      <td>${estadoBadge}</td>
+      <td style="text-align:center"><button class="btn-edit-inv" onclick="event.stopPropagation();abrirReservaDetalle('${r.codigo_reserva}')" title="Ver detalle">›</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function abrirReservaDetalle(codigo){
+  const r=reservasCache.find(x=>x.codigo_reserva===codigo);
+  if(!r)return;
+  rsvCodigoActivo=codigo;
+  const partes=[r.marca,r.modelo,r.colorway].filter(Boolean).join(' ');
+  const producto=partes||(r.codigo_producto||'Producto');
+  const productoFull=r.talla?`${producto} · ${r.talla}`:producto;
+  document.getElementById('rsv-p-codigo').textContent=r.codigo_reserva;
+  document.getElementById('rsv-p-producto').textContent=productoFull;
+  document.getElementById('rsv-p-cliente').textContent=r.nombre_cliente||'—';
+  const fecha=r.fecha?r.fecha.slice(8,10)+'/'+r.fecha.slice(5,7)+'/'+r.fecha.slice(2,4):'—';
+  document.getElementById('rsv-p-fecha').textContent=fecha;
+  document.getElementById('rsv-p-estado-badge').innerHTML=
+    r.estado==='ACTIVA'?`<span class="rsv-badge-activa">Activa</span>`:
+    r.estado==='COMPLETADA'?`<span class="rsv-badge-completada">Completada</span>`:
+    `<span class="rsv-badge-cancelada">Cancelada</span>`;
+  document.getElementById('rsv-p-tipo-badge').innerHTML=
+    r.tipo==='STOCK'?`<span class="rsv-tipo-stock">Stock</span>`:`<span class="rsv-tipo-pedido">Pedido</span>`;
+  // Progreso
+  const acordado=parseFloat(r.precio_acordado||0);
+  const abonado=r.total_abonado;
+  const saldo=Math.max(0,acordado-abonado);
+  const pct=acordado>0?Math.min(100,Math.round(abonado/acordado*100)):0;
+  const barEl=document.getElementById('rsv-p-bar');
+  barEl.style.width=pct+'%';
+  barEl.className='rsv-progress-bar'+(saldo<=0?' done':'');
+  document.getElementById('rsv-p-abonado').textContent=fmt(abonado);
+  document.getElementById('rsv-p-acordado').textContent=fmt(acordado);
+  document.getElementById('rsv-p-saldo').textContent=fmt(saldo);
+  document.getElementById('rsv-p-saldo').className='rsv-saldo-val'+(saldo<=0?' pagado':'');
+  document.getElementById('rsv-p-precio-final').value=acordado||'';
+  // Abonos
+  const abonos=[...(r.abonos||[])].sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+  const listEl=document.getElementById('rsv-p-abonos-list');
+  if(!abonos.length){
+    listEl.innerHTML='<div style="color:var(--muted2);font-size:12px;padding:8px 0">Sin abonos registrados</div>';
+  }else{
+    listEl.innerHTML=abonos.map(a=>{
+      const fd=a.fecha?a.fecha.slice(8,10)+'/'+a.fecha.slice(5,7)+'/'+a.fecha.slice(2,4):'—';
+      return`<div class="rsv-abono-row">
+        <span class="rsv-abono-fecha">${fd}</span>
+        <span class="rsv-abono-nota">${a.notas||'—'}</span>
+        <span class="rsv-abono-monto${a.es_pago_final?' rsv-abono-final':''}">${fmt(a.monto)}${a.es_pago_final?' ✓':''}</span>
+      </div>`;
+    }).join('');
+  }
+  // Vincular producto PEDIDO
+  const linkWrap=document.getElementById('rsv-p-link-wrap');
+  if(r.tipo==='PEDIDO'&&!r.codigo_producto&&r.estado==='ACTIVA'){
+    linkWrap.style.display='block';
+    fillProductoSelects();
+    document.getElementById('rsv-p-link-prod').value='';
+  }else{
+    linkWrap.style.display='none';
+  }
+  // Notas
+  const notasEl=document.getElementById('rsv-p-notas');
+  if(notasEl)notasEl.textContent=r.notas||'—';
+  const notasSec=document.getElementById('rsv-p-notas-section');
+  if(notasSec)notasSec.style.display=r.notas?'block':'none';
+  // Mostrar acciones solo si ACTIVA
+  const isActiva=r.estado==='ACTIVA';
+  document.getElementById('rsv-p-nuevo-abono-wrap').style.display=isActiva?'block':'none';
+  document.getElementById('rsv-p-completar-wrap').style.display=isActiva?'block':'none';
+  const mnEl=document.getElementById('rsv-new-monto');if(mnEl)mnEl.value='';
+  const nnEl=document.getElementById('rsv-new-nota');if(nnEl)nnEl.value='';
+  document.getElementById('rsv-overlay').classList.add('open');
+}
+
+function cerrarReservaDetalle(){
+  document.getElementById('rsv-overlay').classList.remove('open');
+  rsvCodigoActivo=null;
+}
+
+async function registrarAbono(){
+  if(!rsvCodigoActivo)return;
+  const monto=parseFloat(document.getElementById('rsv-new-monto').value)||0;
+  if(!monto){toast('Ingresa el monto del abono','warn');return;}
+  const nota=document.getElementById('rsv-new-nota').value.trim()||null;
+  const fecha=new Date().toISOString().slice(0,10);
+  try{
+    const{error}=await db.from('abonos').insert({
+      codigo_reserva:rsvCodigoActivo,monto,fecha,es_pago_final:false,notas:nota
+    });
+    if(error)throw error;
+    toast('✓ Abono registrado','ok');
+    await loadReservas();
+    abrirReservaDetalle(rsvCodigoActivo);
+  }catch(e){toast('Error: '+e.message,'err');}
+}
+
+async function completarReserva(){
+  if(!rsvCodigoActivo)return;
+  const r=reservasCache.find(x=>x.codigo_reserva===rsvCodigoActivo);
+  if(!r)return;
+  if(!r.codigo_producto){toast('Vincula primero un producto del inventario','warn');return;}
+  const precioFinal=parseFloat(document.getElementById('rsv-p-precio-final').value)||0;
+  if(!precioFinal){toast('Ingresa el precio final de venta','warn');return;}
+  if(!confirm(`¿Completar ${r.codigo_reserva} y generar venta por ${fmt(precioFinal)}?\n\nSe marcará el producto como VENDIDO.`))return;
+  try{
+    const fecha=new Date().toISOString().slice(0,10);
+    const prod=inventarioCache.find(p=>p.codigo_producto===r.codigo_producto);
+    const pF=parseFloat(prod?.precio_final||prod?.precio_compra_soles||0);
+    const g=Math.round((precioFinal-pF)*100)/100;
+    const rt=pF>0?Math.round(g/pF*10000)/10000:0;
+    const cv=await genCodigo('venta');
+    const{error:eV}=await db.from('ventas').insert({
+      codigo_venta:cv,codigo_producto:r.codigo_producto,
+      precio_venta_soles:precioFinal,
+      canal:'RESERVA',
+      comprador:r.nombre_cliente,
+      id_cliente:r.id_cliente||null,
+      ganancia:g,rentabilidad:rt,fecha,
+      comentarios:`Reserva ${r.codigo_reserva}`
+    });
+    if(eV)throw eV;
+    const saldo=Math.max(0,parseFloat(r.precio_acordado||0)-r.total_abonado);
+    if(saldo>0.01){
+      await db.from('abonos').insert({
+        codigo_reserva:rsvCodigoActivo,monto:saldo,fecha,
+        es_pago_final:true,notas:'Pago final — '+cv
+      });
+    }
+    await db.from('inventario').update({estado:'VENDIDO'}).eq('codigo_producto',r.codigo_producto);
+    await db.from('reservas').update({estado:'COMPLETADA'}).eq('codigo_reserva',rsvCodigoActivo);
+    toast(`✓ ${cv} generada — Reserva completada`,'ok');
+    cerrarReservaDetalle();
+    await Promise.all([loadReservas(),loadInventario()]);
+  }catch(e){toast('Error: '+e.message,'err');}
+}
+
+async function cancelarReserva(){
+  if(!rsvCodigoActivo)return;
+  const r=reservasCache.find(x=>x.codigo_reserva===rsvCodigoActivo);
+  if(!r)return;
+  const nombre=[r.marca,r.modelo,r.colorway].filter(Boolean).join(' ')||r.codigo_reserva;
+  if(!confirm(`¿Cancelar la reserva ${r.codigo_reserva}?\n\n${nombre}\n\n${r.codigo_producto?'El producto volverá a estado DISPONIBLE.':''}`))return;
+  try{
+    await db.from('reservas').update({estado:'CANCELADA'}).eq('codigo_reserva',rsvCodigoActivo);
+    if(r.codigo_producto){
+      await db.from('inventario').update({estado:'DISPONIBLE'}).eq('codigo_producto',r.codigo_producto);
+    }
+    toast('✓ Reserva cancelada','ok');
+    cerrarReservaDetalle();
+    await Promise.all([loadReservas(), r.codigo_producto?loadInventario():Promise.resolve()]);
+  }catch(e){toast('Error: '+e.message,'err');}
+}
+
+async function rsvVincularProducto(){
+  if(!rsvCodigoActivo)return;
+  const raw=document.getElementById('rsv-p-link-prod').value;
+  const cod=(raw.match(/^([A-Z]+-\d+)/)||[])[1]||'';
+  if(!cod){toast('Selecciona un producto válido del inventario','warn');return;}
+  try{
+    await db.from('reservas').update({codigo_producto:cod}).eq('codigo_reserva',rsvCodigoActivo);
+    await db.from('inventario').update({estado:'RESERVADO'}).eq('codigo_producto',cod);
+    toast('✓ Producto vinculado — inventario marcado como RESERVADO','ok');
+    await Promise.all([loadReservas(),loadInventario()]);
+    abrirReservaDetalle(rsvCodigoActivo);
+  }catch(e){toast('Error: '+e.message,'err');}
+}
+
 // ── INIT ──
 async function init(){
   setToday();
-  await Promise.all([loadTCGlobal(), loadInventario(), loadClientes(), loadOCs()]);
+  await Promise.all([loadTCGlobal(), loadInventario(), loadClientes(), loadOCs(), loadReservas()]);
   initRowSel('inv-tbody');
   initRowSel('vt-tbody');
 }
@@ -2498,6 +2853,7 @@ function showView(n,btn){
   if(n==='flujo') loadFlujo();
   if(n==='ventas') loadVentas();
   if(n==='oc') renderOCTab();
+  if(n==='reservas') loadReservas();
 }
 
 function setTipo(tipo,btn){
@@ -2646,17 +3002,13 @@ function fillDataLists(){
   comboSetData('cl-cp-oc-tipo', ['✈️ IMPORTACION','🏪 LOCAL']);
   comboSetData('cl-vt-canal', ['📸 INSTAGRAM','💬 WHATSAPP','🏪 PRESENCIAL','🔹 OTRO']);
   comboSetData('cl-vt-medio-pago', ['💵 EFECTIVO','🏦 TRANSFERENCIA','💳 TARJETA','💜 YAPE','💙 PLIN']);
-  comboSetData('cl-rv-tipo', ['📦 EN_STOCK','🔍 A_PEDIDO']);
-  comboSetData('cl-rv-canal', ['📸 INSTAGRAM','💬 WHATSAPP','🏪 PRESENCIAL','🔹 OTRO']);
   comboSetData('cl-pg-cat', ['🏪 OPERATIVO','👤 PERSONAL','📦 IMPORTACION','📣 MARKETING']);
   comboSetData('cl-cl-canal', ['📸 INSTAGRAM','💬 WHATSAPP','🏪 PRESENCIAL','🔹 OTRO']);
   comboSetData('cl-cl-tipo', ['👤 REGULAR','⭐ VIP','📦 MAYORISTA']);
   // Defaults iniciales para combos que arrancan con un valor fijo
   const elMoneda=document.getElementById('cp-moneda');
   if(elMoneda&&!elMoneda.value) elMoneda.value='🇺🇸 USD';
-  const elRvTipo=document.getElementById('rv-tipo');
-  if(elRvTipo&&!elRvTipo.value) elRvTipo.value='📦 EN_STOCK';
-  toggleReservaTipo();
+  setRvTipo('STOCK');
   // Suprimir autocomplete/autocorrect del browser en todos los combos
   document.querySelectorAll('.combo-wrap input').forEach(el=>{
     el.setAttribute('autocomplete','nope');
@@ -2924,6 +3276,9 @@ function fillProductoSelects(){
   const label=p=>{const n=[p.marca,p.modelo,p.colorway].filter(Boolean).join(' ');return`${p.codigo_producto} · ${n} (${p.talla||'—'})`;};
   comboSetData('cl-vt-prod', disp.map(label));
   comboSetData('cl-rv-prod', disp.map(label));
+  // Vincular pedido: disponibles y reservados
+  const linkable=inventarioCache.filter(p=>p.estado==='DISPONIBLE'||p.estado==='RESERVADO');
+  comboSetData('cl-rsv-link-prod', linkable.map(label));
   // Costo: todos los no cancelados
   const allCosto=inventarioCache.filter(p=>p.estado!=='CANCELADO');
   comboSetData('cl-cs-prod', allCosto.map(label));
@@ -3272,7 +3627,6 @@ function onPickRvProducto(){
   const raw=document.getElementById('rv-producto').value;
   const cod=(raw.match(/^([A-Z]+-\d+)/)||[])[1]||'';
   rvProdSelected=inventarioCache.find(p=>p.codigo_producto===cod&&p.estado==='DISPONIBLE')||null;
-  if(rvProdSelected) document.getElementById('rv-talla').value=rvProdSelected.talla||'';
 }
 
 function onSelectProducto(){
@@ -3298,10 +3652,21 @@ function calcVentaGanancia(){
   el.textContent=fmt(g);el.style.color=g>=0?'var(--green)':'var(--red)';
 }
 
-function toggleReservaTipo(){
-  const t=noEmoji(document.getElementById('rv-tipo').value);
-  document.getElementById('rv-stock-wrap').style.display=t==='EN_STOCK'?'flex':'none';
-  document.getElementById('rv-pedido-wrap').style.display=t==='A_PEDIDO'?'block':'none';
+let rvTipoActual='STOCK';
+function setRvTipo(tipo){
+  rvTipoActual=tipo;
+  document.getElementById('rv-btn-stock').className='rv-tipo-btn'+(tipo==='STOCK'?' stock-act':'');
+  document.getElementById('rv-btn-pedido').className='rv-tipo-btn'+(tipo==='PEDIDO'?' pedido-act':'');
+  document.getElementById('rv-stock-wrap').style.display=tipo==='STOCK'?'block':'none';
+  document.getElementById('rv-pedido-wrap').style.display=tipo==='PEDIDO'?'block':'none';
+  document.getElementById('rv-info-stock').style.display=tipo==='STOCK'?'block':'none';
+  document.getElementById('rv-info-pedido').style.display=tipo==='PEDIDO'?'block':'none';
+  if(tipo==='STOCK'){
+    ['rv-marca','rv-modelo','rv-colorway','rv-talla'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  }else{
+    rvProdSelected=null;
+    const el=document.getElementById('rv-producto');if(el)el.value='';
+  }
 }
 
 function onSelectReservaProducto(){
@@ -3519,50 +3884,65 @@ async function registrarVenta(){
 }
 
 // ── REGISTRAR RESERVA ──
+async function genCodigoReserva(){
+  const{data}=await db.from('reservas').select('codigo_reserva').order('created_at',{ascending:false}).limit(1);
+  if(!data||!data.length)return'RSV-001';
+  const last=data[0].codigo_reserva||'RSV-000';
+  const n=parseInt((last.match(/(\d+)$/)||['0'])[0])+1;
+  return'RSV-'+String(n).padStart(3,'0');
+}
+
 async function registrarReserva(){
-  const tipo=noEmoji(document.getElementById('rv-tipo').value);
-  let codProd=null,marca=null,modelo=null,colorway=null;
-  if(tipo==='EN_STOCK'){
-    if(!rvProdSelected){toast('Selecciona un producto','warn');return;}
+  const tipo=rvTipoActual;
+  let codProd=null,marca=null,modelo=null,colorway=null,talla=null;
+  if(tipo==='STOCK'){
+    if(!rvProdSelected){toast('Selecciona un producto del inventario','warn');return;}
     codProd=rvProdSelected.codigo_producto;
-    marca=rvProdSelected.marca;modelo=rvProdSelected.modelo;colorway=rvProdSelected.colorway;
+    marca=rvProdSelected.marca;modelo=rvProdSelected.modelo;
+    colorway=rvProdSelected.colorway;talla=rvProdSelected.talla;
   }else{
     marca=document.getElementById('rv-marca').value.trim().toUpperCase();
-    if(!marca){toast('Ingresa la marca','warn');return;}
-    modelo=document.getElementById('rv-modelo').value.trim().toUpperCase();
-    colorway=document.getElementById('rv-colorway').value.trim().toUpperCase();
+    if(!marca){toast('Ingresa la marca del pedido','warn');return;}
+    modelo=document.getElementById('rv-modelo').value.trim().toUpperCase()||null;
+    colorway=document.getElementById('rv-colorway').value.trim().toUpperCase()||null;
+    talla=document.getElementById('rv-talla').value.trim()||null;
   }
+  const precio=parseFloat(document.getElementById('rv-precio').value)||0;
+  if(!precio){toast('Ingresa el precio acordado','warn');return;}
+  const clId=clSelectedId.rv;
+  const cl=clId?clientesCache.find(c=>c.id_cliente===clId):null;
+  const nombreCliente=cl?[cl.nombre,cl.apellido].filter(Boolean).join(' ')||null:null;
+  const adelanto=parseFloat(document.getElementById('rv-adelanto').value)||0;
+  const notas=document.getElementById('rv-notas').value.trim()||null;
   const btn=document.getElementById('btn-reserva');setLoading(btn,true);
   try{
+    const codigoReserva=await genCodigoReserva();
+    const fecha=new Date().toISOString().slice(0,10);
     const{error}=await db.from('reservas').insert({
-      codigo_producto:codProd,marca,modelo,colorway,
-      talla:document.getElementById('rv-talla').value.trim()||null,
-      id_cliente:clSelectedId.rv||null,
-      monto_adelanto:parseFloat(document.getElementById('rv-adelanto').value)||0,
-      canal:noEmoji(document.getElementById('rv-canal').value),tipo,
-      fecha_limite:document.getElementById('rv-fecha-limite').value||null,
-      notas:document.getElementById('rv-notas').value.trim()||null
+      codigo_reserva:codigoReserva,tipo,estado:'ACTIVA',
+      id_cliente:clId||null,nombre_cliente:nombreCliente,
+      codigo_producto:codProd,
+      marca,modelo,colorway,talla,
+      precio_acordado:precio,fecha,notas
     });
     if(error)throw error;
-    // Registrar adelanto en flujo_caja como RESERVA (no afecta caja real)
-    const adelantoRv=parseFloat(document.getElementById('rv-adelanto').value)||0;
-    if(adelantoRv>0){
-      const descRv=[marca||'',modelo||'',colorway||''].filter(Boolean).join(' ');
-      await db.from('flujo_caja').insert({
-        fecha:new Date().toISOString().substring(0,10),
-        tipo:'RESERVA',
-        categoria:'RESERVA',
-        descripcion:'Adelanto reserva — '+descRv,
-        ingreso_soles:adelantoRv,
-        egreso_soles:0,
-        referencia_id:codProd||null
+    if(codProd){
+      await db.from('inventario').update({estado:'RESERVADO'}).eq('codigo_producto',codProd);
+    }
+    if(adelanto>0){
+      await db.from('abonos').insert({
+        codigo_reserva:codigoReserva,monto:adelanto,
+        fecha,es_pago_final:false,notas:'Adelanto inicial'
       });
     }
-    toast('✓ Reserva registrada','ok');
-    ['rv-talla','rv-adelanto','rv-notas','rv-marca','rv-modelo','rv-colorway'].forEach(id=>document.getElementById(id).value='');
-    ['rv-producto','rv-fecha-limite'].forEach(id=>document.getElementById(id).value='');
-    rvProdSelected=null;
-    clClear('rv');
+    toast(`✓ ${codigoReserva} — Reserva registrada`,'ok');
+    ['rv-precio','rv-adelanto','rv-notas','rv-marca','rv-modelo','rv-colorway'].forEach(id=>{
+      const el=document.getElementById(id);if(el)el.value='';
+    });
+    const elRvP=document.getElementById('rv-producto');if(elRvP)elRvP.value='';
+    rvProdSelected=null;clClear('rv');setRvTipo('STOCK');
+    await loadInventario();
+    if(document.getElementById('view-reservas')?.classList.contains('active'))await loadReservas();
   }catch(e){toast('Error: '+e.message,'err');}
   finally{setLoading(btn,false,'✓ Registrar Reserva');}
 }
@@ -4638,6 +5018,104 @@ init();
       <button class="btn btn-primary" id="iep-btn-guardar" onclick="iepGuardar()" style="flex:1">✓ Guardar cambios</button>
       <button class="btn btn-ghost" onclick="cerrarEditarItem()">Cancelar</button>
     </div>
+  </div>
+</div>
+<!-- ── RESERVAS DETAIL PANEL ── -->
+<div id="rsv-overlay" onclick="if(event.target===this)cerrarReservaDetalle()">
+  <div id="rsv-panel">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:12px">
+      <div style="min-width:0">
+        <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:3px" id="rsv-p-codigo">RSV-001</div>
+        <div style="font-family:'Archivo Black';font-size:15px;color:var(--text);line-height:1.3;word-break:break-word" id="rsv-p-producto">—</div>
+      </div>
+      <button onclick="cerrarReservaDetalle()" style="background:none;border:1px solid var(--border);color:var(--muted2);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1">×</button>
+    </div>
+
+    <!-- Info grid -->
+    <div style="background:var(--bg);border-radius:10px;padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px">
+      <div><div class="iep-section-lbl" style="margin-bottom:3px">Cliente</div><div style="font-size:13px;font-weight:600;color:var(--text)" id="rsv-p-cliente">—</div></div>
+      <div><div class="iep-section-lbl" style="margin-bottom:3px">Estado</div><div id="rsv-p-estado-badge">—</div></div>
+      <div><div class="iep-section-lbl" style="margin-bottom:3px">Fecha</div><div style="font-size:12px;color:var(--muted)" id="rsv-p-fecha">—</div></div>
+      <div><div class="iep-section-lbl" style="margin-bottom:3px">Tipo</div><div id="rsv-p-tipo-badge">—</div></div>
+    </div>
+
+    <!-- Vincular producto (PEDIDO sin producto) -->
+    <div id="rsv-p-link-wrap" class="iep-section" style="display:none">
+      <div class="iep-section-lbl">Vincular producto del inventario</div>
+      <p style="font-size:11px;color:var(--muted2);margin-bottom:8px">Cuando compres el producto, vincúlalo aquí para continuar la reserva.</p>
+      <div class="combo-wrap">
+        <input type="text" id="rsv-p-link-prod" placeholder="Buscar producto disponible/reservado…" autocomplete="off"
+          oninput="comboFilter('rsv-p-link-prod','cl-rsv-link-prod')"
+          onfocus="comboOpen('rsv-p-link-prod','cl-rsv-link-prod')"
+          onblur="comboBlur('cl-rsv-link-prod')"
+          onkeydown="comboKey(event,'rsv-p-link-prod','cl-rsv-link-prod')">
+        <span class="combo-arrow">▼</span>
+        <div class="combo-list" id="cl-rsv-link-prod"></div>
+      </div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:8px;width:100%" onclick="rsvVincularProducto()">Vincular →</button>
+    </div>
+
+    <!-- Progreso pago -->
+    <div class="iep-section">
+      <div class="iep-section-lbl">Progreso de pago</div>
+      <div class="rsv-progress"><div class="rsv-progress-bar" id="rsv-p-bar" style="width:0%"></div></div>
+      <div class="rsv-saldo-row">
+        <span class="rsv-saldo-lbl">Abonado: <strong id="rsv-p-abonado">S/. 0.00</strong></span>
+        <span class="rsv-saldo-lbl">de <strong id="rsv-p-acordado">S/. 0.00</strong></span>
+      </div>
+      <div class="rsv-saldo-row" style="margin-top:6px">
+        <span class="rsv-saldo-lbl">Saldo pendiente</span>
+        <span class="rsv-saldo-val" id="rsv-p-saldo">S/. 0.00</span>
+      </div>
+    </div>
+
+    <!-- Historial abonos -->
+    <div class="iep-section">
+      <div class="iep-section-lbl">Historial de abonos</div>
+      <div id="rsv-p-abonos-list"></div>
+    </div>
+
+    <!-- Nuevo abono -->
+    <div class="iep-section" id="rsv-p-nuevo-abono-wrap">
+      <div class="iep-section-lbl">Registrar abono</div>
+      <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
+        <div class="field" style="flex:1;min-width:100px;margin:0">
+          <label>Monto S/.</label>
+          <div style="position:relative">
+            <span style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--muted2);pointer-events:none">S/.</span>
+            <input type="number" id="rsv-new-monto" step="0.01" min="0" placeholder="0.00" style="padding-left:28px">
+          </div>
+        </div>
+        <div class="field" style="flex:1;min-width:110px;margin:0">
+          <label>Nota <span style="font-weight:400;opacity:.6">(opcional)</span></label>
+          <input type="text" id="rsv-new-nota" placeholder="Yape, efectivo…">
+        </div>
+        <button class="btn btn-ghost btn-sm" style="height:38px;flex-shrink:0;white-space:nowrap" onclick="registrarAbono()">+ Abono</button>
+      </div>
+    </div>
+
+    <!-- Completar reserva -->
+    <div class="iep-section" id="rsv-p-completar-wrap">
+      <div class="iep-section-lbl">Cerrar reserva</div>
+      <div class="field" style="margin-bottom:10px">
+        <label>Precio final de venta S/.</label>
+        <div style="position:relative">
+          <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--muted2);pointer-events:none">S/.</span>
+          <input type="number" id="rsv-p-precio-final" step="0.01" min="0" placeholder="0.00" style="padding-left:30px;width:100%">
+        </div>
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-bottom:8px" onclick="completarReserva()">✓ Completar y generar venta</button>
+      <button class="btn btn-ghost btn-sm" style="width:100%;color:var(--red);border-color:rgba(220,38,38,.4)" onclick="cancelarReserva()">Cancelar reserva</button>
+    </div>
+
+    <!-- Notas -->
+    <div class="iep-section" id="rsv-p-notas-section">
+      <div class="iep-section-lbl">Notas</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.6" id="rsv-p-notas">—</div>
+    </div>
+
   </div>
 </div>
 </body>
