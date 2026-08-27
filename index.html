@@ -1431,7 +1431,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   </div>
 
   <div class="table-toolbar">
-    <input type="text" id="inv-codigo" class="search-box" placeholder="Buscar código…" oninput="filterInventario()" style="max-width:180px">
+    <input type="text" id="inv-codigo" class="search-box" placeholder="Buscar código, marca, modelo, colorway…" oninput="filterInventario()" style="max-width:260px">
     <div class="combo-wrap" style="flex:1;min-width:130px">
       <input type="text" id="inv-marca" placeholder="Marca…" autocomplete="off"
         oninput="comboFilter('inv-marca','cl-inv-marca');filterInventario()"
@@ -2884,7 +2884,11 @@ function filterInventario(){
   const cat=noEmoji(g('inv-cat')).toUpperCase();
 
   let rows=invBaseRows().filter(p=>{
-    const matchCod=!codigo||(p.codigo_producto||'').toUpperCase().includes(codigo);
+    const matchCod=!codigo||
+      (p.codigo_producto||'').toUpperCase().includes(codigo)||
+      (p.marca||'').toUpperCase().includes(codigo)||
+      (p.modelo||'').toUpperCase().includes(codigo)||
+      (p.colorway||'').toUpperCase().includes(codigo);
     const matchM=!marca||(p.marca||'').toLowerCase().includes(marca);
     const matchS=!modelo||(p.modelo||'').toLowerCase().includes(modelo);
     const matchC=!colorway||(p.colorway||'').toLowerCase().includes(colorway);
