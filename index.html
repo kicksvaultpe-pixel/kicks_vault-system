@@ -2030,23 +2030,25 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   </div>
 
   <div class="table-wrap">
-    <table style="min-width:920px">
+    <table style="min-width:1000px">
       <thead>
         <tr>
-          <th style="width:86px">Reserva</th>
+          <th style="width:65px">Fecha</th>
+          <th style="width:82px">Código</th>
           <th style="width:66px">Tipo</th>
-          <th style="width:130px">Cliente</th>
-          <th style="width:84px">Cód. Prod.</th>
+          <th style="width:62px">Cód.Cl.</th>
+          <th style="min-width:120px">Cliente</th>
+          <th style="width:82px">Cód.Prod.</th>
           <th>Producto</th>
           <th class="right" style="width:100px">Acordado</th>
-          <th class="right" style="width:100px">Abonado</th>
-          <th class="right" style="width:90px">Saldo</th>
+          <th class="right" style="width:90px">Abonado</th>
+          <th class="right" style="width:88px">Saldo</th>
           <th style="width:92px">Estado</th>
           <th style="width:36px"></th>
         </tr>
       </thead>
       <tbody id="rsv-tbody">
-        <tr class="loading-row"><td colspan="10"><div class="spinner"></div></td></tr>
+        <tr class="loading-row"><td colspan="12"><div class="spinner"></div></td></tr>
       </tbody>
     </table>
   </div>
@@ -2557,7 +2559,7 @@ let rsvCodigoActivo=null;
 
 async function loadReservas(){
   const tbody=document.getElementById('rsv-tbody');
-  if(tbody)tbody.innerHTML='<tr class="loading-row"><td colspan="9"><div class="spinner"></div></td></tr>';
+  if(tbody)tbody.innerHTML='<tr class="loading-row"><td colspan="12"><div class="spinner"></div></td></tr>';
   const{data,error}=await db.from('reservas').select('*, abonos(*)').order('created_at',{ascending:false});
   if(error){toast('Error cargando reservas: '+error.message,'err');return;}
   reservasCache=(data||[]).map(r=>({
@@ -2606,35 +2608,31 @@ function renderReservas(){
     (r.codigo_producto||'').toUpperCase().includes(q)
   );
   if(!rows.length){
-    tbody.innerHTML=`<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">🔖</div><div class="empty-text">Sin reservas</div></div></td></tr>`;
+    tbody.innerHTML=`<tr><td colspan="12"><div class="empty-state"><div class="empty-icon">🔖</div><div class="empty-text">Sin reservas</div></div></td></tr>`;
     return;
   }
   tbody.innerHTML=rows.map(r=>{
     const fecha=r.fecha?r.fecha.slice(8,10)+'/'+r.fecha.slice(5,7)+'/'+r.fecha.slice(2,4):'—';
     const partes=[r.marca,r.modelo,r.colorway].filter(Boolean).join(' ');
     const productoNombre=partes||'—';
-    const productoFull=r.talla?`${productoNombre} <span style="color:var(--muted2);">(${r.talla})</span>`:productoNombre;
-    const codProd=r.codigo_producto
-      ?`<span class="td-code" style="color:var(--purple)">${r.codigo_producto}</span>`
-      :`<span style="font-size:10px;color:var(--muted2);font-style:italic">Sin vincular</span>`;
-    const codCl=r.id_cliente?`<div style="font-size:9px;color:var(--muted2);margin-top:1px">${clCodigo(r.id_cliente)}</div>`:'';
+    const productoFull=r.talla?`${productoNombre} <span style="color:var(--muted2)">(${r.talla})</span>`:productoNombre;
     const acordado=parseFloat(r.precio_acordado||0);
     const saldo=Math.max(0,acordado-r.total_abonado);
-    const pct=acordado>0?Math.min(100,Math.round(r.total_abonado/acordado*100)):0;
-    const pctChip=`<div style="font-size:9px;font-weight:700;color:${pct>=100?'var(--green)':'var(--muted2)'};margin-top:1px">${pct}% pagado</div>`;
     const estadoBadge=
       r.estado==='ACTIVA'?`<span class="rsv-badge-activa">Activa</span>`:
       r.estado==='COMPLETADA'?`<span class="rsv-badge-completada">Completada</span>`:
       `<span class="rsv-badge-cancelada">Cancelada</span>`;
     const tipoBadge=r.tipo==='STOCK'?`<span class="rsv-tipo-stock">Stock</span>`:`<span class="rsv-tipo-pedido">Pedido</span>`;
     return`<tr onclick="abrirReservaDetalle('${r.codigo_reserva}')" style="cursor:pointer">
-      <td><span class="td-code" style="color:var(--accent)">${r.codigo_reserva}</span><div style="font-size:9px;color:var(--muted2);margin-top:1px">${fecha}</div></td>
+      <td><span class="td-code" style="color:var(--muted2)">${fecha}</span></td>
+      <td><span class="td-code" style="color:var(--accent)">${r.codigo_reserva}</span></td>
       <td>${tipoBadge}</td>
-      <td><div class="td-main" style="font-size:11px">${r.nombre_cliente||'—'}</div>${codCl}</td>
-      <td>${codProd}</td>
-      <td class="td-trunc" style="font-size:11px;color:var(--text);max-width:160px">${productoFull}</td>
+      <td><span class="td-code">${r.id_cliente?clCodigo(r.id_cliente):'—'}</span></td>
+      <td class="td-main" style="font-size:11px">${r.nombre_cliente||'—'}</td>
+      <td>${r.codigo_producto?`<span class="td-code" style="color:var(--purple)">${r.codigo_producto}</span>`:`<span style="font-size:9px;color:var(--muted2);font-style:italic">—</span>`}</td>
+      <td class="td-trunc" style="font-size:11px;color:var(--text)">${productoFull}</td>
       <td class="right td-amt">${fmt(acordado)}</td>
-      <td class="right"><div class="td-amt" style="color:var(--green)">${fmt(r.total_abonado)}</div>${pctChip}</td>
+      <td class="right td-amt" style="color:var(--green)">${fmt(r.total_abonado)}</td>
       <td class="right td-amt" style="${saldo<=0?'color:var(--green)':'color:var(--accent)'}">${fmt(saldo)}</td>
       <td>${estadoBadge}</td>
       <td style="text-align:center"><button class="btn-edit-inv" onclick="event.stopPropagation();abrirReservaDetalle('${r.codigo_reserva}')" title="Ver detalle">›</button></td>
@@ -2731,11 +2729,12 @@ async function registrarAbono(){
     // Registrar en flujo como RESERVA (visible pero no cuenta en caja real)
     const descProd=r?[r.marca,r.modelo,r.colorway].filter(Boolean).join(' ')||rsvCodigoActivo:rsvCodigoActivo;
     const descCl=r?.nombre_cliente?' · '+r.nombre_cliente:'';
-    await db.from('flujo_caja').insert({
+    const{error:fcErr}=await db.from('flujo_caja').insert({
       fecha,tipo:'RESERVA',categoria:'RESERVA',
       descripcion:`Abono ${rsvCodigoActivo} · ${descProd}${descCl}`,
       ingreso_soles:monto,egreso_soles:0,referencia_id:rsvCodigoActivo
     });
+    if(fcErr)console.warn('flujo_caja abono insert error',fcErr);
     toast('✓ Abono registrado','ok');
     await loadReservas();
     abrirReservaDetalle(rsvCodigoActivo);
@@ -3945,21 +3944,24 @@ async function registrarReserva(){
       marca,modelo,colorway,talla,
       precio_acordado:precio,fecha,notas
     });
-    if(error)throw error;
+    if(error){console.error('reservas insert error',error);throw error;}
     if(codProd){
-      await db.from('inventario').update({estado:'RESERVADO'}).eq('codigo_producto',codProd);
+      const{error:invErr}=await db.from('inventario').update({estado:'RESERVADO'}).eq('codigo_producto',codProd);
+      if(invErr)console.warn('inventario update error',invErr);
     }
     if(adelanto>0){
-      await db.from('abonos').insert({
+      const{error:abonoErr}=await db.from('abonos').insert({
         codigo_reserva:codigoReserva,monto:adelanto,
         fecha,es_pago_final:false,notas:'Adelanto inicial'
       });
+      if(abonoErr){console.error('abonos insert error',abonoErr);throw abonoErr;}
       const descFlujo=[marca,modelo,colorway].filter(Boolean).join(' ')||codigoReserva;
-      await db.from('flujo_caja').insert({
+      const{error:fcErr}=await db.from('flujo_caja').insert({
         fecha,tipo:'RESERVA',categoria:'RESERVA',
         descripcion:`Adelanto ${codigoReserva} · ${descFlujo}${nombreCliente?' · '+nombreCliente:''}`,
         ingreso_soles:adelanto,egreso_soles:0,referencia_id:codigoReserva
       });
+      if(fcErr)console.warn('flujo_caja reserva insert error',fcErr);
     }
     toast(`✓ ${codigoReserva} — Reserva registrada`,'ok');
     ['rv-precio','rv-adelanto','rv-notas','rv-marca','rv-modelo','rv-colorway'].forEach(id=>{
