@@ -2915,8 +2915,9 @@ async function rsvVincularProducto(){
   try{
     const{error:rsvErr}=await db.from('reservas').update({codigo_producto:cod}).eq('codigo_reserva',rsvCodigoActivo);
     if(rsvErr)throw rsvErr;
-    const{error:invErr}=await db.from('inventario').update({estado:'RESERVADO'}).eq('codigo_producto',cod);
+    const{data:invUpd,error:invErr}=await db.from('inventario').update({estado:'RESERVADO'}).eq('codigo_producto',cod).select('codigo_producto,estado');
     if(invErr){console.error('inventario update error',invErr);toast('⚠ Reserva actualizada pero no se pudo marcar el producto: '+invErr.message,'warn');}
+    else if(!invUpd||!invUpd.length){console.warn('inventario update: 0 filas para',cod);toast('⚠ Producto no encontrado en inventario','warn');}
     else toast('✓ Producto vinculado — inventario marcado como RESERVADO','ok');
     await Promise.all([loadReservas(),loadInventario()]);
     abrirReservaDetalle(rsvCodigoActivo);
@@ -4072,8 +4073,10 @@ async function registrarReserva(){
     });
     if(error){console.error('reservas insert error',error);throw error;}
     if(codProd){
-      const{error:invErr}=await db.from('inventario').update({estado:'RESERVADO'}).eq('codigo_producto',codProd);
+      const{data:invUpd,error:invErr}=await db.from('inventario').update({estado:'RESERVADO'}).eq('codigo_producto',codProd).select('codigo_producto,estado');
       if(invErr){console.error('inventario update error',invErr);toast('⚠ Reserva creada pero no se pudo marcar el producto: '+invErr.message,'warn');}
+      else if(!invUpd||!invUpd.length){console.warn('inventario update: 0 filas afectadas para',codProd);toast('⚠ Reserva creada pero el producto no se encontró en inventario','warn');}
+      else console.log('inventario marcado RESERVADO:',invUpd[0]);
     }
     if(adelanto>0){
       const{error:abonoErr}=await db.from('abonos').insert({
