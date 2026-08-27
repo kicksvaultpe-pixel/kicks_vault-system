@@ -101,6 +101,10 @@ nav{position:sticky;top:0;z-index:200;background:var(--card);border-bottom:1px s
 .info-box{padding:10px 14px;border-radius:8px;font-size:11px;font-family:'Archivo',sans-serif;line-height:1.6;margin-bottom:14px}
 .info-orange{background:rgba(194,65,12,.08);border:1px solid rgba(194,65,12,.25);color:var(--orange)}
 .info-purple{background:rgba(109,40,217,.08);border:1px solid rgba(109,40,217,.25);color:var(--purple)}
+.info-green{background:rgba(22,163,74,.08);border:1px solid rgba(22,163,74,.25);color:var(--green)}
+.info-red{background:rgba(220,38,38,.07);border:1px solid rgba(220,38,38,.22);color:var(--red)}
+tbody tr.row-rsv{background:rgba(109,40,217,.03)}
+tbody tr.row-rsv:hover td{background:rgba(109,40,217,.06)}
 
 /* BUTTONS */
 .btn{padding:11px 24px;border:none;border-radius:9px;font-family:'Archivo';font-size:12px;font-weight:700;letter-spacing:.5px;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:7px}
@@ -2020,7 +2024,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   </div>
 
   <div class="table-toolbar" style="flex-wrap:wrap;gap:8px;margin-bottom:12px">
-    <input type="search" id="rsv-search" class="search-input" placeholder="RSV-001, C-005, marca, modelo, IVT-..." oninput="filtrarReservas()" style="flex:1;min-width:200px">
+    <input type="text" id="rsv-search" class="search-box" placeholder="RSV-001, C-005, marca, modelo, IVT-..." oninput="filtrarReservas()" style="flex:1;min-width:180px">
     <div style="display:flex;gap:6px;flex-wrap:wrap">
       <button class="btn btn-ghost btn-sm rsv-filter-btn active" data-estado="" onclick="setRsvFiltro('',this)">Todas</button>
       <button class="btn btn-ghost btn-sm rsv-filter-btn" data-estado="ACTIVA" onclick="setRsvFiltro('ACTIVA',this)">Activas</button>
@@ -2670,7 +2674,6 @@ function abrirReservaDetalle(codigo){
   document.getElementById('rsv-p-acordado').textContent=fmt(acordado);
   document.getElementById('rsv-p-saldo').textContent=fmt(saldo);
   document.getElementById('rsv-p-saldo').className='rsv-saldo-val'+(saldo<=0?' pagado':'');
-  document.getElementById('rsv-p-precio-final').value=acordado||'';
   // Abonos
   const abonos=[...(r.abonos||[])].sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
   const listEl=document.getElementById('rsv-p-abonos-list');
@@ -2741,14 +2744,65 @@ async function registrarAbono(){
   }catch(e){toast('Error: '+e.message,'err');}
 }
 
-async function completarReserva(){
+function abrirModalCompletarRsv(){
   if(!rsvCodigoActivo)return;
   const r=reservasCache.find(x=>x.codigo_reserva===rsvCodigoActivo);
   if(!r)return;
   if(!r.codigo_producto){toast('Vincula primero un producto del inventario','warn');return;}
-  const precioFinal=parseFloat(document.getElementById('rsv-p-precio-final').value)||0;
+  const acordado=parseFloat(r.precio_acordado||0);
+  const saldo=Math.max(0,acordado-r.total_abonado);
+  const partes=[r.marca,r.modelo,r.colorway].filter(Boolean).join(' ');
+  const prod=r.talla?`${partes} (${r.talla})`:partes||r.codigo_producto;
+  document.getElementById('mcrv-summary').innerHTML=`
+    <div style="display:flex;flex-direction:column;gap:7px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="color:var(--muted2)">Reserva</span>
+        <span class="td-code" style="color:var(--accent)">${r.codigo_reserva}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="color:var(--muted2)">Producto</span>
+        <span style="font-weight:600;text-align:right;max-width:220px;font-size:11px">${prod}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="color:var(--muted2)">Cód. inventario</span>
+        <span class="td-code" style="color:var(--purple)">${r.codigo_producto}</span>
+      </div>
+      ${r.nombre_cliente?`<div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="color:var(--muted2)">Cliente</span>
+        <span style="font-weight:600">${r.nombre_cliente}</span>
+      </div>`:''}
+      <div style="border-top:1px solid var(--border);padding-top:8px;margin-top:2px;display:flex;flex-direction:column;gap:5px">
+        <div style="display:flex;justify-content:space-between">
+          <span style="color:var(--muted2)">Acordado</span>
+          <span class="td-amt">${fmt(acordado)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between">
+          <span style="color:var(--muted2)">Ya abonado</span>
+          <span class="td-amt" style="color:var(--green)">${fmt(r.total_abonado)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between">
+          <span style="color:var(--muted2)">Saldo pendiente</span>
+          <span class="td-amt" style="color:${saldo>0.01?'var(--accent)':'var(--green)'}">${fmt(saldo)}</span>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('mcrv-precio').value=acordado||'';
+  document.getElementById('modal-completar-rsv').classList.add('open');
+  setTimeout(()=>document.getElementById('mcrv-precio').focus(),120);
+}
+
+function cerrarModalCompletarRsv(){
+  document.getElementById('modal-completar-rsv').classList.remove('open');
+}
+
+async function confirmarCompletarReserva(){
+  if(!rsvCodigoActivo)return;
+  const r=reservasCache.find(x=>x.codigo_reserva===rsvCodigoActivo);
+  if(!r||!r.codigo_producto)return;
+  const precioFinal=parseFloat(document.getElementById('mcrv-precio').value)||0;
   if(!precioFinal){toast('Ingresa el precio final de venta','warn');return;}
-  if(!confirm(`¿Completar ${r.codigo_reserva} y generar venta por ${fmt(precioFinal)}?\n\nSe marcará el producto como VENDIDO.`))return;
+  const btn=document.getElementById('btn-mcrv-confirm');
+  setLoading(btn,true);
   try{
     const fecha=new Date().toISOString().slice(0,10);
     const prod=inventarioCache.find(p=>p.codigo_producto===r.codigo_producto);
@@ -2759,43 +2813,80 @@ async function completarReserva(){
     const{error:eV}=await db.from('ventas').insert({
       codigo_venta:cv,codigo_producto:r.codigo_producto,
       precio_venta_soles:precioFinal,
-      canal:'RESERVA',
-      comprador:r.nombre_cliente,
+      canal:'PRESENCIAL',
+      comprador:r.nombre_cliente||null,
       id_cliente:r.id_cliente||null,
       ganancia:g,rentabilidad:rt,fecha,
       comentarios:`Reserva ${r.codigo_reserva}`
     });
-    if(eV)throw eV;
+    if(eV){console.error('ventas insert error',eV);throw eV;}
     const saldo=Math.max(0,parseFloat(r.precio_acordado||0)-r.total_abonado);
     if(saldo>0.01){
-      await db.from('abonos').insert({
+      const{error:aE}=await db.from('abonos').insert({
         codigo_reserva:rsvCodigoActivo,monto:saldo,fecha,
         es_pago_final:true,notas:'Pago final — '+cv
       });
+      if(aE)console.warn('abono final error',aE);
     }
     await db.from('inventario').update({estado:'VENDIDO'}).eq('codigo_producto',r.codigo_producto);
     await db.from('reservas').update({estado:'COMPLETADA'}).eq('codigo_reserva',rsvCodigoActivo);
     toast(`✓ ${cv} generada — Reserva completada`,'ok');
+    cerrarModalCompletarRsv();
     cerrarReservaDetalle();
     await Promise.all([loadReservas(),loadInventario()]);
   }catch(e){toast('Error: '+e.message,'err');}
+  finally{setLoading(btn,false,'✓ Confirmar venta');}
 }
 
-async function cancelarReserva(){
+function abrirModalCancelarRsv(){
   if(!rsvCodigoActivo)return;
   const r=reservasCache.find(x=>x.codigo_reserva===rsvCodigoActivo);
   if(!r)return;
   const nombre=[r.marca,r.modelo,r.colorway].filter(Boolean).join(' ')||r.codigo_reserva;
-  if(!confirm(`¿Cancelar la reserva ${r.codigo_reserva}?\n\n${nombre}\n\n${r.codigo_producto?'El producto volverá a estado DISPONIBLE.':''}`))return;
+  document.getElementById('mxrv-info').innerHTML=`
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="color:var(--muted2)">Reserva</span>
+        <span class="td-code" style="color:var(--accent)">${r.codigo_reserva}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="color:var(--muted2)">Producto</span>
+        <span style="font-weight:600;font-size:11px">${nombre}</span>
+      </div>
+      ${r.nombre_cliente?`<div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="color:var(--muted2)">Cliente</span>
+        <span style="font-weight:600">${r.nombre_cliente}</span>
+      </div>`:''}
+      ${r.codigo_producto?`<div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="color:var(--muted2)">Inventario</span>
+        <span class="td-code" style="color:var(--purple)">${r.codigo_producto} → DISPONIBLE</span>
+      </div>`:''}
+    </div>`;
+  document.getElementById('modal-cancelar-rsv').classList.add('open');
+}
+
+function cerrarModalCancelarRsv(){
+  document.getElementById('modal-cancelar-rsv').classList.remove('open');
+}
+
+async function confirmarCancelarReserva(){
+  if(!rsvCodigoActivo)return;
+  const r=reservasCache.find(x=>x.codigo_reserva===rsvCodigoActivo);
+  if(!r)return;
+  const btn=document.getElementById('btn-mxrv-confirm');
+  setLoading(btn,true);
   try{
-    await db.from('reservas').update({estado:'CANCELADA'}).eq('codigo_reserva',rsvCodigoActivo);
+    const{error:rE}=await db.from('reservas').update({estado:'CANCELADA'}).eq('codigo_reserva',rsvCodigoActivo);
+    if(rE)throw rE;
     if(r.codigo_producto){
       await db.from('inventario').update({estado:'DISPONIBLE'}).eq('codigo_producto',r.codigo_producto);
     }
     toast('✓ Reserva cancelada','ok');
+    cerrarModalCancelarRsv();
     cerrarReservaDetalle();
     await Promise.all([loadReservas(), r.codigo_producto?loadInventario():Promise.resolve()]);
   }catch(e){toast('Error: '+e.message,'err');}
+  finally{setLoading(btn,false,'Sí, cancelar reserva');}
 }
 
 async function rsvVincularProducto(){
@@ -3008,7 +3099,7 @@ function fillDataLists(){
   comboSetData('cl-inv-talla', tallas);
   // Opciones fijas — inventario filtros
   comboSetData('cl-inv-cat', ['— Todos —','👟 ZAPATILLAS','👕 ROPA','💎 ACCESORIOS','📦 OTROS']);
-  comboSetData('cl-inv-estado', ['— Todos —','✅ DISPONIBLE','💰 VENDIDO','⏳ PENDIENTE','❌ CANCELADO']);
+  comboSetData('cl-inv-estado', ['— Todos —','✅ DISPONIBLE','🔒 RESERVADO','💰 VENDIDO','⏳ PENDIENTE','❌ CANCELADO']);
   // Opciones fijas — toolbars otros tabs
   comboSetData('cl-vt-f-canal', ['— Todos —','📸 INSTAGRAM','💬 WHATSAPP','🏪 PRESENCIAL','🔹 OTRO']);
   comboSetData('cl-clf-tipo', ['— Todos —','👤 REGULAR','⭐ VIP','📦 MAYORISTA']);
@@ -3078,6 +3169,8 @@ function renderInventario(rows){
       estadoBadge='<span class="badge badge-yellow">PAGO PEND.</span>';
     else if(p.estado==='DISPONIBLE')
       estadoBadge='<span class="badge badge-green">DISPONIBLE</span>';
+    else if(p.estado==='RESERVADO')
+      estadoBadge='<span class="badge badge-purple">RESERVADO</span>';
     else
       estadoBadge='<span class="badge badge-accent">VENDIDO</span>';
 
@@ -3115,7 +3208,7 @@ function renderInventario(rows){
     const catCls=catMap[(p.categoria||'').toUpperCase()]||'cat-otros';
     const catLabel=p.categoria||'—';
 
-    const rowCls=isCancelado||p.estado==='VENDIDO'?'row-dim':isPendiente?'row-pend':'';
+    const rowCls=isCancelado||p.estado==='VENDIDO'?'row-dim':isPendiente?'row-pend':p.estado==='RESERVADO'?'row-rsv':'';
     return`<tr class="${rowCls}">
       <td class="inv-fecha">${fecha}</td>
       <td><span class="inv-cod">${p.codigo_producto}</span></td>
@@ -5127,15 +5220,8 @@ init();
     <!-- Completar reserva -->
     <div class="iep-section" id="rsv-p-completar-wrap">
       <div class="iep-section-lbl">Cerrar reserva</div>
-      <div class="field" style="margin-bottom:10px">
-        <label>Precio final de venta S/.</label>
-        <div style="position:relative">
-          <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--muted2);pointer-events:none">S/.</span>
-          <input type="number" id="rsv-p-precio-final" step="0.01" min="0" placeholder="0.00" style="padding-left:30px;width:100%">
-        </div>
-      </div>
-      <button class="btn btn-primary" style="width:100%;margin-bottom:8px" onclick="completarReserva()">✓ Completar y generar venta</button>
-      <button class="btn btn-ghost btn-sm" style="width:100%;color:var(--red);border-color:rgba(220,38,38,.4)" onclick="cancelarReserva()">Cancelar reserva</button>
+      <button class="btn btn-primary" style="width:100%;margin-bottom:8px" onclick="abrirModalCompletarRsv()">✓ Completar y generar venta</button>
+      <button class="btn btn-ghost btn-sm" style="width:100%;color:var(--red);border-color:rgba(220,38,38,.4)" onclick="abrirModalCancelarRsv()">Cancelar reserva</button>
     </div>
 
     <!-- Notas -->
@@ -5146,6 +5232,50 @@ init();
 
   </div>
 </div>
+
+<!-- ══ MODAL COMPLETAR RESERVA ══ -->
+<div class="modal-overlay" id="modal-completar-rsv">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-title">
+      <span>✓ Completar Reserva</span>
+      <button class="modal-close" onclick="cerrarModalCompletarRsv()">×</button>
+    </div>
+    <div id="mcrv-summary" style="background:var(--bg);border-radius:10px;padding:14px;margin-bottom:16px;font-size:12px"></div>
+    <div class="field" style="margin-bottom:14px">
+      <label>Precio final de venta S/. *</label>
+      <div style="position:relative">
+        <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--muted2);pointer-events:none">S/.</span>
+        <input type="number" id="mcrv-precio" step="0.01" min="0" placeholder="0.00" style="padding-left:30px;width:100%;font-size:16px;font-weight:700">
+      </div>
+    </div>
+    <div class="info-box info-green" style="margin-bottom:16px">
+      El producto pasará a <strong>VENDIDO</strong> y la venta quedará registrada en Resultados.
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" style="flex:1" id="btn-mcrv-confirm" onclick="confirmarCompletarReserva()">✓ Confirmar venta</button>
+      <button class="btn btn-ghost" onclick="cerrarModalCompletarRsv()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL CANCELAR RESERVA ══ -->
+<div class="modal-overlay" id="modal-cancelar-rsv">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-title">
+      <span>Cancelar Reserva</span>
+      <button class="modal-close" onclick="cerrarModalCancelarRsv()">×</button>
+    </div>
+    <div id="mxrv-info" style="background:var(--bg);border-radius:10px;padding:14px;margin-bottom:14px;font-size:12px"></div>
+    <div class="info-box info-red" style="margin-bottom:16px;font-size:11px">
+      Esta acción no se puede deshacer. Los abonos registrados quedan en historial. El producto (si aplica) volverá a estado <strong>DISPONIBLE</strong>.
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn" style="flex:1;background:var(--red);color:#fff;border:none" id="btn-mxrv-confirm" onclick="confirmarCancelarReserva()">Sí, cancelar reserva</button>
+      <button class="btn btn-ghost" onclick="cerrarModalCancelarRsv()">No, volver</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
 <!-- deploy Fri Mar  6 02:46:01 UTC 2026 -->
