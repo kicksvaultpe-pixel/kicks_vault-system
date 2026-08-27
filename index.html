@@ -414,14 +414,6 @@ input[list] { cursor: text; }
 .fc-bubble.fin{border-color:rgba(96,165,250,.18);background:linear-gradient(135deg,var(--card) 0%,rgba(96,165,250,.03) 100%)}
 .fc-bubble.actual{border-color:rgba(37,99,235,.18);background:linear-gradient(135deg,var(--card) 0%,rgba(37,99,235,.03) 100%)}
 
-/* Burbuja 4: Compras Pendientes (global, todos los meses) */
-.fc-pend-card{background:var(--card);border:1px solid rgba(251,191,36,.35);border-radius:14px;padding:18px 22px;margin-bottom:14px;position:relative;overflow:hidden;display:flex;align-items:center;flex-wrap:wrap;gap:10px 36px;box-shadow:0 2px 8px rgba(251,191,36,.08)}
-.fc-pend-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--yellow),transparent)}
-.fc-pend-card .fc-chip{margin-bottom:0;flex:0 0 100%}
-.fc-pend-card .fpc-item{display:flex;flex-direction:column;gap:3px;min-width:120px}
-.fc-pend-card .fpc-lbl{font-size:11px;color:var(--muted2);font-weight:600;letter-spacing:.3px}
-.fc-pend-card .fpc-val{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--yellow)}
-.fc-pend-card .fpc-val.neutral{color:var(--muted)}
 
 /* Chip label */
 .fc-chip{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
@@ -1305,7 +1297,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   <!-- ── PAGO ── -->
   <div id="form-pago" class="form-panel">
     <div class="card">
-      <div class="card-label">Nuevo Gasto</div>
+      <div class="card-label">Nuevo Gasto Operativo</div>
       <div class="form-grid g2">
         <div class="field span2"><label>Concepto</label><input type="text" id="pg-concepto" placeholder="STAND SL / SUNAT / WEB..."></div>
         <div class="field"><label>Categoría</label>
@@ -1878,26 +1870,6 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <div class="fc-ctrl-badge ok" id="fc-control-badge" style="display:none">✓ Cuadra</div>
     </div>
 
-  </div>
-
-  <!-- Compras Pendientes — todos los meses -->
-  <div class="fc-pend-card">
-    <div class="fc-chip">
-      <div class="fc-chip-dot" style="background:var(--yellow);box-shadow:0 0 6px var(--yellow)"></div>
-      Compras Pendientes
-    </div>
-    <div class="fpc-item">
-      <span class="fpc-lbl">⏳ Por pagar S/.</span>
-      <span class="fpc-val" id="fc-allpend-soles">S/. 0.00</span>
-    </div>
-    <div class="fpc-item">
-      <span class="fpc-lbl">⏳ Por pagar $</span>
-      <span class="fpc-val" id="fc-allpend-usd">$ 0.00</span>
-    </div>
-    <div class="fpc-item">
-      <span class="fpc-lbl">Productos pendientes</span>
-      <span class="fpc-val neutral" id="fc-allpend-cnt">0</span>
-    </div>
   </div>
 
   <!-- Indicadores -->
@@ -4646,13 +4618,6 @@ async function loadFlujo() {
   document.getElementById('fc-pend-soles').textContent    = fmt(pendComprasSoles);
   document.getElementById('fc-pend-usd').textContent      = fmtUsd(pendComprasUsd);
 
-  // ── COMPRAS PENDIENTES GLOBALES (todos los meses) ──
-  const allPendInv = inventarioCache.filter(p => p.pago_estado === 'PENDIENTE');
-  const allPendS   = allPendInv.filter(p => (p.moneda||'SOLES') !== 'USD').reduce((s,p) => s + parseFloat(p.precio_compra_soles||0), 0);
-  const allPendU   = allPendInv.filter(p => p.moneda === 'USD').reduce((s,p) => s + parseFloat(p.precio_compra_usd||0), 0);
-  document.getElementById('fc-allpend-soles').textContent = fmt(allPendS);
-  document.getElementById('fc-allpend-usd').textContent   = fmtUsd(allPendU);
-  document.getElementById('fc-allpend-cnt').textContent   = allPendInv.length;
 
   // ── RENDER TABLA ──
   renderFlujoTabla();
@@ -4728,7 +4693,7 @@ function renderFlujoTabla() {
       desc=prod?buildProdDesc(prod):(cleanDesc(f.descripcion)||'—');
     } else if(accion==='PAGO'){
       const n=parseInt(f.referencia_id)||0;
-      codOp=n?'PG-'+String(n).padStart(4,'0'):(f.codigo_operacion||'—');
+      codOp=n?'GS-'+String(n).padStart(4,'0'):(f.codigo_operacion||'—');
       desc=cleanDesc(f.descripcion)||f.categoria||'—';
     } else if(accion==='RESERVA'){
       codOp=f.referencia_id||'—'; // RSV-XXX
@@ -4746,7 +4711,7 @@ function renderFlujoTabla() {
     const tdCodRef=codRef!=='—'?`<span class="td-code">${codRef}</span>`:'<span class="td-muted">—</span>';
     return `<tr class="${trClass}">
       <td class="td-fecha">${fmtFecha(f.fecha)}</td>
-      <td><span class="fc-accion-badge fc-accion-${accion}">${accion}</span></td>
+      <td><span class="fc-accion-badge fc-accion-${accion}">${accion==='PAGO'?'GASTO':accion}</span></td>
       <td>${tdCodOp}</td>
       <td>${tdCodRef}</td>
       <td class="td-desc">${desc}</td>
