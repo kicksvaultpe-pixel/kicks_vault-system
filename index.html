@@ -205,7 +205,7 @@ tbody tr.row-dim{opacity:.45}
 .sc-grid.g5{grid-template-columns:1.2fr auto auto auto auto;column-gap:10px}
 /* Row separators between Zapatillas and Ropa rows */
 .sc-stock .sc-grid.g5:first-of-type>*:nth-child(n+11),
-.sc-valor .sc-grid.g2:first-of-type>*:nth-child(n+5),
+.sc-valor .sc-grid.g4:first-of-type>*:nth-child(n+9),
 .sc-compras .sc-grid.g3:first-of-type>*:nth-child(n+7){border-top:1px solid var(--border);padding-top:7px;margin-top:2px}
 /* Valor Stock 3-KPI strip: Total | Disponible | Reservado */
 .sv-trio{display:flex;background:var(--surface);border-radius:10px;border:1px solid var(--border);overflow:hidden}
@@ -1483,13 +1483,19 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         </div>
       </div>
       <div class="sg-divider"></div>
-      <div class="sc-grid g2">
+      <div class="sc-grid g4">
         <span></span>
-        <span class="sg-h">Monto S/.</span>
+        <span class="sg-h" style="color:var(--accent)">Total</span>
+        <span class="sg-h" style="color:var(--green)">Disp.</span>
+        <span class="sg-h" style="color:var(--purple)">Reserv.</span>
         <span class="sg-mc">👟 Zapatillas</span>
         <span class="sg-mn accent" id="st-zap-val">—</span>
+        <span class="sg-mn" style="color:var(--green)" id="st-zap-disp-val">—</span>
+        <span class="sg-mn" style="color:var(--purple)" id="st-zap-rsv-val">—</span>
         <span class="sg-mc">👕 Ropa &amp; Otros</span>
         <span class="sg-mn accent" id="st-ropa-val">—</span>
+        <span class="sg-mn" style="color:var(--green)" id="st-ropa-disp-val">—</span>
+        <span class="sg-mn" style="color:var(--purple)" id="st-ropa-rsv-val">—</span>
       </div>
     </div>
     <!-- COMPRAS DEL MES -->
@@ -2269,8 +2275,15 @@ document.addEventListener('click', e => {
     return;
   }
   _comboClosing = null;
-  if (document.activeElement !== input) input.focus();
-  else comboOpen(input.id, list ? list.id : '');
+  if (input.readOnly) {
+    // iOS doesn't focus readonly inputs so onfocus never fires — open directly
+    if (list && list.classList.contains('open')) list.classList.remove('open');
+    else comboOpen(input.id, list ? list.id : '');
+  } else if (document.activeElement !== input) {
+    input.focus();
+  } else {
+    comboOpen(input.id, list ? list.id : '');
+  }
 });
 
 // Close AC on outside click
@@ -3337,11 +3350,15 @@ function updateStats(mes='',vendidosMes=[],vendidosDespues=[]){
   const vRsvRopa  = rsvRopa.reduce((s,p)=>s+parseFloat(p.precio_final||0),0);
   const vDispAll  = dispAll.reduce((s,p)=>s+parseFloat(p.precio_final||0),0);
   const vRsvAll   = rsvAll.reduce((s,p)=>s+parseFloat(p.precio_final||0),0);
-  set('st-zap-val',   fmt(vDispZap  + vRsvZap));   // total activo zap
-  set('st-ropa-val',  fmt(vDispRopa + vRsvRopa));  // total activo ropa
-  set('st-total-val', fmt(vDispAll  + vRsvAll));   // total activo global
-  set('st-disp-val',  fmt(vDispAll));              // sub: solo disponible
-  set('st-rsv-val',   fmt(vRsvAll));               // sub: solo reservado
+  set('st-zap-val',      fmt(vDispZap  + vRsvZap));
+  set('st-zap-disp-val', fmt(vDispZap));
+  set('st-zap-rsv-val',  fmt(vRsvZap));
+  set('st-ropa-val',     fmt(vDispRopa + vRsvRopa));
+  set('st-ropa-disp-val',fmt(vDispRopa));
+  set('st-ropa-rsv-val', fmt(vRsvRopa));
+  set('st-total-val',    fmt(vDispAll  + vRsvAll));
+  set('st-disp-val',     fmt(vDispAll));
+  set('st-rsv-val',      fmt(vRsvAll));
   // Compras del mes (usa mesCompras: mes seleccionado o mes actual en historia)
   const mesPagados=inventarioCache.filter(p=>
     p.fecha_compra&&p.fecha_compra.startsWith(mesCompras)&&
