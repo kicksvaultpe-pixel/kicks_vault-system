@@ -2276,9 +2276,10 @@ document.addEventListener('click', e => {
   }
   _comboClosing = null;
   if (input.readOnly) {
-    // iOS doesn't focus readonly inputs so onfocus never fires — open directly
-    if (list && list.classList.contains('open')) list.classList.remove('open');
-    else comboOpen(input.id, list ? list.id : '');
+    // Always call comboOpen — toggle-close is handled above via _comboClosing (mousedown)
+    // On desktop: onfocus may have already opened it (double render is harmless)
+    // On iOS: onfocus never fires for readonly, so this is the sole opener
+    comboOpen(input.id, list ? list.id : '');
   } else if (document.activeElement !== input) {
     input.focus();
   } else {
