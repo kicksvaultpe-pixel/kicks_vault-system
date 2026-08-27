@@ -2341,6 +2341,14 @@ function comboRender(inputId, listId, val) {
     return `<div class="combo-opt" onclick="comboPick('${inputId}','${listId}','${i.replace(/'/g,"\'")}')">${hl}</div>`;
   }).join('');
   list.classList.add('open');
+  // Fixed positioning so the dropdown escapes overflow:hidden/auto ancestors (mobile toolbar scroll)
+  const inp = document.getElementById(inputId);
+  if (inp) {
+    const r = inp.getBoundingClientRect();
+    const maxH = Math.min(220, window.innerHeight - r.bottom - 8);
+    list.style.cssText = list.style.cssText +
+      `;position:fixed;top:${r.bottom+4}px;left:${r.left}px;width:${r.width}px;right:auto;max-height:${Math.max(80,maxH)}px;z-index:9999`;
+  }
 }
 
 function comboPick(inputId, listId, val) {
@@ -2392,6 +2400,10 @@ document.addEventListener('click', e => {
   if (!e.target.closest('.combo-wrap'))
     document.querySelectorAll('.combo-list').forEach(l => l.classList.remove('open'));
 });
+// Close combos on scroll so fixed-position dropdown doesn't drift
+window.addEventListener('scroll', () => {
+  document.querySelectorAll('.combo-list.open').forEach(l => l.classList.remove('open'));
+}, true);
 
 // ── ORDENES DE COMPRA ──
 let ocCache=[], ocModo='nueva', ocSessionCodigo=null, ocSessionCount=0;
