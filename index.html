@@ -2334,6 +2334,28 @@ function comboRender(inputId, listId, val) {
     return `<div class="combo-opt" onclick="comboPick('${inputId}','${listId}','${i.replace(/'/g,"\'")}')">${hl}</div>`;
   }).join('');
   list.classList.add('open');
+  // Combos dentro de .table-toolbar tienen overflow-x:auto en móvil que clipa el dropdown.
+  // Usamos position:fixed calculado desde el viewport para escapar ese clip.
+  const inp2 = document.getElementById(inputId);
+  if (inp2 && inp2.closest('.table-toolbar')) {
+    const r = inp2.getBoundingClientRect();
+    list.style.position = 'fixed';
+    list.style.top    = (r.bottom + 4) + 'px';
+    list.style.left   = r.left + 'px';
+    list.style.width  = r.width + 'px';
+    list.style.right  = 'auto';
+    list.style.maxHeight = Math.min(220, Math.max(80, window.innerHeight - r.bottom - 8)) + 'px';
+    list.style.zIndex = '9999';
+  } else {
+    // Fuera de toolbar: resetear a posición relativa normal
+    list.style.position = '';
+    list.style.top = '';
+    list.style.left = '';
+    list.style.width = '';
+    list.style.right = '';
+    list.style.maxHeight = '';
+    list.style.zIndex = '';
+  }
 }
 
 function comboPick(inputId, listId, val) {
