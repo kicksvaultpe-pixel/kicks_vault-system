@@ -207,19 +207,12 @@ tbody tr.row-dim{opacity:.45}
 .sc-stock .sc-grid.g5:first-of-type>*:nth-child(n+11),
 .sc-valor .sc-grid.g2:first-of-type>*:nth-child(n+5),
 .sc-compras .sc-grid.g3:first-of-type>*:nth-child(n+7){border-top:1px solid var(--border);padding-top:7px;margin-top:2px}
-/* Valor Stock hero */
-.sv-hero{padding-bottom:12px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:2px;margin-bottom:2px}
-.sv-hero-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2)}
-.sv-hero-val{font-family:"Archivo Black";font-size:26px;letter-spacing:-.5px;font-variant-numeric:tabular-nums;line-height:1.1;color:var(--accent)}
-/* Disp / Reservado split panel */
-.sv-split{display:grid;grid-template-columns:1fr 1px 1fr;background:var(--surface);border-radius:8px;border:1px solid var(--border);overflow:hidden}
-.sv-split-sep{background:var(--border)}
-.sv-split-item{padding:8px 10px;display:flex;flex-direction:column;gap:3px}
-.sv-split-item.rsv{align-items:flex-end}
-.sv-split-label{font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted2)}
-.sv-split-item.rsv .sv-split-label{color:var(--purple)}
-.sv-split-val{font-family:"Archivo Black";font-size:13px;font-variant-numeric:tabular-nums;color:var(--text)}
-.sv-split-item.rsv .sv-split-val{color:var(--purple)}
+/* Valor Stock 3-KPI strip: Total | Disponible | Reservado */
+.sv-trio{display:flex;background:var(--surface);border-radius:10px;border:1px solid var(--border);overflow:hidden}
+.sv-trio-sep{width:1px;background:var(--border);flex-shrink:0}
+.sv-trio-item{flex:1;padding:10px 6px;display:flex;flex-direction:column;gap:3px;align-items:center;text-align:center}
+.sv-trio-lbl{font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted2)}
+.sv-trio-val{font-family:"Archivo Black";font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap;line-height:1.1;color:var(--text)}
 /* Tab Ingresos */
 .st-big-num{font-family:"Archivo Black";font-size:26px;line-height:1.1;margin:8px 0 4px;font-variant-numeric:tabular-nums}
 .st-big-num.accent{color:var(--accent)}.st-big-num.green{color:var(--green)}.st-big-num.red{color:var(--red)}
@@ -1473,29 +1466,30 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
     <!-- VALOR STOCK -->
     <div class="stat-card sc-valor">
       <div class="sc-chip">Valor Stock</div>
-      <div class="sv-hero">
-        <span class="sv-hero-label">Total Activo</span>
-        <span class="sv-hero-val" id="st-total-val">—</span>
+      <div class="sv-trio">
+        <div class="sv-trio-item">
+          <span class="sv-trio-lbl">Total</span>
+          <span class="sv-trio-val accent" id="st-total-val">—</span>
+        </div>
+        <div class="sv-trio-sep"></div>
+        <div class="sv-trio-item">
+          <span class="sv-trio-lbl" style="color:var(--green)">Dispon.</span>
+          <span class="sv-trio-val" style="color:var(--green)" id="st-disp-val">—</span>
+        </div>
+        <div class="sv-trio-sep"></div>
+        <div class="sv-trio-item">
+          <span class="sv-trio-lbl" style="color:var(--purple)">Reserv.</span>
+          <span class="sv-trio-val" style="color:var(--purple)" id="st-rsv-val">—</span>
+        </div>
       </div>
-      <div class="sc-grid g2" style="margin-top:10px">
+      <div class="sg-divider"></div>
+      <div class="sc-grid g2">
         <span></span>
         <span class="sg-h">Monto S/.</span>
         <span class="sg-mc">👟 Zapatillas</span>
         <span class="sg-mn accent" id="st-zap-val">—</span>
         <span class="sg-mc">👕 Ropa &amp; Otros</span>
         <span class="sg-mn accent" id="st-ropa-val">—</span>
-      </div>
-      <div class="sg-divider"></div>
-      <div class="sv-split">
-        <div class="sv-split-item">
-          <span class="sv-split-label">Disponible</span>
-          <span class="sv-split-val" id="st-disp-val">—</span>
-        </div>
-        <div class="sv-split-sep"></div>
-        <div class="sv-split-item rsv">
-          <span class="sv-split-label">🔒 Reservado</span>
-          <span class="sv-split-val" id="st-rsv-val">—</span>
-        </div>
       </div>
     </div>
     <!-- COMPRAS DEL MES -->
