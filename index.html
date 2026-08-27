@@ -777,25 +777,25 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="6" height="6" rx="1"/><rect x="9" y="3" width="6" height="6" rx="1"/><rect x="16" y="3" width="6" height="6" rx="1"/><rect x="2" y="12" width="6" height="6" rx="1"/><rect x="9" y="12" width="6" height="6" rx="1"/><rect x="16" y="12" width="6" height="6" rx="1"/></svg>
       <span class="tab-label">Inventario</span>
     </button>
+    <button class="nav-tab" onclick="showView('reservas',this)">
+      <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <span class="tab-label">Reservas</span>
+    </button>
     <button class="nav-tab" onclick="showView('ventas',this)">
       <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
       <span class="tab-label">Resultados</span>
-    </button>
-    <button class="nav-tab" onclick="showView('flujo',this)">
-      <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
-      <span class="tab-label">Flujo</span>
     </button>
     <button class="nav-tab" onclick="showView('clientes',this)">
       <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       <span class="tab-label">Clientes</span>
     </button>
+    <button class="nav-tab" onclick="showView('flujo',this)">
+      <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
+      <span class="tab-label">Flujo</span>
+    </button>
     <button class="nav-tab" onclick="showView('oc',this)">
       <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
       <span class="tab-label">OCs</span>
-    </button>
-    <button class="nav-tab" onclick="showView('reservas',this)">
-      <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-      <span class="tab-label">Reservas</span>
     </button>
   </div>
   <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Modo oscuro"></button>
@@ -2020,7 +2020,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   </div>
 
   <div class="table-toolbar" style="flex-wrap:wrap;gap:8px;margin-bottom:12px">
-    <input type="search" id="rsv-search" class="search-input" placeholder="Buscar código, cliente, producto…" oninput="filtrarReservas()" style="flex:1;min-width:180px">
+    <input type="search" id="rsv-search" class="search-input" placeholder="RSV-001, C-005, marca, modelo, IVT-..." oninput="filtrarReservas()" style="flex:1;min-width:200px">
     <div style="display:flex;gap:6px;flex-wrap:wrap">
       <button class="btn btn-ghost btn-sm rsv-filter-btn active" data-estado="" onclick="setRsvFiltro('',this)">Todas</button>
       <button class="btn btn-ghost btn-sm rsv-filter-btn" data-estado="ACTIVA" onclick="setRsvFiltro('ACTIVA',this)">Activas</button>
@@ -2030,22 +2030,23 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   </div>
 
   <div class="table-wrap">
-    <table style="min-width:680px">
+    <table style="min-width:920px">
       <thead>
         <tr>
-          <th style="width:88px">Código</th>
-          <th style="width:68px">Tipo</th>
-          <th>Cliente</th>
+          <th style="width:86px">Reserva</th>
+          <th style="width:66px">Tipo</th>
+          <th style="width:130px">Cliente</th>
+          <th style="width:84px">Cód. Prod.</th>
           <th>Producto</th>
           <th class="right" style="width:100px">Acordado</th>
-          <th class="right" style="width:88px">Abonado</th>
-          <th class="right" style="width:88px">Saldo</th>
+          <th class="right" style="width:100px">Abonado</th>
+          <th class="right" style="width:90px">Saldo</th>
           <th style="width:92px">Estado</th>
           <th style="width:36px"></th>
         </tr>
       </thead>
       <tbody id="rsv-tbody">
-        <tr class="loading-row"><td colspan="9"><div class="spinner"></div></td></tr>
+        <tr class="loading-row"><td colspan="10"><div class="spinner"></div></td></tr>
       </tbody>
     </table>
   </div>
@@ -2597,21 +2598,30 @@ function renderReservas(){
   if(q)rows=rows.filter(r=>
     (r.codigo_reserva||'').toUpperCase().includes(q)||
     (r.nombre_cliente||'').toUpperCase().includes(q)||
+    (r.id_cliente?clCodigo(r.id_cliente):'').toUpperCase().includes(q)||
     (r.marca||'').toUpperCase().includes(q)||
     (r.modelo||'').toUpperCase().includes(q)||
     (r.colorway||'').toUpperCase().includes(q)||
+    (r.talla||'').toUpperCase().includes(q)||
     (r.codigo_producto||'').toUpperCase().includes(q)
   );
   if(!rows.length){
-    tbody.innerHTML=`<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">🔖</div><div class="empty-text">Sin reservas</div></div></td></tr>`;
+    tbody.innerHTML=`<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">🔖</div><div class="empty-text">Sin reservas</div></div></td></tr>`;
     return;
   }
   tbody.innerHTML=rows.map(r=>{
     const fecha=r.fecha?r.fecha.slice(8,10)+'/'+r.fecha.slice(5,7)+'/'+r.fecha.slice(2,4):'—';
     const partes=[r.marca,r.modelo,r.colorway].filter(Boolean).join(' ');
-    const producto=partes||(r.codigo_producto||'—');
-    const productoFull=r.talla?`${producto} (${r.talla})`:producto;
-    const saldo=Math.max(0,parseFloat(r.precio_acordado||0)-r.total_abonado);
+    const productoNombre=partes||'—';
+    const productoFull=r.talla?`${productoNombre} <span style="color:var(--muted2);">(${r.talla})</span>`:productoNombre;
+    const codProd=r.codigo_producto
+      ?`<span class="td-code" style="color:var(--purple)">${r.codigo_producto}</span>`
+      :`<span style="font-size:10px;color:var(--muted2);font-style:italic">Sin vincular</span>`;
+    const codCl=r.id_cliente?`<div style="font-size:9px;color:var(--muted2);margin-top:1px">${clCodigo(r.id_cliente)}</div>`:'';
+    const acordado=parseFloat(r.precio_acordado||0);
+    const saldo=Math.max(0,acordado-r.total_abonado);
+    const pct=acordado>0?Math.min(100,Math.round(r.total_abonado/acordado*100)):0;
+    const pctChip=`<div style="font-size:9px;font-weight:700;color:${pct>=100?'var(--green)':'var(--muted2)'};margin-top:1px">${pct}% pagado</div>`;
     const estadoBadge=
       r.estado==='ACTIVA'?`<span class="rsv-badge-activa">Activa</span>`:
       r.estado==='COMPLETADA'?`<span class="rsv-badge-completada">Completada</span>`:
@@ -2620,10 +2630,11 @@ function renderReservas(){
     return`<tr onclick="abrirReservaDetalle('${r.codigo_reserva}')" style="cursor:pointer">
       <td><span class="td-code" style="color:var(--accent)">${r.codigo_reserva}</span><div style="font-size:9px;color:var(--muted2);margin-top:1px">${fecha}</div></td>
       <td>${tipoBadge}</td>
-      <td class="td-main">${r.nombre_cliente||'—'}</td>
-      <td class="td-trunc" style="max-width:160px;font-size:11px;color:var(--muted)">${productoFull}</td>
-      <td class="right td-amt">${fmt(r.precio_acordado)}</td>
-      <td class="right td-amt" style="color:var(--green)">${fmt(r.total_abonado)}</td>
+      <td><div class="td-main" style="font-size:11px">${r.nombre_cliente||'—'}</div>${codCl}</td>
+      <td>${codProd}</td>
+      <td class="td-trunc" style="font-size:11px;color:var(--text);max-width:160px">${productoFull}</td>
+      <td class="right td-amt">${fmt(acordado)}</td>
+      <td class="right"><div class="td-amt" style="color:var(--green)">${fmt(r.total_abonado)}</div>${pctChip}</td>
       <td class="right td-amt" style="${saldo<=0?'color:var(--green)':'color:var(--accent)'}">${fmt(saldo)}</td>
       <td>${estadoBadge}</td>
       <td style="text-align:center"><button class="btn-edit-inv" onclick="event.stopPropagation();abrirReservaDetalle('${r.codigo_reserva}')" title="Ver detalle">›</button></td>
@@ -2711,11 +2722,20 @@ async function registrarAbono(){
   if(!monto){toast('Ingresa el monto del abono','warn');return;}
   const nota=document.getElementById('rsv-new-nota').value.trim()||null;
   const fecha=new Date().toISOString().slice(0,10);
+  const r=reservasCache.find(x=>x.codigo_reserva===rsvCodigoActivo);
   try{
     const{error}=await db.from('abonos').insert({
       codigo_reserva:rsvCodigoActivo,monto,fecha,es_pago_final:false,notas:nota
     });
     if(error)throw error;
+    // Registrar en flujo como RESERVA (visible pero no cuenta en caja real)
+    const descProd=r?[r.marca,r.modelo,r.colorway].filter(Boolean).join(' ')||rsvCodigoActivo:rsvCodigoActivo;
+    const descCl=r?.nombre_cliente?' · '+r.nombre_cliente:'';
+    await db.from('flujo_caja').insert({
+      fecha,tipo:'RESERVA',categoria:'RESERVA',
+      descripcion:`Abono ${rsvCodigoActivo} · ${descProd}${descCl}`,
+      ingreso_soles:monto,egreso_soles:0,referencia_id:rsvCodigoActivo
+    });
     toast('✓ Abono registrado','ok');
     await loadReservas();
     abrirReservaDetalle(rsvCodigoActivo);
@@ -3933,6 +3953,12 @@ async function registrarReserva(){
       await db.from('abonos').insert({
         codigo_reserva:codigoReserva,monto:adelanto,
         fecha,es_pago_final:false,notas:'Adelanto inicial'
+      });
+      const descFlujo=[marca,modelo,colorway].filter(Boolean).join(' ')||codigoReserva;
+      await db.from('flujo_caja').insert({
+        fecha,tipo:'RESERVA',categoria:'RESERVA',
+        descripcion:`Adelanto ${codigoReserva} · ${descFlujo}${nombreCliente?' · '+nombreCliente:''}`,
+        ingreso_soles:adelanto,egreso_soles:0,referencia_id:codigoReserva
       });
     }
     toast(`✓ ${codigoReserva} — Reserva registrada`,'ok');
