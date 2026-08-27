@@ -714,6 +714,11 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   .btn-pay,.btn-cancel{min-height:36px;padding:7px 13px;font-size:11px}
   /* Tipo selector más legible */
   .tipo-btn{padding:9px 12px;font-size:11px}
+  /* Edit panel mobile: full width, slide from bottom */
+  #inv-edit-panel{width:100vw;max-height:92vh;top:auto;bottom:0;border-left:none;border-top:1px solid var(--border);border-radius:16px 16px 0 0;transform:translateY(100%)}
+  #inv-edit-overlay.open #inv-edit-panel{transform:translateY(0)}
+  .iep-section .form-grid.g2{grid-template-columns:1fr}
+  .btn-edit-inv{width:36px;height:36px;font-size:15px}
 }
 
 
@@ -4406,6 +4411,7 @@ function abrirEditarItem(codigo){
   document.getElementById('iep-factura').value=p.factura||'';
   document.getElementById('iep-precio-compra').value=p.precio_compra_soles||'';
   document.getElementById('iep-precio-venta').value=p.precio_venta_sugerido||'';
+  document.getElementById('iep-fecha-compra').value=p.fecha_compra||'';
   document.getElementById('iep-observaciones').value=p.observaciones||'';
   iepRenderCostos();
   iepActualizarTotal();
@@ -4434,7 +4440,7 @@ function iepRenderCostos(){
       :`<button class="iep-costo-del" onclick="iepEliminarCosto(${c.id},false)">×</button>`;
     return`<div class="iep-costo-row">
       <span class="iep-costo-concepto">${c.concepto}</span>
-      <span class="iep-costo-monto">S/ ${fmt(c.costo_soles)}</span>
+      <span class="iep-costo-monto">${fmt(c.costo_soles)}</span>
       ${del}
     </div>`;
   }).join('');
@@ -4462,7 +4468,7 @@ function iepActualizarTotal(){
   const pc=parseFloat(document.getElementById('iep-precio-compra').value||0);
   const activos=iepCostosOrig.filter(c=>!iepCostosEliminar.includes(c.id));
   const tc=[...activos,...iepCostosNuevos].reduce((s,c)=>s+parseFloat(c.costo_soles||0),0);
-  document.getElementById('iep-costo-total').textContent='S/ '+fmt(pc+tc);
+  document.getElementById('iep-costo-total').textContent=fmt(pc+tc);
 }
 
 async function iepGuardar(){
@@ -4489,6 +4495,7 @@ async function iepGuardar(){
       precio_compra_soles:pc||null,
       precio_venta_sugerido:pv||null,
       precio_final:precioFinal||null,
+      fecha_compra:document.getElementById('iep-fecha-compra').value||null,
       observaciones:document.getElementById('iep-observaciones').value.trim()||null
     }).eq('codigo_producto',invEditCodigo);
     if(e1)throw e1;
@@ -4518,20 +4525,23 @@ init();
 <!-- ══ INVENTARIO EDIT PANEL ══ -->
 <div id="inv-edit-overlay" onclick="cerrarEditarItem()">
   <div id="inv-edit-panel" onclick="event.stopPropagation()">
+
+    <!-- Header -->
     <div class="iep-header">
       <div>
-        <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:5px">Editar producto</div>
+        <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:4px">Editar producto</div>
         <div id="iep-codigo" style="font-size:17px;font-weight:700;color:var(--accent);font-family:'Archivo Black'">—</div>
       </div>
       <button class="iep-close" onclick="cerrarEditarItem()">✕</button>
     </div>
 
+    <!-- Producto -->
     <div class="iep-section" style="border-top:none;padding-top:0;margin-top:0">
       <div class="iep-section-lbl">Producto</div>
       <div class="form-grid g2">
         <div class="field"><label>Marca</label><input type="text" id="iep-marca" autocomplete="off"></div>
         <div class="field"><label>Modelo</label><input type="text" id="iep-modelo" autocomplete="off"></div>
-        <div class="field span2"><label>Colorway</label><input type="text" id="iep-colorway" autocomplete="off"></div>
+        <div class="field"><label>Colorway</label><input type="text" id="iep-colorway" autocomplete="off"></div>
         <div class="field"><label>Talla</label><input type="text" id="iep-talla" autocomplete="off"></div>
         <div class="field"><label>Categoría</label>
           <select id="iep-cat" class="iep-select">
@@ -4542,11 +4552,13 @@ init();
             <option value="OTROS">Otros</option>
           </select>
         </div>
+        <div class="field"><label>Fecha compra</label><input type="date" id="iep-fecha-compra"></div>
       </div>
     </div>
 
+    <!-- Estado -->
     <div class="iep-section">
-      <div class="iep-section-lbl">Estado y Pago</div>
+      <div class="iep-section-lbl">Estado y referencia</div>
       <div class="form-grid g2">
         <div class="field"><label>Estado</label>
           <select id="iep-estado" class="iep-select">
@@ -4567,32 +4579,57 @@ init();
       </div>
     </div>
 
+    <!-- Financiero -->
     <div class="iep-section">
-      <div class="iep-section-lbl">Financiero</div>
+      <div class="iep-section-lbl">Precios</div>
       <div class="form-grid g2">
-        <div class="field"><label>P. Compra S/.</label><input type="number" id="iep-precio-compra" step="0.01" min="0" placeholder="0.00" oninput="iepActualizarTotal()"></div>
-        <div class="field"><label>P.V. Sugerido S/.</label><input type="number" id="iep-precio-venta" step="0.01" min="0" placeholder="0.00"></div>
+        <div class="field">
+          <label>P. Compra</label>
+          <div style="position:relative">
+            <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--muted2);pointer-events:none">S/.</span>
+            <input type="number" id="iep-precio-compra" step="0.01" min="0" placeholder="0.00" oninput="iepActualizarTotal()" style="padding-left:30px">
+          </div>
+        </div>
+        <div class="field">
+          <label>P.V. Sugerido</label>
+          <div style="position:relative">
+            <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--muted2);pointer-events:none">S/.</span>
+            <input type="number" id="iep-precio-venta" step="0.01" min="0" placeholder="0.00" style="padding-left:30px">
+          </div>
+        </div>
       </div>
-      <div style="margin-top:14px">
-        <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-bottom:8px">Costos adicionales</div>
+
+      <!-- Costos adicionales -->
+      <div style="margin-top:16px">
+        <div class="iep-section-lbl" style="margin-bottom:8px">Costos adicionales</div>
         <div id="iep-costos-list"></div>
         <div style="display:flex;gap:8px;margin-top:10px;align-items:flex-end">
           <div class="field" style="flex:1;margin-bottom:0"><label>Concepto</label><input type="text" id="iep-new-concepto" placeholder="Envío, Aduana..."></div>
-          <div class="field" style="width:88px;margin-bottom:0"><label>S/.</label><input type="number" id="iep-new-monto" step="0.01" min="0" placeholder="0.00"></div>
-          <button class="btn btn-ghost btn-sm" onclick="iepAgregarCosto()" style="flex-shrink:0;height:36px;margin-bottom:0">+ Agregar</button>
+          <div class="field" style="width:96px;margin-bottom:0">
+            <label>Monto</label>
+            <div style="position:relative">
+              <span style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--muted2);pointer-events:none">S/.</span>
+              <input type="number" id="iep-new-monto" step="0.01" min="0" placeholder="0.00" style="padding-left:28px">
+            </div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="iepAgregarCosto()" style="flex-shrink:0;height:36px">+ Agregar</button>
         </div>
       </div>
+
+      <!-- Total calculado -->
       <div class="iep-total-row">
         <span class="iep-total-lbl">Costo Total</span>
         <span class="iep-total-val" id="iep-costo-total">—</span>
       </div>
     </div>
 
+    <!-- Observaciones -->
     <div class="iep-section">
       <div class="iep-section-lbl">Observaciones</div>
-      <textarea id="iep-observaciones" rows="3" placeholder="Notas, detalles adicionales sobre este producto..." style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-family:'Archivo',inherit;font-size:12px;resize:vertical;box-sizing:border-box;outline:none"></textarea>
+      <textarea id="iep-observaciones" rows="3" placeholder="Notas o detalles adicionales..." style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-family:'Archivo',inherit;font-size:12px;resize:vertical;box-sizing:border-box;outline:none;transition:border-color .15s" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"></textarea>
     </div>
 
+    <!-- Botones -->
     <div style="display:flex;gap:10px;margin-top:24px">
       <button class="btn btn-primary" id="iep-btn-guardar" onclick="iepGuardar()" style="flex:1">✓ Guardar cambios</button>
       <button class="btn btn-ghost" onclick="cerrarEditarItem()">Cancelar</button>
