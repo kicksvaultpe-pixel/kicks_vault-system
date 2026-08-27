@@ -415,7 +415,7 @@ input[list] { cursor: text; }
 .fc-bubble.actual{border-color:rgba(37,99,235,.18);background:linear-gradient(135deg,var(--card) 0%,rgba(37,99,235,.03) 100%)}
 
 /* Burbuja 4: Compras Pendientes (global, todos los meses) */
-.fc-pend-card{background:var(--card);border:1px solid rgba(251,191,36,.25);border-radius:14px;padding:16px 22px;margin-bottom:14px;position:relative;overflow:hidden;display:flex;align-items:center;flex-wrap:wrap;gap:10px 36px}
+.fc-pend-card{background:var(--card);border:1px solid rgba(251,191,36,.35);border-radius:14px;padding:18px 22px;margin-bottom:14px;position:relative;overflow:hidden;display:flex;align-items:center;flex-wrap:wrap;gap:10px 36px;box-shadow:0 2px 8px rgba(251,191,36,.08)}
 .fc-pend-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--yellow),transparent)}
 .fc-pend-card .fc-chip{margin-bottom:0;flex:0 0 100%}
 .fc-pend-card .fpc-item{display:flex;flex-direction:column;gap:3px;min-width:120px}
@@ -1820,7 +1820,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       </div>
       <div class="fc-inner-div" style="margin:10px 0 6px"></div>
       <div class="fc-row">
-        <span class="fc-row-lbl" title="Adelantos recibidos de reservas activas este mes (no cuentan como ingreso hasta ejecutar la venta)">🔒 Adelantos reservas</span>
+        <span class="fc-row-lbl" title="Total abonado en reservas activas (desaparece cuando la reserva se completa o cancela)">🔒 Adelantos reservas</span>
         <span class="fc-row-val" style="color:var(--purple)" id="fc-pend-reservas">S/. 0.00</span>
       </div>
       <div class="fc-row">
@@ -4506,8 +4506,10 @@ async function loadFlujo() {
   const pendSoles = pendMes.reduce((s,p) => s + parseFloat(p.precio_compra_soles||0), 0);
   const pendUsd   = pendMes.reduce((s,p) => s + parseFloat(p.precio_compra_usd||0), 0);
 
-  // RESERVAS del mes (adelantos)
-  const reservasMes = flujoCache.filter(f=>(f.categoria||f.tipo||'')==='RESERVA').reduce((s,f)=>s+parseFloat(f.ingreso_soles||0),0);
+  // RESERVAS ACTIVAS — adelantos reales bloqueados (solo reservas que no se completaron ni cancelaron)
+  const reservasMes = (reservasCache||[])
+    .filter(r => r.estado === 'ACTIVA')
+    .reduce((s, r) => s + (r.total_abonado || 0), 0);
 
   // CÁLCULOS — egresos son positivos en BD, se restan
   const totalAntesGanancias = cajaInicio + stockInicio;
