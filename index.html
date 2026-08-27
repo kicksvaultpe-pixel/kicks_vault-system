@@ -2913,9 +2913,11 @@ async function rsvVincularProducto(){
   const cod=(raw.match(/^([A-Z]+-\d+)/)||[])[1]||'';
   if(!cod){toast('Selecciona un producto válido del inventario','warn');return;}
   try{
-    await db.from('reservas').update({codigo_producto:cod}).eq('codigo_reserva',rsvCodigoActivo);
-    await db.from('inventario').update({estado:'RESERVADO'}).eq('codigo_producto',cod);
-    toast('✓ Producto vinculado — inventario marcado como RESERVADO','ok');
+    const{error:rsvErr}=await db.from('reservas').update({codigo_producto:cod}).eq('codigo_reserva',rsvCodigoActivo);
+    if(rsvErr)throw rsvErr;
+    const{error:invErr}=await db.from('inventario').update({estado:'RESERVADO'}).eq('codigo_producto',cod);
+    if(invErr){console.error('inventario update error',invErr);toast('⚠ Reserva actualizada pero no se pudo marcar el producto: '+invErr.message,'warn');}
+    else toast('✓ Producto vinculado — inventario marcado como RESERVADO','ok');
     await Promise.all([loadReservas(),loadInventario()]);
     abrirReservaDetalle(rsvCodigoActivo);
   }catch(e){toast('Error: '+e.message,'err');}
@@ -3362,7 +3364,7 @@ function invBaseRows(){
   const vd=window._invVendDespSet||new Set();
   return inventarioCache.filter(p=>
     p.fecha_compra&&p.fecha_compra<=fechaFin&&
-    (p.estado==='DISPONIBLE'||vm.has(p.codigo_producto)||vd.has(p.codigo_producto))
+    (p.estado==='DISPONIBLE'||p.estado==='RESERVADO'||vm.has(p.codigo_producto)||vd.has(p.codigo_producto))
   );
 }
 
@@ -4071,7 +4073,7 @@ async function registrarReserva(){
     if(error){console.error('reservas insert error',error);throw error;}
     if(codProd){
       const{error:invErr}=await db.from('inventario').update({estado:'RESERVADO'}).eq('codigo_producto',codProd);
-      if(invErr)console.warn('inventario update error',invErr);
+      if(invErr){console.error('inventario update error',invErr);toast('⚠ Reserva creada pero no se pudo marcar el producto: '+invErr.message,'warn');}
     }
     if(adelanto>0){
       const{error:abonoErr}=await db.from('abonos').insert({
