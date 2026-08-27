@@ -178,17 +178,17 @@ tbody tr.row-dim{opacity:.45}
 .sg-lbl-tot{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2)}
 .sg-val-tot{font-family:"Archivo Black";font-size:14px;color:var(--text);white-space:nowrap}
 .sg-val-tot.green{color:var(--green)}.sg-val-tot.accent{color:var(--accent)}.sg-val-tot.red{color:var(--red)}
-.sg-h{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);text-align:right}
+.sg-h{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);text-align:right;padding-bottom:3px}
 .sg-h:first-child{text-align:left}
-.sg-mc{font-size:11px;color:var(--muted2);font-family:'Archivo',sans-serif}.sg-uni-head{display:grid;grid-template-columns:1fr auto;gap:0 8px;padding-bottom:6px}.sg-uni-row{display:grid;grid-template-columns:1fr auto;gap:0 8px;padding:4px 0;align-items:center}
-.sg-mc-tot{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2)}
-.sg-mn{font-family:"Archivo Black";font-size:12px;color:var(--text);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.sg-mc{font-size:12px;color:var(--muted);font-family:'Archivo',sans-serif}.sg-uni-head{display:grid;grid-template-columns:1fr auto;gap:0 8px;padding-bottom:6px}.sg-uni-row{display:grid;grid-template-columns:1fr auto;gap:0 8px;padding:4px 0;align-items:center}
+.sg-mc-tot{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.sg-mn{font-family:"Archivo Black";font-size:13px;color:var(--text);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 .sg-mn.accent{color:var(--accent)}.sg-mn.green{color:var(--green)}.sg-mn.red{color:var(--red)}
-.sg-mn-tot{font-family:"Archivo Black";font-size:15px;color:var(--text);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.sg-mn-tot{font-family:"Archivo Black";font-size:17px;color:var(--text);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 .sg-mn-tot.red{color:var(--red)}.sg-mn-tot.green{color:var(--green)}.sg-mn-tot.accent{color:var(--accent)}
 /* Inv stat card variants */
-.sc-chip{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:12px;display:flex;align-items:center;gap:7px}
-.sc-chip::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0;background:var(--muted2)}
+.sc-chip{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.sc-chip::before{content:'';width:7px;height:7px;border-radius:50%;flex-shrink:0;background:var(--muted2)}
 .sc-stock .sc-chip::before{background:var(--accent)}
 .sc-valor .sc-chip::before{background:var(--green)}
 .sc-compras .sc-chip::before{background:var(--purple)}
@@ -198,11 +198,28 @@ tbody tr.row-dim{opacity:.45}
 .sc-valor.stat-card:hover::before{opacity:.55;background:linear-gradient(90deg,transparent,var(--green),transparent)}
 .sc-compras.stat-card::before{opacity:.3;background:linear-gradient(90deg,transparent,var(--purple),transparent)}
 .sc-compras.stat-card:hover::before{opacity:.55;background:linear-gradient(90deg,transparent,var(--purple),transparent)}
-.sc-grid{display:grid;align-items:center;row-gap:5px}
+.sc-grid{display:grid;align-items:center;row-gap:6px}
 .sc-grid.g2{grid-template-columns:1fr auto;column-gap:16px}
 .sc-grid.g3{grid-template-columns:1fr auto auto;column-gap:14px}
 .sc-grid.g4{grid-template-columns:1.2fr auto auto auto;column-gap:12px}
 .sc-grid.g5{grid-template-columns:1.2fr auto auto auto auto;column-gap:10px}
+/* Row separators between Zapatillas and Ropa rows */
+.sc-stock .sc-grid.g5:first-of-type>*:nth-child(n+11),
+.sc-valor .sc-grid.g2:first-of-type>*:nth-child(n+5),
+.sc-compras .sc-grid.g3:first-of-type>*:nth-child(n+7){border-top:1px solid var(--border);padding-top:7px;margin-top:2px}
+/* Valor Stock hero */
+.sv-hero{padding-bottom:12px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:2px;margin-bottom:2px}
+.sv-hero-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2)}
+.sv-hero-val{font-family:"Archivo Black";font-size:26px;letter-spacing:-.5px;font-variant-numeric:tabular-nums;line-height:1.1;color:var(--accent)}
+/* Disp / Reservado split panel */
+.sv-split{display:grid;grid-template-columns:1fr 1px 1fr;background:var(--surface);border-radius:8px;border:1px solid var(--border);overflow:hidden}
+.sv-split-sep{background:var(--border)}
+.sv-split-item{padding:8px 10px;display:flex;flex-direction:column;gap:3px}
+.sv-split-item.rsv{align-items:flex-end}
+.sv-split-label{font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted2)}
+.sv-split-item.rsv .sv-split-label{color:var(--purple)}
+.sv-split-val{font-family:"Archivo Black";font-size:13px;font-variant-numeric:tabular-nums;color:var(--text)}
+.sv-split-item.rsv .sv-split-val{color:var(--purple)}
 /* Tab Ingresos */
 .st-big-num{font-family:"Archivo Black";font-size:26px;line-height:1.1;margin:8px 0 4px;font-variant-numeric:tabular-nums}
 .st-big-num.accent{color:var(--accent)}.st-big-num.green{color:var(--green)}.st-big-num.red{color:var(--red)}
@@ -1456,7 +1473,11 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
     <!-- VALOR STOCK -->
     <div class="stat-card sc-valor">
       <div class="sc-chip">Valor Stock</div>
-      <div class="sc-grid g2">
+      <div class="sv-hero">
+        <span class="sv-hero-label">Total Activo</span>
+        <span class="sv-hero-val" id="st-total-val">—</span>
+      </div>
+      <div class="sc-grid g2" style="margin-top:10px">
         <span></span>
         <span class="sg-h">Monto S/.</span>
         <span class="sg-mc">👟 Zapatillas</span>
@@ -1465,17 +1486,16 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <span class="sg-mn accent" id="st-ropa-val">—</span>
       </div>
       <div class="sg-divider"></div>
-      <div class="sc-grid g2">
-        <span class="sg-mc-tot">Total activo</span>
-        <span class="sg-mn-tot accent" id="st-total-val">—</span>
-      </div>
-      <div class="sc-grid g2" style="margin-top:5px">
-        <span class="sg-mc-tot" style="font-size:10px;color:var(--muted2)">Disponible</span>
-        <span class="sg-mn-tot" style="font-size:10px;color:var(--muted2)" id="st-disp-val">—</span>
-      </div>
-      <div class="sc-grid g2" style="margin-top:3px">
-        <span class="sg-mc-tot" style="font-size:10px;color:var(--purple)">🔒 Reservado</span>
-        <span class="sg-mn-tot" style="font-size:10px;color:var(--purple)" id="st-rsv-val">—</span>
+      <div class="sv-split">
+        <div class="sv-split-item">
+          <span class="sv-split-label">Disponible</span>
+          <span class="sv-split-val" id="st-disp-val">—</span>
+        </div>
+        <div class="sv-split-sep"></div>
+        <div class="sv-split-item rsv">
+          <span class="sv-split-label">🔒 Reservado</span>
+          <span class="sv-split-val" id="st-rsv-val">—</span>
+        </div>
       </div>
     </div>
     <!-- COMPRAS DEL MES -->
