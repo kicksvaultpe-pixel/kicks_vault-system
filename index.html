@@ -719,7 +719,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
     </button>
     <button class="nav-tab" onclick="showView('ventas',this)">
       <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-      <span class="tab-label">Ventas</span>
+      <span class="tab-label">Resultados</span>
     </button>
     <button class="nav-tab" onclick="showView('flujo',this)">
       <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
@@ -758,7 +758,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
     <button class="tipo-btn active compra"  onclick="setTipo('compra',this)">Compra</button>
     <button class="tipo-btn venta"          onclick="setTipo('venta',this)">Venta</button>
     <button class="tipo-btn reserva"        onclick="setTipo('reserva',this)">Reserva</button>
-    <button class="tipo-btn pago"           onclick="setTipo('pago',this)">Pago</button>
+    <button class="tipo-btn pago"           onclick="setTipo('pago',this)">Gasto</button>
     <button class="tipo-btn costo"          onclick="setTipo('costo',this)">Costo</button>
   </div>
 
@@ -1024,7 +1024,6 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         </div>
         <!-- Precio + Fecha -->
         <div class="field"><label>Precio de venta S/.</label><input type="number" id="vt-precio" placeholder="0.00" step="0.01" oninput="calcVentaGanancia()"></div>
-        <div class="field"><label>Fecha</label><input type="date" id="vt-fecha"></div>
         <!-- Cliente (combobox) -->
         <div class="field span2">
           <label>Cliente <span style="font-size:9px;opacity:.6;font-weight:400">(opcional)</span>
@@ -1195,7 +1194,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   <!-- ── PAGO ── -->
   <div id="form-pago" class="form-panel">
     <div class="card">
-      <div class="card-label">Gasto Operativo</div>
+      <div class="card-label">Nuevo Gasto</div>
       <div class="form-grid g2">
         <div class="field span2"><label>Concepto</label><input type="text" id="pg-concepto" placeholder="STAND SL / SUNAT / WEB..."></div>
         <div class="field"><label>Categoría</label>
@@ -1210,10 +1209,9 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
           </div>
         </div>
         <div class="field"><label>Monto S/.</label><input type="number" id="pg-monto" placeholder="100.00" step="0.01" min="0"></div>
-        <div class="field"><label>Fecha</label><input type="date" id="pg-fecha"></div>
       </div>
     </div>
-    <button class="btn btn-orange" id="btn-pago" onclick="registrarPago()">✓ Registrar Pago</button>
+    <button class="btn btn-orange" id="btn-pago" onclick="registrarPago()">✓ Registrar Gasto</button>
   </div>
 
   <!-- ── COSTO ── -->
@@ -1476,10 +1474,10 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <th>Colorway</th>
         <th>Categoría</th>
         <th onclick="sortTable('talla')" style="cursor:pointer">Talla <span id="sort-talla"></span></th>
-        <th onclick="sortTable('precio_compra_soles')" style="cursor:pointer">Costo Prod. <span id="sort-precio_compra_soles"></span></th>
-        <th>Costo Adic.</th>
-        <th onclick="sortTable('precio_final')" style="cursor:pointer">Costo Final <span id="sort-precio_final"></span></th>
-        <th onclick="sortTable('precio_venta_sugerido')" style="cursor:pointer">P. Venta <span id="sort-precio_venta_sugerido"></span></th>
+        <th onclick="sortTable('precio_compra_soles')" style="cursor:pointer">P. Compra <span id="sort-precio_compra_soles"></span></th>
+        <th>Costos Adic.</th>
+        <th onclick="sortTable('precio_final')" style="cursor:pointer">Costo Total <span id="sort-precio_final"></span></th>
+        <th onclick="sortTable('precio_venta_sugerido')" style="cursor:pointer">P.V. Sugerido <span id="sort-precio_venta_sugerido"></span></th>
         <th onclick="sortTable('margen')" style="cursor:pointer">Margen <span id="sort-margen"></span></th>
         <th>OC</th><th>Estado</th><th>Pago</th><th>Factura</th><th></th>
       </tr></thead>
@@ -1493,7 +1491,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
 <!-- Placeholders -->
 <div id="view-ventas" class="view">
   <div class="page-hd">
-    <div class="page-title"><div class="dot"></div> Ingresos</div>
+    <div class="page-title"><div class="dot"></div> Resultados</div>
     <div class="page-sub">Ventas del mes, pagos del negocio y utilidad neta</div>
   </div>
 
@@ -1569,7 +1567,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <th style="width:85px">Cód. Cliente</th>
         <th style="width:130px">Cliente</th>
         <th style="width:100px">Canal</th>
-        <th class="right" style="width:100px">Costo Final</th>
+        <th class="right" style="width:100px">Costo Total</th>
         <th class="right" style="width:100px">Venta S/.</th>
         <th class="right" style="width:100px">Ganancia</th>
         <th class="right" style="width:60px">ROI</th>
@@ -1602,7 +1600,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
     <table id="pg-table" style="min-width:580px">
       <thead><tr>
         <th style="width:80px">Fecha</th>
-        <th style="width:90px">Código</th>
+        <th style="width:90px">Cód. Pago</th>
         <th>Concepto</th>
         <th style="width:140px">Categoría</th>
         <th class="right" style="width:120px">Monto S/.</th>
@@ -1754,7 +1752,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
 
     <!-- REINVERSIÓN -->
     <div class="ind-card ind-reinversion">
-      <div class="sim-chip"><div class="sim-chip-dot dot-purple"></div>Reinversión</div>
+      <div class="sim-chip"><div class="sim-chip-dot dot-purple"></div>Var. Stock</div>
       <div class="sim-num" id="ind-reinversion" style="color:var(--purple)">—</div>
       <div class="sim-lbl">Stock fin − Stock inicio</div>
       <div class="sim-trend trend-purple" id="ind-reinversion-trend">—</div>
@@ -1767,7 +1765,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
     <input type="text" id="fc-buscar" class="search-box" style="flex:1;min-width:160px"
       placeholder="Buscar código, descripción…" oninput="renderFlujoTabla()">
     <div class="combo-wrap" style="min-width:140px">
-      <input type="text" id="fc-accion" placeholder="Acción…" autocomplete="nope" readonly
+      <input type="text" id="fc-accion" placeholder="Tipo…" autocomplete="nope" readonly
         onfocus="comboOpen('fc-accion','cl-fc-accion')"
         onblur="comboBlurStrict('fc-accion','cl-fc-accion')"
         onkeydown="comboKey(event,'fc-accion','cl-fc-accion')">
@@ -1780,9 +1778,9 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
     <table class="fc-tabla">
       <thead><tr>
         <th style="width:85px">Fecha</th>
-        <th style="width:100px">Acción</th>
-        <th style="width:85px">Cod. Op.</th>
-        <th style="width:85px">Cod. Ref.</th>
+        <th style="width:100px">Tipo</th>
+        <th style="width:85px">Cód. Op.</th>
+        <th style="width:85px">Cód. Ref.</th>
         <th>Descripción</th>
         <th class="right" style="width:110px">Ingreso S/.</th>
         <th class="right" style="width:110px">Egreso S/.</th>
@@ -1808,7 +1806,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <div class="stat-val" id="cl-stat-total">—</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Con ventas</div>
+      <div class="stat-label">Activos</div>
       <div class="stat-val accent" id="cl-stat-activos" style="color:var(--accent)">—</div>
     </div>
     <div class="stat-card">
@@ -1843,7 +1841,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <th>Talla</th>
         <th>Canal</th>
         <th>Tipo</th>
-        <th class="right">Monto Compra</th>
+        <th class="right">Total Comprado</th>
         <th></th>
       </tr></thead>
       <tbody id="cl-tbody">
@@ -1864,7 +1862,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
 
   <div class="stats-row stats3">
     <div class="stat-card">
-      <div class="stat-label">Total OCs</div>
+      <div class="stat-label">Total</div>
       <div class="stat-val" id="oc-stat-total">—</div>
     </div>
     <div class="stat-card">
@@ -2422,7 +2420,7 @@ async function init(){
 function setToday(){
   const now=new Date();
   const t=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
-  ['cp-fecha','vt-fecha','pg-fecha','cs-fecha','modal-fecha'].forEach(id=>{
+  ['cp-fecha','cs-fecha','modal-fecha'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.value=t;
   });
 }
@@ -3013,7 +3011,7 @@ function renderPerfil(c,ventas){
       <div class="cl-section-lbl">Historial de compras</div>
       <div style="overflow-x:auto">
         <table class="cl-hist">
-          <thead><tr><th>Fecha</th><th>Producto</th><th class="right">Venta S/.</th><th class="right">Gan.</th></tr></thead>
+          <thead><tr><th>Fecha</th><th>Producto</th><th class="right">Venta S/.</th><th class="right">Ganancia</th></tr></thead>
           <tbody>${histRows}</tbody>
         </table>
       </div>
@@ -3473,7 +3471,7 @@ async function registrarVenta(){
       comprador:vtCl?[vtCl.nombre,vtCl.apellido].filter(Boolean).join(' ')||null:null,
       id_cliente:vtClId||null,
       ganancia:g,rentabilidad:r,
-      fecha:document.getElementById('vt-fecha').value
+      fecha:new Date().toISOString().slice(0,10)
     });
     if(error)throw error;
     await db.from('inventario').update({estado:'VENDIDO'}).eq('codigo_producto',codProd);
@@ -3551,7 +3549,7 @@ async function registrarPago(){
       codigo_pago:codigoPago,
       concepto,monto_soles:-Math.abs(monto),
       categoria:noEmoji(document.getElementById('pg-cat').value),
-      fecha:document.getElementById('pg-fecha').value
+      fecha:new Date().toISOString().slice(0,10)
     });
     if(error)throw error;
     toast('✓ Pago registrado · '+codigoPago,'ok');
