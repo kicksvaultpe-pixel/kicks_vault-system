@@ -1490,20 +1490,23 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   <div class="table-wrap">
     <table>
       <thead><tr>
-        <th onclick="sortTable('fecha_compra')" style="cursor:pointer;width:72px">Fecha <span id="sort-fecha_compra"></span></th>
-        <th style="width:92px">Código</th>
-        <th onclick="sortTable('marca')" style="cursor:pointer">Marca + Modelo <span id="sort-marca"></span></th>
+        <th onclick="sortTable('fecha_compra')" style="cursor:pointer;width:65px">Fecha <span id="sort-fecha_compra"></span></th>
+        <th style="width:88px">Código</th>
+        <th onclick="sortTable('marca')" style="cursor:pointer">Marca <span id="sort-marca"></span></th>
+        <th onclick="sortTable('modelo')" style="cursor:pointer">Modelo <span id="sort-modelo"></span></th>
         <th>Colorway</th>
-        <th onclick="sortTable('talla')" style="cursor:pointer;width:55px;text-align:center">Talla <span id="sort-talla"></span></th>
-        <th style="width:120px">Estado</th>
-        <th class="right" onclick="sortTable('precio_final')" style="cursor:pointer;width:100px">Costo Total <span id="sort-precio_final"></span></th>
-        <th class="right" onclick="sortTable('precio_venta_sugerido')" style="cursor:pointer;width:100px">P.V. Sug. <span id="sort-precio_venta_sugerido"></span></th>
-        <th class="right" onclick="sortTable('margen')" style="cursor:pointer;width:78px">Margen <span id="sort-margen"></span></th>
-        <th style="width:120px">Pago</th>
-        <th style="width:44px"></th>
+        <th>Categoría</th>
+        <th onclick="sortTable('talla')" style="cursor:pointer;width:52px;text-align:center">Talla <span id="sort-talla"></span></th>
+        <th class="right" onclick="sortTable('precio_compra_soles')" style="cursor:pointer;width:88px">P. Compra <span id="sort-precio_compra_soles"></span></th>
+        <th class="right" style="width:82px">Costos Adic.</th>
+        <th class="right" onclick="sortTable('precio_final')" style="cursor:pointer;width:88px">Costo Total <span id="sort-precio_final"></span></th>
+        <th class="right" onclick="sortTable('precio_venta_sugerido')" style="cursor:pointer;width:88px">P.V. Sug. <span id="sort-precio_venta_sugerido"></span></th>
+        <th style="width:110px">Estado</th>
+        <th style="width:105px">Pago</th>
+        <th style="width:40px"></th>
       </tr></thead>
       <tbody id="inv-tbody">
-        <tr class="loading-row"><td colspan="11"><div class="spinner"></div></td></tr>
+        <tr class="loading-row"><td colspan="14"><div class="spinner"></div></td></tr>
       </tbody>
     </table>
   </div>
@@ -2681,7 +2684,7 @@ async function loadClientes(){
 function renderInventario(rows){
   const tbody=document.getElementById('inv-tbody');
   if(!rows.length){
-    tbody.innerHTML='<tr><td colspan="11"><div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Sin productos</div></div></td></tr>';
+    tbody.innerHTML='<tr><td colspan="14"><div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Sin productos</div></div></td></tr>';
     return;
   }
   tbody.innerHTML=rows.map(p=>{
@@ -2740,13 +2743,16 @@ function renderInventario(rows){
     return`<tr class="${rowCls}">
       <td class="inv-fecha">${fecha}</td>
       <td><span class="inv-cod">${p.codigo_producto}</span></td>
-      <td class="inv-txt"><span style="font-weight:700">${p.marca||'—'}</span>${p.modelo?` <span style="color:var(--muted2);font-weight:500">${p.modelo}</span>`:''}</td>
-      <td class="inv-txt" style="color:var(--muted2);font-weight:500;font-size:11px">${p.colorway||'—'}</td>
+      <td class="inv-txt">${p.marca||'—'}</td>
+      <td class="inv-txt">${p.modelo||'—'}</td>
+      <td class="inv-txt">${p.colorway||'—'}</td>
+      <td><span class="${catCls}">${catLabel}</span></td>
       <td class="inv-talla">${p.talla||'—'}</td>
-      <td>${estadoBadge}</td>
+      <td class="right">${pcHtml}</td>
+      <td class="right">${costoHtml}</td>
       <td class="right">${finalHtml}</td>
       <td class="right">${ventaHtml}</td>
-      <td class="right">${mg}</td>
+      <td>${estadoBadge}</td>
       <td>${pagoBadge}</td>
       <td style="text-align:center"><button class="btn-edit-inv" onclick="abrirEditarItem('${p.codigo_producto}')" title="Editar">✏</button></td>
     </tr>`;
