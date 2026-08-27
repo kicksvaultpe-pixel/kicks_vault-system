@@ -4200,7 +4200,7 @@ function renderVentas(rows){
     const inv=v.inventario||{};
     const cl=v.clientes||{};
     const nombre=[inv.marca,inv.modelo,inv.colorway].filter(Boolean).join(' ')||'—';
-    const fecha=v.fecha?v.fecha.substring(2).replace(/-/g,'/'):' —';
+    const fecha=v.fecha?v.fecha.slice(8,10)+'/'+v.fecha.slice(5,7)+'/'+v.fecha.slice(2,4):' —';
     const gan=parseFloat(v.ganancia||0);
     const roi=parseFloat(v.rentabilidad||0);
     const gc=gan>=0?'var(--green)':'var(--red)';
@@ -4262,7 +4262,7 @@ function renderPagos(rows){
     const monto=Math.abs(parseFloat(p.monto_soles||0));
     const cat=(p.categoria||'—').toUpperCase();
     const badge=catBadge[cat]||'badge-muted';
-    const fecha=p.fecha?p.fecha.substring(2).replace(/-/g,'/'):'—';
+    const fecha=p.fecha?p.fecha.slice(8,10)+'/'+p.fecha.slice(5,7)+'/'+p.fecha.slice(2,4):'—';
     return`<tr>
       <td class="td-code">${fecha}</td>
       <td class="td-code" style="color:var(--accent)">${p.codigo_pago||'—'}</td>
