@@ -351,7 +351,7 @@ input[list] { cursor: text; }
 .ind-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;position:relative;overflow:hidden}
 
 /* Patrimonio */
-.pat-chip{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:8px}
+.pat-chip{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:7px}
 .pat-total{font-family:"Archivo Black";font-size:15px;color:var(--text);margin-bottom:2px;font-variant-numeric:tabular-nums}
 .pat-sub{font-size:10px;color:var(--muted2);margin-bottom:8px;letter-spacing:.2px}
 .pat-bar-wrap{height:4px;background:var(--border2);border-radius:4px;overflow:hidden;margin-bottom:8px;display:flex}
@@ -370,8 +370,8 @@ input[list] { cursor: text; }
 .pat-leg-amt{font-size:10px;color:var(--muted2);font-variant-numeric:tabular-nums;margin-top:1px}
 
 /* Cards simples */
-.sim-chip{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.sim-chip-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.sim-chip{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.sim-chip-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .dot-green{background:var(--green)}
 .dot-accent{background:var(--accent);box-shadow:0 0 5px var(--accent)}
 .dot-red{background:var(--red)}
@@ -414,8 +414,8 @@ input[list] { cursor: text; }
 .fc-bubble.actual{border-color:rgba(37,99,235,.18);background:linear-gradient(135deg,var(--card) 0%,rgba(37,99,235,.03) 100%)}
 
 /* Chip label */
-.fc-chip{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:14px}
-.fc-chip-dot{width:5px;height:5px;border-radius:50%}
+.fc-chip{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.fc-chip-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .inicio .fc-chip-dot{background:var(--muted2)}
 .actual .fc-chip-dot{background:var(--accent);box-shadow:0 0 6px var(--accent)}
 .fin .fc-chip-dot{background:var(--blue)}
@@ -427,7 +427,7 @@ input[list] { cursor: text; }
 .fc-main-num.blue{color:var(--blue)}
 .fc-main-num.red{color:var(--red)}
 .fc-main-num.green{color:var(--green)}
-.fc-main-lbl{font-size:10px;font-family:'Archivo',sans-serif;color:var(--muted2);margin-bottom:16px;letter-spacing:.3px}
+.fc-main-lbl{font-size:11px;font-family:'Archivo',sans-serif;color:var(--muted2);margin-bottom:16px;letter-spacing:.2px}
 
 /* Divisor interno */
 .fc-inner-div{border-top:1px solid var(--border);margin:14px 0}
@@ -2275,16 +2275,8 @@ document.addEventListener('click', e => {
     return;
   }
   _comboClosing = null;
-  if (input.readOnly) {
-    // Always call comboOpen — toggle-close is handled above via _comboClosing (mousedown)
-    // On desktop: onfocus may have already opened it (double render is harmless)
-    // On iOS: onfocus never fires for readonly, so this is the sole opener
-    comboOpen(input.id, list ? list.id : '');
-  } else if (document.activeElement !== input) {
-    input.focus();
-  } else {
-    comboOpen(input.id, list ? list.id : '');
-  }
+  if (document.activeElement !== input) input.focus();
+  else comboOpen(input.id, list ? list.id : '');
 });
 
 // Close AC on outside click
@@ -2342,14 +2334,6 @@ function comboRender(inputId, listId, val) {
     return `<div class="combo-opt" onclick="comboPick('${inputId}','${listId}','${i.replace(/'/g,"\'")}')">${hl}</div>`;
   }).join('');
   list.classList.add('open');
-  // Fixed positioning so the dropdown escapes overflow:hidden/auto ancestors (mobile toolbar scroll)
-  const inp = document.getElementById(inputId);
-  if (inp) {
-    const r = inp.getBoundingClientRect();
-    const maxH = Math.min(220, window.innerHeight - r.bottom - 8);
-    list.style.cssText = list.style.cssText +
-      `;position:fixed;top:${r.bottom+4}px;left:${r.left}px;width:${r.width}px;right:auto;max-height:${Math.max(80,maxH)}px;z-index:9999`;
-  }
 }
 
 function comboPick(inputId, listId, val) {
@@ -2401,10 +2385,6 @@ document.addEventListener('click', e => {
   if (!e.target.closest('.combo-wrap'))
     document.querySelectorAll('.combo-list').forEach(l => l.classList.remove('open'));
 });
-// Close combos on scroll so fixed-position dropdown doesn't drift
-window.addEventListener('scroll', () => {
-  document.querySelectorAll('.combo-list.open').forEach(l => l.classList.remove('open'));
-}, true);
 
 // ── ORDENES DE COMPRA ──
 let ocCache=[], ocModo='nueva', ocSessionCodigo=null, ocSessionCount=0;
