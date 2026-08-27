@@ -4297,8 +4297,9 @@ async function loadFlujo() {
     fcMesActual = fcMesStr(now);
   }
   document.getElementById('fc-mes-label').textContent = fcMesLabel(fcMesActual);
-  // Asegurar inventarioCache cargado
+  // Asegurar caches cargados
   if(!inventarioCache.length) await loadInventario();
+  if(!reservasCache.length) await loadReservas();
 
   const [y,m] = fcMesActual.split('-').map(Number);
   const fechaInicio = `${y}-${String(m).padStart(2,'0')}-01`;
@@ -4588,8 +4589,14 @@ function renderFlujoTabla() {
       const n=parseInt(f.referencia_id)||0;
       codOp=n?'PG-'+String(n).padStart(4,'0'):(f.codigo_operacion||'—');
       desc=cleanDesc(f.descripcion)||f.categoria||'—';
+    } else if(accion==='RESERVA'){
+      codOp=f.referencia_id||'—'; // RSV-XXX
+      const rsv=reservasCache.find(r=>r.codigo_reserva===f.referencia_id);
+      codRef=rsv?.codigo_producto||'—'; // P-XXX
+      const prod=codRef!=='—'?inventarioCache.find(p=>p.codigo_producto===codRef):null;
+      desc=prod?buildProdDesc(prod):(cleanDesc(f.descripcion)||'—');
     } else {
-      // PENDIENTE, RESERVA, CANCELACION
+      // PENDIENTE, CANCELACION
       codRef=f.referencia_id||'—';
       const prod=f.referencia_id?inventarioCache.find(p=>p.codigo_producto===f.referencia_id):null;
       desc=prod?buildProdDesc(prod):(cleanDesc(f.descripcion)||'—');
