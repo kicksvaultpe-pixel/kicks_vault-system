@@ -1759,53 +1759,53 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
 
     <!-- INICIO DE MES -->
     <div class="fc-bubble inicio">
-      <div class="fc-chip"><div class="fc-chip-dot"></div>Inicio de Mes</div>
+      <div class="fc-chip"><div class="fc-chip-dot"></div>Apertura</div>
       <div class="fc-main-num white" id="fc-caja-inicio">—</div>
-      <div class="fc-main-lbl">Caja disponible</div>
+      <div class="fc-main-lbl">Caja al inicio del mes</div>
       <div class="fc-inner-div"></div>
       <div class="fc-row">
-        <span class="fc-row-lbl">Stock valorizado</span>
+        <span class="fc-row-lbl">Valor de stock</span>
         <span class="fc-row-val" id="fc-stock-inicio">—</span>
       </div>
       <div class="fc-row">
-        <span class="fc-row-lbl">Ganancias del mes</span>
+        <span class="fc-row-lbl">Margen del mes</span>
         <span class="fc-row-val green" id="fc-ganancias">—</span>
       </div>
       <div class="fc-bot">
-        <span class="fc-bot-lbl">Total patrimonio</span>
+        <span class="fc-bot-lbl">Patrimonio inicio</span>
         <span class="fc-bot-val accent" id="fc-total-antes">—</span>
       </div>
     </div>
 
     <!-- CAJA ACTUAL -->
     <div class="fc-bubble actual">
-      <div class="fc-chip"><div class="fc-chip-dot"></div>Caja Actual</div>
+      <div class="fc-chip"><div class="fc-chip-dot"></div>Flujo de Caja</div>
       <div class="fc-main-num accent" id="fc-caja-actual">—</div>
-      <div class="fc-main-lbl">inicio + ingresos − egresos</div>
+      <div class="fc-main-lbl">apertura ± movimientos del mes</div>
       <div class="fc-inner-div"></div>
       <div class="fc-row">
-        <span class="fc-row-lbl">↑ Ventas cobradas</span>
+        <span class="fc-row-lbl">+ Ventas cobradas</span>
         <span class="fc-row-val green" id="fc-ing-ventas">—</span>
       </div>
       <div class="fc-row">
-        <span class="fc-row-lbl">↓ Compras pagadas</span>
+        <span class="fc-row-lbl">− Compras pagadas</span>
         <span class="fc-row-val red" id="fc-egr-soles">—</span>
       </div>
       <div class="fc-row">
-        <span class="fc-row-lbl">↓ Costos / Gastos</span>
+        <span class="fc-row-lbl">− Costos y gastos</span>
         <span class="fc-row-val red" id="fc-egr-costos-gastos">—</span>
       </div>
       <div class="fc-inner-div" style="margin:10px 0 6px"></div>
       <div class="fc-row">
-        <span class="fc-row-lbl" title="Adelantos recibidos de reservas activas este mes (no cuentan como ingreso hasta ejecutar la venta)">🟣 Adelantos S/.</span>
+        <span class="fc-row-lbl" title="Adelantos recibidos de reservas activas este mes (no cuentan como ingreso hasta ejecutar la venta)">🔒 Adelantos reservas</span>
         <span class="fc-row-val" style="color:var(--purple)" id="fc-pend-reservas">S/. 0.00</span>
       </div>
       <div class="fc-row">
-        <span class="fc-row-lbl">⏳ Compras S/.</span>
+        <span class="fc-row-lbl">⏳ Pendiente S/.</span>
         <span class="fc-row-val yellow" id="fc-pend-soles">S/. 0.00</span>
       </div>
       <div class="fc-row">
-        <span class="fc-row-lbl">⏳ Compras $</span>
+        <span class="fc-row-lbl">⏳ Pendiente $</span>
         <span class="fc-row-val yellow" id="fc-pend-usd">$ 0.00</span>
       </div>
       <div class="fc-bot">
@@ -1816,16 +1816,16 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
 
     <!-- FIN DE MES -->
     <div class="fc-bubble fin">
-      <div class="fc-chip"><div class="fc-chip-dot"></div>Fin de Mes</div>
+      <div class="fc-chip"><div class="fc-chip-dot"></div>Cierre</div>
       <div class="fc-main-num blue" id="fc-caja-fin">—</div>
       <div class="fc-main-lbl">Caja al cierre del mes</div>
       <div class="fc-inner-div"></div>
       <div class="fc-row">
-        <span class="fc-row-lbl">Stock fin de mes</span>
+        <span class="fc-row-lbl">Valor de stock</span>
         <span class="fc-row-val blue" id="fc-stock-fin">—</span>
       </div>
       <div class="fc-row">
-        <span class="fc-row-lbl">Total patrimonio fin</span>
+        <span class="fc-row-lbl">Patrimonio final</span>
         <span class="fc-row-val" id="fc-total-label">—</span>
       </div>
       <div class="fc-bot">
@@ -1865,15 +1865,15 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
 
     <!-- GANANCIAS -->
     <div class="ind-card ind-ganancias">
-      <div class="sim-chip"><div class="sim-chip-dot dot-green"></div>Ganancias</div>
+      <div class="sim-chip"><div class="sim-chip-dot dot-green"></div>Margen</div>
       <div class="sim-num" id="ind-ganancias" style="color:var(--green)">—</div>
-      <div class="sim-lbl">Ventas del mes</div>
+      <div class="sim-lbl">Margen en ventas</div>
       <div class="sim-trend trend-up" id="ind-ganancias-trend">—</div>
     </div>
 
     <!-- UTILIDAD -->
     <div class="ind-card ind-utilidad-pos" id="ind-utilidad-card">
-      <div class="sim-chip"><div class="sim-chip-dot dot-accent" id="ind-utilidad-dot"></div>Utilidad</div>
+      <div class="sim-chip"><div class="sim-chip-dot dot-accent" id="ind-utilidad-dot"></div>Utilidad Neta</div>
       <div class="sim-num" id="ind-utilidad">—</div>
       <div class="sim-lbl">Caja fin − Caja inicio</div>
       <div class="sim-trend" id="ind-utilidad-trend">—</div>
