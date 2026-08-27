@@ -3285,14 +3285,15 @@ function updateStats(mes='',vendidosMes=[],vendidosDespues=[]){
     // Estaba en inventario al cierre del mes: comprado <= fechaFin, no cancelado,
     // y no vendido durante o antes del mes (= DISPONIBLE ahora  O  vendido después del mes)
     const atFin=p=>p.fecha_compra&&p.fecha_compra<=fechaFin&&p.estado!=='CANCELADO'&&
-      (p.estado==='DISPONIBLE'||vendDespSet.has(p.codigo_producto));
+      (p.estado==='DISPONIBLE'||p.estado==='RESERVADO'||vendDespSet.has(p.codigo_producto));
     allZap=inventarioCache.filter(p=>atFin(p)&&p.categoria==='ZAPATILLAS');
     allRopa=inventarioCache.filter(p=>atFin(p)&&p.categoria!=='ZAPATILLAS');
-    dispZap=allZap.filter(p=>p.pago_estado!=='PENDIENTE');
-    dispRopa=allRopa.filter(p=>p.pago_estado!=='PENDIENTE');
-    dispAll=inventarioCache.filter(p=>atFin(p)&&p.pago_estado!=='PENDIENTE');
-    // Reservados históricos no se trackean por mes, se muestra 0
-    rsvZap=[]; rsvRopa=[]; rsvAll=[];
+    dispZap=allZap.filter(p=>p.estado==='DISPONIBLE'&&p.pago_estado!=='PENDIENTE');
+    dispRopa=allRopa.filter(p=>p.estado==='DISPONIBLE'&&p.pago_estado!=='PENDIENTE');
+    dispAll=inventarioCache.filter(p=>atFin(p)&&p.estado==='DISPONIBLE'&&p.pago_estado!=='PENDIENTE');
+    rsvZap=allZap.filter(p=>p.estado==='RESERVADO'&&p.pago_estado!=='PENDIENTE');
+    rsvRopa=allRopa.filter(p=>p.estado==='RESERVADO'&&p.pago_estado!=='PENDIENTE');
+    rsvAll=inventarioCache.filter(p=>atFin(p)&&p.estado==='RESERVADO'&&p.pago_estado!=='PENDIENTE');
     // Vendidos = vendidos DURANTE ese mes
     vendZap=inventarioCache.filter(p=>p.categoria==='ZAPATILLAS'&&vendMesSet.has(p.codigo_producto)).length;
     vendRopa=inventarioCache.filter(p=>p.categoria!=='ZAPATILLAS'&&vendMesSet.has(p.codigo_producto)).length;
