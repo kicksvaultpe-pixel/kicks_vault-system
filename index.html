@@ -2236,7 +2236,7 @@ function ocExistenteChange(){
   // Count products in this OC
   const prods=inventarioCache.filter(p=>p.orden_compra===cod);
   const monto=prods.reduce((s,p)=>s+parseFloat(p.precio_compra_soles||0),0);
-  const fecha=oc.fecha?oc.fecha.substring(2,10):'—';
+  const fecha=oc.fecha?oc.fecha.slice(8,10)+'/'+oc.fecha.slice(5,7)+'/'+oc.fecha.slice(2,4):'—';
   document.getElementById('oc-info-codigo').textContent=oc.codigo;
   document.getElementById('oc-info-tipo').textContent=(oc.tipo==='IMPORTACION'?'✈️ ':'🏪 ')+oc.tipo;
   document.getElementById('oc-info-prods').textContent=prods.length+' uds';
@@ -2342,7 +2342,7 @@ function renderOCTab(){
   tbody.innerHTML=ocs.map(oc=>{
     const prods=inventarioCache.filter(p=>p.orden_compra===oc.codigo);
     const monto=prods.reduce((sum,p)=>sum+parseFloat(p.precio_compra_soles||0),0);
-    const fecha=oc.fecha?oc.fecha.substring(2,10):'—';
+    const fecha=oc.fecha?oc.fecha.slice(8,10)+'/'+oc.fecha.slice(5,7)+'/'+oc.fecha.slice(2,4):'—';
     return `<tr>
       <td><span class="td-code" style="color:var(--accent)">${oc.codigo}</span></td>
       <td class="td-main">${oc.nombre||'<span class="td-unit">—</span>'}</td>
@@ -2984,10 +2984,11 @@ async function abrirPerfil(id){
 
 function renderPerfil(c,ventas){
   const totalGastado=ventas.reduce((s,v)=>s+parseFloat(v.precio_venta_soles||0),0);
-  const ultimaCompra=ventas.length?ventas[0].fecha:null;
+  const _uf=ventas.length?ventas[0].fecha:null;
+  const ultimaCompra=_uf?_uf.slice(8,10)+'/'+_uf.slice(5,7)+'/'+_uf.slice(2,4):null;
   const histRows=ventas.slice(0,10).map(v=>`
     <tr>
-      <td class="td-unit">${v.fecha||'—'}</td>
+      <td class="td-unit">${v.fecha?v.fecha.slice(8,10)+'/'+v.fecha.slice(5,7)+'/'+v.fecha.slice(2,4):'—'}</td>
       <td class="td-accent">${v.codigo_producto||'—'}</td>
       <td class="right">${fmt(v.precio_venta_soles)}</td>
       <td class="td-green right">${fmt(v.ganancia)}</td>
@@ -3981,8 +3982,8 @@ function renderFlujoTabla() {
 
   const fmtFecha = f => {
     if(!f) return '—';
-    const d = new Date(f);
-    return d.toLocaleDateString('es-PE',{day:'2-digit',month:'2-digit',year:'2-digit'});
+    const s=String(f).slice(0,10);
+    return s.slice(8,10)+'/'+s.slice(5,7)+'/'+s.slice(2,4);
   };
 
   const fmtUsdAmt = v => parseFloat(v||0) > 0 ? '$ '+parseFloat(v).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
