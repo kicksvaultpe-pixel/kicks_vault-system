@@ -1553,6 +1553,15 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <span class="combo-arrow">▼</span>
       <div class="combo-list" id="cl-inv-estado"></div>
     </div>
+    <div class="combo-wrap" style="min-width:130px">
+      <input type="text" id="inv-tpago" placeholder="T.Pago…" autocomplete="off" readonly
+        oninput="comboFilter('inv-tpago','cl-inv-tpago');filterInventario()"
+        onfocus="comboOpen('inv-tpago','cl-inv-tpago')"
+        onblur="comboBlur('cl-inv-tpago')"
+        onkeydown="comboKey(event,'inv-tpago','cl-inv-tpago')">
+      <span class="combo-arrow">▼</span>
+      <div class="combo-list" id="cl-inv-tpago"></div>
+    </div>
     <div style="flex:1"></div>
     <button class="btn btn-ghost btn-sm" onclick="clearFiltros()">× Limpiar</button>
     <button class="btn btn-ghost btn-sm" onclick="loadInventario()" title="Recargar">↺</button>
@@ -1574,7 +1583,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <th class="right" onclick="sortTable('precio_final')" style="cursor:pointer;width:88px">Costo Total <span id="sort-precio_final"></span></th>
         <th class="right" onclick="sortTable('precio_venta_sugerido')" style="cursor:pointer;width:88px">P.V. Sug. <span id="sort-precio_venta_sugerido"></span></th>
         <th style="width:110px">Estado</th>
-        <th style="width:105px">Pago</th>
+        <th style="width:105px">T.Pago</th>
         <th style="width:40px"></th>
       </tr></thead>
       <tbody id="inv-tbody">
@@ -3108,7 +3117,8 @@ function fillDataLists(){
   comboSetData('cl-inv-talla', tallas);
   // Opciones fijas — inventario filtros
   comboSetData('cl-inv-cat', ['— Todos —','👟 ZAPATILLAS','👕 ROPA','💎 ACCESORIOS','📦 OTROS']);
-  comboSetData('cl-inv-estado', ['— Todos —','✅ DISPONIBLE','🔒 RESERVADO','💰 VENDIDO','⏳ PENDIENTE','❌ CANCELADO']);
+  comboSetData('cl-inv-estado', ['— Todos —','✅ DISPONIBLE','🔒 RESERVADO','💰 VENDIDO','❌ CANCELADO']);
+  comboSetData('cl-inv-tpago',  ['— Todos —','💵 CONTADO','🔄 CRÉDITO','⏳ PENDIENTE']);
   // Opciones fijas — toolbars otros tabs
   comboSetData('cl-vt-f-canal', ['— Todos —','📸 INSTAGRAM','💬 WHATSAPP','🏪 PRESENCIAL','🔹 OTRO']);
   comboSetData('cl-clf-tipo', ['— Todos —','👤 REGULAR','⭐ VIP','📦 MAYORISTA']);
@@ -3328,7 +3338,7 @@ function set(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
 let sortCol=null,sortDir=1;
 
 function clearFiltros(){
-  ['inv-codigo','inv-marca','inv-modelo','inv-colorway','inv-talla','inv-cat','inv-estado'].forEach(id=>{
+  ['inv-codigo','inv-marca','inv-modelo','inv-colorway','inv-talla','inv-cat','inv-estado','inv-tpago'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.value='';
   });
   sortCol=null; sortDir=1;
@@ -3364,6 +3374,7 @@ function filterInventario(){
   const colorway=g('inv-colorway').toLowerCase();
   const talla=g('inv-talla').toLowerCase();
   const estado=noEmoji(g('inv-estado'));
+  const tpago=noEmoji(g('inv-tpago'));
   const cat=noEmoji(g('inv-cat')).toUpperCase();
 
   let rows=invBaseRows().filter(p=>{
@@ -3376,11 +3387,12 @@ function filterInventario(){
     const matchS=!modelo||(p.modelo||'').toLowerCase().includes(modelo);
     const matchC=!colorway||(p.colorway||'').toLowerCase().includes(colorway);
     const matchT=!talla||(p.talla||'').toLowerCase().includes(talla);
-    const matchE=!estado||(estado==='PENDIENTE'?p.pago_estado==='PENDIENTE':estado==='DISPONIBLE'?(p.estado==='DISPONIBLE'&&p.pago_estado!=='PENDIENTE'):p.estado===estado);
+    const matchE=!estado||(estado==='DISPONIBLE'?(p.estado==='DISPONIBLE'&&p.pago_estado!=='PENDIENTE'):p.estado===estado);
+    const matchTP=!tpago||(tpago==='PENDIENTE'?p.pago_estado==='PENDIENTE':tpago==='CONTADO'?p.tipo_pago==='CONTADO':tpago.startsWith('CR')?p.tipo_pago==='CREDITO':false);
     const matchCat=!cat||(p.categoria||'').toUpperCase().includes(cat);
     const showCancelado=estado==='CANCELADO';
     if(p.estado==='CANCELADO'&&!showCancelado) return false;
-    return matchCod&&matchM&&matchS&&matchC&&matchT&&matchE&&matchCat;
+    return matchCod&&matchM&&matchS&&matchC&&matchT&&matchE&&matchTP&&matchCat;
   });
 
   if(sortCol){
