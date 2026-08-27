@@ -1050,7 +1050,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <div class="form-grid g3">
         <div class="field"><label>Factura</label><input type="text" id="cp-factura" placeholder="Nro. factura..."></div>
         <div class="field span2"><label>Descripción del producto</label><input type="text" id="cp-desc-factura" placeholder="Descripción del producto..."></div>
-        <div class="field span3"><label>Comentarios</label><textarea id="cp-comentarios" placeholder="Condición, origen, notas..."></textarea></div>
+        <div class="field span3"><label>Observaciones</label><textarea id="cp-comentarios" placeholder="Condición, origen, notas..."></textarea></div>
       </div>
     </div>
         <!-- CRÉDITO: Factura & Notas -->
@@ -1059,7 +1059,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <div class="form-grid g3">
         <div class="field"><label>Factura</label><input type="text" id="cp-factura-credito" placeholder="Nro. factura..."></div>
         <div class="field span2"><label>Descripción del producto</label><input type="text" id="cp-desc-factura-credito" placeholder="Descripción del producto..."></div>
-        <div class="field span3"><label>Comentarios</label><textarea id="cp-comentarios-credito" placeholder="Proveedor, condiciones, notas..."></textarea></div>
+        <div class="field span3"><label>Observaciones</label><textarea id="cp-comentarios-credito" placeholder="Proveedor, condiciones, notas..."></textarea></div>
       </div>
     </div>
     <button class="btn btn-primary" id="btn-compra" onclick="registrarCompra()">✓ Registrar Compra</button>
@@ -3967,7 +3967,7 @@ async function registrarCompra(){
       precio_venta_sugerido:pventa,
       factura:document.getElementById('cp-factura').value.trim()||null,
       descripcion_factura:esCredito?document.getElementById('cp-desc-factura-credito').value.trim()||null:document.getElementById('cp-desc-factura').value.trim()||null,
-      comentarios:document.getElementById('cp-comentarios').value.trim()||null,
+      observaciones:(esCredito?document.getElementById('cp-comentarios-credito'):document.getElementById('cp-comentarios')).value.trim()||null,
       estado:'DISPONIBLE',
       tipo_pago:tipoPagoActual,
       pago_estado:esCredito?'PENDIENTE':'PAGADO',
