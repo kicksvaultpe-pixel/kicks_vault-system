@@ -1562,7 +1562,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <div class="sc-grid g2" style="row-gap:10px;margin-top:8px">
         <span class="sg-mc">N° Ventas</span>
         <span class="sg-mn accent" id="vt-n">—</span>
-        <span class="sg-mc">Margen Prom.</span>
+        <span class="sg-mc">ROI Prom.</span>
         <span class="sg-mn green" id="vt-margen">—</span>
       </div>
     </div>
@@ -4270,7 +4270,7 @@ function updateVentasStats(rows,pagos,mes){
   s('vt-rev',fmt(rev));
   s('vt-sub-mes',lbl);
   s('vt-gan',fmt(gan));
-  s('vt-margen',(avgRoi*100).toFixed(0)+'% margen promedio');
+  s('vt-margen',(avgRoi*100).toFixed(0)+'% ROI promedio');
   s('vt-costo',fmt(costo));
   s('vt-pagos-stat',fmt(pagosTotal));
   s('vt-n',n+' ud'+(n!==1?'s':''));
