@@ -506,6 +506,29 @@ input[list] { cursor: text; }
 .inv-monto.purple{color:var(--purple)}
 .inv-dash{color:var(--muted2);font-size:10px;font-family:inherit}
 
+/* ── Inventario Edit Panel ── */
+.btn-edit-inv{background:none;border:1px solid var(--border);color:var(--muted2);width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;justify-content:center;transition:all .15s;padding:0}
+.btn-edit-inv:hover{border-color:var(--accent);color:var(--accent);background:rgba(99,102,241,.08)}
+#inv-edit-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:none;opacity:0;transition:opacity .2s;pointer-events:none}
+#inv-edit-overlay.open{display:block;opacity:1;pointer-events:all}
+#inv-edit-panel{position:fixed;right:0;top:0;bottom:0;width:440px;max-width:100vw;background:var(--card);border-left:1px solid var(--border);z-index:201;overflow-y:auto;padding:24px 24px 40px;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1)}
+#inv-edit-overlay.open #inv-edit-panel{transform:translateX(0)}
+.iep-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}
+.iep-close{background:none;border:1px solid var(--border);color:var(--muted2);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:15px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.iep-close:hover{border-color:var(--red);color:var(--red)}
+.iep-section{border-top:1px solid var(--border);padding-top:16px;margin-top:16px}
+.iep-section-lbl{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:12px}
+.iep-select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Archivo',inherit;font-size:12px;cursor:pointer;appearance:none;-webkit-appearance:none}
+.iep-select:focus{outline:none;border-color:var(--accent)}
+.iep-costo-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)}
+.iep-costo-concepto{flex:1;font-size:12px;font-weight:600;color:var(--text)}
+.iep-costo-monto{font-size:11px;font-weight:700;color:var(--purple);font-variant-numeric:tabular-nums;white-space:nowrap}
+.iep-costo-del{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:16px;padding:0 2px;line-height:1;transition:color .15s}
+.iep-costo-del:hover{color:var(--red)}
+.iep-total-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;margin-top:4px}
+.iep-total-lbl{font-size:11px;font-weight:700;color:var(--text)}
+.iep-total-val{font-size:15px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums;font-family:'Archivo Black'}
+
 /* ═══════════════════════════════════════════════════════
    MOBILE BOTTOM NAV
 ═══════════════════════════════════════════════════════ */
@@ -1467,22 +1490,20 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   <div class="table-wrap">
     <table>
       <thead><tr>
-        <th onclick="sortTable('fecha_compra')" style="cursor:pointer">Fecha <span id="sort-fecha_compra"></span></th>
-        <th>Código</th>
-        <th onclick="sortTable('marca')" style="cursor:pointer">Marca <span id="sort-marca"></span></th>
-        <th onclick="sortTable('modelo')" style="cursor:pointer">Modelo <span id="sort-modelo"></span></th>
+        <th onclick="sortTable('fecha_compra')" style="cursor:pointer;width:72px">Fecha <span id="sort-fecha_compra"></span></th>
+        <th style="width:92px">Código</th>
+        <th onclick="sortTable('marca')" style="cursor:pointer">Marca + Modelo <span id="sort-marca"></span></th>
         <th>Colorway</th>
-        <th>Categoría</th>
-        <th onclick="sortTable('talla')" style="cursor:pointer">Talla <span id="sort-talla"></span></th>
-        <th onclick="sortTable('precio_compra_soles')" style="cursor:pointer">P. Compra <span id="sort-precio_compra_soles"></span></th>
-        <th>Costos Adic.</th>
-        <th onclick="sortTable('precio_final')" style="cursor:pointer">Costo Total <span id="sort-precio_final"></span></th>
-        <th onclick="sortTable('precio_venta_sugerido')" style="cursor:pointer">P.V. Sugerido <span id="sort-precio_venta_sugerido"></span></th>
-        <th onclick="sortTable('margen')" style="cursor:pointer">Margen <span id="sort-margen"></span></th>
-        <th>OC</th><th>Estado</th><th>Pago</th><th>Factura</th><th></th>
+        <th onclick="sortTable('talla')" style="cursor:pointer;width:55px;text-align:center">Talla <span id="sort-talla"></span></th>
+        <th style="width:120px">Estado</th>
+        <th class="right" onclick="sortTable('precio_final')" style="cursor:pointer;width:100px">Costo Total <span id="sort-precio_final"></span></th>
+        <th class="right" onclick="sortTable('precio_venta_sugerido')" style="cursor:pointer;width:100px">P.V. Sug. <span id="sort-precio_venta_sugerido"></span></th>
+        <th class="right" onclick="sortTable('margen')" style="cursor:pointer;width:78px">Margen <span id="sort-margen"></span></th>
+        <th style="width:120px">Pago</th>
+        <th style="width:44px"></th>
       </tr></thead>
       <tbody id="inv-tbody">
-        <tr class="loading-row"><td colspan="17"><div class="spinner"></div></td></tr>
+        <tr class="loading-row"><td colspan="11"><div class="spinner"></div></td></tr>
       </tbody>
     </table>
   </div>
@@ -2660,7 +2681,7 @@ async function loadClientes(){
 function renderInventario(rows){
   const tbody=document.getElementById('inv-tbody');
   if(!rows.length){
-    tbody.innerHTML='<tr><td colspan="17"><div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Sin productos</div></div></td></tr>';
+    tbody.innerHTML='<tr><td colspan="11"><div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Sin productos</div></div></td></tr>';
     return;
   }
   tbody.innerHTML=rows.map(p=>{
@@ -2719,21 +2740,15 @@ function renderInventario(rows){
     return`<tr class="${rowCls}">
       <td class="inv-fecha">${fecha}</td>
       <td><span class="inv-cod">${p.codigo_producto}</span></td>
-      <td class="inv-txt">${p.marca||'—'}</td>
-      <td class="inv-txt">${p.modelo||'—'}</td>
-      <td class="inv-txt">${p.colorway||'—'}</td>
-      <td><span class="${catCls}">${catLabel}</span></td>
+      <td class="inv-txt"><span style="font-weight:700">${p.marca||'—'}</span>${p.modelo?` <span style="color:var(--muted2);font-weight:500">${p.modelo}</span>`:''}</td>
+      <td class="inv-txt" style="color:var(--muted2);font-weight:500;font-size:11px">${p.colorway||'—'}</td>
       <td class="inv-talla">${p.talla||'—'}</td>
-      <td class="right">${pcHtml}</td>
-      <td class="right">${costoHtml}</td>
+      <td>${estadoBadge}</td>
       <td class="right">${finalHtml}</td>
       <td class="right">${ventaHtml}</td>
       <td class="right">${mg}</td>
-      <td class="inv-txt">${p.orden_compra||'—'}</td>
-      <td>${estadoBadge}</td>
       <td>${pagoBadge}</td>
-      <td class="inv-txt-muted">${p.factura||'—'}</td>
-      <td>${btnCancel}</td>
+      <td style="text-align:center"><button class="btn-edit-inv" onclick="abrirEditarItem('${p.codigo_producto}')" title="Editar">✏</button></td>
     </tr>`;
   }).join('');
 }
@@ -4363,8 +4378,221 @@ function _dlCSV(csv,name){
   setTimeout(()=>URL.revokeObjectURL(u),1000);
 }
 
+// ══ INVENTARIO EDIT ══
+let invEditCodigo=null,iepCostosOrig=[],iepCostosNuevos=[],iepCostosEliminar=[];
+
+function abrirEditarItem(codigo){
+  const p=inventarioCache.find(x=>x.codigo_producto===codigo);
+  if(!p)return;
+  invEditCodigo=codigo;
+  iepCostosOrig=[...(p.costos||[])];
+  iepCostosNuevos=[];
+  iepCostosEliminar=[];
+  document.getElementById('iep-codigo').textContent=codigo;
+  document.getElementById('iep-marca').value=p.marca||'';
+  document.getElementById('iep-modelo').value=p.modelo||'';
+  document.getElementById('iep-colorway').value=p.colorway||'';
+  document.getElementById('iep-talla').value=p.talla||'';
+  document.getElementById('iep-cat').value=p.categoria||'';
+  document.getElementById('iep-estado').value=p.estado||'DISPONIBLE';
+  document.getElementById('iep-pago').value=p.tipo_pago||'CONTADO';
+  document.getElementById('iep-oc').value=p.orden_compra||'';
+  document.getElementById('iep-factura').value=p.factura||'';
+  document.getElementById('iep-precio-compra').value=p.precio_compra_soles||'';
+  document.getElementById('iep-precio-venta').value=p.precio_venta_sugerido||'';
+  document.getElementById('iep-observaciones').value=p.observaciones||'';
+  iepRenderCostos();
+  iepActualizarTotal();
+  document.getElementById('inv-edit-overlay').classList.add('open');
+}
+
+function cerrarEditarItem(){
+  document.getElementById('inv-edit-overlay').classList.remove('open');
+  invEditCodigo=null;
+}
+
+function iepRenderCostos(){
+  const list=document.getElementById('iep-costos-list');
+  const activos=iepCostosOrig.filter(c=>!iepCostosEliminar.includes(c.id));
+  const todos=[
+    ...activos.map(c=>({...c,_nuevo:false})),
+    ...iepCostosNuevos.map((c,i)=>({...c,_nuevo:true,_idx:i}))
+  ];
+  if(!todos.length){
+    list.innerHTML='<div style="color:var(--muted2);font-size:11px;padding:6px 0">Sin costos adicionales</div>';
+    return;
+  }
+  list.innerHTML=todos.map(c=>{
+    const del=c._nuevo
+      ?`<button class="iep-costo-del" onclick="iepEliminarCosto(${c._idx},true)">×</button>`
+      :`<button class="iep-costo-del" onclick="iepEliminarCosto(${c.id},false)">×</button>`;
+    return`<div class="iep-costo-row">
+      <span class="iep-costo-concepto">${c.concepto}</span>
+      <span class="iep-costo-monto">S/ ${fmt(c.costo_soles)}</span>
+      ${del}
+    </div>`;
+  }).join('');
+}
+
+function iepAgregarCosto(){
+  const concepto=document.getElementById('iep-new-concepto').value.trim();
+  const monto=parseFloat(document.getElementById('iep-new-monto').value);
+  if(!concepto||!monto||monto<=0){toast('Ingresa concepto y monto','warn');return;}
+  iepCostosNuevos.push({concepto:concepto.toUpperCase(),costo_soles:monto});
+  document.getElementById('iep-new-concepto').value='';
+  document.getElementById('iep-new-monto').value='';
+  iepRenderCostos();
+  iepActualizarTotal();
+}
+
+function iepEliminarCosto(id,isNuevo){
+  if(isNuevo)iepCostosNuevos.splice(id,1);
+  else iepCostosEliminar.push(id);
+  iepRenderCostos();
+  iepActualizarTotal();
+}
+
+function iepActualizarTotal(){
+  const pc=parseFloat(document.getElementById('iep-precio-compra').value||0);
+  const activos=iepCostosOrig.filter(c=>!iepCostosEliminar.includes(c.id));
+  const tc=[...activos,...iepCostosNuevos].reduce((s,c)=>s+parseFloat(c.costo_soles||0),0);
+  document.getElementById('iep-costo-total').textContent='S/ '+fmt(pc+tc);
+}
+
+async function iepGuardar(){
+  if(!invEditCodigo)return;
+  const btn=document.getElementById('iep-btn-guardar');
+  setLoading(btn,true);
+  try{
+    const pc=parseFloat(document.getElementById('iep-precio-compra').value||0);
+    const pv=parseFloat(document.getElementById('iep-precio-venta').value||0);
+    const activos=iepCostosOrig.filter(c=>!iepCostosEliminar.includes(c.id));
+    const tc=[...activos,...iepCostosNuevos].reduce((s,c)=>s+parseFloat(c.costo_soles||0),0);
+    const precioFinal=pc+tc;
+
+    const{error:e1}=await db.from('inventario').update({
+      marca:document.getElementById('iep-marca').value.trim().toUpperCase()||null,
+      modelo:document.getElementById('iep-modelo').value.trim().toUpperCase()||null,
+      colorway:document.getElementById('iep-colorway').value.trim().toUpperCase()||null,
+      talla:document.getElementById('iep-talla').value.trim()||null,
+      categoria:document.getElementById('iep-cat').value||null,
+      estado:document.getElementById('iep-estado').value||null,
+      tipo_pago:document.getElementById('iep-pago').value||null,
+      orden_compra:document.getElementById('iep-oc').value.trim()||null,
+      factura:document.getElementById('iep-factura').value.trim()||null,
+      precio_compra_soles:pc||null,
+      precio_venta_sugerido:pv||null,
+      precio_final:precioFinal||null,
+      observaciones:document.getElementById('iep-observaciones').value.trim()||null
+    }).eq('codigo_producto',invEditCodigo);
+    if(e1)throw e1;
+
+    if(iepCostosEliminar.length){
+      const{error:e2}=await db.from('costos').delete().in('id',iepCostosEliminar);
+      if(e2)throw e2;
+    }
+    if(iepCostosNuevos.length){
+      const fecha=new Date().toISOString().slice(0,10);
+      const{error:e3}=await db.from('costos').insert(
+        iepCostosNuevos.map(c=>({codigo_producto:invEditCodigo,concepto:c.concepto,costo_soles:c.costo_soles,fecha}))
+      );
+      if(e3)throw e3;
+    }
+
+    toast(`✓ ${invEditCodigo} actualizado`,'ok');
+    cerrarEditarItem();
+    await loadInventario();
+  }catch(e){toast('Error: '+e.message,'err');}
+  finally{setLoading(btn,false);}
+}
+
 init();
 </script>
+
+<!-- ══ INVENTARIO EDIT PANEL ══ -->
+<div id="inv-edit-overlay" onclick="cerrarEditarItem()">
+  <div id="inv-edit-panel" onclick="event.stopPropagation()">
+    <div class="iep-header">
+      <div>
+        <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:5px">Editar producto</div>
+        <div id="iep-codigo" style="font-size:17px;font-weight:700;color:var(--accent);font-family:'Archivo Black'">—</div>
+      </div>
+      <button class="iep-close" onclick="cerrarEditarItem()">✕</button>
+    </div>
+
+    <div class="iep-section" style="border-top:none;padding-top:0;margin-top:0">
+      <div class="iep-section-lbl">Producto</div>
+      <div class="form-grid g2">
+        <div class="field"><label>Marca</label><input type="text" id="iep-marca" autocomplete="off"></div>
+        <div class="field"><label>Modelo</label><input type="text" id="iep-modelo" autocomplete="off"></div>
+        <div class="field span2"><label>Colorway</label><input type="text" id="iep-colorway" autocomplete="off"></div>
+        <div class="field"><label>Talla</label><input type="text" id="iep-talla" autocomplete="off"></div>
+        <div class="field"><label>Categoría</label>
+          <select id="iep-cat" class="iep-select">
+            <option value="">—</option>
+            <option value="ZAPATILLAS">Zapatillas</option>
+            <option value="ROPA">Ropa</option>
+            <option value="ACCESORIOS">Accesorios</option>
+            <option value="OTROS">Otros</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="iep-section">
+      <div class="iep-section-lbl">Estado y Pago</div>
+      <div class="form-grid g2">
+        <div class="field"><label>Estado</label>
+          <select id="iep-estado" class="iep-select">
+            <option value="DISPONIBLE">Disponible</option>
+            <option value="RESERVADO">Reservado</option>
+            <option value="VENDIDO">Vendido</option>
+            <option value="CANCELADO">Cancelado</option>
+          </select>
+        </div>
+        <div class="field"><label>Tipo Pago</label>
+          <select id="iep-pago" class="iep-select">
+            <option value="CONTADO">Contado</option>
+            <option value="CREDITO">Crédito</option>
+          </select>
+        </div>
+        <div class="field"><label>OC</label><input type="text" id="iep-oc" autocomplete="off" placeholder="OC-001"></div>
+        <div class="field"><label>Factura</label><input type="text" id="iep-factura" autocomplete="off" placeholder="N° factura"></div>
+      </div>
+    </div>
+
+    <div class="iep-section">
+      <div class="iep-section-lbl">Financiero</div>
+      <div class="form-grid g2">
+        <div class="field"><label>P. Compra S/.</label><input type="number" id="iep-precio-compra" step="0.01" min="0" placeholder="0.00" oninput="iepActualizarTotal()"></div>
+        <div class="field"><label>P.V. Sugerido S/.</label><input type="number" id="iep-precio-venta" step="0.01" min="0" placeholder="0.00"></div>
+      </div>
+      <div style="margin-top:14px">
+        <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-bottom:8px">Costos adicionales</div>
+        <div id="iep-costos-list"></div>
+        <div style="display:flex;gap:8px;margin-top:10px;align-items:flex-end">
+          <div class="field" style="flex:1;margin-bottom:0"><label>Concepto</label><input type="text" id="iep-new-concepto" placeholder="Envío, Aduana..."></div>
+          <div class="field" style="width:88px;margin-bottom:0"><label>S/.</label><input type="number" id="iep-new-monto" step="0.01" min="0" placeholder="0.00"></div>
+          <button class="btn btn-ghost btn-sm" onclick="iepAgregarCosto()" style="flex-shrink:0;height:36px;margin-bottom:0">+ Agregar</button>
+        </div>
+      </div>
+      <div class="iep-total-row">
+        <span class="iep-total-lbl">Costo Total</span>
+        <span class="iep-total-val" id="iep-costo-total">—</span>
+      </div>
+    </div>
+
+    <div class="iep-section">
+      <div class="iep-section-lbl">Observaciones</div>
+      <textarea id="iep-observaciones" rows="3" placeholder="Notas, detalles adicionales sobre este producto..." style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-family:'Archivo',inherit;font-size:12px;resize:vertical;box-sizing:border-box;outline:none"></textarea>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:24px">
+      <button class="btn btn-primary" id="iep-btn-guardar" onclick="iepGuardar()" style="flex:1">✓ Guardar cambios</button>
+      <button class="btn btn-ghost" onclick="cerrarEditarItem()">Cancelar</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
 <!-- deploy Fri Mar  6 02:46:01 UTC 2026 -->
