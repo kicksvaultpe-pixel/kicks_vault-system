@@ -179,7 +179,7 @@ tbody tr.row-dim{opacity:.45}
 .sg-mc{font-size:11px;color:var(--muted2);font-family:'Archivo',sans-serif}.sg-uni-head{display:grid;grid-template-columns:1fr auto;gap:0 8px;padding-bottom:6px}.sg-uni-row{display:grid;grid-template-columns:1fr auto;gap:0 8px;padding:4px 0;align-items:center}
 .sg-mc-tot{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2)}
 .sg-mn{font-family:"Archivo Black";font-size:12px;color:var(--text);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
-.sg-mn.accent{color:var(--accent)}.sg-mn.green{color:var(--green)}
+.sg-mn.accent{color:var(--accent)}.sg-mn.green{color:var(--green)}.sg-mn.red{color:var(--red)}
 .sg-mn-tot{font-family:"Archivo Black";font-size:15px;color:var(--text);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 .sg-mn-tot.red{color:var(--red)}.sg-mn-tot.green{color:var(--green)}.sg-mn-tot.accent{color:var(--accent)}
 /* Inv stat card variants */
@@ -207,6 +207,9 @@ tbody tr.row-dim{opacity:.45}
 .sc-ganancia.stat-card:hover::before{opacity:.55;background:linear-gradient(90deg,transparent,var(--green),transparent)}
 .sc-ganancia .sc-chip::before{background:var(--green)}
 .sc-utilidad .sc-chip::before{background:var(--muted2)}
+.sc-resultado.stat-card::before{opacity:.3}.sc-resultado.stat-card:hover::before{opacity:.55}
+.sc-resultado .sc-chip::before{background:var(--accent)}
+.sc-stats-vt .sc-chip::before{background:var(--muted2)}
 .vt-meta-bar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:20px;padding:10px 18px;background:var(--card);border:1px solid var(--border);border-radius:12px}
 .vt-meta-item{display:flex;align-items:center;gap:8px}
 .vt-meta-lbl{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2)}
@@ -580,7 +583,8 @@ input[list] { cursor: text; }
   /* Cards más compactas */
   .card-label { font-size: 10px; }
   /* Tabla min-width más chica para scroll */
-  .table-wrap table, #vt-table { min-width: 800px !important; }
+  .table-wrap table { min-width: 800px !important; }
+  #pg-table { min-width: 480px !important; }
   /* cl-sel bubble en mobile */
   .cl-sel { flex-wrap: nowrap; }
   /* Stat cards: columna única para que el contenido no se trunque */
@@ -609,9 +613,6 @@ input[list] { cursor: text; }
 tbody tr{cursor:pointer;user-select:none}
 tbody tr.row-selected>td{background:rgba(37,99,235,.07)!important;outline:1px solid rgba(37,99,235,.18)}
 tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
-/* Ventas stats responsive */
-@media(max-width:640px){#vt-stats-row{grid-template-columns:1fr 1fr!important}}
-@media(max-width:360px){#vt-stats-row{grid-template-columns:1fr!important}}
 
 /* ── CRM CLIENTES ── */
 .cl-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
@@ -1506,40 +1507,37 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
     <button class="btn btn-ghost btn-sm" id="vt-btn-historico" onclick="vtToggleHistorico()" title="Ver todo el historial" style="height:34px">🕐 Historia</button>
   </div>
 
-  <!-- Fila 1: 3 cards principales -->
-  <div class="stats-row stats3">
-    <div class="stat-card sc-venta">
-      <div class="sc-chip">Precio de Venta</div>
-      <div class="st-big-num accent" id="vt-rev">—</div>
-      <div class="stat-sub" id="vt-sub-mes"></div>
+  <!-- Cards: P&L + Stats -->
+  <div class="stats-row" style="grid-template-columns:1.6fr 1fr">
+    <div class="stat-card sc-resultado">
+      <div class="sc-chip">Resultado</div>
+      <div class="sc-grid g2">
+        <span class="sg-mc">Precio de Venta</span>
+        <span class="sg-mn accent" id="vt-rev">—</span>
+        <span class="sg-mc">− Precio Compra</span>
+        <span class="sg-mn" id="vt-costo">—</span>
+      </div>
+      <div class="sg-divider"></div>
+      <div class="sc-grid g2">
+        <span class="sg-mc-tot" style="color:var(--green)">Ganancia Bruta</span>
+        <span class="sg-mn-tot green" id="vt-gan">—</span>
+        <span class="sg-mc">− Pagos del Negocio</span>
+        <span class="sg-mn red" id="vt-pagos-stat">—</span>
+      </div>
+      <div class="sg-divider"></div>
+      <div class="sc-grid g2">
+        <span class="sg-mc-tot">Utilidad Neta</span>
+        <span class="sg-mn-tot" id="vt-utilidad">—</span>
+      </div>
     </div>
-    <div class="stat-card sc-ganancia">
-      <div class="sc-chip">Ganancia Bruta</div>
-      <div class="st-big-num green" id="vt-gan">—</div>
-      <div class="stat-sub" id="vt-margen">—</div>
-    </div>
-    <div class="stat-card sc-utilidad">
-      <div class="sc-chip">Utilidad Neta</div>
-      <div class="st-big-num" id="vt-utilidad">—</div>
-      <div class="stat-sub">ganancia − pagos</div>
-    </div>
-  </div>
-
-  <!-- Fila 2: desglose compacto -->
-  <div class="vt-meta-bar">
-    <div class="vt-meta-item">
-      <span class="vt-meta-lbl">Precio Compra</span>
-      <span class="vt-meta-val" id="vt-costo">—</span>
-    </div>
-    <span class="vt-meta-sep">·</span>
-    <div class="vt-meta-item">
-      <span class="vt-meta-lbl">Pagos del negocio</span>
-      <span class="vt-meta-val red" id="vt-pagos-stat">—</span>
-    </div>
-    <span class="vt-meta-sep">·</span>
-    <div class="vt-meta-item">
-      <span class="vt-meta-lbl">N° Ventas</span>
-      <span class="vt-meta-val" id="vt-n">—</span>
+    <div class="stat-card sc-stats-vt">
+      <div class="sc-chip" id="vt-sub-mes">Este Mes</div>
+      <div class="sc-grid g2" style="row-gap:10px;margin-top:8px">
+        <span class="sg-mc">N° Ventas</span>
+        <span class="sg-mn accent" id="vt-n">—</span>
+        <span class="sg-mc">Margen Prom.</span>
+        <span class="sg-mn green" id="vt-margen">—</span>
+      </div>
     </div>
   </div>
 
@@ -1603,33 +1601,18 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   <div class="table-wrap">
     <table id="pg-table" style="min-width:580px">
       <thead><tr>
+        <th style="width:90px">Código</th>
         <th style="width:80px">Fecha</th>
         <th>Concepto</th>
         <th style="width:140px">Categoría</th>
         <th class="right" style="width:120px">Monto S/.</th>
       </tr></thead>
       <tbody id="pg-tbody">
-        <tr class="loading-row"><td colspan="4"><div class="spinner"></div></td></tr>
+        <tr class="loading-row"><td colspan="5"><div class="spinner"></div></td></tr>
       </tbody>
     </table>
   </div>
 
-  <!-- RESULTADO FINAL -->
-  <div class="vt-resultado">
-    <div class="vt-res-row">
-      <span class="vt-res-lbl">Ganancia de Ventas</span>
-      <span class="vt-res-val green" id="vt-res-gan">—</span>
-    </div>
-    <div class="vt-res-row">
-      <span class="vt-res-lbl">− Pagos del Negocio</span>
-      <span class="vt-res-val red" id="vt-res-pag">—</span>
-    </div>
-    <div class="sg-divider" style="margin:8px 0"></div>
-    <div class="vt-res-row">
-      <span class="vt-res-lbl-tot">Utilidad Neta</span>
-      <span class="vt-res-val-tot" id="vt-res-util">—</span>
-    </div>
-  </div>
 </div>
 <div id="view-flujo" class="view">
   <div class="page-hd">
@@ -4259,22 +4242,13 @@ function updateVentasStats(rows,pagos,mes){
   s('vt-sub-mes',lbl);
   s('vt-gan',fmt(gan));
   s('vt-margen',(avgRoi*100).toFixed(0)+'% margen promedio');
-  const utilEl=document.getElementById('vt-utilidad');
-  if(utilEl){
-    utilEl.textContent=(utilidad>=0?'+ ':'-')+fmt(Math.abs(utilidad));
-    utilEl.className='st-big-num '+(utilidad>=0?'green':'red');
-  }
-  // Fila 2 meta bar
   s('vt-costo',fmt(costo));
   s('vt-pagos-stat',fmt(pagosTotal));
   s('vt-n',n+' ud'+(n!==1?'s':''));
-  // Resultado final
-  s('vt-res-gan',fmt(gan));
-  s('vt-res-pag',fmt(pagosTotal));
-  const resEl=document.getElementById('vt-res-util');
-  if(resEl){
-    resEl.textContent=(utilidad>=0?'+ ':'-')+fmt(Math.abs(utilidad));
-    resEl.style.color=utilidad>=0?'var(--green)':'var(--red)';
+  const utilEl=document.getElementById('vt-utilidad');
+  if(utilEl){
+    utilEl.textContent=(utilidad>=0?'+ ':'-')+fmt(Math.abs(utilidad));
+    utilEl.className='sg-mn-tot '+(utilidad>=0?'green':'red');
   }
 }
 
@@ -4282,7 +4256,7 @@ function renderPagos(rows){
   const tbody=document.getElementById('pg-tbody');
   if(!tbody)return;
   if(!rows.length){
-    tbody.innerHTML='<tr><td colspan="4" style="text-align:center;padding:32px;color:var(--muted2)">Sin pagos en este período</td></tr>';
+    tbody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted2)">Sin pagos en este período</td></tr>';
     return;
   }
   const catBadge={'OPERATIVO':'badge-muted','MARKETING':'badge-purple','PERSONAL':'badge-accent','IMPORTACION':'badge-accent','PAGO':'badge-muted'};
@@ -4292,8 +4266,9 @@ function renderPagos(rows){
     const badge=catBadge[cat]||'badge-muted';
     const fecha=p.fecha?p.fecha.substring(2).replace(/-/g,'/'):'—';
     return`<tr>
+      <td class="td-code" style="color:var(--accent)">${p.codigo_pago||'—'}</td>
       <td class="td-code">${fecha}</td>
-      <td class="td-main">${p.concepto||'—'}</td>
+      <td class="td-main td-trunc">${p.concepto||'—'}</td>
       <td><span class="badge ${badge}">${cat}</span></td>
       <td class="td-amt right" style="color:var(--red)">− ${fmt(monto)}</td>
     </tr>`;
