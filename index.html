@@ -1466,12 +1466,16 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       </div>
       <div class="sg-divider"></div>
       <div class="sc-grid g2">
-        <span class="sg-mc-tot">Disp.</span>
+        <span class="sg-mc-tot">Total activo</span>
         <span class="sg-mn-tot accent" id="st-total-val">—</span>
       </div>
       <div class="sc-grid g2" style="margin-top:5px">
-        <span class="sg-mc-tot" style="color:var(--purple)">🔒 Reserv.</span>
-        <span class="sg-mn-tot" style="color:var(--purple)" id="st-rsv-val">—</span>
+        <span class="sg-mc-tot" style="font-size:10px;color:var(--muted2)">Disponible</span>
+        <span class="sg-mn-tot" style="font-size:10px;color:var(--muted2)" id="st-disp-val">—</span>
+      </div>
+      <div class="sc-grid g2" style="margin-top:3px">
+        <span class="sg-mc-tot" style="font-size:10px;color:var(--purple)">🔒 Reservado</span>
+        <span class="sg-mn-tot" style="font-size:10px;color:var(--purple)" id="st-rsv-val">—</span>
       </div>
     </div>
     <!-- COMPRAS DEL MES -->
@@ -3268,9 +3272,9 @@ function updateStats(mes='',vendidosMes=[],vendidosDespues=[]){
     dispZap=allZap.filter(p=>p.estado==='DISPONIBLE'&&p.pago_estado!=='PENDIENTE');
     dispRopa=allRopa.filter(p=>p.estado==='DISPONIBLE'&&p.pago_estado!=='PENDIENTE');
     dispAll=inventarioCache.filter(p=>p.estado==='DISPONIBLE'&&p.pago_estado!=='PENDIENTE');
-    rsvZap=allZap.filter(p=>p.estado==='RESERVADO');
-    rsvRopa=allRopa.filter(p=>p.estado==='RESERVADO');
-    rsvAll=inventarioCache.filter(p=>p.estado==='RESERVADO');
+    rsvZap=allZap.filter(p=>p.estado==='RESERVADO'&&p.pago_estado!=='PENDIENTE');
+    rsvRopa=allRopa.filter(p=>p.estado==='RESERVADO'&&p.pago_estado!=='PENDIENTE');
+    rsvAll=inventarioCache.filter(p=>p.estado==='RESERVADO'&&p.pago_estado!=='PENDIENTE');
     vendZap=allZap.filter(p=>p.estado==='VENDIDO').length;
     vendRopa=allRopa.filter(p=>p.estado==='VENDIDO').length;
     vendAll=inventarioCache.filter(p=>p.estado==='VENDIDO').length;
@@ -3311,11 +3315,18 @@ function updateStats(mes='',vendidosMes=[],vendidosDespues=[]){
   set('st-zap-vend', vendZap);
   set('st-ropa-vend', vendRopa);
   set('st-vend', vendAll);
-  // Valor stock
-  set('st-zap-val', fmt(dispZap.reduce((s,p)=>s+parseFloat(p.precio_final||0),0)));
-  set('st-ropa-val', fmt(dispRopa.reduce((s,p)=>s+parseFloat(p.precio_final||0),0)));
-  set('st-total-val', fmt(dispAll.reduce((s,p)=>s+parseFloat(p.precio_final||0),0)));
-  set('st-rsv-val', fmt(rsvAll.reduce((s,p)=>s+parseFloat(p.precio_final||0),0)));
+  // Valor stock — solo efectivo (excluye crédito pendiente)
+  const vDispZap  = dispZap.reduce((s,p)=>s+parseFloat(p.precio_final||0),0);
+  const vRsvZap   = rsvZap.reduce((s,p)=>s+parseFloat(p.precio_final||0),0);
+  const vDispRopa = dispRopa.reduce((s,p)=>s+parseFloat(p.precio_final||0),0);
+  const vRsvRopa  = rsvRopa.reduce((s,p)=>s+parseFloat(p.precio_final||0),0);
+  const vDispAll  = dispAll.reduce((s,p)=>s+parseFloat(p.precio_final||0),0);
+  const vRsvAll   = rsvAll.reduce((s,p)=>s+parseFloat(p.precio_final||0),0);
+  set('st-zap-val',   fmt(vDispZap  + vRsvZap));   // total activo zap
+  set('st-ropa-val',  fmt(vDispRopa + vRsvRopa));  // total activo ropa
+  set('st-total-val', fmt(vDispAll  + vRsvAll));   // total activo global
+  set('st-disp-val',  fmt(vDispAll));              // sub: solo disponible
+  set('st-rsv-val',   fmt(vRsvAll));               // sub: solo reservado
   // Compras del mes (usa mesCompras: mes seleccionado o mes actual en historia)
   const mesPagados=inventarioCache.filter(p=>
     p.fecha_compra&&p.fecha_compra.startsWith(mesCompras)&&
