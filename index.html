@@ -497,6 +497,7 @@ input[list] { cursor: text; }
 .fc-accion-COSTO{background:rgba(96,165,250,.1);color:var(--blue);border:1px solid rgba(96,165,250,.18)}
 .fc-accion-CANCELACION{background:rgba(156,163,175,.08);color:var(--muted2);border:1px solid rgba(156,163,175,.18)}
 .fc-accion-PENDIENTE{background:rgba(180,83,9,.08);color:var(--yellow);border:1px solid rgba(180,83,9,.18)}
+.fc-accion-INVERSION{background:rgba(37,99,235,.08);color:var(--blue);border:1px solid rgba(37,99,235,.18)}
 
 
 /* DARK MODE TOGGLE */
@@ -1429,14 +1430,108 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
 
   <!-- ── INVERSIÓN ── -->
   <div id="form-inversion" class="form-panel">
-    <div class="card" style="text-align:center;padding:48px 24px">
-      <div style="font-size:32px;margin-bottom:12px">🏦</div>
-      <div class="card-label" style="margin-bottom:8px;font-size:13px">Inversión / Activos</div>
-      <p style="color:var(--muted2);font-size:12px;max-width:280px;margin:0 auto;line-height:1.6">
-        Registro de activos e inversiones — crédito hipotecario, propiedades y bienes.<br>
-        <span style="opacity:.6">Próximamente disponible.</span>
-      </p>
+
+    <!-- Mis Activos -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-label">Mis Activos</div>
+      <div id="inv-activos-list" style="margin-bottom:12px">
+        <div style="text-align:center;padding:20px;color:var(--muted2);font-size:12px">Cargando activos…</div>
+      </div>
+      <div id="inv-add-wrap" style="display:none;border-top:1px solid var(--border);padding-top:14px;margin-top:4px">
+        <div class="form-grid g2" style="margin-bottom:10px">
+          <div class="field span2"><label>Nombre del activo</label><input type="text" id="inv-a-nombre" placeholder="Hipoteca Casa Miraflores…"></div>
+          <div class="field"><label>Tipo</label>
+            <div class="combo-wrap">
+              <input type="text" id="inv-a-tipo" placeholder="Tipo…" autocomplete="off" readonly
+                onfocus="comboOpen('inv-a-tipo','cl-inv-a-tipo')"
+                onblur="comboBlurStrict('inv-a-tipo','cl-inv-a-tipo')"
+                onkeydown="comboKey(event,'inv-a-tipo','cl-inv-a-tipo')">
+              <span class="combo-arrow">▼</span>
+              <div class="combo-list" id="cl-inv-a-tipo"></div>
+            </div>
+          </div>
+          <div class="field"><label>Moneda</label>
+            <div class="combo-wrap">
+              <input type="text" id="inv-a-moneda" placeholder="Moneda…" autocomplete="off" readonly
+                onfocus="comboOpen('inv-a-moneda','cl-inv-a-moneda')"
+                onblur="comboBlurStrict('inv-a-moneda','cl-inv-a-moneda')"
+                onkeydown="comboKey(event,'inv-a-moneda','cl-inv-a-moneda')">
+              <span class="combo-arrow">▼</span>
+              <div class="combo-list" id="cl-inv-a-moneda"></div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-sm" style="background:var(--accent);color:#fff;border:none" id="btn-inv-activo" onclick="registrarActivo()">+ Agregar</button>
+          <button class="btn btn-ghost btn-sm" onclick="toggleAddActivo()">Cancelar</button>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm" id="btn-inv-nuevo" onclick="toggleAddActivo()" style="margin-top:4px">+ Nuevo Activo</button>
     </div>
+
+    <!-- Registrar Cuota -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-label">Registrar Cuota</div>
+      <div class="form-grid g2">
+        <div class="field span2"><label>Activo</label>
+          <div class="combo-wrap">
+            <input type="text" id="inv-activo-sel" placeholder="Seleccionar activo…" autocomplete="off" readonly
+              onfocus="comboOpen('inv-activo-sel','cl-inv-activo-sel')"
+              onblur="comboBlurStrict('inv-activo-sel','cl-inv-activo-sel')"
+              onkeydown="comboKey(event,'inv-activo-sel','cl-inv-activo-sel')">
+            <span class="combo-arrow">▼</span>
+            <div class="combo-list" id="cl-inv-activo-sel"></div>
+          </div>
+        </div>
+        <div class="field"><label>Capital S/. <span style="color:var(--muted2);font-weight:400">(al activo)</span></label>
+          <input type="number" id="inv-monto-activo" placeholder="0.00" step="0.01" min="0" oninput="invActualizarPreview()">
+        </div>
+        <div class="field"><label>Interés S/. <span style="color:var(--muted2);font-weight:400">(gasto)</span></label>
+          <input type="number" id="inv-monto-gasto" placeholder="0.00" step="0.01" min="0" oninput="invActualizarPreview()">
+        </div>
+        <div class="field"><label>Concepto</label>
+          <input type="text" id="inv-concepto" placeholder="Cuota Enero 2026…">
+        </div>
+        <div class="field"><label>Fecha</label>
+          <input type="date" id="inv-fecha">
+        </div>
+      </div>
+      <div id="inv-cuota-preview" style="display:none;margin-top:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:12px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="color:var(--muted2)">Sale de caja</span>
+          <span id="inv-prev-total" style="font-family:'Archivo Black';color:var(--text)">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="color:var(--muted2)">→ Al activo (patrimonio)</span>
+          <span id="inv-prev-activo" style="color:var(--accent)">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between">
+          <span style="color:var(--muted2)">→ Interés (gasto)</span>
+          <span id="inv-prev-gasto" style="color:var(--red)">—</span>
+        </div>
+      </div>
+    </div>
+    <button class="btn" style="background:var(--blue);color:#fff;border:none;margin-bottom:24px" id="btn-inv-cuota" onclick="registrarInversion()">Registrar Cuota</button>
+
+    <!-- Historial -->
+    <div class="card-label" style="margin-bottom:10px">Historial de Cuotas</div>
+    <div class="table-wrap">
+      <table style="min-width:700px">
+        <thead><tr>
+          <th style="width:75px">Fecha</th>
+          <th style="width:90px">Código</th>
+          <th style="width:120px">Activo</th>
+          <th>Concepto</th>
+          <th class="right" style="width:110px">Capital S/.</th>
+          <th class="right" style="width:110px">Interés S/.</th>
+          <th class="right" style="width:110px">Total S/.</th>
+        </tr></thead>
+        <tbody id="inv-hist-body">
+          <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted2)">Sin cuotas registradas</td></tr>
+        </tbody>
+      </table>
+    </div>
+
   </div>
 </div>
 
@@ -1821,6 +1916,10 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <div class="fc-row">
         <span class="fc-row-lbl">− Gastos</span>
         <span class="fc-row-val red" id="fc-egr-costos-gastos">—</span>
+      </div>
+      <div class="fc-row" id="fc-row-inversion" style="display:none">
+        <span class="fc-row-lbl">− Inversión (capital)</span>
+        <span class="fc-row-val red" id="fc-egr-inversion">—</span>
       </div>
       <div class="fc-bot">
         <span class="fc-bot-lbl">Neto del mes</span>
@@ -3119,6 +3218,12 @@ function setTipo(tipo,btn){
   btn.classList.add('active');
   document.getElementById('form-'+tipo).classList.add('active');
   if(['venta','costo','reserva'].includes(tipo))fillProductoSelects();
+  if(tipo==='inversion'){
+    loadActivos();
+    loadInversiones();
+    const fEl=document.getElementById('inv-fecha');
+    if(fEl&&!fEl.value)fEl.value=fechaHoy();
+  }
 }
 
 // ── TIPO PAGO TOGGLE ──
@@ -3253,7 +3358,7 @@ function fillDataLists(){
   comboSetData('cl-clf-tipo', ['— Todos —','👤 REGULAR','⭐ VIP','📦 MAYORISTA']);
   comboSetData('cl-oc-f-estado', ['— Todos —','⏳ PENDIENTE','✅ COMPLETADA','❌ CANCELADA']);
   comboSetData('cl-oc-f-tipo', ['— Todos —','✈️ IMPORTACIÓN','🏪 LOCAL']);
-  comboSetData('cl-fc-accion', ['— Todos —','VENTA','COMPRA','COSTO','GASTO','PENDIENTE','RESERVA','CANCELACIÓN']);
+  comboSetData('cl-fc-accion', ['— Todos —','VENTA','COMPRA','COSTO','GASTO','INVERSIÓN','PENDIENTE','RESERVA','CANCELACIÓN']);
   // Opciones fijas — formularios registro
   comboSetData('cl-cp-cat', ['👟 ZAPATILLAS','👕 ROPA','🧢 ACCESORIOS','📦 OTROS']);
   comboSetData('cl-cp-moneda', ['🇺🇸 USD','🇵🇪 SOLES']);
@@ -3261,6 +3366,8 @@ function fillDataLists(){
   comboSetData('cl-vt-canal', ['📸 INSTAGRAM','💬 WHATSAPP','🏪 PRESENCIAL','🔹 OTRO']);
   comboSetData('cl-vt-medio-pago', ['💵 EFECTIVO','🏦 TRANSFERENCIA','💳 TARJETA','💜 YAPE','💙 PLIN']);
   comboSetData('cl-pg-cat', ['🏪 OPERATIVO','👤 PERSONAL','📦 IMPORTACIÓN','📣 MARKETING']);
+  comboSetData('cl-inv-a-tipo', ['🏠 HIPOTECA','🚗 VEHICULO','🖥 EQUIPO','📂 OTRO']);
+  comboSetData('cl-inv-a-moneda', ['🇵🇪 SOLES','🇺🇸 USD']);
   comboSetData('cl-cl-canal', ['📸 INSTAGRAM','💬 WHATSAPP','🏪 PRESENCIAL','🔹 OTRO']);
   comboSetData('cl-cl-tipo', ['👤 REGULAR','⭐ VIP','📦 MAYORISTA']);
   // Defaults iniciales para combos que arrancan con un valor fijo
@@ -4402,6 +4509,176 @@ async function registrarCosto(){
 
 
 // ══════════════════════════════════════════
+// INVERSIONES / ACTIVOS
+// ══════════════════════════════════════════
+let activosCache = [];
+let inversionesCache2 = [];
+
+async function loadActivos(){
+  const{data}=await db.from('activos').select('*').order('created_at',{ascending:true});
+  activosCache=data||[];
+  renderActivosList();
+  const opts=activosCache.map(a=>`${a.codigo_activo} · ${a.nombre}`);
+  comboSetData('cl-inv-activo-sel', opts.length?opts:['Sin activos — agrega uno primero']);
+}
+
+async function loadInversiones(){
+  const{data}=await db.from('inversiones').select('*,activos(nombre,codigo_activo)').order('fecha',{ascending:false}).order('created_at',{ascending:false});
+  inversionesCache2=data||[];
+  renderInversionesHistorial();
+  renderActivosList();
+}
+
+function renderActivosList(){
+  const el=document.getElementById('inv-activos-list');
+  if(!el)return;
+  if(!activosCache.length){
+    el.innerHTML='<div style="text-align:center;padding:16px 0;color:var(--muted2);font-size:12px">Sin activos configurados. Agrega uno abajo.</div>';
+    return;
+  }
+  el.innerHTML=activosCache.map(a=>{
+    const totalCapital=inversionesCache2.filter(i=>i.activo_id===a.id).reduce((s,i)=>s+parseFloat(i.monto_activo||0),0);
+    const totalInteres=inversionesCache2.filter(i=>i.activo_id===a.id).reduce((s,i)=>s+parseFloat(i.monto_gasto||0),0);
+    const nCuotas=inversionesCache2.filter(i=>i.activo_id===a.id).length;
+    return`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="td-code">${a.codigo_activo}</span>
+          <span style="font-weight:600;font-size:13px">${a.nombre}</span>
+          <span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(37,99,235,.08);color:var(--blue);border:1px solid rgba(37,99,235,.18)">${a.tipo||'OTRO'}</span>
+        </div>
+        <div style="font-size:11px;color:var(--muted2);margin-top:3px">${nCuotas} cuota${nCuotas!==1?'s':''} · Capital total: <span style="color:var(--accent)">${fmt(totalCapital)}</span> · Intereses: <span style="color:var(--red)">${fmt(totalInteres)}</span></div>
+      </div>
+      <button onclick="eliminarActivo('${a.id}','${a.nombre}')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--muted2);cursor:pointer;font-size:11px">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function renderInversionesHistorial(){
+  const body=document.getElementById('inv-hist-body');
+  if(!body)return;
+  if(!inversionesCache2.length){
+    body.innerHTML='<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted2)">Sin cuotas registradas</td></tr>';
+    return;
+  }
+  const fmtF=d=>d?d.slice(8,10)+'/'+d.slice(5,7)+'/'+d.slice(2,4):'—';
+  body.innerHTML=inversionesCache2.map(i=>{
+    const total=parseFloat(i.monto_activo||0)+parseFloat(i.monto_gasto||0);
+    const aNombre=i.activos?.nombre||i.activo_id||'—';
+    return`<tr>
+      <td class="td-fecha">${fmtF(i.fecha)}</td>
+      <td><span class="td-code">${i.codigo_inversion}</span></td>
+      <td class="td-unit">${aNombre}</td>
+      <td class="td-desc">${i.concepto||'—'}</td>
+      <td class="td-amt right" style="color:var(--accent)">${fmt(i.monto_activo||0)}</td>
+      <td class="td-amt right" style="color:var(--red)">${fmt(i.monto_gasto||0)}</td>
+      <td class="td-amt right" style="font-family:'Archivo Black'">${fmt(total)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function toggleAddActivo(){
+  const wrap=document.getElementById('inv-add-wrap');
+  const btn=document.getElementById('btn-inv-nuevo');
+  const visible=wrap.style.display!=='none';
+  wrap.style.display=visible?'none':'block';
+  btn.style.display=visible?'':'none';
+  if(!visible){
+    document.getElementById('inv-a-nombre').focus();
+  }
+}
+
+async function registrarActivo(){
+  const nombre=document.getElementById('inv-a-nombre').value.trim();
+  const tipo=noEmoji(document.getElementById('inv-a-tipo').value)||'OTRO';
+  const moneda=noEmoji(document.getElementById('inv-a-moneda').value)||'SOLES';
+  if(!nombre){toast('Ingresa el nombre del activo','warn');return;}
+  const btn=document.getElementById('btn-inv-activo');setLoading(btn,true);
+  try{
+    const cod=await genCodigo('activo');
+    const{error}=await db.from('activos').insert({codigo_activo:cod,nombre,tipo,moneda});
+    if(error)throw error;
+    toast('✓ Activo registrado · '+cod,'ok');
+    document.getElementById('inv-a-nombre').value='';
+    document.getElementById('inv-a-tipo').value='';
+    document.getElementById('inv-a-moneda').value='';
+    toggleAddActivo();
+    await loadActivos();
+  }catch(e){toast('Error: '+e.message,'err');}
+  finally{setLoading(btn,false,'+ Agregar');}
+}
+
+async function eliminarActivo(id,nombre){
+  const tieneInv=inversionesCache2.some(i=>i.activo_id===id);
+  if(tieneInv){toast('No se puede eliminar — tiene cuotas registradas','warn');return;}
+  if(!confirm('¿Eliminar activo "'+nombre+'"?'))return;
+  const{error}=await db.from('activos').delete().eq('id',id);
+  if(error){toast('Error: '+error.message,'err');return;}
+  toast('Activo eliminado','ok');
+  await loadActivos();
+}
+
+async function registrarInversion(){
+  const activoRaw=document.getElementById('inv-activo-sel').value.trim();
+  const montoActivo=parseFloat(document.getElementById('inv-monto-activo').value)||0;
+  const montoGasto=parseFloat(document.getElementById('inv-monto-gasto').value)||0;
+  const concepto=document.getElementById('inv-concepto').value.trim();
+  const fecha=document.getElementById('inv-fecha').value||fechaHoy();
+  if(!activoRaw||activoRaw.startsWith('Sin activos')){toast('Selecciona un activo','warn');return;}
+  if(!montoActivo&&!montoGasto){toast('Ingresa al menos un monto','warn');return;}
+  const codActivo=(activoRaw.match(/^(ACT-\d+)/)||[])[1];
+  const activo=activosCache.find(a=>a.codigo_activo===codActivo);
+  if(!activo){toast('Activo no encontrado','warn');return;}
+  const btn=document.getElementById('btn-inv-cuota');setLoading(btn,true);
+  try{
+    const codInv=await genCodigo('inversion');
+    // Insertar en inversiones
+    const{error:eInv}=await db.from('inversiones').insert({
+      codigo_inversion:codInv,activo_id:activo.id,
+      concepto:concepto||'Cuota',monto_activo:montoActivo,
+      monto_gasto:montoGasto,moneda:activo.moneda||'SOLES',fecha
+    });
+    if(eInv)throw eInv;
+    // Capital → flujo_caja directo como INVERSION
+    if(montoActivo>0){
+      await db.from('flujo_caja').insert({
+        fecha,tipo:'INVERSION',categoria:'ACTIVO',
+        descripcion:`${codInv} · ${activo.nombre}${concepto?' · '+concepto:''}`,
+        ingreso_soles:0,egreso_soles:montoActivo,referencia_id:codInv
+      });
+    }
+    // Interés → pagos table (trigger crea flujo_caja como PAGO) → aparece en Resultado
+    if(montoGasto>0){
+      const codPago=await genCodigo('pago');
+      await db.from('pagos').insert({
+        codigo_pago:codPago,
+        concepto:'Interés · '+activo.nombre+(concepto?' · '+concepto:''),
+        monto_soles:-Math.abs(montoGasto),
+        categoria:'INTERES',fecha
+      });
+    }
+    toast('✓ Cuota registrada · '+codInv,'ok');
+    ['inv-monto-activo','inv-monto-gasto','inv-concepto'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+    document.getElementById('inv-activo-sel').value='';
+    document.getElementById('inv-cuota-preview').style.display='none';
+    await Promise.all([loadInversiones(),loadFlujo()]);
+  }catch(e){toast('Error: '+e.message,'err');}
+  finally{setLoading(btn,false,'Registrar Cuota');}
+}
+
+function invActualizarPreview(){
+  const mA=parseFloat(document.getElementById('inv-monto-activo')?.value)||0;
+  const mG=parseFloat(document.getElementById('inv-monto-gasto')?.value)||0;
+  const prev=document.getElementById('inv-cuota-preview');
+  if(!prev)return;
+  if(!mA&&!mG){prev.style.display='none';return;}
+  prev.style.display='block';
+  document.getElementById('inv-prev-total').textContent=fmt(mA+mG);
+  document.getElementById('inv-prev-activo').textContent=fmt(mA);
+  document.getElementById('inv-prev-gasto').textContent=fmt(mG);
+}
+
+// ══════════════════════════════════════════
 // FLUJO DE CAJA
 // ══════════════════════════════════════════
 let fcMesActual = null; // 'YYYY-MM'
@@ -4494,8 +4771,9 @@ async function loadFlujo() {
     const pIngV  = fp.filter(f=>pcat(f)==='VENTA').reduce((s,f)=>s+parseFloat(f.ingreso_soles||0),0);
     const pEgrC  = fp.filter(f=>pcat(f)==='COMPRA').reduce((s,f)=>s+parseFloat(f.egreso_soles||0),0);
     const pEgrCo = fp.filter(f=>pcat(f)==='COSTO').reduce((s,f)=>s+parseFloat(f.egreso_soles||0),0);
-    const pEgrG  = fp.filter(f=>['OPERATIVO','MARKETING','PERSONAL','IMPORTACION','PAGO'].includes(pcat(f))).reduce((s,f)=>s+parseFloat(f.egreso_soles||0),0);
-    const cajaPrevFin = cajaPrevInicio + pIngV - pEgrC - pEgrCo - pEgrG;
+    const pEgrG  = fp.filter(f=>['OPERATIVO','MARKETING','PERSONAL','IMPORTACION','PAGO','INTERES'].includes(pcat(f))).reduce((s,f)=>s+parseFloat(f.egreso_soles||0),0);
+    const pEgrI  = fp.filter(f=>pcat(f)==='INVERSION').reduce((s,f)=>s+parseFloat(f.egreso_soles||0),0);
+    const cajaPrevFin = cajaPrevInicio + pIngV - pEgrC - pEgrCo - pEgrG - pEgrI;
     cajaInicio = cajaPrevFin;
   }
 
@@ -4540,7 +4818,8 @@ async function loadFlujo() {
   );
   const egrCompras = compMesInv.reduce((s,p) => s + parseFloat(p.precio_compra_soles||0), 0);
   const egrCostos  = compMesInv.reduce((s,p) => s + parseFloat(p.total_costos||0), 0);
-  const egrGastos  = sumEgr(flujoCache.filter(f=>['OPERATIVO','MARKETING','PERSONAL','IMPORTACION','PAGO'].includes(cat(f))));
+  const egrGastos   = sumEgr(flujoCache.filter(f=>['OPERATIVO','MARKETING','PERSONAL','IMPORTACION','PAGO','INTERES'].includes(cat(f))));
+  const egrInversion= sumEgr(flujoCache.filter(f=>cat(f)==='INVERSION'));
 
   // PENDIENTES — créditos sin pagar (todos los meses)
   const pendMes = inventarioCache.filter(p => p.pago_estado === 'PENDIENTE');
@@ -4564,15 +4843,19 @@ async function loadFlujo() {
   // CÁLCULOS — egresos son positivos en BD, se restan
   const totalAntesGanancias = cajaInicio + stockInicio;
   const total = totalAntesGanancias + ganancias;
-  const netoMes = ingVentas - egrCompras - egrCostos - egrGastos;
+  const netoMes = ingVentas - egrCompras - egrCostos - egrGastos - egrInversion;
   const cajaActual = cajaInicio + netoMes;
   const cajaFin = cajaActual;
   const totalFin = cajaFin + stockFin;
   const control = Math.round((total - totalFin) * 100) / 100;
 
 
+  // Activo fijo acumulado (todas las inversiones históricas)
+  const{data:invTodas}=await db.from('inversiones').select('monto_activo');
+  const activoFijo=(invTodas||[]).reduce((s,i)=>s+parseFloat(i.monto_activo||0),0);
+
   // ── INDICADORES ──
-  const patrimonio    = cajaActual + stockFin;
+  const patrimonio    = cajaActual + stockFin + activoFijo;
   const cajaPct       = patrimonio > 0 ? Math.round(cajaActual / patrimonio * 1000) / 10 : 0;
   const stockPct      = patrimonio > 0 ? Math.round(stockFin   / patrimonio * 1000) / 10 : 0;
   const utilidad      = cajaFin - cajaInicio;
@@ -4622,7 +4905,12 @@ async function loadFlujo() {
   document.getElementById('fc-stock-inicio').textContent = fmt(stockInicio);
   document.getElementById('fc-ganancias').textContent    = ganancias > 0 ? '+ ' + fmt(ganancias) : fmt(ganancias);
   document.getElementById('fc-total-antes').textContent  = fmt(totalAntesGanancias);
-  document.getElementById('fc-activo-inicio').textContent = '—';
+  const activoFijoEl=document.getElementById('fc-activo-inicio');
+  if(activoFijoEl)activoFijoEl.textContent=activoFijo>0?fmt(activoFijo):'—';
+  const activoFijoFinEl=document.getElementById('fc-activo-fin');
+  if(activoFijoFinEl)activoFijoFinEl.textContent=activoFijo>0?fmt(activoFijo):'—';
+  const activoFijoInd=document.getElementById('ind-activo-fijo');
+  if(activoFijoInd)activoFijoInd.textContent=activoFijo>0?fmt(activoFijo):'—';
   // Actual
   document.getElementById('fc-caja-actual').textContent  = fmt(cajaActual);
   const realColor = cajaReal >= 0 ? 'var(--blue)' : 'var(--red)';
@@ -4632,7 +4920,6 @@ async function loadFlujo() {
   document.getElementById('fc-caja-fin').textContent     = fmt(cajaFin);
   document.getElementById('fc-stock-fin').textContent    = fmt(stockFin);
   document.getElementById('fc-total-label').textContent  = fmt(totalFin);
-  document.getElementById('fc-activo-fin').textContent   = '—';
   const crFinEl = document.getElementById('fc-caja-real-fin');
   if(crFinEl){ crFinEl.textContent = fmt(cajaReal); crFinEl.style.color = realColor; }
   // Control
@@ -4650,6 +4937,10 @@ async function loadFlujo() {
   document.getElementById('fc-ing-ventas').textContent      = ingVentas > 0 ? '+ ' + fmt(ingVentas) : fmt(ingVentas);
   document.getElementById('fc-egr-soles').textContent         = (egrCompras + egrCostos) > 0 ? '− ' + fmt(egrCompras + egrCostos) : '—';
   document.getElementById('fc-egr-costos-gastos').textContent = egrGastos > 0 ? '− ' + fmt(egrGastos) : '—';
+  const rowInv=document.getElementById('fc-row-inversion');
+  const egrInvEl=document.getElementById('fc-egr-inversion');
+  if(rowInv)rowInv.style.display=egrInversion>0?'':'none';
+  if(egrInvEl)egrInvEl.textContent=egrInversion>0?'− '+fmt(egrInversion):'—';
 
   // Neto
   const netoEl = document.getElementById('fc-neto-mes');
@@ -4696,7 +4987,7 @@ function renderFlujoTabla() {
   // Filtro por acción
   const fcAccion=(document.getElementById('fc-accion')?.value||'').trim();
   const accionActiva=fcAccion&&!fcAccion.startsWith('— ')?fcAccion:'';
-  const accionDB=accionActiva==='GASTO'?'PAGO':accionActiva==='CANCELACIÓN'?'CANCELACION':accionActiva;
+  const accionDB=accionActiva==='GASTO'?'PAGO':accionActiva==='CANCELACIÓN'?'CANCELACION':accionActiva==='INVERSIÓN'?'INVERSION':accionActiva;
   const flujoFiltrado=accionDB?flujoCache.filter(f=>(f.categoria||f.tipo||'').toUpperCase()===accionDB):flujoCache;
 
   // Créditos pendientes del inventario que NO tienen fila en flujo_caja (todos los meses)
@@ -4726,7 +5017,7 @@ function renderFlujoTabla() {
     const fcCat = (f.categoria||f.tipo||'').toUpperCase();
     const esRes  = fcCat==='RESERVA';
     const esPend = fcCat==='PENDIENTE';
-    const accion = esPend?'PENDIENTE':fcCat==='VENTA'?'VENTA':fcCat==='COMPRA'?'COMPRA':fcCat==='COSTO'?'COSTO':fcCat==='RESERVA'?'RESERVA':fcCat==='CANCELACION'?'CANCELACION':'PAGO';
+    const accion = esPend?'PENDIENTE':fcCat==='VENTA'?'VENTA':fcCat==='COMPRA'?'COMPRA':fcCat==='COSTO'?'COSTO':fcCat==='RESERVA'?'RESERVA':fcCat==='CANCELACION'?'CANCELACION':fcCat==='INVERSION'?'INVERSION':'PAGO';
     // Para filas RESERVA: detectar si la reserva ya cerró
     const rsvData  = esRes ? reservasCache.find(r=>r.codigo_reserva===f.referencia_id) : null;
     const rsvCerrada = rsvData && rsvData.estado !== 'ACTIVA';
@@ -4756,6 +5047,9 @@ function renderFlujoTabla() {
       codRef=f.referencia_id||'—';
       const prod=f.referencia_id?inventarioCache.find(p=>p.codigo_producto===f.referencia_id):null;
       desc=prod?buildProdDesc(prod):(cleanDesc(f.descripcion)||'—');
+    } else if(accion==='INVERSION'){
+      codOp=f.referencia_id||'—'; // INV-XXXX
+      desc=cleanDesc(f.descripcion)||'—';
     } else if(accion==='PAGO'){
       const n=parseInt(f.referencia_id)||0;
       codOp=n?'GS-'+String(n).padStart(4,'0'):(f.codigo_operacion||'—');
@@ -4775,7 +5069,7 @@ function renderFlujoTabla() {
     const tdCodRef=codRef!=='—'?`<span class="td-code">${codRef}</span>`:'<span class="td-muted">—</span>';
     return `<tr class="${trClass}">
       <td class="td-fecha">${fmtFecha(f.fecha)}</td>
-      <td><span class="fc-accion-badge fc-accion-${accion}">${accion==='PAGO'?'GASTO':accion}</span></td>
+      <td><span class="fc-accion-badge fc-accion-${accion}">${accion==='PAGO'?'GASTO':accion==='INVERSION'?'INVERSIÓN':accion}</span></td>
       <td>${tdCodOp}</td>
       <td>${tdCodRef}</td>
       <td class="td-desc">${desc}</td>
