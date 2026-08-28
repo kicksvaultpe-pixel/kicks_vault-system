@@ -368,6 +368,8 @@ input[list] { cursor: text; }
 .pat-leg-pct{font-family:"Archivo Black";font-size:17px;line-height:1;font-variant-numeric:tabular-nums}
 .pat-leg-pct.accent{color:var(--accent)}
 .pat-leg-pct.blue{color:var(--blue)}
+.pat-leg-pct.green{color:var(--green)}
+.activo-dot::before{background:var(--green)}
 .pat-leg-amt{font-size:10px;color:var(--muted2);font-variant-numeric:tabular-nums;margin-top:1px}
 
 /* Cards simples */
@@ -2005,8 +2007,9 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <div class="pat-total" id="ind-patrimonio">—</div>
       <div class="pat-sub">Caja + Stock + Activo fijo</div>
       <div class="pat-bar-wrap">
-        <div id="ind-bar-caja" style="height:100%;background:var(--accent);border-radius:4px 0 0 4px;float:left;transition:width .7s cubic-bezier(.4,0,.2,1);width:50%"></div>
-        <div id="ind-bar-stock" style="height:100%;background:var(--blue);border-radius:0 4px 4px 0;float:left;transition:width .7s cubic-bezier(.4,0,.2,1);width:50%"></div>
+        <div id="ind-bar-caja"   style="height:100%;background:var(--accent);border-radius:4px 0 0 4px;transition:width .7s cubic-bezier(.4,0,.2,1);width:50%"></div>
+        <div id="ind-bar-stock"  style="height:100%;background:var(--blue);border-radius:0;transition:width .7s cubic-bezier(.4,0,.2,1);width:50%"></div>
+        <div id="ind-bar-activo" style="height:100%;background:var(--green);border-radius:0 4px 4px 0;transition:width .7s cubic-bezier(.4,0,.2,1);width:0%"></div>
       </div>
       <div class="pat-legend">
         <div class="pat-leg-item">
@@ -2014,15 +2017,16 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
           <div class="pat-leg-pct accent" id="ind-caja-pct">—</div>
           <div class="pat-leg-amt" id="ind-caja-amt">—</div>
         </div>
+        <div class="pat-leg-item" id="ind-activo-leg" style="text-align:center;display:none">
+          <div class="pat-leg-dot activo-dot" style="justify-content:center">Activo</div>
+          <div class="pat-leg-pct green" id="ind-activo-pct">—</div>
+          <div class="pat-leg-amt" id="ind-activo-fijo">—</div>
+        </div>
         <div class="pat-leg-item">
           <div class="pat-leg-dot stock-dot right">Stock</div>
           <div class="pat-leg-pct blue" style="text-align:right" id="ind-stock-pct">—</div>
           <div class="pat-leg-amt" id="ind-stock-amt">—</div>
         </div>
-      </div>
-      <div style="display:flex;justify-content:space-between;margin-top:6px;padding-top:6px;border-top:1px solid var(--border);font-size:10px">
-        <span style="color:var(--muted2)">Activo fijo</span>
-        <span style="color:var(--muted2);font-variant-numeric:tabular-nums" id="ind-activo-fijo">—</span>
       </div>
     </div>
 
@@ -4868,20 +4872,27 @@ async function loadFlujo() {
   const patrimonio    = cajaActual + stockFin + activoFijo;
   const cajaPct       = patrimonio > 0 ? Math.round(cajaActual / patrimonio * 1000) / 10 : 0;
   const stockPct      = patrimonio > 0 ? Math.round(stockFin   / patrimonio * 1000) / 10 : 0;
+  const activoPct     = patrimonio > 0 ? Math.round(activoFijo / patrimonio * 1000) / 10 : 0;
   const utilidad      = cajaFin - cajaInicio;
   const reinversion   = stockFin - stockInicio;
   const nVentas       = (ventasMes||[]).length;
 
-  // Patrimonio
+  // Patrimonio — barra 3 segmentos
   document.getElementById('ind-patrimonio').textContent = fmt(patrimonio);
-  const barCaja = document.getElementById('ind-bar-caja');
-  const barStock = document.getElementById('ind-bar-stock');
-  if(barCaja) barCaja.style.width = cajaPct + '%';
-  if(barStock) barStock.style.width = stockPct + '%';
-  document.getElementById('ind-caja-pct').textContent   = cajaPct.toFixed(1) + '%';
+  const barCaja   = document.getElementById('ind-bar-caja');
+  const barStock  = document.getElementById('ind-bar-stock');
+  const barActivo = document.getElementById('ind-bar-activo');
+  if(barCaja)   barCaja.style.width   = cajaPct   + '%';
+  if(barStock)  barStock.style.width  = stockPct  + '%';
+  if(barActivo) barActivo.style.width = activoPct + '%';
+  document.getElementById('ind-caja-pct').textContent   = cajaPct.toFixed(1)   + '%';
   document.getElementById('ind-caja-amt').textContent   = fmt(cajaActual);
-  document.getElementById('ind-stock-pct').textContent  = stockPct.toFixed(1) + '%';
+  document.getElementById('ind-stock-pct').textContent  = stockPct.toFixed(1)  + '%';
   document.getElementById('ind-stock-amt').textContent  = fmt(stockFin);
+  const activoLeg = document.getElementById('ind-activo-leg');
+  const activoPctEl = document.getElementById('ind-activo-pct');
+  if(activoLeg)   activoLeg.style.display = activoFijo > 0 ? '' : 'none';
+  if(activoPctEl) activoPctEl.textContent = activoPct.toFixed(1) + '%';
 
   // Ganancias
   document.getElementById('ind-ganancias').textContent       = fmt(ganancias);
