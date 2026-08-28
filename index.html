@@ -3527,8 +3527,8 @@ function fillProductoSelects(){
   const label=p=>{const n=[p.marca,p.modelo,p.colorway].filter(Boolean).join(' ');return`${p.codigo_producto} · ${n} (${p.talla||'—'})`;};
   comboSetData('cl-vt-prod', disp.map(label));
   comboSetData('cl-rv-prod', disp.map(label));
-  // Vincular pedido: solo DISPONIBLE (RESERVADO excluido para evitar doble asignación)
-  const linkable=inventarioCache.filter(p=>p.estado==='DISPONIBLE'&&p.pago_estado!=='PENDIENTE');
+  // Vincular pedido: solo DISPONIBLE (incluye créditos pendientes de pago)
+  const linkable=inventarioCache.filter(p=>p.estado==='DISPONIBLE');
   comboSetData('cl-rsv-link-prod', linkable.map(label));
   // Costo: todos los no cancelados
   const allCosto=inventarioCache.filter(p=>p.estado!=='CANCELADO');
@@ -4683,10 +4683,14 @@ function renderFlujoTabla() {
     const esRes  = fcCat==='RESERVA';
     const esPend = fcCat==='PENDIENTE';
     const accion = esPend?'PENDIENTE':fcCat==='VENTA'?'VENTA':fcCat==='COMPRA'?'COMPRA':fcCat==='COSTO'?'COSTO':fcCat==='RESERVA'?'RESERVA':fcCat==='CANCELACION'?'CANCELACION':'PAGO';
-    const trClass = esPend ? 'row-pend' : '';
+    // Para filas RESERVA: detectar si la reserva ya cerró
+    const rsvData  = esRes ? reservasCache.find(r=>r.codigo_reserva===f.referencia_id) : null;
+    const rsvCerrada = rsvData && rsvData.estado !== 'ACTIVA';
+    const trClass = esPend ? 'row-pend' : rsvCerrada ? 'row-dim' : '';
     const egrUsd  = parseFloat(f.egreso_usd||0);
     const esUsdPend = esPend && egrUsd > 0;
-    const ingHtml = ing>0 ? `<span class="${esRes?'td-reserva':'td-ing'}">${esRes?'+ '+fmt(ing)+' <span style="font-size:10px;opacity:.7">(reserva)</span>':fmt(ing)}</span>` : '<span class="td-muted">—</span>';
+    const rsvTag  = esRes ? (rsvCerrada ? `<span style="font-size:9px;opacity:.6">(${rsvData.estado==='COMPLETADA'?'✓ venta generada':'✗ cancelada'})</span>` : '<span style="font-size:10px;opacity:.7">(reserva)</span>') : '';
+    const ingHtml = ing>0 ? `<span class="${esRes?'td-reserva':'td-ing'}">${esRes?'+ '+fmt(ing)+' '+rsvTag:fmt(ing)}</span>` : '<span class="td-muted">—</span>';
     const egrHtml = egr>0&&!esRes&&!esPend ? `<span class="td-egr">${fmt(egr)}</span>` : '<span class="td-muted">—</span>';
     // Pendiente S/. o $ según moneda
     const pendS = esPend && !esUsdPend && egr>0 ? `<span class="td-pend">⏳ ${fmt(egr)}</span>` : '<span class="td-muted">—</span>';
@@ -4714,8 +4718,7 @@ function renderFlujoTabla() {
       desc=cleanDesc(f.descripcion)||f.categoria||'—';
     } else if(accion==='RESERVA'){
       codOp=f.referencia_id||'—'; // RSV-XXX
-      const rsv=reservasCache.find(r=>r.codigo_reserva===f.referencia_id);
-      codRef=rsv?.codigo_producto||'—'; // P-XXX
+      codRef=rsvData?.codigo_producto||'—'; // P-XXX
       const prod=codRef!=='—'?inventarioCache.find(p=>p.codigo_producto===codRef):null;
       desc=prod?buildProdDesc(prod):(cleanDesc(f.descripcion)||'—');
     } else {
