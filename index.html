@@ -2827,7 +2827,7 @@ async function registrarAbono(){
   const monto=parseFloat(document.getElementById('rsv-new-monto').value)||0;
   if(!monto){toast('Ingresa el monto del abono','warn');return;}
   const nota=document.getElementById('rsv-new-nota').value.trim()||null;
-  const fecha=new Date().toISOString().slice(0,10);
+  const fecha=fechaHoy();
   const r=reservasCache.find(x=>x.codigo_reserva===rsvCodigoActivo);
   try{
     const{error}=await db.from('abonos').insert({
@@ -2909,7 +2909,7 @@ async function confirmarCompletarReserva(){
   const btn=document.getElementById('btn-mcrv-confirm');
   setLoading(btn,true);
   try{
-    const fecha=new Date().toISOString().slice(0,10);
+    const fecha=fechaHoy();
     const prod=inventarioCache.find(p=>p.codigo_producto===r.codigo_producto);
     const pF=parseFloat(prod?.precio_final||prod?.precio_compra_soles||0);
     const g=Math.round((precioFinal-pF)*100)/100;
@@ -4112,7 +4112,7 @@ async function registrarVenta(){
       comprador:vtCl?[vtCl.nombre,vtCl.apellido].filter(Boolean).join(' ')||null:null,
       id_cliente:vtClId||null,
       ganancia:g,rentabilidad:r,
-      fecha:new Date().toISOString().slice(0,10)
+      fecha:fechaHoy()
     });
     if(error)throw error;
     await db.from('inventario').update({estado:'VENDIDO'}).eq('codigo_producto',codProd);
@@ -4162,7 +4162,7 @@ async function registrarReserva(){
   const btn=document.getElementById('btn-reserva');setLoading(btn,true);
   try{
     const codigoReserva=await genCodigoReserva();
-    const fecha=new Date().toISOString().slice(0,10);
+    const fecha=fechaHoy();
     const{error}=await db.from('reservas').insert({
       codigo_reserva:codigoReserva,tipo,estado:'ACTIVA',
       id_cliente:clId||null,nombre_cliente:nombreCliente,
@@ -4216,7 +4216,7 @@ async function registrarPago(){
       codigo_pago:codigoPago,
       concepto,monto_soles:-Math.abs(monto),
       categoria:noEmoji(document.getElementById('pg-cat').value),
-      fecha:new Date().toISOString().slice(0,10)
+      fecha:fechaHoy()
     });
     if(error)throw error;
     toast('✓ Pago registrado · '+codigoPago,'ok');
@@ -4769,6 +4769,7 @@ async function genCodigo(tipo){
 }
 
 // ── UTILS ──
+function fechaHoy(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function fmt(n){return'S/. '+parseFloat(n||0).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function setLoading(btn,on,label){btn.disabled=on;btn.innerHTML=on?'<div class="spinner"></div> Guardando...':(label||'');}
 let toastTimer;
@@ -5030,7 +5031,7 @@ function exportInventarioCSV(){
     return[p.fecha_compra||'',p.codigo_producto,p.marca||'',p.modelo||'',p.colorway||'',p.talla||'',p.categoria||'',p.estado||'',p.precio_compra_soles||0,p.total_costos||0,pF,pV,mg,p.tipo_pago||'']
       .map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',');
   });
-  _dlCSV([h.join(','),...r].join('\n'),`kv-inventario-${new Date().toISOString().slice(0,10)}.csv`);
+  _dlCSV([h.join(','),...r].join('\n'),`kv-inventario-${fechaHoy()}.csv`);
 }
 
 function exportVentasCSV(){
@@ -5040,7 +5041,7 @@ function exportVentasCSV(){
     return[v.fecha||'',v.codigo_venta,inv.marca||'',inv.modelo||'',inv.colorway||'',inv.talla||'',v.canal||'',v.comprador||'',v.precio_venta_soles||0,v.ganancia||0,(parseFloat(v.rentabilidad||0)*100).toFixed(1)]
       .map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',');
   });
-  _dlCSV([h.join(','),...r].join('\n'),`kv-ventas-${new Date().toISOString().slice(0,10)}.csv`);
+  _dlCSV([h.join(','),...r].join('\n'),`kv-ventas-${fechaHoy()}.csv`);
 }
 
 function _dlCSV(csv,name){
@@ -5166,7 +5167,7 @@ async function iepGuardar(){
       if(e2)throw e2;
     }
     if(iepCostosNuevos.length){
-      const fecha=new Date().toISOString().slice(0,10);
+      const fecha=fechaHoy();
       const{error:e3}=await db.from('costos').insert(
         iepCostosNuevos.map(c=>({codigo_producto:invEditCodigo,concepto:c.concepto,costo_soles:c.costo_soles,fecha}))
       );
