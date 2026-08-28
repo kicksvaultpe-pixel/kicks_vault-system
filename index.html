@@ -2738,7 +2738,7 @@ function renderReservas(){
       <td>${tipoBadge}</td>
       <td><span class="td-code">${r.id_cliente?clCodigo(r.id_cliente):'—'}</span></td>
       <td class="td-main" style="font-size:11px">${r.nombre_cliente||'—'}</td>
-      <td>${r.codigo_producto?`<span class="td-code" style="color:var(--purple)">${r.codigo_producto}</span>`:`<span style="font-size:9px;color:var(--muted2);font-style:italic">—</span>`}</td>
+      <td>${r.codigo_producto?`<span class="td-code" style="color:var(--purple)">${r.codigo_producto}</span>`:r.tipo==='PEDIDO'&&r.estado==='ACTIVA'?`<span style="display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;color:var(--yellow);background:rgba(180,83,9,.1);border:1px solid rgba(180,83,9,.25);border-radius:4px;padding:2px 6px">⚠ Vincular</span>`:`<span style="font-size:9px;color:var(--muted2);font-style:italic">—</span>`}</td>
       <td class="td-trunc" style="font-size:11px;color:var(--text)">${productoFull}</td>
       <td class="right td-amt">${fmt(acordado)}</td>
       <td class="right td-amt" style="color:var(--green)">${fmt(r.total_abonado)}</td>
@@ -2810,8 +2810,14 @@ function abrirReservaDetalle(codigo){
   if(notasSec)notasSec.style.display=r.notas?'block':'none';
   // Mostrar acciones solo si ACTIVA
   const isActiva=r.estado==='ACTIVA';
+  const puedeCompletar=isActiva&&!!r.codigo_producto;
   document.getElementById('rsv-p-nuevo-abono-wrap').style.display=isActiva?'block':'none';
   document.getElementById('rsv-p-completar-wrap').style.display=isActiva?'block':'none';
+  // Para PEDIDO sin vincular: deshabilitar completar y mostrar aviso
+  const btnCompletar=document.getElementById('rsv-p-completar-wrap')?.querySelector('.btn-primary');
+  const avisoVincular=document.getElementById('rsv-p-aviso-vincular');
+  if(btnCompletar){btnCompletar.disabled=!puedeCompletar;btnCompletar.style.opacity=puedeCompletar?'':'0.4';}
+  if(avisoVincular)avisoVincular.style.display=isActiva&&!r.codigo_producto&&r.tipo==='PEDIDO'?'block':'none';
   const mnEl=document.getElementById('rsv-new-monto');if(mnEl)mnEl.value='';
   const nnEl=document.getElementById('rsv-new-nota');if(nnEl)nnEl.value='';
   document.getElementById('rsv-overlay').classList.add('open');
@@ -3521,8 +3527,8 @@ function fillProductoSelects(){
   const label=p=>{const n=[p.marca,p.modelo,p.colorway].filter(Boolean).join(' ');return`${p.codigo_producto} · ${n} (${p.talla||'—'})`;};
   comboSetData('cl-vt-prod', disp.map(label));
   comboSetData('cl-rv-prod', disp.map(label));
-  // Vincular pedido: disponibles y reservados
-  const linkable=inventarioCache.filter(p=>p.estado==='DISPONIBLE'||p.estado==='RESERVADO');
+  // Vincular pedido: solo DISPONIBLE (RESERVADO excluido para evitar doble asignación)
+  const linkable=inventarioCache.filter(p=>p.estado==='DISPONIBLE'&&p.pago_estado!=='PENDIENTE');
   comboSetData('cl-rsv-link-prod', linkable.map(label));
   // Costo: todos los no cancelados
   const allCosto=inventarioCache.filter(p=>p.estado!=='CANCELADO');
@@ -5377,6 +5383,9 @@ init();
     <!-- Completar reserva -->
     <div class="iep-section" id="rsv-p-completar-wrap">
       <div class="iep-section-lbl">Cerrar reserva</div>
+      <div id="rsv-p-aviso-vincular" class="info-box info-orange" style="display:none;margin-bottom:10px;font-size:11px">
+        ⚠ Vincula primero el producto comprado para poder completar esta reserva.
+      </div>
       <button class="btn btn-primary" style="width:100%;margin-bottom:8px" onclick="abrirModalCompletarRsv()">✓ Completar y generar venta</button>
       <button class="btn btn-ghost btn-sm" style="width:100%;color:var(--red);border-color:rgba(220,38,38,.4)" onclick="abrirModalCancelarRsv()">Cancelar reserva</button>
     </div>
