@@ -4723,7 +4723,7 @@ function renderFlujoTabla() {
       desc=prod?buildProdDesc(prod):(cleanDesc(f.descripcion)||'—');
     } else {
       // PENDIENTE, CANCELACION
-      codRef=f.referencia_id||'—';
+      codOp=f.referencia_id||'—';
       const prod=f.referencia_id?inventarioCache.find(p=>p.codigo_producto===f.referencia_id):null;
       desc=prod?buildProdDesc(prod):(cleanDesc(f.descripcion)||'—');
     }
@@ -4751,8 +4751,8 @@ function renderFlujoTabla() {
     return `<tr class="row-pend">
       <td class="td-fecha">${fmtFecha(p.fecha_compra)}</td>
       <td><span class="fc-accion-badge fc-accion-PENDIENTE">PENDIENTE</span></td>
-      <td class="td-muted">—</td>
       <td><span class="td-code">${p.codigo_producto}</span></td>
+      <td class="td-muted">—</td>
       <td class="td-desc">${desc}</td>
       <td class="right">—</td>
       <td class="td-muted">—</td>
