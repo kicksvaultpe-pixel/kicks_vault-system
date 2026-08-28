@@ -402,8 +402,7 @@ input[list] { cursor: text; }
 .fc-mes-label{font-family:"Archivo Black";font-size:20px;color:var(--text);letter-spacing:.5px}
 
 /* 3 burbujas principales */
-.fc-trio{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
-@media(max-width:700px){.fc-trio{grid-template-columns:1fr 1fr}}
+.fc-trio{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
 @media(max-width:480px){.fc-trio{grid-template-columns:1fr}}
 
 .fc-bubble{background:var(--card);border:1px solid var(--border);border-left-width:3px;border-radius:16px;padding:22px 24px;position:relative;overflow:hidden;transition:all .2s}
@@ -414,6 +413,8 @@ input[list] { cursor: text; }
 .fc-bubble.actual::after{background:var(--accent)}
 .fc-bubble.fin{border-left-color:var(--blue);border-color:rgba(96,165,250,.22);background:linear-gradient(160deg,var(--card) 65%,rgba(96,165,250,.035) 100%)}
 .fc-bubble.fin::after{background:var(--blue)}
+.fc-bubble.compras{border-left-color:var(--orange);border-color:rgba(194,65,12,.22);background:linear-gradient(160deg,var(--card) 65%,rgba(194,65,12,.04) 100%)}
+.fc-bubble.compras::after{background:var(--orange)}
 
 /* Chip label */
 .fc-chip{display:flex;align-items:center;gap:7px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:12px}
@@ -1831,14 +1832,6 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
           <span class="fc-row-lbl" title="Total abonado en reservas activas (desaparece cuando la reserva se completa o cancela)">🔒 Adelantos reservas</span>
           <span class="fc-row-val" style="color:var(--purple)" id="fc-pend-reservas">S/. 0.00</span>
         </div>
-        <div class="fc-row">
-          <span class="fc-row-lbl">⏳ Compras pend. S/.</span>
-          <span class="fc-row-val yellow" id="fc-pend-soles">S/. 0.00</span>
-        </div>
-        <div class="fc-row">
-          <span class="fc-row-lbl">⏳ Compras pend. $</span>
-          <span class="fc-row-val yellow" id="fc-pend-usd">$ 0.00</span>
-        </div>
       </div>
       <div class="fc-bot" style="border-color:rgba(109,40,217,.2)">
         <span class="fc-bot-lbl" style="color:var(--purple)">Caja real</span>
@@ -1874,6 +1867,32 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <span class="fc-bot-val" id="fc-control">—</span>
       </div>
       <div class="fc-ctrl-badge ok" id="fc-control-badge" style="display:none">✓ Cuadra</div>
+    </div>
+
+    <!-- COMPRAS DEL MES -->
+    <div class="fc-bubble compras">
+      <div class="fc-chip"><div class="fc-chip-dot" style="background:var(--orange)"></div>Compras</div>
+      <div class="fc-main-num" style="color:var(--orange)" id="fc-compras-mes">—</div>
+      <div class="fc-main-lbl">pagado en compras y costos · mes actual</div>
+      <div class="fc-info-section">
+        <div class="fc-info-lbl">Por pagar · todos los meses</div>
+        <div class="fc-row">
+          <span class="fc-row-lbl">📦 Stock · S/.</span>
+          <span class="fc-row-val yellow" id="fc-pend-stock-s">S/. 0.00</span>
+        </div>
+        <div class="fc-row">
+          <span class="fc-row-lbl">📦 Stock · $</span>
+          <span class="fc-row-val yellow" id="fc-pend-stock-u">$ 0.00</span>
+        </div>
+        <div class="fc-row">
+          <span class="fc-row-lbl">🚚 Pedido · S/.</span>
+          <span class="fc-row-val yellow" id="fc-pend-pedido-s">S/. 0.00</span>
+        </div>
+        <div class="fc-row">
+          <span class="fc-row-lbl">🚚 Pedido · $</span>
+          <span class="fc-row-val yellow" id="fc-pend-pedido-u">$ 0.00</span>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -4518,12 +4537,19 @@ async function loadFlujo() {
   const egrCostos  = compMesInv.reduce((s,p) => s + parseFloat(p.total_costos||0), 0);
   const egrGastos  = sumEgr(flujoCache.filter(f=>['OPERATIVO','MARKETING','PERSONAL','IMPORTACION','PAGO'].includes(cat(f))));
 
-  // PENDIENTES — créditos sin pagar (todos los meses, para cuadrar con tabla)
-  const pendMes = inventarioCache.filter(p =>
-    p.pago_estado === 'PENDIENTE'
+  // PENDIENTES — créditos sin pagar (todos los meses)
+  const pendMes = inventarioCache.filter(p => p.pago_estado === 'PENDIENTE');
+
+  // Split stock vs pedido: un producto es "pedido" si está vinculado a una reserva tipo PEDIDO
+  const pedidoProdsSet = new Set(
+    (reservasCache||[]).filter(r=>r.tipo==='PEDIDO').map(r=>r.codigo_producto).filter(Boolean)
   );
-  const pendSoles = pendMes.reduce((s,p) => s + parseFloat(p.precio_compra_soles||0), 0);
-  const pendUsd   = pendMes.reduce((s,p) => s + parseFloat(p.precio_compra_usd||0), 0);
+  const pendStockProds  = pendMes.filter(p=>!pedidoProdsSet.has(p.codigo_producto));
+  const pendPedidoProds = pendMes.filter(p=> pedidoProdsSet.has(p.codigo_producto));
+  const pendStockSoles  = pendStockProds.filter(p=>(p.moneda||'SOLES')!=='USD').reduce((s,p)=>s+parseFloat(p.precio_compra_soles||0),0);
+  const pendStockUsd    = pendStockProds.filter(p=>p.moneda==='USD').reduce((s,p)=>s+parseFloat(p.precio_compra_usd||0),0);
+  const pendPedidoSoles = pendPedidoProds.filter(p=>(p.moneda||'SOLES')!=='USD').reduce((s,p)=>s+parseFloat(p.precio_compra_soles||0),0);
+  const pendPedidoUsd   = pendPedidoProds.filter(p=>p.moneda==='USD').reduce((s,p)=>s+parseFloat(p.precio_compra_usd||0),0);
 
   // RESERVAS ACTIVAS — adelantos reales bloqueados (solo reservas que no se completaron ni cancelaron)
   const reservasMes = (reservasCache||[])
@@ -4636,14 +4662,17 @@ async function loadFlujo() {
   const pendAntSoles = pendAntiguos.filter(p=>(p.moneda||'SOLES')!=='USD').reduce((s,p)=>s+parseFloat(p.precio_compra_soles||0),0);
   const pendAntUsd   = pendAntiguos.filter(p=>p.moneda==='USD').reduce((s,p)=>s+parseFloat(p.precio_compra_usd||0),0);
 
-  const pendComprasSoles = pendFlujoSoles + pendAntSoles;
-  const pendComprasUsd   = pendFlujoUsd   + pendAntUsd;
   const pendReservasAmt  = reservasMes;
 
   const fmtUsd = v => '$ ' + parseFloat(v).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2});
-  document.getElementById('fc-pend-reservas').textContent = fmt(pendReservasAmt);
-  document.getElementById('fc-pend-soles').textContent    = fmt(pendComprasSoles);
-  document.getElementById('fc-pend-usd').textContent      = fmtUsd(pendComprasUsd);
+  document.getElementById('fc-pend-reservas').textContent  = fmt(pendReservasAmt);
+
+  // Bubble compras
+  document.getElementById('fc-compras-mes').textContent   = fmt(egrCompras + egrCostos);
+  document.getElementById('fc-pend-stock-s').textContent  = fmt(pendStockSoles);
+  document.getElementById('fc-pend-stock-u').textContent  = fmtUsd(pendStockUsd);
+  document.getElementById('fc-pend-pedido-s').textContent = fmt(pendPedidoSoles);
+  document.getElementById('fc-pend-pedido-u').textContent = fmtUsd(pendPedidoUsd);
 
 
   // ── RENDER TABLA ──
