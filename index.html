@@ -4211,7 +4211,7 @@ async function registrarPago(){
   if(!monto){toast('Ingresa el monto','warn');return;}
   const btn=document.getElementById('btn-pago');setLoading(btn,true);
   try{
-    const codigoPago=(await genCodigo('pago')).replace(/^PG-/,'GS-');
+    const codigoPago=await genCodigo('pago');
     const{error}=await db.from('pagos').insert({
       codigo_pago:codigoPago,
       concepto,monto_soles:-Math.abs(monto),
