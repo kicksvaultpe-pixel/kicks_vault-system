@@ -2819,7 +2819,7 @@ function abrirReservaDetalle(codigo){
   if(btnCompletar){btnCompletar.disabled=!puedeCompletar;btnCompletar.style.opacity=puedeCompletar?'':'0.4';}
   if(avisoVincular)avisoVincular.style.display=isActiva&&!r.codigo_producto&&r.tipo==='PEDIDO'?'block':'none';
   const mnEl=document.getElementById('rsv-new-monto');if(mnEl)mnEl.value='';
-  const nnEl=document.getElementById('rsv-new-nota');if(nnEl)nnEl.value='';
+  const nnEl=document.getElementById('rsv-new-nota');if(nnEl)nnEl.value='Abono';
   document.getElementById('rsv-overlay').classList.add('open');
 }
 
@@ -5377,7 +5377,7 @@ init();
         </div>
         <div class="field" style="flex:1;min-width:110px;margin:0">
           <label>Nota <span style="font-weight:400;opacity:.6">(opcional)</span></label>
-          <input type="text" id="rsv-new-nota" placeholder="Yape, efectivo…">
+          <input type="text" id="rsv-new-nota" placeholder="Yape, efectivo…" value="Abono">
         </div>
         <button class="btn btn-ghost btn-sm" style="height:38px;flex-shrink:0;white-space:nowrap" onclick="registrarAbono()">+ Abono</button>
       </div>
