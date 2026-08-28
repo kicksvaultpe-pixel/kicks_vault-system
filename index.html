@@ -1424,7 +1424,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <div id="cs-lista-body"></div>
     </div>
 
-    <button class="btn btn-purple" id="btn-costo" onclick="registrarCosto()" style="display:none">✓ Registrar costos</button>
+    <button class="btn btn-purple" id="btn-costo" onclick="registrarCosto()" style="display:none">Registrar Costos</button>
   </div>
 
   <!-- ── INVERSIÓN ── -->
@@ -1829,7 +1829,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <div class="fc-info-section">
         <div class="fc-info-lbl">Sin efecto en caja</div>
         <div class="fc-row">
-          <span class="fc-row-lbl" title="Total abonado en reservas activas (desaparece cuando la reserva se completa o cancela)">🔒 Adelantos reservas</span>
+          <span class="fc-row-lbl" title="Total abonado en reservas activas (desaparece cuando la reserva se completa o cancela)">🔒 Adelantos de reservas</span>
           <span class="fc-row-val" style="color:var(--purple)" id="fc-pend-reservas">S/. 0.00</span>
         </div>
       </div>
@@ -2592,6 +2592,7 @@ function csProdChange(){
 function renderOCTab(){
   const estadoF=noEmoji(document.getElementById('oc-f-estado')?.value||'');
   const tipoF=noEmoji(document.getElementById('oc-f-tipo')?.value||'');
+  const tipoFDB=tipoF.normalize('NFD').replace(/[̀-ͯ]/g,''); // quita tildes para comparar con DB
   // Stats
   const s=el=>document.getElementById(el);
   if(s('oc-stat-total')) s('oc-stat-total').textContent=ocCache.length;
@@ -2600,7 +2601,7 @@ function renderOCTab(){
   // Filter
   let ocs=ocCache;
   if(estadoF) ocs=ocs.filter(o=>o.estado===estadoF);
-  if(tipoF) ocs=ocs.filter(o=>o.tipo===tipoF);
+  if(tipoFDB) ocs=ocs.filter(o=>o.tipo===tipoFDB);
   const tbody=document.getElementById('oc-tbody');
   if(!tbody) return;
   if(!ocs.length){
@@ -2667,7 +2668,7 @@ async function confirmarTC(){
       setTimeout(()=>{btn.textContent='Fijar TC';btn.classList.remove('saved');},2000);}
     toast('TC fijado: S/. '+parseFloat(val).toFixed(3)+' — guardado en DB','ok');
   }catch(e){
-    toast('Error guardando TC (verifica RLS en tabla configuracion): '+e.message,'err');
+    toast('No se pudo guardar el tipo de cambio','err');
   }
 }
 async function loadTCGlobal(){
@@ -2751,9 +2752,9 @@ function renderReservas(){
     const acordado=parseFloat(r.precio_acordado||0);
     const saldo=Math.max(0,acordado-r.total_abonado);
     const estadoBadge=
-      r.estado==='ACTIVA'?`<span class="rsv-badge-activa">Activa</span>`:
-      r.estado==='COMPLETADA'?`<span class="rsv-badge-completada">Completada</span>`:
-      `<span class="rsv-badge-cancelada">Cancelada</span>`;
+      r.estado==='ACTIVA'?`<span class="rsv-badge-activa">ACTIVA</span>`:
+      r.estado==='COMPLETADA'?`<span class="rsv-badge-completada">COMPLETADA</span>`:
+      `<span class="rsv-badge-cancelada">CANCELADA</span>`;
     const tipoBadge=r.tipo==='STOCK'?`<span class="rsv-tipo-stock">Stock</span>`:`<span class="rsv-tipo-pedido">Pedido</span>`;
     return`<tr onclick="abrirReservaDetalle('${r.codigo_reserva}')" style="cursor:pointer">
       <td><span class="td-code" style="color:var(--muted2)">${fecha}</span></td>
@@ -3237,7 +3238,7 @@ function fillDataLists(){
   comboSetData('cl-cs-modelo', modelos);
   comboSetData('cl-cs-colorway', colorways);
   comboSetData('cl-cs-talla', tallas);
-  comboSetData('cl-cs-concepto', ['📦 IMPORTACION','🚚 ENVIO','📋 OTROS']);
+  comboSetData('cl-cs-concepto', ['📦 IMPORTACIÓN','🚚 ENVÍO','📋 OTROS']);
   // Inventario filtros — solo lo que existe en el inventario
   comboSetData('cl-inv-marca', marcas);
   comboSetData('cl-inv-modelo', modelos);
@@ -3251,15 +3252,15 @@ function fillDataLists(){
   comboSetData('cl-vt-f-canal', ['— Todos —','📸 INSTAGRAM','💬 WHATSAPP','🏪 PRESENCIAL','🔹 OTRO']);
   comboSetData('cl-clf-tipo', ['— Todos —','👤 REGULAR','⭐ VIP','📦 MAYORISTA']);
   comboSetData('cl-oc-f-estado', ['— Todos —','⏳ PENDIENTE','✅ COMPLETADA','❌ CANCELADA']);
-  comboSetData('cl-oc-f-tipo', ['— Todos —','✈️ IMPORTACION','🏪 LOCAL']);
-  comboSetData('cl-fc-accion', ['— Todos —','VENTA','COMPRA','COSTO','PAGO','PENDIENTE','RESERVA','CANCELACION']);
+  comboSetData('cl-oc-f-tipo', ['— Todos —','✈️ IMPORTACIÓN','🏪 LOCAL']);
+  comboSetData('cl-fc-accion', ['— Todos —','VENTA','COMPRA','COSTO','GASTO','PENDIENTE','RESERVA','CANCELACIÓN']);
   // Opciones fijas — formularios registro
   comboSetData('cl-cp-cat', ['👟 ZAPATILLAS','👕 ROPA','🧢 ACCESORIOS','📦 OTROS']);
   comboSetData('cl-cp-moneda', ['🇺🇸 USD','🇵🇪 SOLES']);
-  comboSetData('cl-cp-oc-tipo', ['✈️ IMPORTACION','🏪 LOCAL']);
+  comboSetData('cl-cp-oc-tipo', ['✈️ IMPORTACIÓN','🏪 LOCAL']);
   comboSetData('cl-vt-canal', ['📸 INSTAGRAM','💬 WHATSAPP','🏪 PRESENCIAL','🔹 OTRO']);
   comboSetData('cl-vt-medio-pago', ['💵 EFECTIVO','🏦 TRANSFERENCIA','💳 TARJETA','💜 YAPE','💙 PLIN']);
-  comboSetData('cl-pg-cat', ['🏪 OPERATIVO','👤 PERSONAL','📦 IMPORTACION','📣 MARKETING']);
+  comboSetData('cl-pg-cat', ['🏪 OPERATIVO','👤 PERSONAL','📦 IMPORTACIÓN','📣 MARKETING']);
   comboSetData('cl-cl-canal', ['📸 INSTAGRAM','💬 WHATSAPP','🏪 PRESENCIAL','🔹 OTRO']);
   comboSetData('cl-cl-tipo', ['👤 REGULAR','⭐ VIP','📦 MAYORISTA']);
   // Defaults iniciales para combos que arrancan con un valor fijo
@@ -4695,7 +4696,8 @@ function renderFlujoTabla() {
   // Filtro por acción
   const fcAccion=(document.getElementById('fc-accion')?.value||'').trim();
   const accionActiva=fcAccion&&!fcAccion.startsWith('— ')?fcAccion:'';
-  const flujoFiltrado=accionActiva?flujoCache.filter(f=>(f.categoria||f.tipo||'').toUpperCase()===accionActiva):flujoCache;
+  const accionDB=accionActiva==='GASTO'?'PAGO':accionActiva==='CANCELACIÓN'?'CANCELACION':accionActiva;
+  const flujoFiltrado=accionDB?flujoCache.filter(f=>(f.categoria||f.tipo||'').toUpperCase()===accionDB):flujoCache;
 
   // Créditos pendientes del inventario que NO tienen fila en flujo_caja (todos los meses)
   const codigosEnFlujo = new Set(flujoCache.filter(f=>(f.tipo||'').toUpperCase()==='PENDIENTE').map(f=>f.referencia_id));
@@ -5086,7 +5088,7 @@ function exportInventarioCSV(){
 }
 
 function exportVentasCSV(){
-  const h=['Fecha','Código Venta','Marca','Modelo','Colorway','Talla','Canal','Comprador','Venta S/.','Ganancia S/.','ROI %'];
+  const h=['Fecha','Código Venta','Marca','Modelo','Colorway','Talla','Canal','Cliente','Venta S/.','Ganancia S/.','ROI %'];
   const r=ventasCache.map(v=>{
     const inv=v.inventario||{};
     return[v.fecha||'',v.codigo_venta,inv.marca||'',inv.modelo||'',inv.colorway||'',inv.talla||'',v.canal||'',v.comprador||'',v.precio_venta_soles||0,v.ganancia||0,(parseFloat(v.rentabilidad||0)*100).toFixed(1)]
@@ -5419,7 +5421,7 @@ init();
         </div>
         <div class="field" style="flex:1;min-width:110px;margin:0">
           <label>Nota <span style="font-weight:400;opacity:.6">(opcional)</span></label>
-          <input type="text" id="rsv-new-nota" placeholder="Yape, efectivo…" value="Abono">
+          <input type="text" id="rsv-new-nota" placeholder="Método de pago…" value="Abono">
         </div>
         <button class="btn btn-ghost btn-sm" style="height:38px;flex-shrink:0;white-space:nowrap" onclick="registrarAbono()">+ Abono</button>
       </div>
