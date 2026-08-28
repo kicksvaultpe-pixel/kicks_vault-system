@@ -4474,11 +4474,13 @@ async function loadFlujo() {
   );
   const stockInicio = stockInicioProds.reduce((s,p) => s + parseFloat(p.precio_final||0), 0);
 
-  // STOCK FIN — productos DISPONIBLES + PAGADO al fin del mes actual
+  // STOCK FIN — mismo criterio que tarjeta Valor Stock en Inventario:
+  // DISPONIBLE o RESERVADO, pago no pendiente, comprado hasta fin del mes
   const stockFinProds = inventarioCache.filter(p =>
-    p.estado === 'DISPONIBLE' &&
-    p.pago_estado === 'PAGADO' &&
-    p.fecha_compra <= fechaFinStr
+    p.fecha_compra <= fechaFinStr &&
+    p.estado !== 'CANCELADO' &&
+    (p.estado === 'DISPONIBLE' || p.estado === 'RESERVADO') &&
+    p.pago_estado !== 'PENDIENTE'
   );
   const stockFin = stockFinProds.reduce((s,p) => s + parseFloat(p.precio_final||0), 0);
 
