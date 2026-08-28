@@ -2893,13 +2893,22 @@ function abrirModalCompletarRsv(){
         </div>
         <div style="display:flex;justify-content:space-between">
           <span style="color:var(--muted2)">Saldo pendiente</span>
-          <span class="td-amt" style="color:${saldo>0.01?'var(--accent)':'var(--green)'}">${fmt(saldo)}</span>
+          <span class="td-amt" id="mcrv-saldo-val" style="color:${saldo>0.01?'var(--accent)':'var(--green)'}">${fmt(saldo)}</span>
         </div>
       </div>
     </div>`;
-  document.getElementById('mcrv-precio').value=acordado||'';
+  const precioEl=document.getElementById('mcrv-precio');
+  precioEl.value=acordado||'';
+  precioEl.dataset.abonado=r.total_abonado||0;
+  precioEl.oninput=function(){
+    const nP=parseFloat(this.value)||0;
+    const ab=parseFloat(this.dataset.abonado)||0;
+    const nS=Math.max(0,nP-ab);
+    const el=document.getElementById('mcrv-saldo-val');
+    if(el){el.textContent=fmt(nS);el.style.color=nS>0.01?'var(--accent)':'var(--green)';}
+  };
   document.getElementById('modal-completar-rsv').classList.add('open');
-  setTimeout(()=>document.getElementById('mcrv-precio').focus(),120);
+  setTimeout(()=>precioEl.focus(),120);
 }
 
 function cerrarModalCompletarRsv(){
@@ -2931,7 +2940,7 @@ async function confirmarCompletarReserva(){
       comentarios:`Reserva ${r.codigo_reserva}`
     });
     if(eV){console.error('ventas insert error',eV);throw eV;}
-    const saldo=Math.max(0,parseFloat(r.precio_acordado||0)-r.total_abonado);
+    const saldo=Math.max(0,precioFinal-r.total_abonado);
     if(saldo>0.01){
       const{error:aE}=await db.from('abonos').insert({
         codigo_reserva:rsvCodigoActivo,monto:saldo,fecha,
