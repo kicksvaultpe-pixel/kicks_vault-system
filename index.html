@@ -406,42 +406,45 @@ input[list] { cursor: text; }
 @media(max-width:700px){.fc-trio{grid-template-columns:1fr 1fr}}
 @media(max-width:480px){.fc-trio{grid-template-columns:1fr}}
 
-.fc-bubble{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px 24px;position:relative;overflow:hidden;transition:all .2s}
-.fc-bubble::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:16px 16px 0 0}
-.fc-bubble.inicio::after{background:linear-gradient(90deg,transparent,var(--border2),transparent)}
-.fc-bubble.actual::after{background:linear-gradient(90deg,transparent,var(--accent),transparent)}
-.fc-bubble.fin::after{background:linear-gradient(90deg,transparent,var(--blue),transparent)}
-.fc-bubble.fin{border-color:rgba(96,165,250,.18);background:linear-gradient(135deg,var(--card) 0%,rgba(96,165,250,.03) 100%)}
-.fc-bubble.actual{border-color:rgba(37,99,235,.18);background:linear-gradient(135deg,var(--card) 0%,rgba(37,99,235,.03) 100%)}
-
+.fc-bubble{background:var(--card);border:1px solid var(--border);border-left-width:3px;border-radius:16px;padding:22px 24px;position:relative;overflow:hidden;transition:all .2s}
+.fc-bubble::after{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.fc-bubble.inicio{border-left-color:var(--border2)}
+.fc-bubble.inicio::after{background:var(--border2)}
+.fc-bubble.actual{border-left-color:var(--accent);border-color:rgba(37,99,235,.22);background:linear-gradient(160deg,var(--card) 65%,rgba(37,99,235,.035) 100%)}
+.fc-bubble.actual::after{background:var(--accent)}
+.fc-bubble.fin{border-left-color:var(--blue);border-color:rgba(96,165,250,.22);background:linear-gradient(160deg,var(--card) 65%,rgba(96,165,250,.035) 100%)}
+.fc-bubble.fin::after{background:var(--blue)}
 
 /* Chip label */
-.fc-chip{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.fc-chip{display:flex;align-items:center;gap:7px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:12px}
 .fc-chip-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .inicio .fc-chip-dot{background:var(--muted2)}
 .actual .fc-chip-dot{background:var(--accent);box-shadow:0 0 6px var(--accent)}
-.fin .fc-chip-dot{background:var(--blue)}
+.fin .fc-chip-dot{background:var(--blue);box-shadow:0 0 6px var(--blue)}
 
 /* Número principal */
-.fc-main-num{font-family:"Archivo Black";font-size:24px;line-height:1;letter-spacing:-1px;margin-bottom:4px;font-variant-numeric:tabular-nums}
+.fc-main-num{font-family:"Archivo Black";font-size:26px;line-height:1;letter-spacing:-1.5px;margin-bottom:3px;font-variant-numeric:tabular-nums}
 .fc-main-num.white{color:var(--text)}
 .fc-main-num.accent{color:var(--accent)}
 .fc-main-num.blue{color:var(--blue)}
 .fc-main-num.red{color:var(--red)}
 .fc-main-num.green{color:var(--green)}
-.fc-main-lbl{font-size:11px;font-family:'Archivo',sans-serif;color:var(--muted2);margin-bottom:16px;letter-spacing:.2px}
-.fc-real-row{display:flex;align-items:baseline;justify-content:space-between;margin:2px 0 10px}
-.fc-real-lbl{font-size:10px;color:var(--muted2);font-weight:700;letter-spacing:.5px;text-transform:uppercase}
-.fc-real-val{font-family:"Archivo Black";font-size:18px;color:var(--purple);font-variant-numeric:tabular-nums;letter-spacing:-.5px}
-.fc-info-lbl{font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted2);opacity:.7;margin-bottom:4px}
+.fc-main-lbl{font-size:11px;font-family:'Archivo',sans-serif;color:var(--muted2);margin-bottom:14px;letter-spacing:.2px}
+.fc-real-row{display:flex;align-items:baseline;justify-content:space-between;margin:2px 0 10px;padding:6px 10px;background:rgba(109,40,217,.05);border-radius:8px;border:1px solid rgba(109,40,217,.1)}
+.fc-real-lbl{font-size:10px;color:var(--muted2);font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.fc-real-val{font-family:"Archivo Black";font-size:16px;font-variant-numeric:tabular-nums;letter-spacing:-.5px}
+
+/* Sección "sin efecto en caja" */
+.fc-info-section{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin:14px 0 0}
+.fc-info-lbl{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);opacity:.8;margin-bottom:6px}
 
 /* Divisor interno */
 .fc-inner-div{border-top:1px solid var(--border);margin:14px 0}
 
 /* Filas internas */
 .fc-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0}
-.fc-row-lbl{font-size:10px;font-family:'Archivo',sans-serif;color:var(--muted2);letter-spacing:.2px}
-.fc-row-val{font-family:"Archivo Black";font-size:12px;color:var(--text);font-variant-numeric:tabular-nums}
+.fc-row-lbl{font-size:11px;font-family:'Archivo',sans-serif;color:var(--muted2);letter-spacing:.1px}
+.fc-row-val{font-family:"Archivo Black";font-size:13px;color:var(--text);font-variant-numeric:tabular-nums}
 .fc-row-val.green{color:var(--green)}
 .fc-row-val.red{color:var(--red)}
 .fc-row-val.accent{color:var(--accent)}
@@ -450,9 +453,9 @@ input[list] { cursor: text; }
 .fc-row-val.muted{color:var(--muted2)}
 
 /* Total fondo de burbuja */
-.fc-bot{display:flex;justify-content:space-between;align-items:baseline;margin-top:12px;padding-top:12px;border-top:1px solid var(--border2)}
+.fc-bot{display:flex;justify-content:space-between;align-items:baseline;margin-top:14px;padding-top:13px;border-top:1px solid var(--border2)}
 .fc-bot-lbl{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2)}
-.fc-bot-val{font-family:"Archivo Black";font-size:13px;font-variant-numeric:tabular-nums}
+.fc-bot-val{font-family:"Archivo Black";font-size:15px;font-variant-numeric:tabular-nums}
 .fc-bot-val.accent{color:var(--accent)}
 .fc-bot-val.green{color:var(--green)}
 .fc-bot-val.blue{color:var(--blue)}
@@ -1640,7 +1643,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
 <div id="view-ventas" class="view">
   <div class="page-hd">
     <div class="page-title"><div class="dot"></div> Resultados</div>
-    <div class="page-sub">Ventas del mes, pagos del negocio y utilidad neta</div>
+    <div class="page-sub">Ventas del mes, gastos del negocio y utilidad neta</div>
   </div>
 
   <!-- Navegación de mes -->
@@ -1667,7 +1670,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <div class="sc-grid g2">
         <span class="sg-mc-tot" style="color:var(--green)">Ganancia Bruta</span>
         <span class="sg-mn-tot green" id="vt-gan">—</span>
-        <span class="sg-mc">− Pagos del Negocio</span>
+        <span class="sg-mc">− Gastos del Negocio</span>
         <span class="sg-mn red" id="vt-pagos-stat">—</span>
       </div>
       <div class="sg-divider"></div>
@@ -1729,8 +1732,8 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
     Click para seleccionar · Ctrl+C para copiar · Shift+click para rango
   </div>
 
-  <!-- SECCIÓN PAGOS DEL NEGOCIO -->
-  <div class="card-label" style="margin-top:28px;margin-bottom:12px">Pagos del Negocio</div>
+  <!-- SECCIÓN GASTOS DEL NEGOCIO -->
+  <div class="card-label" style="margin-top:28px;margin-bottom:12px">Gastos del Negocio</div>
   <div class="table-toolbar">
     <input type="text" id="pg-buscar" class="search-box" placeholder="Buscar concepto…" oninput="renderPagos(filterPagosLocal())" style="min-width:180px">
     <div class="combo-wrap" style="min-width:160px">
@@ -1748,7 +1751,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
     <table id="pg-table" style="min-width:580px">
       <thead><tr>
         <th style="width:80px">Fecha</th>
-        <th style="width:90px">Cód. Pago</th>
+        <th style="width:90px">Cód. Gasto</th>
         <th>Concepto</th>
         <th style="width:140px">Categoría</th>
         <th class="right" style="width:120px">Monto S/.</th>
@@ -1822,19 +1825,20 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <span class="fc-bot-lbl">Neto del mes</span>
         <span class="fc-bot-val" id="fc-neto-mes">—</span>
       </div>
-      <div class="fc-inner-div" style="margin:10px 0 6px"></div>
-      <div class="fc-info-lbl">Sin efecto en caja</div>
-      <div class="fc-row">
-        <span class="fc-row-lbl" title="Total abonado en reservas activas (desaparece cuando la reserva se completa o cancela)">🔒 Adelantos reservas</span>
-        <span class="fc-row-val" style="color:var(--purple)" id="fc-pend-reservas">S/. 0.00</span>
-      </div>
-      <div class="fc-row">
-        <span class="fc-row-lbl">⏳ Compras pend. S/.</span>
-        <span class="fc-row-val yellow" id="fc-pend-soles">S/. 0.00</span>
-      </div>
-      <div class="fc-row">
-        <span class="fc-row-lbl">⏳ Compras pend. $</span>
-        <span class="fc-row-val yellow" id="fc-pend-usd">$ 0.00</span>
+      <div class="fc-info-section">
+        <div class="fc-info-lbl">Sin efecto en caja</div>
+        <div class="fc-row">
+          <span class="fc-row-lbl" title="Total abonado en reservas activas (desaparece cuando la reserva se completa o cancela)">🔒 Adelantos reservas</span>
+          <span class="fc-row-val" style="color:var(--purple)" id="fc-pend-reservas">S/. 0.00</span>
+        </div>
+        <div class="fc-row">
+          <span class="fc-row-lbl">⏳ Compras pend. S/.</span>
+          <span class="fc-row-val yellow" id="fc-pend-soles">S/. 0.00</span>
+        </div>
+        <div class="fc-row">
+          <span class="fc-row-lbl">⏳ Compras pend. $</span>
+          <span class="fc-row-val yellow" id="fc-pend-usd">$ 0.00</span>
+        </div>
       </div>
       <div class="fc-bot" style="border-color:rgba(109,40,217,.2)">
         <span class="fc-bot-lbl" style="color:var(--purple)">Caja real</span>
@@ -4434,7 +4438,7 @@ async function loadFlujo() {
     const dPrev = new Date(y, m-2, 1);
     const mesPrev = fcMesStr(dPrev);
     const prevIni = `${mesPrev}-01`;
-    const dPrevFin = new Date(y, m-2, 0);
+    const dPrevFin = new Date(y, m-1, 0);
     const prevFinStr = dPrevFin.toISOString().substring(0,10);
 
     // Buscar caja_mensual del mes anterior
@@ -4465,12 +4469,12 @@ async function loadFlujo() {
   const vendidosMesSet = new Set((ventasMes||[]).map(v=>v.codigo_producto).filter(Boolean));
 
   // STOCK INICIO — productos DISPONIBLES + PAGADO al último día del mes anterior
-  const dPrevEnd = new Date(y, m-2, 0); // último día mes anterior
+  const dPrevEnd = new Date(y, m-1, 0); // último día mes anterior
   const prevEndStr = dPrevEnd.toISOString().substring(0,10);
   const stockInicioProds = inventarioCache.filter(p =>
     p.pago_estado === 'PAGADO' &&
     p.fecha_compra <= prevEndStr &&
-    (p.estado === 'DISPONIBLE' || (p.estado === 'VENDIDO' && vendidosMesSet.has(p.codigo_producto)))
+    (p.estado === 'DISPONIBLE' || p.estado === 'RESERVADO' || (p.estado === 'VENDIDO' && vendidosMesSet.has(p.codigo_producto)))
   );
   const stockInicio = stockInicioProds.reduce((s,p) => s + parseFloat(p.precio_final||0), 0);
 
@@ -4499,11 +4503,9 @@ async function loadFlujo() {
   const egrCostos  = compMesInv.reduce((s,p) => s + parseFloat(p.total_costos||0), 0);
   const egrGastos  = sumEgr(flujoCache.filter(f=>['OPERATIVO','MARKETING','PERSONAL','IMPORTACION','PAGO'].includes(cat(f))));
 
-  // PENDIENTES — créditos sin pagar registrados este mes
+  // PENDIENTES — créditos sin pagar (todos los meses, para cuadrar con tabla)
   const pendMes = inventarioCache.filter(p =>
-    p.pago_estado === 'PENDIENTE' &&
-    p.fecha_compra >= fechaInicio &&
-    p.fecha_compra <= fechaFinStr
+    p.pago_estado === 'PENDIENTE'
   );
   const pendSoles = pendMes.reduce((s,p) => s + parseFloat(p.precio_compra_soles||0), 0);
   const pendUsd   = pendMes.reduce((s,p) => s + parseFloat(p.precio_compra_usd||0), 0);
@@ -4658,7 +4660,6 @@ function renderFlujoTabla() {
     body.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--muted2)">Sin movimientos este mes</td></tr>';
     return;
   }
-  body.innerHTML = '';
 
   const fmtFecha = f => {
     if(!f) return '—';
@@ -4941,7 +4942,7 @@ function renderPagos(rows){
   const tbody=document.getElementById('pg-tbody');
   if(!tbody)return;
   if(!rows.length){
-    tbody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted2)">Sin pagos en este período</td></tr>';
+    tbody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted2)">Sin gastos en este período</td></tr>';
     return;
   }
   const catBadge={'OPERATIVO':'badge-muted','MARKETING':'badge-purple','PERSONAL':'badge-accent','IMPORTACION':'badge-accent','PAGO':'badge-muted'};
