@@ -433,6 +433,7 @@ input[list] { cursor: text; }
 .fc-real-row{display:flex;align-items:baseline;justify-content:space-between;margin:2px 0 10px}
 .fc-real-lbl{font-size:10px;color:var(--muted2);font-weight:700;letter-spacing:.5px;text-transform:uppercase}
 .fc-real-val{font-family:"Archivo Black";font-size:18px;color:var(--purple);font-variant-numeric:tabular-nums;letter-spacing:-.5px}
+.fc-info-lbl{font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted2);opacity:.7;margin-bottom:4px}
 
 /* Divisor interno */
 .fc-inner-div{border-top:1px solid var(--border);margin:14px 0}
@@ -1803,10 +1804,6 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
     <div class="fc-bubble actual">
       <div class="fc-chip"><div class="fc-chip-dot"></div>Flujo de Caja</div>
       <div class="fc-main-num accent" id="fc-caja-actual">—</div>
-      <div class="fc-real-row">
-        <span class="fc-real-lbl">Caja real</span>
-        <span class="fc-real-val" id="fc-caja-real-actual">—</span>
-      </div>
       <div class="fc-main-lbl">apertura ± movimientos del mes</div>
       <div class="fc-inner-div"></div>
       <div class="fc-row">
@@ -1826,6 +1823,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <span class="fc-bot-val" id="fc-neto-mes">—</span>
       </div>
       <div class="fc-inner-div" style="margin:10px 0 6px"></div>
+      <div class="fc-info-lbl">Sin efecto en caja</div>
       <div class="fc-row">
         <span class="fc-row-lbl" title="Total abonado en reservas activas (desaparece cuando la reserva se completa o cancela)">🔒 Adelantos reservas</span>
         <span class="fc-row-val" style="color:var(--purple)" id="fc-pend-reservas">S/. 0.00</span>
@@ -1837,6 +1835,10 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <div class="fc-row">
         <span class="fc-row-lbl">⏳ Compras pend. $</span>
         <span class="fc-row-val yellow" id="fc-pend-usd">$ 0.00</span>
+      </div>
+      <div class="fc-bot" style="border-color:rgba(109,40,217,.2)">
+        <span class="fc-bot-lbl" style="color:var(--purple)">Caja real</span>
+        <span class="fc-bot-val" id="fc-caja-real-actual">—</span>
       </div>
     </div>
 
