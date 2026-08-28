@@ -1811,11 +1811,11 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <span class="fc-row-val green" id="fc-ing-ventas">—</span>
       </div>
       <div class="fc-row">
-        <span class="fc-row-lbl">− Compras pagadas</span>
+        <span class="fc-row-lbl">− Compras y costos</span>
         <span class="fc-row-val red" id="fc-egr-soles">—</span>
       </div>
       <div class="fc-row">
-        <span class="fc-row-lbl">− Costos y gastos</span>
+        <span class="fc-row-lbl">− Gastos</span>
         <span class="fc-row-val red" id="fc-egr-costos-gastos">—</span>
       </div>
       <div class="fc-bot">
@@ -4592,8 +4592,8 @@ async function loadFlujo() {
   // ── RENDER BLOQUE MOVIMIENTOS ──
   // Movimientos
   document.getElementById('fc-ing-ventas').textContent      = ingVentas > 0 ? '+ ' + fmt(ingVentas) : fmt(ingVentas);
-  document.getElementById('fc-egr-soles').textContent       = egrCompras > 0 ? '− ' + fmt(egrCompras) : '—';
-  document.getElementById('fc-egr-costos-gastos').textContent = (egrCostos + egrGastos) > 0 ? '− ' + fmt(egrCostos + egrGastos) : '—';
+  document.getElementById('fc-egr-soles').textContent         = (egrCompras + egrCostos) > 0 ? '− ' + fmt(egrCompras + egrCostos) : '—';
+  document.getElementById('fc-egr-costos-gastos').textContent = egrGastos > 0 ? '− ' + fmt(egrGastos) : '—';
 
   // Neto
   const netoEl = document.getElementById('fc-neto-mes');
