@@ -2526,7 +2526,7 @@ function comboPick(inputId, listId, val) {
   if (el) el.value = val.startsWith('— ') ? '' : val;
   const list = document.getElementById(listId);
   if (list) list.classList.remove('open');
-  if (inputId.startsWith('inv-')) filterInventario();
+  if (['inv-marca','inv-modelo','inv-colorway','inv-talla','inv-cat','inv-estado','inv-tpago'].includes(inputId)) filterInventario();
   if (inputId.startsWith('cs-f-')) buscarProductoCosto();
   if (inputId === 'cp-oc-select') ocExistenteChange();
   if (inputId === 'vt-producto') onPickVtProducto();
@@ -4515,7 +4515,12 @@ let activosCache = [];
 let inversionesCache2 = [];
 
 async function loadActivos(){
-  const{data}=await db.from('activos').select('*').order('created_at',{ascending:true});
+  const{data,error}=await db.from('activos').select('*').order('created_at',{ascending:true});
+  if(error){
+    const el=document.getElementById('inv-activos-list');
+    if(el)el.innerHTML='<div style="color:var(--red);font-size:12px;padding:12px">Error al cargar activos: '+error.message+'<br><span style="color:var(--muted2)">¿Creaste las tablas en Supabase?</span></div>';
+    return;
+  }
   activosCache=data||[];
   renderActivosList();
   const opts=activosCache.map(a=>`${a.codigo_activo} · ${a.nombre}`);
@@ -4523,7 +4528,8 @@ async function loadActivos(){
 }
 
 async function loadInversiones(){
-  const{data}=await db.from('inversiones').select('*,activos(nombre,codigo_activo)').order('fecha',{ascending:false}).order('created_at',{ascending:false});
+  const{data,error}=await db.from('inversiones').select('*,activos(nombre,codigo_activo)').order('fecha',{ascending:false}).order('created_at',{ascending:false});
+  if(error){console.warn('loadInversiones:',error.message);return;}
   inversionesCache2=data||[];
   renderInversionesHistorial();
   renderActivosList();
@@ -4595,7 +4601,9 @@ async function registrarActivo(){
   if(!nombre){toast('Ingresa el nombre del activo','warn');return;}
   const btn=document.getElementById('btn-inv-activo');setLoading(btn,true);
   try{
-    const cod=await genCodigo('activo');
+    let cod;
+    try{ cod=await genCodigo('activo'); }
+    catch(e){ throw new Error('RPC gen_codigo_activo no existe en Supabase — ejecuta el SQL primero'); }
     const{error}=await db.from('activos').insert({codigo_activo:cod,nombre,tipo,moneda});
     if(error)throw error;
     toast('✓ Activo registrado · '+cod,'ok');
@@ -4604,6 +4612,7 @@ async function registrarActivo(){
     document.getElementById('inv-a-moneda').value='';
     toggleAddActivo();
     await loadActivos();
+    await loadInversiones();
   }catch(e){toast('Error: '+e.message,'err');}
   finally{setLoading(btn,false,'+ Agregar');}
 }
@@ -4639,10 +4648,11 @@ async function registrarInversion(){
       monto_gasto:montoGasto,moneda:activo.moneda||'SOLES',fecha
     });
     if(eInv)throw eInv;
-    // Capital → flujo_caja directo como INVERSION
+    // Capital → flujo_caja directo. Usa tipo='PAGO' (valor existente en enum) + categoria='INVERSION'
+    // cat(f) = f.categoria||f.tipo → 'INVERSION', separado de egrGastos y egrCompras
     if(montoActivo>0){
       await db.from('flujo_caja').insert({
-        fecha,tipo:'INVERSION',categoria:'ACTIVO',
+        fecha,tipo:'PAGO',categoria:'INVERSION',
         descripcion:`${codInv} · ${activo.nombre}${concepto?' · '+concepto:''}`,
         ingreso_soles:0,egreso_soles:montoActivo,referencia_id:codInv
       });
@@ -4851,8 +4861,8 @@ async function loadFlujo() {
 
 
   // Activo fijo acumulado (todas las inversiones históricas)
-  const{data:invTodas}=await db.from('inversiones').select('monto_activo');
-  const activoFijo=(invTodas||[]).reduce((s,i)=>s+parseFloat(i.monto_activo||0),0);
+  const{data:invTodas,error:invErr}=await db.from('inversiones').select('monto_activo');
+  const activoFijo=invErr?0:(invTodas||[]).reduce((s,i)=>s+parseFloat(i.monto_activo||0),0);
 
   // ── INDICADORES ──
   const patrimonio    = cajaActual + stockFin + activoFijo;
