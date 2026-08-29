@@ -402,6 +402,9 @@ input[list] { cursor: text; }
 .fc-nav{display:flex;align-items:center;gap:14px;margin-bottom:24px}
 .fc-nav-btn{background:var(--surface);border:1px solid var(--border2);border-radius:8px;width:34px;height:34px;color:var(--muted2);cursor:pointer;font-size:16px;font-weight:700;transition:all .2s;display:flex;align-items:center;justify-content:center}
 .fc-nav-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(37,99,235,.05)}
+.fc-nav-btn:disabled{opacity:.35;cursor:default;pointer-events:none}
+.inv-pag{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;margin-top:10px;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow)}
+.inv-pag-info{font-size:11px;color:var(--muted2)}
 .fc-mes-label{font-family:"Archivo Black";font-size:20px;color:var(--text);letter-spacing:.5px}
 
 /* 3 burbujas principales */
@@ -1734,6 +1737,14 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <tr class="loading-row"><td colspan="14"><div class="spinner"></div></td></tr>
       </tbody>
     </table>
+  </div>
+  <div class="inv-pag" id="inv-pag" style="display:none">
+    <span id="inv-pag-info" class="inv-pag-info"></span>
+    <div style="display:flex;align-items:center;gap:6px">
+      <button class="fc-nav-btn" id="inv-pag-prev" onclick="invPagMove(-1)">‹</button>
+      <span id="inv-pag-page" style="font-size:11px;font-weight:600;color:var(--text);min-width:60px;text-align:center"></span>
+      <button class="fc-nav-btn" id="inv-pag-next" onclick="invPagMove(1)">›</button>
+    </div>
   </div>
 </div>
 
@@ -3306,7 +3317,8 @@ async function loadInventario(){
   const{data,error}=await db.from('inventario')
     .select('*, costos(id,concepto,costo_soles,fecha), orden_compra')
     .order('fecha_compra',{ascending:false})
-    .order('codigo_producto',{ascending:false});
+    .order('codigo_producto',{ascending:false})
+    .limit(2000);
   if(error){toast('Error: '+error.message,'err');return;}
   inventarioCache=(data||[]).map(p=>({
     ...p,
@@ -3406,14 +3418,44 @@ async function loadClientes(){
   fillClienteCombos();
 }
 
-// ── RENDER ──
+// ── PAGINACIÓN INVENTARIO ──
+let invPage=0;
+const INV_PAGE_SIZE=50;
+let _invAllRows=[];
+
 function renderInventario(rows){
+  _invAllRows=rows;
+  invPage=0;
+  _renderInvPage();
+}
+
+function _renderInvPage(){
+  const rows=_invAllRows;
+  const total=rows.length;
+  const totalPages=Math.max(1,Math.ceil(total/INV_PAGE_SIZE));
+  if(invPage>=totalPages) invPage=totalPages-1;
+  const start=invPage*INV_PAGE_SIZE;
+  const end=Math.min(start+INV_PAGE_SIZE,total);
+  const page=rows.slice(start,end);
+
+  // Actualizar controles
+  const pag=document.getElementById('inv-pag');
+  const info=document.getElementById('inv-pag-info');
+  const pgLbl=document.getElementById('inv-pag-page');
+  const prev=document.getElementById('inv-pag-prev');
+  const next=document.getElementById('inv-pag-next');
+  if(pag) pag.style.display=total>INV_PAGE_SIZE?'flex':'none';
+  if(info) info.textContent=`${start+1}–${end} de ${total} productos`;
+  if(pgLbl) pgLbl.textContent=`Pág ${invPage+1} / ${totalPages}`;
+  if(prev) prev.disabled=invPage===0;
+  if(next) next.disabled=invPage>=totalPages-1;
+
   const tbody=document.getElementById('inv-tbody');
-  if(!rows.length){
+  if(!page.length){
     tbody.innerHTML='<tr><td colspan="14"><div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Sin productos</div></div></td></tr>';
     return;
   }
-  tbody.innerHTML=rows.map(p=>{
+  tbody.innerHTML=page.map(p=>{
     const pF=parseFloat(p.precio_final||p.precio_compra_soles||0);
     const pV=parseFloat(p.precio_venta_sugerido||0);
     const margen=pF>0&&pV>0?Math.round((pV-pF)/pF*100):null;
@@ -3485,6 +3527,13 @@ function renderInventario(rows){
       <td style="text-align:center"><button class="btn-edit-inv" onclick="abrirEditarItem('${p.codigo_producto}')" title="Editar">✏</button></td>
     </tr>`;
   }).join('');
+}
+
+function invPagMove(dir){
+  const totalPages=Math.ceil(_invAllRows.length/INV_PAGE_SIZE)||1;
+  invPage=Math.max(0,Math.min(totalPages-1,invPage+dir));
+  _renderInvPage();
+  document.querySelector('#view-inventario .table-wrap')?.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 function updateStats(mes='',vendidosMes=[],vendidosDespues=[]){
@@ -3662,6 +3711,7 @@ function filterInventario(){
       return va<vb?-sortDir:va>vb?sortDir:0;
     });
   }
+  invPage=0;
   renderInventario(rows);
 }
 
