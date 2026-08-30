@@ -1664,7 +1664,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <span class="sg-mc-tot">Desembolsado</span>
         <span class="sg-mn-tot" id="st-mes-uds-total">—</span>
         <span class="sg-mn-tot red" id="st-mes-val">—</span>
-        <span class="sg-mc" style="color:var(--orange,#f59e0b)">⏳ Falta pagar</span>
+        <span class="sg-mc" style="color:var(--orange,#f59e0b)" title="Saldo de todas las compras a crédito sin pagar, de cualquier mes">⏳ Deuda total</span>
         <span class="sg-mn" style="color:var(--orange,#f59e0b)" id="st-mes-cred-uds">—</span>
         <span class="sg-mn" style="color:var(--orange,#f59e0b)" id="st-mes-cred-val">—</span>
       </div>
@@ -2034,6 +2034,11 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
               <span style="font-family:'Archivo Black';color:var(--yellow);font-variant-numeric:tabular-nums" id="fc-pend-pedido-s">S/. 0.00</span>
               <span style="font-family:'Archivo Black';color:var(--yellow);font-variant-numeric:tabular-nums" id="fc-pend-pedido-u">$ 0.00</span>
             </span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;padding-top:5px;margin-top:2px;border-top:1px solid var(--border)"
+               title="Deuda total de compras a crédito, USD convertido a soles. Mismo número que 'Deuda total' en Inventario.">
+            <span style="color:var(--muted2);font-weight:700">⏳ Deuda total</span>
+            <span style="font-family:'Archivo Black';color:var(--orange);font-variant-numeric:tabular-nums" id="fc-pend-total">S/. 0.00</span>
           </div>
         </div>
       </div>
@@ -3736,13 +3741,13 @@ function updateStats(mes='',vendidosMes=[],vendidosDespues=[]){
   Object.keys(acum).forEach(k=>{acum[k][0]=vistos[k].size;});
   const montoMes=Object.values(acum).reduce((s,[,v])=>s+v,0);
   const udsMes=new Set(movsMes.map(f=>f.referencia_id).filter(Boolean)).size;
-  // Deuda viva: creditos comprados en el mes que siguen sin pagarse
-  const mesCred=inventarioCache.filter(p=>
-    p.fecha_compra&&p.fecha_compra.startsWith(mesCompras)&&p.pago_estado==='PENDIENTE');
-  const deudaMes=mesCred.reduce((s,p)=>
-    s+Math.max(0,parseFloat(p.precio_final||0)-parseFloat(p.total_costos||0)),0);
-  set('st-mes-cred-uds', mesCred.length||'—');
-  set('st-mes-cred-val', fmt(deudaMes));
+  // DEUDA TOTAL de creditos: es un saldo, no un movimiento del mes, asi que NO
+  // se filtra por mesCompras. Mismo criterio que los Pendientes del tab Flujo de
+  // Caja (precio_compra_soles de los PENDIENTE) para que ambos den igual.
+  const credTodos=inventarioCache.filter(p=>p.pago_estado==='PENDIENTE');
+  const deudaTotal=credTodos.reduce((s,p)=>s+parseFloat(p.precio_compra_soles||0),0);
+  set('st-mes-cred-uds', credTodos.length||'—');
+  set('st-mes-cred-val', fmt(deudaTotal));
   set('st-mes-zap-uds', acum.ZAP[0]);
   set('st-mes-zap-val', fmt(acum.ZAP[1]));
   set('st-mes-ropa-uds', acum.ROPA[0]);
@@ -5165,6 +5170,10 @@ async function loadFlujo() {
   document.getElementById('fc-pend-stock-u').textContent  = fmtUsd(pendStockUsd);
   document.getElementById('fc-pend-pedido-s').textContent = fmt(pendPedidoSoles);
   document.getElementById('fc-pend-pedido-u').textContent = fmtUsd(pendPedidoUsd);
+  // Deuda total en soles: precio_compra_soles ya trae el USD convertido a su TC,
+  // asi que suma las dos monedas. Mismo criterio que "Deuda total" en Inventario.
+  const pendTotalSoles = pendMes.reduce((s,p)=>s+parseFloat(p.precio_compra_soles||0),0);
+  document.getElementById('fc-pend-total').textContent = fmt(pendTotalSoles);
 
 
   // ── RENDER TABLA ──
