@@ -2195,6 +2195,8 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <span class="combo-arrow">▼</span>
       <div class="combo-list" id="cl-clf-tipo"></div>
     </div>
+    <button class="btn btn-ghost btn-sm" onclick="clLimpiarFiltros()">× Limpiar</button>
+    <div style="flex:1"></div>
     <button class="btn btn-primary btn-sm" onclick="abrirModalCliente()">+ Nuevo Cliente</button>
   </div>
 
@@ -3376,7 +3378,8 @@ async function loadInventario(){
   }
   invNavUpdate();
   // Paginado con .range(): PostgREST corta en max-rows (1000 por defecto) y un
-  // .limit() mayor NO lo supera — con 1057 productos se perdian 57 sin avisar.
+  // .limit() mayor NO lo supera, asi que pasado ese tope se perdian filas sin
+  // ningun aviso. Con .range() en bucle se traen todas, sea cual sea el total.
   const PAGE=1000;
   let data=[],from=0;
   for(;;){
@@ -3976,6 +3979,12 @@ function renderClientes(data){
       <td><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();abrirModalCliente(${c.id_cliente})" style="padding:4px 10px">✏</button></td>
     </tr>`;
   }).join('');
+}
+
+function clLimpiarFiltros(){
+  const s=document.getElementById('cl-search');   if(s)s.value='';
+  const t=document.getElementById('clf-tipo');    if(t)t.value='';
+  filterClientes();
 }
 
 function filterClientes(){
