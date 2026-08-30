@@ -1664,10 +1664,24 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <span class="sg-mc-tot">Desembolsado</span>
         <span class="sg-mn-tot" id="st-mes-uds-total">—</span>
         <span class="sg-mn-tot red" id="st-mes-val">—</span>
-        <span class="sg-mc" style="color:var(--orange,#f59e0b)" title="Saldo de todas las compras a crédito sin pagar, de cualquier mes">⏳ Deuda total</span>
-        <span class="sg-mn" style="color:var(--orange,#f59e0b)" id="st-mes-cred-uds">—</span>
-        <span class="sg-mn" style="color:var(--orange,#f59e0b)" id="st-mes-cred-val">—</span>
       </div>
+      <div class="sg-divider"></div>
+      <!-- POR PAGAR: saldo de creditos, no depende del mes -->
+      <div class="sc-grid g3" title="Saldo de todas las compras a crédito sin pagar, de cualquier mes">
+        <span class="sg-mc-tot" style="color:var(--orange,#f59e0b)">Por pagar</span>
+        <span class="sg-h">Uds.</span>
+        <span class="sg-h">Monto S/.</span>
+        <span class="sg-mc">📦 Stock</span>
+        <span class="sg-mn" id="st-deu-stock-uds">—</span>
+        <span class="sg-mn" style="color:var(--orange,#f59e0b)" id="st-deu-stock-val">—</span>
+        <span class="sg-mc">🚚 Pedido</span>
+        <span class="sg-mn" id="st-deu-pedido-uds">—</span>
+        <span class="sg-mn" style="color:var(--orange,#f59e0b)" id="st-deu-pedido-val">—</span>
+        <span class="sg-mc-tot">Total</span>
+        <span class="sg-mn-tot" id="st-deu-total-uds">—</span>
+        <span class="sg-mn-tot" style="color:var(--orange,#f59e0b)" id="st-deu-total-val">—</span>
+      </div>
+      <div style="font-size:10px;color:var(--muted2);margin-top:5px;text-align:right" id="st-deu-tc"></div>
     </div>
   </div>
 
@@ -2018,29 +2032,28 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <div class="sim-chip"><div class="sim-chip-dot" style="background:var(--orange)"></div>Compras del Mes</div>
       <div class="sim-num" style="color:var(--orange)" id="fc-compras-mes">—</div>
       <div class="sim-lbl">pagado en compras y costos</div>
-      <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)"
+           title="Saldo de todas las compras a crédito sin pagar, de cualquier mes">
         <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px">Por pagar</div>
-        <div style="display:flex;flex-direction:column;gap:4px">
-          <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px">
-            <span style="color:var(--muted2)">📦 Stock</span>
-            <span style="display:flex;gap:10px">
-              <span style="font-family:'Archivo Black';color:var(--yellow);font-variant-numeric:tabular-nums" id="fc-pend-stock-s">S/. 0.00</span>
-              <span style="font-family:'Archivo Black';color:var(--yellow);font-variant-numeric:tabular-nums" id="fc-pend-stock-u">$ 0.00</span>
-            </span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px">
-            <span style="color:var(--muted2)">🚚 Pedido</span>
-            <span style="display:flex;gap:10px">
-              <span style="font-family:'Archivo Black';color:var(--yellow);font-variant-numeric:tabular-nums" id="fc-pend-pedido-s">S/. 0.00</span>
-              <span style="font-family:'Archivo Black';color:var(--yellow);font-variant-numeric:tabular-nums" id="fc-pend-pedido-u">$ 0.00</span>
-            </span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;padding-top:5px;margin-top:2px;border-top:1px solid var(--border)"
-               title="Deuda total de compras a crédito, USD convertido a soles. Mismo número que 'Deuda total' en Inventario.">
-            <span style="color:var(--muted2);font-weight:700">⏳ Deuda total</span>
-            <span style="font-family:'Archivo Black';color:var(--orange);font-variant-numeric:tabular-nums" id="fc-pend-total">S/. 0.00</span>
-          </div>
+        <div style="display:grid;grid-template-columns:1fr auto auto auto;gap:4px 10px;align-items:center;font-size:11px;font-variant-numeric:tabular-nums">
+          <span></span>
+          <span style="font-size:9px;letter-spacing:.5px;color:var(--muted2);text-align:right">UDS</span>
+          <span style="font-size:9px;letter-spacing:.5px;color:var(--muted2);text-align:right">USD</span>
+          <span style="font-size:9px;letter-spacing:.5px;color:var(--muted2);text-align:right">SOLES</span>
+          <span style="color:var(--muted2)">📦 Stock</span>
+          <span style="text-align:right;color:var(--muted2)" id="fc-pend-stock-n">—</span>
+          <span style="text-align:right;color:var(--yellow)" id="fc-pend-stock-u">—</span>
+          <span style="font-family:'Archivo Black';text-align:right;color:var(--yellow)" id="fc-pend-stock-s">S/. 0.00</span>
+          <span style="color:var(--muted2)">🚚 Pedido</span>
+          <span style="text-align:right;color:var(--muted2)" id="fc-pend-pedido-n">—</span>
+          <span style="text-align:right;color:var(--yellow)" id="fc-pend-pedido-u">—</span>
+          <span style="font-family:'Archivo Black';text-align:right;color:var(--yellow)" id="fc-pend-pedido-s">S/. 0.00</span>
+          <span style="font-weight:700;color:var(--muted2);border-top:1px solid var(--border);padding-top:5px">Total</span>
+          <span style="text-align:right;color:var(--muted2);border-top:1px solid var(--border);padding-top:5px" id="fc-pend-total-n">—</span>
+          <span style="text-align:right;color:var(--orange);border-top:1px solid var(--border);padding-top:5px" id="fc-pend-total-u">—</span>
+          <span style="font-family:'Archivo Black';text-align:right;color:var(--orange);border-top:1px solid var(--border);padding-top:5px" id="fc-pend-total">S/. 0.00</span>
         </div>
+        <div style="font-size:10px;color:var(--muted2);margin-top:5px;text-align:right" id="fc-pend-tc"></div>
       </div>
     </div>
 
@@ -3382,6 +3395,8 @@ async function loadInventario(){
   // Movimientos de caja del mes que se esta viendo. Es la fuente correcta para
   // "Compras del Mes": el RPC pagar_credito escribe la fila con la FECHA DE PAGO,
   // asi un credito de marzo pagado en agosto es egreso de agosto.
+  // deudaCreditos() necesita las reservas para separar Stock de Pedido
+  if(!reservasCache.length){ try{ await loadReservas(); }catch(e){} }
   window._invFlujoMes=[];
   const mesFlujo=invHistorico?'':invMesActual;
   if(mesFlujo){
@@ -3741,13 +3756,17 @@ function updateStats(mes='',vendidosMes=[],vendidosDespues=[]){
   Object.keys(acum).forEach(k=>{acum[k][0]=vistos[k].size;});
   const montoMes=Object.values(acum).reduce((s,[,v])=>s+v,0);
   const udsMes=new Set(movsMes.map(f=>f.referencia_id).filter(Boolean)).size;
-  // DEUDA TOTAL de creditos: es un saldo, no un movimiento del mes, asi que NO
-  // se filtra por mesCompras. Mismo criterio que los Pendientes del tab Flujo de
-  // Caja (precio_compra_soles de los PENDIENTE) para que ambos den igual.
-  const credTodos=inventarioCache.filter(p=>p.pago_estado==='PENDIENTE');
-  const deudaTotal=credTodos.reduce((s,p)=>s+parseFloat(p.precio_compra_soles||0),0);
-  set('st-mes-cred-uds', credTodos.length||'—');
-  set('st-mes-cred-val', fmt(deudaTotal));
+  // POR PAGAR: saldo de creditos, no depende del mes. Lo calcula deudaCreditos()
+  // para que este tab y Flujo de Caja muestren exactamente lo mismo.
+  const deu=deudaCreditos();
+  set('st-deu-stock-uds',  deu.stock.n||'—');
+  set('st-deu-stock-val',  deu.stock.n?fmt(deu.stock.soles):'—');
+  set('st-deu-pedido-uds', deu.pedido.n||'—');
+  set('st-deu-pedido-val', deu.pedido.n?fmt(deu.pedido.soles):'—');
+  set('st-deu-total-uds',  deu.total.n||'—');
+  set('st-deu-total-val',  fmt(deu.total.soles));
+  const elTc=document.getElementById('st-deu-tc');
+  if(elTc) elTc.textContent=deu.total.usd>0?`$ ${deu.total.usd.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})} · TC ${deu.tcLabel}`:'';
   set('st-mes-zap-uds', acum.ZAP[0]);
   set('st-mes-zap-val', fmt(acum.ZAP[1]));
   set('st-mes-ropa-uds', acum.ROPA[0]);
@@ -3760,6 +3779,28 @@ function updateStats(mes='',vendidosMes=[],vendidosDespues=[]){
   set('st-mes-val', fmt(montoMes));
 }
 function set(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
+
+// Deuda de compras a credito: saldo vivo, sin filtro de mes. Separa Stock de
+// Pedido (producto ligado a una reserva tipo PEDIDO). precio_compra_soles ya
+// trae el USD convertido a su tipo de cambio, asi que la columna soles suma
+// ambas monedas y es lo que realmente hay que pagar.
+function deudaCreditos(){
+  const pend=(inventarioCache||[]).filter(p=>p.pago_estado==='PENDIENTE');
+  const pedidoSet=new Set(
+    (reservasCache||[]).filter(r=>r.tipo==='PEDIDO'&&r.codigo_producto).map(r=>r.codigo_producto)
+  );
+  const acum=L=>({
+    n:L.length,
+    usd:  L.reduce((s,p)=>s+(p.moneda==='USD'?parseFloat(p.precio_compra_usd||0):0),0),
+    soles:L.reduce((s,p)=>s+parseFloat(p.precio_compra_soles||0),0)
+  });
+  const stock =acum(pend.filter(p=>!pedidoSet.has(p.codigo_producto)));
+  const pedido=acum(pend.filter(p=> pedidoSet.has(p.codigo_producto)));
+  // Un solo TC -> "3.40"; varios -> "3.40 – 3.55"
+  const tcs=[...new Set(pend.filter(p=>p.moneda==='USD'&&p.tipo_cambio).map(p=>parseFloat(p.tipo_cambio)))].sort((a,b)=>a-b);
+  const tcLabel=!tcs.length?'':tcs.length===1?tcs[0].toFixed(2):`${tcs[0].toFixed(2)} – ${tcs[tcs.length-1].toFixed(2)}`;
+  return {stock,pedido,total:acum(pend),tcLabel};
+}
 
 let sortCol=null,sortDir=1;
 
@@ -5018,16 +5059,8 @@ async function loadFlujo() {
   // PENDIENTES — créditos sin pagar (todos los meses)
   const pendMes = inventarioCache.filter(p => p.pago_estado === 'PENDIENTE');
 
-  // Split stock vs pedido: un producto es "pedido" si está vinculado a una reserva tipo PEDIDO
-  const pedidoProdsSet = new Set(
-    (reservasCache||[]).filter(r=>r.tipo==='PEDIDO').map(r=>r.codigo_producto).filter(Boolean)
-  );
-  const pendStockProds  = pendMes.filter(p=>!pedidoProdsSet.has(p.codigo_producto));
-  const pendPedidoProds = pendMes.filter(p=> pedidoProdsSet.has(p.codigo_producto));
-  const pendStockSoles  = pendStockProds.filter(p=>(p.moneda||'SOLES')!=='USD').reduce((s,p)=>s+parseFloat(p.precio_compra_soles||0),0);
-  const pendStockUsd    = pendStockProds.filter(p=>p.moneda==='USD').reduce((s,p)=>s+parseFloat(p.precio_compra_usd||0),0);
-  const pendPedidoSoles = pendPedidoProds.filter(p=>(p.moneda||'SOLES')!=='USD').reduce((s,p)=>s+parseFloat(p.precio_compra_soles||0),0);
-  const pendPedidoUsd   = pendPedidoProds.filter(p=>p.moneda==='USD').reduce((s,p)=>s+parseFloat(p.precio_compra_usd||0),0);
+  // El split stock/pedido y los montos por moneda los calcula deudaCreditos(),
+  // compartida con el tab Inventario (ver mas abajo, bloque "POR PAGAR").
 
   // RESERVAS ACTIVAS — adelantos reales bloqueados (solo reservas que no se completaron ni cancelaron)
   const reservasMes = (reservasCache||[])
@@ -5166,14 +5199,19 @@ async function loadFlujo() {
 
   // Bubble compras
   document.getElementById('fc-compras-mes').textContent   = fmt(egrCompras + egrCostos);
-  document.getElementById('fc-pend-stock-s').textContent  = fmt(pendStockSoles);
-  document.getElementById('fc-pend-stock-u').textContent  = fmtUsd(pendStockUsd);
-  document.getElementById('fc-pend-pedido-s').textContent = fmt(pendPedidoSoles);
-  document.getElementById('fc-pend-pedido-u').textContent = fmtUsd(pendPedidoUsd);
-  // Deuda total en soles: precio_compra_soles ya trae el USD convertido a su TC,
-  // asi que suma las dos monedas. Mismo criterio que "Deuda total" en Inventario.
-  const pendTotalSoles = pendMes.reduce((s,p)=>s+parseFloat(p.precio_compra_soles||0),0);
-  document.getElementById('fc-pend-total').textContent = fmt(pendTotalSoles);
+  // POR PAGAR — misma funcion que usa el tab Inventario, para que no se separen
+  const deu = deudaCreditos();
+  const setTx = (id,v) => { const e=document.getElementById(id); if(e) e.textContent=v; };
+  setTx('fc-pend-stock-n',  deu.stock.n||'—');
+  setTx('fc-pend-stock-u',  deu.stock.usd>0?fmtUsd(deu.stock.usd):'—');
+  setTx('fc-pend-stock-s',  fmt(deu.stock.soles));
+  setTx('fc-pend-pedido-n', deu.pedido.n||'—');
+  setTx('fc-pend-pedido-u', deu.pedido.usd>0?fmtUsd(deu.pedido.usd):'—');
+  setTx('fc-pend-pedido-s', fmt(deu.pedido.soles));
+  setTx('fc-pend-total-n',  deu.total.n||'—');
+  setTx('fc-pend-total-u',  deu.total.usd>0?fmtUsd(deu.total.usd):'—');
+  setTx('fc-pend-total',    fmt(deu.total.soles));
+  setTx('fc-pend-tc',       deu.tcLabel?`TC ${deu.tcLabel}`:'');
 
 
   // ── RENDER TABLA ──
