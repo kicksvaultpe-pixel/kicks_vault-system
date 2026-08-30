@@ -2204,14 +2204,14 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   <div class="table-wrap">
     <table style="min-width:850px">
       <thead><tr>
-        <th>Código</th>
-        <th>Nombre</th>
-        <th>Teléfono</th>
-        <th>Instagram</th>
-        <th>Talla</th>
-        <th>Canal</th>
-        <th>Tipo</th>
-        <th class="right">Total Comprado</th>
+        <th onclick="clSort('codigo')"    style="cursor:pointer">Código <span id="clsort-codigo"></span></th>
+        <th onclick="clSort('nombre')"    style="cursor:pointer">Nombre <span id="clsort-nombre"></span></th>
+        <th onclick="clSort('telefono')"  style="cursor:pointer">Teléfono <span id="clsort-telefono"></span></th>
+        <th onclick="clSort('instagram')" style="cursor:pointer">Instagram <span id="clsort-instagram"></span></th>
+        <th onclick="clSort('talla')"     style="cursor:pointer">Talla <span id="clsort-talla"></span></th>
+        <th onclick="clSort('canal')"     style="cursor:pointer">Canal <span id="clsort-canal"></span></th>
+        <th onclick="clSort('tipo')"      style="cursor:pointer">Tipo <span id="clsort-tipo"></span></th>
+        <th class="right" onclick="clSort('monto')" style="cursor:pointer">Total Comprado <span id="clsort-monto"></span></th>
         <th></th>
       </tr></thead>
       <tbody id="cl-tbody">
@@ -3931,7 +3931,21 @@ let clPanelId=null;
 let vtProdSelected=null; // producto activo en form venta
 let rvProdSelected=null; // producto activo en form reserva
 
-function clCodigo(id){ return 'C-'+String(id).padStart(3,'0'); }
+// Devuelve el codigo_cliente guardado. Antes se derivaba del id_cliente, pero
+// ese id es una secuencia de Postgres que no se reinicia al borrar filas, asi
+// que la tabla mostraba C-017..C-036 con codigos reales C-001..C-020.
+function clCodigo(id){
+  const c=(clientesCache||[]).find(x=>x.id_cliente===id);
+  return c?.codigo_cliente||('C-'+String(id).padStart(3,'0'));
+}
+
+// Siguiente correlativo real, mirando los codigos existentes y no el id.
+function clSiguienteCodigo(){
+  const n=(clientesCache||[])
+    .map(c=>parseInt(String(c.codigo_cliente||'').replace(/\D/g,''),10))
+    .filter(x=>!isNaN(x));
+  return 'C-'+String((n.length?Math.max(...n):0)+1).padStart(3,'0');
+}
 
 function fillClienteCombos(){
   const sorted=[...clientesCache].sort((a,b)=>a.id_cliente-b.id_cliente);
@@ -3984,16 +3998,52 @@ function renderClientes(data){
 function clLimpiarFiltros(){
   const s=document.getElementById('cl-search');   if(s)s.value='';
   const t=document.getElementById('clf-tipo');    if(t)t.value='';
+  clSortCol=null; clSortDir=1;
+  document.querySelectorAll('[id^="clsort-"]').forEach(el=>el.textContent='');
+  filterClientes();
+}
+
+// ── Orden de la tabla de clientes ──
+let clSortCol=null, clSortDir=1;
+const CL_SORT={
+  codigo:   c=>clCodigo(c.id_cliente),
+  nombre:   c=>[c.nombre,c.apellido].filter(Boolean).join(' '),
+  telefono: c=>c.telefono||'',
+  instagram:c=>c.instagram||'',
+  talla:    c=>c.talla_frecuente||'',
+  canal:    c=>c.canal_preferido||'',
+  tipo:     c=>c.tipo||'',
+  monto:    c=>clMontoMap[c.id_cliente]||0,
+};
+
+function clSort(col){
+  if(clSortCol===col) clSortDir*=-1; else { clSortCol=col; clSortDir=1; }
+  document.querySelectorAll('[id^="clsort-"]').forEach(el=>el.textContent='');
+  const el=document.getElementById('clsort-'+col);
+  if(el) el.textContent=clSortDir===1?' ↑':' ↓';
   filterClientes();
 }
 
 function filterClientes(){
   const q=(document.getElementById('cl-search')?.value||'').toLowerCase();
   const tipo=noEmoji(document.getElementById('clf-tipo')?.value||'');
-  renderClientes(clientesCache.filter(c=>{
+  let rows=clientesCache.filter(c=>{
     const txt=[c.nombre,c.apellido,c.instagram,c.telefono,clCodigo(c.id_cliente)].filter(Boolean).join(' ').toLowerCase();
     return(!q||txt.includes(q))&&(!tipo||c.tipo===tipo);
-  }));
+  });
+  const get=CL_SORT[clSortCol];
+  if(get){
+    // los vacios siempre al final, sin importar la direccion
+    rows=[...rows].sort((a,b)=>{
+      const x=get(a), y=get(b);
+      if(typeof x==='number') return (x-y)*clSortDir;
+      if(!x&&!y) return 0;
+      if(!x) return 1;
+      if(!y) return -1;
+      return String(x).localeCompare(String(y),'es',{numeric:true})*clSortDir;
+    });
+  }
+  renderClientes(rows);
 }
 
 // ── Panel de perfil ──
@@ -4111,7 +4161,7 @@ async function guardarCliente(){
       if(error)throw error;
       toast('✓ Cliente actualizado','ok');
     }else{
-      const{error}=await db.from('clientes').insert(payload);
+      const{error}=await db.from('clientes').insert({...payload,codigo_cliente:clSiguienteCodigo()});
       if(error)throw error;
       toast('✓ Cliente creado','ok');
     }
@@ -4209,6 +4259,7 @@ async function guardarClRapido(){
   try{
     const{data,error}=await db.from('clientes').insert({
       nombre,
+      codigo_cliente:clSiguienteCodigo(),
       telefono:document.getElementById('clr-telefono').value.trim()||null,
       talla_frecuente:document.getElementById('clr-talla').value.trim()||null,
     }).select().single();
