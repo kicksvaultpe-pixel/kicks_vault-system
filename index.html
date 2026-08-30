@@ -3326,13 +3326,23 @@ async function loadInventario(){
     invMesActual=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0');
   }
   invNavUpdate();
-  const{data,error}=await db.from('inventario')
-    .select('*, costos(id,concepto,costo_soles,fecha), orden_compra')
-    .order('fecha_compra',{ascending:false})
-    .order('codigo_producto',{ascending:false})
-    .limit(2000);
-  if(error){toast('Error: '+error.message,'err');return;}
-  inventarioCache=(data||[]).map(p=>({
+  // Paginado con .range(): PostgREST corta en max-rows (1000 por defecto) y un
+  // .limit() mayor NO lo supera — con 1057 productos se perdian 57 sin avisar.
+  const PAGE=1000;
+  let data=[],from=0;
+  for(;;){
+    const{data:chunk,error}=await db.from('inventario')
+      .select('*, costos(id,concepto,costo_soles,fecha), orden_compra')
+      .order('fecha_compra',{ascending:false})
+      .order('codigo_producto',{ascending:false})
+      .range(from,from+PAGE-1);
+    if(error){toast('Error: '+error.message,'err');return;}
+    if(!chunk||!chunk.length) break;
+    data=data.concat(chunk);
+    if(chunk.length<PAGE) break;
+    from+=chunk.length;
+  }
+  inventarioCache=data.map(p=>({
     ...p,
     total_costos:(p.costos||[]).reduce((s,c)=>s+parseFloat(c.costo_soles||0),0)
   }));
@@ -3349,7 +3359,9 @@ async function loadInventario(){
   }
   window._invVendMesSet=new Set(vendidosMes.map(v=>v.codigo_producto).filter(Boolean));
   window._invVendDespSet=new Set(vendidosDespues.map(v=>v.codigo_producto).filter(Boolean));
-  renderInventario(invBaseRows());
+  // filterInventario() y no renderInventario(invBaseRows()): respeta los filtros
+  // y el orden activos tras editar/vender/reservar, y excluye CANCELADO igual.
+  filterInventario();
   updateStats(invHistorico?'':invMesActual,vendidosMes,vendidosDespues);
   fillProductoSelects();
   fillDataLists();
@@ -4884,25 +4896,30 @@ async function loadFlujo() {
     .lte('fecha', fechaFinStr);
   const ganancias = (ventasMes||[]).reduce((s,v) => s + parseFloat(v.ganancia||0), 0);
   const vendidosMesSet = new Set((ventasMes||[]).map(v=>v.codigo_producto).filter(Boolean));
+  // Vendidos DESPUES del mes: al cierre del mes todavia estaban en stock.
+  const {data:ventasPost} = await db.from('ventas').select('codigo_producto').gt('fecha', fechaFinStr);
+  const vendidosPostSet = new Set((ventasPost||[]).map(v=>v.codigo_producto).filter(Boolean));
 
-  // STOCK INICIO — productos DISPONIBLES + PAGADO al último día del mes anterior
-  const dPrevEnd = new Date(y, m-1, 0); // último día mes anterior
+  // Estaba en stock al cierre de `hasta`: comprado antes, no cancelado, y o bien
+  // sigue en stock hoy o se vendio despues de esa fecha. Mismo criterio que
+  // `atFin` en updateStats — pago_estado !== 'PENDIENTE' en ambos extremos.
+  const enStockAl = (p, hasta, vendidosDespues) =>
+    p.fecha_compra && p.fecha_compra <= hasta &&
+    p.estado !== 'CANCELADO' &&
+    p.pago_estado !== 'PENDIENTE' &&
+    (p.estado === 'DISPONIBLE' || p.estado === 'RESERVADO' ||
+     (p.estado === 'VENDIDO' && vendidosDespues.has(p.codigo_producto)));
+
+  // STOCK INICIO — al último día del mes anterior. Lo vendido durante el mes
+  // todavia estaba en stock al empezar, por eso entra vendidosMesSet.
+  const dPrevEnd = new Date(y, m-1, 0);
   const prevEndStr = dPrevEnd.toISOString().substring(0,10);
-  const stockInicioProds = inventarioCache.filter(p =>
-    p.pago_estado === 'PAGADO' &&
-    p.fecha_compra <= prevEndStr &&
-    (p.estado === 'DISPONIBLE' || p.estado === 'RESERVADO' || (p.estado === 'VENDIDO' && vendidosMesSet.has(p.codigo_producto)))
-  );
+  const vendidosDesdeInicio = new Set([...vendidosMesSet, ...vendidosPostSet]);
+  const stockInicioProds = inventarioCache.filter(p => enStockAl(p, prevEndStr, vendidosDesdeInicio));
   const stockInicio = stockInicioProds.reduce((s,p) => s + parseFloat(p.precio_final||0), 0);
 
-  // STOCK FIN — mismo criterio que tarjeta Valor Stock en Inventario:
-  // DISPONIBLE o RESERVADO, pago no pendiente, comprado hasta fin del mes
-  const stockFinProds = inventarioCache.filter(p =>
-    p.fecha_compra <= fechaFinStr &&
-    p.estado !== 'CANCELADO' &&
-    (p.estado === 'DISPONIBLE' || p.estado === 'RESERVADO') &&
-    p.pago_estado !== 'PENDIENTE'
-  );
+  // STOCK FIN — al último día del mes.
+  const stockFinProds = inventarioCache.filter(p => enStockAl(p, fechaFinStr, vendidosPostSet));
   const stockFin = stockFinProds.reduce((s,p) => s + parseFloat(p.precio_final||0), 0);
 
   // MOVIMIENTOS del mes desde flujo_caja
@@ -5597,6 +5614,11 @@ async function iepGuardar(){
     const activos=iepCostosOrig.filter(c=>!iepCostosEliminar.includes(c.id));
     const tc=[...activos,...iepCostosNuevos].reduce((s,c)=>s+parseFloat(c.costo_soles||0),0);
     const precioFinal=pc+tc;
+    // pago_estado debe seguir a tipo_pago: si pasa a CONTADO queda PAGADO;
+    // si pasa a CREDITO conserva el estado previo (o arranca PENDIENTE).
+    const tipoPago=document.getElementById('iep-pago').value||null;
+    const prevProd=inventarioCache.find(p=>p.codigo_producto===invEditCodigo);
+    const pagoEstado=tipoPago==='CREDITO'?(prevProd?.pago_estado||'PENDIENTE'):'PAGADO';
 
     const{error:e1}=await db.from('inventario').update({
       marca:document.getElementById('iep-marca').value.trim().toUpperCase()||null,
@@ -5605,7 +5627,8 @@ async function iepGuardar(){
       talla:document.getElementById('iep-talla').value.trim()||null,
       categoria:document.getElementById('iep-cat').value||null,
       estado:document.getElementById('iep-estado').value||null,
-      tipo_pago:document.getElementById('iep-pago').value||null,
+      tipo_pago:tipoPago,
+      pago_estado:pagoEstado,
       orden_compra:document.getElementById('iep-oc').value.trim()||null,
       factura:document.getElementById('iep-factura').value.trim()||null,
       precio_compra_soles:pc||null,
