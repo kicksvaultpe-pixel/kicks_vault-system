@@ -5376,6 +5376,9 @@ async function genCodigo(tipo){
 // ── UTILS ──
 function fechaHoy(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function fmt(n){return'S/. '+parseFloat(n||0).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2});}
+// Global y declarada con `function` (hoisted): habia un `const fmtUsd` local
+// dentro de renderFlujoTabla, asi que llamarlo desde fuera tiraba ReferenceError.
+function fmtUsd(v){return'$ '+parseFloat(v||0).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function setLoading(btn,on,label){btn.disabled=on;btn.innerHTML=on?'<div class="spinner"></div> Guardando...':(label||'');}
 let toastTimer;
 function toast(msg,type='ok'){
