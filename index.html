@@ -3720,14 +3720,7 @@ function updateStats(mes='',vendidosMes=[],vendidosDespues=[]){
   set('st-acc-vend', vendAcc);
   set('st-otr-vend', vendOtr||'—');
   set('st-vend', vendAll);
-  // ── VALOR STOCK ──
-  // Producto pagado  -> vale su precio_final (compra + costos).
-  // Producto a crédito aún no pagado -> el producto todavía se debe, así que
-  // solo suma lo que YA se desembolsó por él: los costos de importación.
-  const valStock = p => p.pago_estado==='PENDIENTE'
-    ? parseFloat(p.total_costos||0)
-    : parseFloat(p.precio_final||0);
-  const sumVal = L => L.reduce((s,p)=>s+valStock(p),0);
+  // ── VALOR STOCK ── (valStock/sumVal son globales: los usa tambien Flujo de Caja)
   const vDispZap  = sumVal(dispZap);
   const vRsvZap   = sumVal(rsvZap);
   const vDispRopa = sumVal(dispRopa);
@@ -3792,6 +3785,18 @@ function updateStats(mes='',vendidosMes=[],vendidosDespues=[]){
   set('st-mes-val', fmt(montoMes));
 }
 function set(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
+
+// Cuanto vale un producto en el stock. Si esta pagado vale su precio_final
+// (compra + costos); si sigue a credito el producto todavia se debe, asi que
+// solo cuenta lo YA desembolsado por el: los costos de importacion.
+// Global a proposito: la usan el tab Inventario y el de Flujo de Caja, que
+// antes valorizaban el mismo stock con criterios distintos.
+function valStock(p){
+  return p.pago_estado==='PENDIENTE'
+    ? parseFloat(p.total_costos||0)
+    : parseFloat(p.precio_final||0);
+}
+function sumVal(L){ return (L||[]).reduce((s,p)=>s+valStock(p),0); }
 
 // Deuda de compras a credito: saldo vivo, sin filtro de mes. Separa Stock de
 // Pedido (producto ligado a una reserva tipo PEDIDO). precio_compra_soles ya
@@ -5105,10 +5110,12 @@ async function loadFlujo() {
   // Estaba en stock al cierre de `hasta`: comprado antes, no cancelado, y o bien
   // sigue en stock hoy o se vendio despues de esa fecha. Mismo criterio que
   // `atFin` en updateStats — pago_estado !== 'PENDIENTE' en ambos extremos.
+  // No se excluye al credito pendiente: valStock() ya lo valoriza en lo que se
+  // desembolso (su importacion). Excluirlo entero hacia que este tab y el de
+  // Inventario mostraran distinto valor para el mismo stock.
   const enStockAl = (p, hasta, vendidosDespues) =>
     p.fecha_compra && p.fecha_compra <= hasta &&
     p.estado !== 'CANCELADO' &&
-    p.pago_estado !== 'PENDIENTE' &&
     (p.estado === 'DISPONIBLE' || p.estado === 'RESERVADO' ||
      (p.estado === 'VENDIDO' && vendidosDespues.has(p.codigo_producto)));
 
@@ -5118,11 +5125,11 @@ async function loadFlujo() {
   const prevEndStr = dPrevEnd.toISOString().substring(0,10);
   const vendidosDesdeInicio = new Set([...vendidosMesSet, ...vendidosPostSet]);
   const stockInicioProds = inventarioCache.filter(p => enStockAl(p, prevEndStr, vendidosDesdeInicio));
-  const stockInicio = stockInicioProds.reduce((s,p) => s + parseFloat(p.precio_final||0), 0);
+  const stockInicio = sumVal(stockInicioProds);
 
   // STOCK FIN — al último día del mes.
   const stockFinProds = inventarioCache.filter(p => enStockAl(p, fechaFinStr, vendidosPostSet));
-  const stockFin = stockFinProds.reduce((s,p) => s + parseFloat(p.precio_final||0), 0);
+  const stockFin = sumVal(stockFinProds);
 
   // MOVIMIENTOS del mes desde flujo_caja
   const sumIng = arr => arr.reduce((s,f)=>s+parseFloat(f.ingreso_soles||0),0);
