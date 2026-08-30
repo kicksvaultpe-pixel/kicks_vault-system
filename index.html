@@ -1661,9 +1661,12 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       </div>
       <div class="sg-divider"></div>
       <div class="sc-grid g3">
-        <span class="sg-mc-tot">Total</span>
+        <span class="sg-mc-tot">Desembolsado</span>
         <span class="sg-mn-tot" id="st-mes-uds-total">—</span>
         <span class="sg-mn-tot red" id="st-mes-val">—</span>
+        <span class="sg-mc" style="color:var(--orange,#f59e0b)">⏳ Falta pagar</span>
+        <span class="sg-mn" style="color:var(--orange,#f59e0b)" id="st-mes-cred-uds">—</span>
+        <span class="sg-mn" style="color:var(--orange,#f59e0b)" id="st-mes-cred-val">—</span>
       </div>
     </div>
   </div>
@@ -3698,21 +3701,27 @@ function updateStats(mes='',vendidosMes=[],vendidosDespues=[]){
   set('st-disp-val',     fmt(vDispAll));
   set('st-rsv-val',      fmt(vRsvAll));
   // Compras del mes (usa mesCompras: mes seleccionado o mes actual en historia)
+  // Compras del mes = lo DESEMBOLSADO. Se toman todas las compras del mes y se
+  // valorizan con valStock(): las pagadas por su precio_final, las que siguen a
+  // credito solo por la importacion ya desembolsada. Asi cuadra con el Excel.
   const mesPagados=inventarioCache.filter(p=>
-    p.fecha_compra&&p.fecha_compra.startsWith(mesCompras)&&
-    (p.tipo_pago==='CONTADO'||(p.tipo_pago==='CREDITO'&&p.pago_estado==='PAGADO'))
+    p.fecha_compra&&p.fecha_compra.startsWith(mesCompras)&&p.estado!=='CANCELADO'
   );
   const mesZap=mesPagados.filter(esZap);
   const mesRopa=mesPagados.filter(esRopa);
   const mesAcc=mesPagados.filter(esAcc);
   const mesOtr=mesPagados.filter(esOtr);
-  // precio_final ya incluye los costos -> se usa directamente, sin volver a sumar total_costos
-  const sumPF=L=>L.reduce((s,p)=>s+parseFloat(p.precio_final||0),0);
-  const montoZap=sumPF(mesZap);
-  const montoRopa=sumPF(mesRopa);
-  const montoAcc=sumPF(mesAcc);
-  const montoOtr=sumPF(mesOtr);
-  const montoMes=sumPF(mesPagados);
+  const montoZap=sumVal(mesZap);
+  const montoRopa=sumVal(mesRopa);
+  const montoAcc=sumVal(mesAcc);
+  const montoOtr=sumVal(mesOtr);
+  const montoMes=sumVal(mesPagados);
+  // Deuda del mes: lo que aun falta pagar de las compras a credito
+  const mesCred=mesPagados.filter(p=>p.pago_estado==='PENDIENTE');
+  const deudaMes=mesCred.reduce((s,p)=>
+    s+Math.max(0,parseFloat(p.precio_final||0)-parseFloat(p.total_costos||0)),0);
+  set('st-mes-cred-uds', mesCred.length||'—');
+  set('st-mes-cred-val', fmt(deudaMes));
   set('st-mes-zap-uds', mesZap.length);
   set('st-mes-zap-val', fmt(montoZap));
   set('st-mes-ropa-uds', mesRopa.length);
