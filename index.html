@@ -5069,14 +5069,13 @@ async function loadFlujo() {
   const sumEgr = arr => arr.reduce((s,f)=>s+parseFloat(f.egreso_soles||0),0);
   const cat = f => (f.categoria||f.tipo||'').toUpperCase();
   const ingVentas   = sumIng(flujoCache.filter(f=>cat(f)==='VENTA'));
-  // Compras y costos: misma fuente que tarjeta Inventario (inventarioCache)
-  // Excluye créditos aún pendientes (solo CONTADO o CREDITO ya pagado)
-  const compMesInv = inventarioCache.filter(p =>
-    p.fecha_compra >= fechaInicio && p.fecha_compra <= fechaFinStr &&
-    (p.tipo_pago === 'CONTADO' || (p.tipo_pago === 'CREDITO' && p.pago_estado === 'PAGADO'))
-  );
-  const egrCompras = compMesInv.reduce((s,p) => s + parseFloat(p.precio_compra_soles||0), 0);
-  const egrCostos  = compMesInv.reduce((s,p) => s + parseFloat(p.total_costos||0), 0);
+  // Compras y costos: se leen de flujo_caja, que ya trae solo el mes y guarda la
+  // fecha en que salio la plata (el RPC pagar_credito escribe la fila con la
+  // fecha del pago). Antes se recalculaba desde inventarioCache por fecha_compra,
+  // asi que un credito de marzo pagado en agosto se imputaba a marzo y el mes
+  // cerrado se movia al pagarlo. Misma fuente que "Compras del Mes" en Inventario.
+  const egrCompras = sumEgr(flujoCache.filter(f=>cat(f)==='COMPRA'));
+  const egrCostos  = sumEgr(flujoCache.filter(f=>cat(f)==='COSTO'));
   const egrGastos   = sumEgr(flujoCache.filter(f=>['OPERATIVO','MARKETING','PERSONAL','IMPORTACION','PAGO','INTERES'].includes(cat(f))));
   const egrInversion= sumEgr(flujoCache.filter(f=>cat(f)==='INVERSION'));
 
