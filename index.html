@@ -3374,6 +3374,20 @@ async function loadInventario(){
   }
   window._invVendMesSet=new Set(vendidosMes.map(v=>v.codigo_producto).filter(Boolean));
   window._invVendDespSet=new Set(vendidosDespues.map(v=>v.codigo_producto).filter(Boolean));
+  // Movimientos de caja del mes que se esta viendo. Es la fuente correcta para
+  // "Compras del Mes": el RPC pagar_credito escribe la fila con la FECHA DE PAGO,
+  // asi un credito de marzo pagado en agosto es egreso de agosto.
+  window._invFlujoMes=[];
+  const mesFlujo=invHistorico?'':invMesActual;
+  if(mesFlujo){
+    const[fy,fm]=mesFlujo.split('-');
+    const fIni=`${fy}-${fm}-01`;
+    const fFin=new Date(parseInt(fy),parseInt(fm),0).toISOString().substring(0,10);
+    const{data:fm2}=await db.from('flujo_caja')
+      .select('fecha,tipo,categoria,referencia_id,egreso_soles')
+      .gte('fecha',fIni).lte('fecha',fFin);
+    window._invFlujoMes=fm2||[];
+  }
   // filterInventario() y no renderInventario(invBaseRows()): respeta los filtros
   // y el orden activos tras editar/vender/reservar, y excluye CANCELADO igual.
   filterInventario();
@@ -3700,37 +3714,44 @@ function updateStats(mes='',vendidosMes=[],vendidosDespues=[]){
   set('st-total-val',    fmt(vDispAll  + vRsvAll));
   set('st-disp-val',     fmt(vDispAll));
   set('st-rsv-val',      fmt(vRsvAll));
-  // Compras del mes (usa mesCompras: mes seleccionado o mes actual en historia)
-  // Compras del mes = lo DESEMBOLSADO. Se toman todas las compras del mes y se
-  // valorizan con valStock(): las pagadas por su precio_final, las que siguen a
-  // credito solo por la importacion ya desembolsada. Asi cuadra con el Excel.
-  const mesPagados=inventarioCache.filter(p=>
-    p.fecha_compra&&p.fecha_compra.startsWith(mesCompras)&&p.estado!=='CANCELADO'
-  );
-  const mesZap=mesPagados.filter(esZap);
-  const mesRopa=mesPagados.filter(esRopa);
-  const mesAcc=mesPagados.filter(esAcc);
-  const mesOtr=mesPagados.filter(esOtr);
-  const montoZap=sumVal(mesZap);
-  const montoRopa=sumVal(mesRopa);
-  const montoAcc=sumVal(mesAcc);
-  const montoOtr=sumVal(mesOtr);
-  const montoMes=sumVal(mesPagados);
-  // Deuda del mes: lo que aun falta pagar de las compras a credito
-  const mesCred=mesPagados.filter(p=>p.pago_estado==='PENDIENTE');
+  // ── COMPRAS DEL MES = EGRESO DE CAJA HACIA INVENTARIO ──
+  // Fuente: flujo_caja, no inventarioCache. Cada movimiento lleva la fecha en que
+  // salio la plata: el RPC pagar_credito escribe la fila con la fecha del pago, de
+  // modo que un credito de marzo pagado en agosto es egreso de AGOSTO y marzo no
+  // se mueve. Solo COMPRA y COSTO son inventario; PAGO son gastos operativos
+  // (sueldos, alquiler, SUNAT) y no entran aca.
+  const invPorCod=new Map(inventarioCache.map(p=>[p.codigo_producto,p]));
+  const movsMes=(window._invFlujoMes||[]).filter(f=>{
+    const t=(f.tipo||f.categoria||'').toUpperCase();
+    return (t==='COMPRA'||t==='COSTO')&&parseFloat(f.egreso_soles||0)>0;
+  });
+  const acum={ZAP:[0,0],ROPA:[0,0],ACC:[0,0],OTR:[0,0]};
+  const vistos={ZAP:new Set(),ROPA:new Set(),ACC:new Set(),OTR:new Set()};
+  movsMes.forEach(f=>{
+    const p=invPorCod.get(f.referencia_id);
+    const k=!p?'OTR':esZap(p)?'ZAP':esRopa(p)?'ROPA':esAcc(p)?'ACC':'OTR';
+    acum[k][1]+=parseFloat(f.egreso_soles||0);
+    if(f.referencia_id) vistos[k].add(f.referencia_id);   // uds = productos distintos
+  });
+  Object.keys(acum).forEach(k=>{acum[k][0]=vistos[k].size;});
+  const montoMes=Object.values(acum).reduce((s,[,v])=>s+v,0);
+  const udsMes=new Set(movsMes.map(f=>f.referencia_id).filter(Boolean)).size;
+  // Deuda viva: creditos comprados en el mes que siguen sin pagarse
+  const mesCred=inventarioCache.filter(p=>
+    p.fecha_compra&&p.fecha_compra.startsWith(mesCompras)&&p.pago_estado==='PENDIENTE');
   const deudaMes=mesCred.reduce((s,p)=>
     s+Math.max(0,parseFloat(p.precio_final||0)-parseFloat(p.total_costos||0)),0);
   set('st-mes-cred-uds', mesCred.length||'—');
   set('st-mes-cred-val', fmt(deudaMes));
-  set('st-mes-zap-uds', mesZap.length);
-  set('st-mes-zap-val', fmt(montoZap));
-  set('st-mes-ropa-uds', mesRopa.length);
-  set('st-mes-ropa-val', fmt(montoRopa));
-  set('st-mes-acc-uds', mesAcc.length);
-  set('st-mes-acc-val', fmt(montoAcc));
-  set('st-mes-otr-uds', mesOtr.length||'—');
-  set('st-mes-otr-val', fmt(montoOtr));
-  set('st-mes-uds-total', mesPagados.length);
+  set('st-mes-zap-uds', acum.ZAP[0]);
+  set('st-mes-zap-val', fmt(acum.ZAP[1]));
+  set('st-mes-ropa-uds', acum.ROPA[0]);
+  set('st-mes-ropa-val', fmt(acum.ROPA[1]));
+  set('st-mes-acc-uds', acum.ACC[0]);
+  set('st-mes-acc-val', fmt(acum.ACC[1]));
+  set('st-mes-otr-uds', acum.OTR[0]||'—');
+  set('st-mes-otr-val', fmt(acum.OTR[1]));
+  set('st-mes-uds-total', udsMes);
   set('st-mes-val', fmt(montoMes));
 }
 function set(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
