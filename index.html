@@ -1571,11 +1571,16 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <span class="sg-mn green" id="st-zap-disp">—</span>
         <span class="sg-mn" style="color:var(--purple)" id="st-zap-rsv">—</span>
         <span class="sg-mn" id="st-zap-vend">—</span>
-        <span class="sg-mc">👕 Ropa &amp; Otros</span>
+        <span class="sg-mc">👕 Ropa</span>
         <span class="sg-mn" id="st-ropa-total">—</span>
         <span class="sg-mn green" id="st-ropa-disp">—</span>
         <span class="sg-mn" style="color:var(--purple)" id="st-ropa-rsv">—</span>
         <span class="sg-mn" id="st-ropa-vend">—</span>
+        <span class="sg-mc">💎 Accesorios</span>
+        <span class="sg-mn" id="st-acc-total">—</span>
+        <span class="sg-mn green" id="st-acc-disp">—</span>
+        <span class="sg-mn" style="color:var(--purple)" id="st-acc-rsv">—</span>
+        <span class="sg-mn" id="st-acc-vend">—</span>
       </div>
       <div class="sg-divider"></div>
       <div class="sc-grid g5">
@@ -1615,10 +1620,14 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <span class="sg-mn accent" id="st-zap-val">—</span>
         <span class="sg-mn" style="color:var(--green)" id="st-zap-disp-val">—</span>
         <span class="sg-mn" style="color:var(--purple)" id="st-zap-rsv-val">—</span>
-        <span class="sg-mc">👕 Ropa &amp; Otros</span>
+        <span class="sg-mc">👕 Ropa</span>
         <span class="sg-mn accent" id="st-ropa-val">—</span>
         <span class="sg-mn" style="color:var(--green)" id="st-ropa-disp-val">—</span>
         <span class="sg-mn" style="color:var(--purple)" id="st-ropa-rsv-val">—</span>
+        <span class="sg-mc">💎 Accesorios</span>
+        <span class="sg-mn accent" id="st-acc-val">—</span>
+        <span class="sg-mn" style="color:var(--green)" id="st-acc-disp-val">—</span>
+        <span class="sg-mn" style="color:var(--purple)" id="st-acc-rsv-val">—</span>
       </div>
     </div>
     <!-- COMPRAS DEL MES -->
@@ -1631,9 +1640,12 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <span class="sg-mc">👟 Zapatillas</span>
         <span class="sg-mn" id="st-mes-zap-uds">—</span>
         <span class="sg-mn accent" id="st-mes-zap-val">—</span>
-        <span class="sg-mc">👕 Ropa &amp; Otros</span>
+        <span class="sg-mc">👕 Ropa</span>
         <span class="sg-mn" id="st-mes-ropa-uds">—</span>
         <span class="sg-mn accent" id="st-mes-ropa-val">—</span>
+        <span class="sg-mc">💎 Accesorios</span>
+        <span class="sg-mn" id="st-mes-acc-uds">—</span>
+        <span class="sg-mn accent" id="st-mes-acc-val">—</span>
       </div>
       <div class="sg-divider"></div>
       <div class="sc-grid g3">
@@ -3545,20 +3557,28 @@ function updateStats(mes='',vendidosMes=[],vendidosDespues=[]){
   const vendMesSet=new Set(vendidosMes.map(v=>v.codigo_producto).filter(Boolean));
   const vendDespSet=new Set(vendidosDespues.map(v=>v.codigo_producto).filter(Boolean));
 
-  let allZap,allRopa,dispZap,dispRopa,dispAll,rsvZap,rsvRopa,rsvAll,vendZap,vendRopa,vendAll;
+  let allZap,allRopa,allAcc,dispZap,dispRopa,dispAcc,dispAll,rsvZap,rsvRopa,rsvAcc,rsvAll,vendZap,vendRopa,vendAcc,vendAll;
+  // Categorias: ZAPATILLAS | ROPA | resto (ACCESORIOS y cualquier otra) -> acc
+  const esZap =p=>p.categoria==='ZAPATILLAS';
+  const esRopa=p=>p.categoria==='ROPA';
+  const esAcc =p=>p.categoria!=='ZAPATILLAS'&&p.categoria!=='ROPA';
 
   if(!mes){
     // ── HISTORIA: estado actual ──
-    allZap=inventarioCache.filter(p=>p.categoria==='ZAPATILLAS'&&p.estado!=='CANCELADO');
-    allRopa=inventarioCache.filter(p=>p.categoria!=='ZAPATILLAS'&&p.estado!=='CANCELADO');
+    allZap=inventarioCache.filter(p=>esZap(p)&&p.estado!=='CANCELADO');
+    allRopa=inventarioCache.filter(p=>esRopa(p)&&p.estado!=='CANCELADO');
+    allAcc=inventarioCache.filter(p=>esAcc(p)&&p.estado!=='CANCELADO');
     dispZap=allZap.filter(p=>p.estado==='DISPONIBLE'&&p.pago_estado!=='PENDIENTE');
     dispRopa=allRopa.filter(p=>p.estado==='DISPONIBLE'&&p.pago_estado!=='PENDIENTE');
+    dispAcc=allAcc.filter(p=>p.estado==='DISPONIBLE'&&p.pago_estado!=='PENDIENTE');
     dispAll=inventarioCache.filter(p=>p.estado==='DISPONIBLE'&&p.pago_estado!=='PENDIENTE');
     rsvZap=allZap.filter(p=>p.estado==='RESERVADO'&&p.pago_estado!=='PENDIENTE');
     rsvRopa=allRopa.filter(p=>p.estado==='RESERVADO'&&p.pago_estado!=='PENDIENTE');
+    rsvAcc=allAcc.filter(p=>p.estado==='RESERVADO'&&p.pago_estado!=='PENDIENTE');
     rsvAll=inventarioCache.filter(p=>p.estado==='RESERVADO'&&p.pago_estado!=='PENDIENTE');
     vendZap=allZap.filter(p=>p.estado==='VENDIDO').length;
     vendRopa=allRopa.filter(p=>p.estado==='VENDIDO').length;
+    vendAcc=allAcc.filter(p=>p.estado==='VENDIDO').length;
     vendAll=inventarioCache.filter(p=>p.estado==='VENDIDO').length;
   } else {
     // ── MENSUAL: estado al fin del mes ──
@@ -3568,49 +3588,63 @@ function updateStats(mes='',vendidosMes=[],vendidosDespues=[]){
     // y no vendido durante o antes del mes (= DISPONIBLE ahora  O  vendido después del mes)
     const atFin=p=>p.fecha_compra&&p.fecha_compra<=fechaFin&&p.estado!=='CANCELADO'&&
       (p.estado==='DISPONIBLE'||p.estado==='RESERVADO'||vendDespSet.has(p.codigo_producto));
-    allZap=inventarioCache.filter(p=>atFin(p)&&p.categoria==='ZAPATILLAS');
-    allRopa=inventarioCache.filter(p=>atFin(p)&&p.categoria!=='ZAPATILLAS');
+    allZap=inventarioCache.filter(p=>atFin(p)&&esZap(p));
+    allRopa=inventarioCache.filter(p=>atFin(p)&&esRopa(p));
+    allAcc=inventarioCache.filter(p=>atFin(p)&&esAcc(p));
     dispZap=allZap.filter(p=>p.estado==='DISPONIBLE'&&p.pago_estado!=='PENDIENTE');
     dispRopa=allRopa.filter(p=>p.estado==='DISPONIBLE'&&p.pago_estado!=='PENDIENTE');
+    dispAcc=allAcc.filter(p=>p.estado==='DISPONIBLE'&&p.pago_estado!=='PENDIENTE');
     dispAll=inventarioCache.filter(p=>atFin(p)&&p.estado==='DISPONIBLE'&&p.pago_estado!=='PENDIENTE');
     rsvZap=allZap.filter(p=>p.estado==='RESERVADO'&&p.pago_estado!=='PENDIENTE');
     rsvRopa=allRopa.filter(p=>p.estado==='RESERVADO'&&p.pago_estado!=='PENDIENTE');
+    rsvAcc=allAcc.filter(p=>p.estado==='RESERVADO'&&p.pago_estado!=='PENDIENTE');
     rsvAll=inventarioCache.filter(p=>atFin(p)&&p.estado==='RESERVADO'&&p.pago_estado!=='PENDIENTE');
     // Vendidos = vendidos DURANTE ese mes
-    vendZap=inventarioCache.filter(p=>p.categoria==='ZAPATILLAS'&&vendMesSet.has(p.codigo_producto)).length;
-    vendRopa=inventarioCache.filter(p=>p.categoria!=='ZAPATILLAS'&&vendMesSet.has(p.codigo_producto)).length;
+    vendZap=inventarioCache.filter(p=>esZap(p)&&vendMesSet.has(p.codigo_producto)).length;
+    vendRopa=inventarioCache.filter(p=>esRopa(p)&&vendMesSet.has(p.codigo_producto)).length;
+    vendAcc=inventarioCache.filter(p=>esAcc(p)&&vendMesSet.has(p.codigo_producto)).length;
     vendAll=vendMesSet.size;
   }
 
   // Total
   set('st-zap-total', allZap.length);
   set('st-ropa-total', allRopa.length);
-  set('st-total', allZap.length+allRopa.length);
+  set('st-acc-total', allAcc.length);
+  set('st-total', allZap.length+allRopa.length+allAcc.length);
   // Disponibles
   set('st-zap-disp', dispZap.length);
   set('st-ropa-disp', dispRopa.length);
+  set('st-acc-disp', dispAcc.length);
   set('st-disp', dispAll.length);
   // Reservados
   set('st-zap-rsv', rsvZap.length||'—');
   set('st-ropa-rsv', rsvRopa.length||'—');
+  set('st-acc-rsv', rsvAcc.length||'—');
   set('st-rsv', rsvAll.length||'—');
   // Vendidos
   set('st-zap-vend', vendZap);
   set('st-ropa-vend', vendRopa);
+  set('st-acc-vend', vendAcc);
   set('st-vend', vendAll);
   // Valor stock — solo efectivo (excluye crédito pendiente)
-  const vDispZap  = dispZap.reduce((s,p)=>s+parseFloat(p.precio_final||0),0);
-  const vRsvZap   = rsvZap.reduce((s,p)=>s+parseFloat(p.precio_final||0),0);
-  const vDispRopa = dispRopa.reduce((s,p)=>s+parseFloat(p.precio_final||0),0);
-  const vRsvRopa  = rsvRopa.reduce((s,p)=>s+parseFloat(p.precio_final||0),0);
-  const vDispAll  = dispAll.reduce((s,p)=>s+parseFloat(p.precio_final||0),0);
-  const vRsvAll   = rsvAll.reduce((s,p)=>s+parseFloat(p.precio_final||0),0);
+  const sumPF = L => L.reduce((s,p)=>s+parseFloat(p.precio_final||0),0);
+  const vDispZap  = sumPF(dispZap);
+  const vRsvZap   = sumPF(rsvZap);
+  const vDispRopa = sumPF(dispRopa);
+  const vRsvRopa  = sumPF(rsvRopa);
+  const vDispAcc  = sumPF(dispAcc);
+  const vRsvAcc   = sumPF(rsvAcc);
+  const vDispAll  = sumPF(dispAll);
+  const vRsvAll   = sumPF(rsvAll);
   set('st-zap-val',      fmt(vDispZap  + vRsvZap));
   set('st-zap-disp-val', fmt(vDispZap));
   set('st-zap-rsv-val',  fmt(vRsvZap));
   set('st-ropa-val',     fmt(vDispRopa + vRsvRopa));
   set('st-ropa-disp-val',fmt(vDispRopa));
   set('st-ropa-rsv-val', fmt(vRsvRopa));
+  set('st-acc-val',      fmt(vDispAcc  + vRsvAcc));
+  set('st-acc-disp-val', fmt(vDispAcc));
+  set('st-acc-rsv-val',  fmt(vRsvAcc));
   set('st-total-val',    fmt(vDispAll  + vRsvAll));
   set('st-disp-val',     fmt(vDispAll));
   set('st-rsv-val',      fmt(vRsvAll));
@@ -3619,18 +3653,20 @@ function updateStats(mes='',vendidosMes=[],vendidosDespues=[]){
     p.fecha_compra&&p.fecha_compra.startsWith(mesCompras)&&
     (p.tipo_pago==='CONTADO'||(p.tipo_pago==='CREDITO'&&p.pago_estado==='PAGADO'))
   );
-  const mesZap=mesPagados.filter(p=>p.categoria==='ZAPATILLAS');
-  const mesRopa=mesPagados.filter(p=>p.categoria!=='ZAPATILLAS');
-  const costosMesZap=mesZap.reduce((s,p)=>s+parseFloat(p.total_costos||0),0);
-  const costosMesRopa=mesRopa.reduce((s,p)=>s+parseFloat(p.total_costos||0),0);
-  const costosMes=costosMesZap+costosMesRopa;
-  const montoMes=mesPagados.reduce((s,p)=>s+parseFloat(p.precio_compra_soles||0),0)+costosMes;
-  const montoZap=mesZap.reduce((s,p)=>s+parseFloat(p.precio_compra_soles||0),0)+costosMesZap;
-  const montoRopa=mesRopa.reduce((s,p)=>s+parseFloat(p.precio_compra_soles||0),0)+costosMesRopa;
+  const mesZap=mesPagados.filter(esZap);
+  const mesRopa=mesPagados.filter(esRopa);
+  const mesAcc=mesPagados.filter(esAcc);
+  // precio_final ya incluye los costos -> se usa directamente, sin volver a sumar total_costos
+  const montoZap=sumPF(mesZap);
+  const montoRopa=sumPF(mesRopa);
+  const montoAcc=sumPF(mesAcc);
+  const montoMes=sumPF(mesPagados);
   set('st-mes-zap-uds', mesZap.length);
   set('st-mes-zap-val', fmt(montoZap));
   set('st-mes-ropa-uds', mesRopa.length);
   set('st-mes-ropa-val', fmt(montoRopa));
+  set('st-mes-acc-uds', mesAcc.length);
+  set('st-mes-acc-val', fmt(montoAcc));
   set('st-mes-uds-total', mesPagados.length);
   set('st-mes-val', fmt(montoMes));
 }
