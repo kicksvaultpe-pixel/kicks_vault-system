@@ -199,6 +199,15 @@ tbody tr.row-dim{opacity:.45}
 .sc-valor.stat-card:hover::before{opacity:.55;background:linear-gradient(90deg,transparent,var(--green),transparent)}
 .sc-compras.stat-card::before{opacity:.3;background:linear-gradient(90deg,transparent,var(--purple),transparent)}
 .sc-compras.stat-card:hover::before{opacity:.55;background:linear-gradient(90deg,transparent,var(--purple),transparent)}
+/* Tabla "Por pagar" — identica en Inventario y Flujo de Caja */
+.deu-grid{display:grid;grid-template-columns:1fr auto auto auto;gap:4px 10px;align-items:center;font-size:11px;font-variant-numeric:tabular-nums}
+.deu-h{font-size:9px;letter-spacing:.5px;color:var(--muted2);text-align:right}
+.deu-lbl{font-size:12px;color:var(--muted);font-family:'Archivo',sans-serif}
+.deu-n{text-align:right;color:var(--muted2)}
+.deu-u{text-align:right;color:var(--yellow)}
+.deu-s{text-align:right;color:var(--yellow);font-family:'Archivo Black'}
+.deu-tot{border-top:1px solid var(--border);padding-top:5px;font-weight:700}
+.deu-acc{color:var(--orange,#f59e0b)}
 .sc-grid{display:grid;align-items:center;row-gap:6px}
 .sc-grid.g2{grid-template-columns:1fr auto;column-gap:16px}
 .sc-grid.g3{grid-template-columns:1fr auto auto;column-gap:14px}
@@ -1666,22 +1675,29 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <span class="sg-mn-tot red" id="st-mes-val">—</span>
       </div>
       <div class="sg-divider"></div>
-      <!-- POR PAGAR: saldo de creditos, no depende del mes -->
-      <div class="sc-grid g3" title="Saldo de todas las compras a crédito sin pagar, de cualquier mes">
-        <span class="sg-mc-tot" style="color:var(--orange,#f59e0b)">Por pagar</span>
-        <span class="sg-h">Uds.</span>
-        <span class="sg-h">Monto S/.</span>
-        <span class="sg-mc">📦 Stock</span>
-        <span class="sg-mn" id="st-deu-stock-uds">—</span>
-        <span class="sg-mn" style="color:var(--orange,#f59e0b)" id="st-deu-stock-val">—</span>
-        <span class="sg-mc">🚚 Pedido</span>
-        <span class="sg-mn" id="st-deu-pedido-uds">—</span>
-        <span class="sg-mn" style="color:var(--orange,#f59e0b)" id="st-deu-pedido-val">—</span>
-        <span class="sg-mc-tot">Total</span>
-        <span class="sg-mn-tot" id="st-deu-total-uds">—</span>
-        <span class="sg-mn-tot" style="color:var(--orange,#f59e0b)" id="st-deu-total-val">—</span>
+      <!-- POR PAGAR: saldo de creditos, no depende del mes. Mismo bloque que en Flujo de Caja -->
+      <div title="Saldo de todas las compras a crédito sin pagar, de cualquier mes">
+        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--orange,#f59e0b);margin-bottom:6px">Por pagar</div>
+        <div class="deu-grid">
+          <span></span>
+          <span class="deu-h">UDS</span>
+          <span class="deu-h">USD</span>
+          <span class="deu-h">SOLES</span>
+          <span class="deu-lbl">📦 Stock</span>
+          <span class="deu-n" id="st-deu-stock-uds">—</span>
+          <span class="deu-u" id="st-deu-stock-usd">—</span>
+          <span class="deu-s" id="st-deu-stock-val">S/. 0.00</span>
+          <span class="deu-lbl">🚚 Pedido</span>
+          <span class="deu-n" id="st-deu-pedido-uds">—</span>
+          <span class="deu-u" id="st-deu-pedido-usd">—</span>
+          <span class="deu-s" id="st-deu-pedido-val">S/. 0.00</span>
+          <span class="deu-lbl deu-tot">Total</span>
+          <span class="deu-n deu-tot" id="st-deu-total-uds">—</span>
+          <span class="deu-u deu-tot deu-acc" id="st-deu-total-usd">—</span>
+          <span class="deu-s deu-tot deu-acc" id="st-deu-total-val">S/. 0.00</span>
+        </div>
+        <div style="font-size:10px;color:var(--muted2);margin-top:5px;text-align:right" id="st-deu-tc"></div>
       </div>
-      <div style="font-size:10px;color:var(--muted2);margin-top:5px;text-align:right" id="st-deu-tc"></div>
     </div>
   </div>
 
@@ -2035,23 +2051,23 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)"
            title="Saldo de todas las compras a crédito sin pagar, de cualquier mes">
         <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px">Por pagar</div>
-        <div style="display:grid;grid-template-columns:1fr auto auto auto;gap:4px 10px;align-items:center;font-size:11px;font-variant-numeric:tabular-nums">
+        <div class="deu-grid">
           <span></span>
-          <span style="font-size:9px;letter-spacing:.5px;color:var(--muted2);text-align:right">UDS</span>
-          <span style="font-size:9px;letter-spacing:.5px;color:var(--muted2);text-align:right">USD</span>
-          <span style="font-size:9px;letter-spacing:.5px;color:var(--muted2);text-align:right">SOLES</span>
-          <span style="color:var(--muted2)">📦 Stock</span>
-          <span style="text-align:right;color:var(--muted2)" id="fc-pend-stock-n">—</span>
-          <span style="text-align:right;color:var(--yellow)" id="fc-pend-stock-u">—</span>
-          <span style="font-family:'Archivo Black';text-align:right;color:var(--yellow)" id="fc-pend-stock-s">S/. 0.00</span>
-          <span style="color:var(--muted2)">🚚 Pedido</span>
-          <span style="text-align:right;color:var(--muted2)" id="fc-pend-pedido-n">—</span>
-          <span style="text-align:right;color:var(--yellow)" id="fc-pend-pedido-u">—</span>
-          <span style="font-family:'Archivo Black';text-align:right;color:var(--yellow)" id="fc-pend-pedido-s">S/. 0.00</span>
-          <span style="font-weight:700;color:var(--muted2);border-top:1px solid var(--border);padding-top:5px">Total</span>
-          <span style="text-align:right;color:var(--muted2);border-top:1px solid var(--border);padding-top:5px" id="fc-pend-total-n">—</span>
-          <span style="text-align:right;color:var(--orange);border-top:1px solid var(--border);padding-top:5px" id="fc-pend-total-u">—</span>
-          <span style="font-family:'Archivo Black';text-align:right;color:var(--orange);border-top:1px solid var(--border);padding-top:5px" id="fc-pend-total">S/. 0.00</span>
+          <span class="deu-h">UDS</span>
+          <span class="deu-h">USD</span>
+          <span class="deu-h">SOLES</span>
+          <span class="deu-lbl">📦 Stock</span>
+          <span class="deu-n" id="fc-pend-stock-n">—</span>
+          <span class="deu-u" id="fc-pend-stock-u">—</span>
+          <span class="deu-s" id="fc-pend-stock-s">S/. 0.00</span>
+          <span class="deu-lbl">🚚 Pedido</span>
+          <span class="deu-n" id="fc-pend-pedido-n">—</span>
+          <span class="deu-u" id="fc-pend-pedido-u">—</span>
+          <span class="deu-s" id="fc-pend-pedido-s">S/. 0.00</span>
+          <span class="deu-lbl deu-tot">Total</span>
+          <span class="deu-n deu-tot" id="fc-pend-total-n">—</span>
+          <span class="deu-u deu-tot deu-acc" id="fc-pend-total-u">—</span>
+          <span class="deu-s deu-tot deu-acc" id="fc-pend-total">S/. 0.00</span>
         </div>
         <div style="font-size:10px;color:var(--muted2);margin-top:5px;text-align:right" id="fc-pend-tc"></div>
       </div>
@@ -3758,15 +3774,9 @@ function updateStats(mes='',vendidosMes=[],vendidosDespues=[]){
   const udsMes=new Set(movsMes.map(f=>f.referencia_id).filter(Boolean)).size;
   // POR PAGAR: saldo de creditos, no depende del mes. Lo calcula deudaCreditos()
   // para que este tab y Flujo de Caja muestren exactamente lo mismo.
-  const deu=deudaCreditos();
-  set('st-deu-stock-uds',  deu.stock.n||'—');
-  set('st-deu-stock-val',  deu.stock.n?fmt(deu.stock.soles):'—');
-  set('st-deu-pedido-uds', deu.pedido.n||'—');
-  set('st-deu-pedido-val', deu.pedido.n?fmt(deu.pedido.soles):'—');
-  set('st-deu-total-uds',  deu.total.n||'—');
-  set('st-deu-total-val',  fmt(deu.total.soles));
-  const elTc=document.getElementById('st-deu-tc');
-  if(elTc) elTc.textContent=deu.total.usd>0?`$ ${deu.total.usd.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})} · TC ${deu.tcLabel}`:'';
+  pintarDeuda('st-deu-stock-uds','st-deu-stock-usd','st-deu-stock-val',
+              'st-deu-pedido-uds','st-deu-pedido-usd','st-deu-pedido-val',
+              'st-deu-total-uds','st-deu-total-usd','st-deu-total-val','st-deu-tc');
   set('st-mes-zap-uds', acum.ZAP[0]);
   set('st-mes-zap-val', fmt(acum.ZAP[1]));
   set('st-mes-ropa-uds', acum.ROPA[0]);
@@ -3796,10 +3806,24 @@ function deudaCreditos(){
   });
   const stock =acum(pend.filter(p=>!pedidoSet.has(p.codigo_producto)));
   const pedido=acum(pend.filter(p=> pedidoSet.has(p.codigo_producto)));
-  // Un solo TC -> "3.40"; varios -> "3.40 – 3.55"
+  // TC del registro de cada producto (el que se guardo al comprar), no el actual.
+  // Uno solo -> "3.40"; varios -> "3.40 – 3.55"
   const tcs=[...new Set(pend.filter(p=>p.moneda==='USD'&&p.tipo_cambio).map(p=>parseFloat(p.tipo_cambio)))].sort((a,b)=>a-b);
   const tcLabel=!tcs.length?'':tcs.length===1?tcs[0].toFixed(2):`${tcs[0].toFixed(2)} – ${tcs[tcs.length-1].toFixed(2)}`;
   return {stock,pedido,total:acum(pend),tcLabel};
+}
+
+// Pinta la tabla "Por pagar". La usan Inventario y Flujo de Caja con sus ids,
+// para que el bloque sea identico en los dos.
+function pintarDeuda(sN,sU,sS, pN,pU,pS, tN,tU,tS, tcId){
+  const d=deudaCreditos();
+  const put=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  const nOr=n=>n||'—';
+  const uOr=v=>v>0?fmtUsd(v):'—';
+  put(sN,nOr(d.stock.n));  put(sU,uOr(d.stock.usd));  put(sS,fmt(d.stock.soles));
+  put(pN,nOr(d.pedido.n)); put(pU,uOr(d.pedido.usd)); put(pS,fmt(d.pedido.soles));
+  put(tN,nOr(d.total.n));  put(tU,uOr(d.total.usd));  put(tS,fmt(d.total.soles));
+  put(tcId, d.tcLabel?`TC ${d.tcLabel}`:'');
 }
 
 let sortCol=null,sortDir=1;
@@ -5199,19 +5223,10 @@ async function loadFlujo() {
 
   // Bubble compras
   document.getElementById('fc-compras-mes').textContent   = fmt(egrCompras + egrCostos);
-  // POR PAGAR — misma funcion que usa el tab Inventario, para que no se separen
-  const deu = deudaCreditos();
-  const setTx = (id,v) => { const e=document.getElementById(id); if(e) e.textContent=v; };
-  setTx('fc-pend-stock-n',  deu.stock.n||'—');
-  setTx('fc-pend-stock-u',  deu.stock.usd>0?fmtUsd(deu.stock.usd):'—');
-  setTx('fc-pend-stock-s',  fmt(deu.stock.soles));
-  setTx('fc-pend-pedido-n', deu.pedido.n||'—');
-  setTx('fc-pend-pedido-u', deu.pedido.usd>0?fmtUsd(deu.pedido.usd):'—');
-  setTx('fc-pend-pedido-s', fmt(deu.pedido.soles));
-  setTx('fc-pend-total-n',  deu.total.n||'—');
-  setTx('fc-pend-total-u',  deu.total.usd>0?fmtUsd(deu.total.usd):'—');
-  setTx('fc-pend-total',    fmt(deu.total.soles));
-  setTx('fc-pend-tc',       deu.tcLabel?`TC ${deu.tcLabel}`:'');
+  // POR PAGAR — mismo bloque y misma funcion que el tab Inventario
+  pintarDeuda('fc-pend-stock-n','fc-pend-stock-u','fc-pend-stock-s',
+              'fc-pend-pedido-n','fc-pend-pedido-u','fc-pend-pedido-s',
+              'fc-pend-total-n','fc-pend-total-u','fc-pend-total','fc-pend-tc');
 
 
   // ── RENDER TABLA ──
