@@ -5527,7 +5527,10 @@ function updateVentasStats(rows,pagos,mes){
   const gan=rows.reduce((s,v)=>s+parseFloat(v.ganancia||0),0);
   const avgRoi=n>0?rows.reduce((s,v)=>s+parseFloat(v.rentabilidad||0),0)/n:0;
   const costo=rev-gan;
-  const pagosTotal=(pagos||[]).reduce((s,p)=>s+Math.abs(parseFloat(p.monto_soles||0)),0);
+  // Los gastos se guardan en negativo. Se niega el monto en vez de usar abs()
+  // para que un ajuste positivo (p.ej. un trade que devuelve plata) RESTE del
+  // total en lugar de sumarse como si fuera un gasto mas.
+  const pagosTotal=(pagos||[]).reduce((s,p)=>s-parseFloat(p.monto_soles||0),0);
   const utilidad=gan-pagosTotal;
   const lbl=mes?new Date(mes+'-15').toLocaleDateString('es-PE',{month:'long',year:'numeric'}):'Historia';
   const s=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val;};
@@ -5555,7 +5558,9 @@ function renderPagos(rows){
   }
   const catBadge={'OPERATIVO':'badge-muted','MARKETING':'badge-purple','PERSONAL':'badge-accent','IMPORTACION':'badge-accent','PAGO':'badge-muted'};
   tbody.innerHTML=rows.map(p=>{
-    const monto=Math.abs(parseFloat(p.monto_soles||0));
+    // negativo = gasto; positivo = ajuste que devuelve plata (trade, reembolso)
+    const raw=parseFloat(p.monto_soles||0);
+    const esAjuste=raw>0;
     const cat=(p.categoria||'—').toUpperCase();
     const badge=catBadge[cat]||'badge-muted';
     const fecha=p.fecha?p.fecha.slice(8,10)+'/'+p.fecha.slice(5,7)+'/'+p.fecha.slice(2,4):'—';
@@ -5564,7 +5569,7 @@ function renderPagos(rows){
       <td class="td-code" style="color:var(--accent)">${p.codigo_pago||'—'}</td>
       <td class="td-main td-trunc">${p.concepto||'—'}</td>
       <td><span class="badge ${badge}">${cat}</span></td>
-      <td class="td-amt right" style="color:var(--red)">− ${fmt(monto)}</td>
+      <td class="td-amt right" style="color:var(--${esAjuste?'green':'red'})">${esAjuste?'+':'−'} ${fmt(Math.abs(raw))}</td>
     </tr>`;
   }).join('');
 }
