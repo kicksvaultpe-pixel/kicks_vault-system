@@ -366,9 +366,10 @@ input[list] { cursor: text; }
 .pat-sub{font-size:10px;color:var(--muted2);margin-bottom:8px;letter-spacing:.2px}
 .oc-cod{cursor:pointer;border-bottom:1px dashed transparent}
 .oc-cod:hover{border-bottom-color:var(--accent)}
-.oc-sel-inline{width:100%;padding:3px 4px;border-radius:6px;border:1px solid transparent;
-  background:transparent;color:var(--text);font-family:inherit;font-size:10px;font-weight:700;
-  letter-spacing:.3px;cursor:pointer;appearance:none;text-align:left}
+.oc-sel-inline{width:100%;padding:4px 6px;border-radius:6px;border:1px solid transparent;
+  background:transparent;color:var(--text);font-family:inherit;font-size:10.5px;font-weight:700;
+  letter-spacing:.2px;cursor:pointer;text-align:left;
+  text-overflow:ellipsis;white-space:nowrap;overflow:hidden}
 .oc-sel-inline:hover{border-color:var(--border);background:var(--bg)}
 .oc-sel-inline:focus{outline:none;border-color:var(--accent);background:var(--bg)}
 .oc-sel-inline.badge-yellow{color:var(--yellow)}
@@ -377,7 +378,7 @@ input[list] { cursor: text; }
 .oc-sel-inline.badge-green{color:var(--green)}
 .oc-sel-inline.badge-red{color:var(--red)}
 .oc-sel-inline option{background:var(--card);color:var(--text);font-weight:500}
-.oc-cand-list{max-height:210px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:4px}
+.oc-cand-list{max-height:210px;overflow-y:auto;border:1px solid var(--border2);border-radius:9px;padding:4px;background:var(--bg);scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
 .oc-cand{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:12px}
 .oc-cand:hover{background:var(--bg)}
 .oc-cand.sel{background:rgba(79,134,247,.10)}
@@ -2317,7 +2318,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <span class="combo-arrow">▼</span>
       <div class="combo-list" id="cl-oc-f-tipo"></div>
     </div>
-    <input type="text" id="oc-buscar" placeholder="Buscar descripción, tienda, tracking…"
+    <input type="text" id="oc-buscar" class="search-box" placeholder="Buscar descripción, tienda, tracking…"
       oninput="renderOCTab()" style="flex:1;min-width:180px">
     <button onclick="ocLimpiarFiltros()" style="flex-shrink:0;padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--muted2);font-size:11px;cursor:pointer;white-space:nowrap;font-family:inherit">× Limpiar</button>
     <button class="btn" onclick="ocAbrirModal()" style="flex-shrink:0;background:var(--accent);color:#fff;border:none;padding:7px 14px;font-size:12px">✦ Nueva OC</button>
@@ -2330,13 +2331,13 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
           <th style="width:70px">Código</th>
           <th style="width:74px">Fecha</th>
           <th style="min-width:200px">Descripción</th>
-          <th style="width:130px">Estado</th>
+          <th style="width:152px">Estado</th>
           <th style="width:98px">Tienda</th>
           <th style="width:118px">Order</th>
           <th style="width:70px">Courier</th>
           <th style="width:140px">Tracking</th>
           <th style="width:54px">Grupo</th>
-          <th style="width:92px">QC</th>
+          <th style="width:118px">QC</th>
           <th class="right" style="width:82px">Valor $</th>
           <th style="min-width:120px">Información</th>
           <th class="right" style="width:56px">Arts.</th>
@@ -2975,13 +2976,15 @@ function ocPintarArticulos(){
   cuerpo.innerHTML = arts.length
     ? `<table style="width:100%"><thead><tr>
          <th style="width:88px">Código</th><th>Producto</th><th style="width:60px">Talla</th>
-         <th class="right" style="width:92px">Costo Total</th><th style="width:96px">Estado</th>
+         <th class="right" style="width:104px">Costo / por pagar</th><th style="width:96px">Estado</th>
          <th style="width:36px"></th></tr></thead><tbody>`
       + arts.map(p=>`<tr>
           <td><span class="td-code">${p.codigo_producto}</span></td>
           <td class="td-main">${esc(nom(p))}</td>
           <td class="td-unit">${esc(p.talla||'—')}</td>
-          <td class="td-amt right">${fmt(valStock(p))}</td>
+          <td class="td-amt right">${p.pago_estado==='PENDIENTE'
+            ? `<span class="td-pend" title="Comprado a crédito, todavía sin pagar">⏳ ${fmt(p.precio_compra_soles||0)}</span>`
+            : fmt(valStock(p))}</td>
           <td><span class="badge badge-muted">${p.estado}</span></td>
           <td class="right"><button class="oc-quitar" title="Quitar de esta orden"
               onclick="ocQuitarArticulo('${p.codigo_producto}')">×</button></td>
@@ -6757,7 +6760,7 @@ init();
     <div id="oc-arts-body" style="margin-bottom:16px"></div>
     <div style="border-top:1px solid var(--border);padding-top:14px;margin-bottom:12px">
       <div class="card-label" style="margin-bottom:8px">Agregar productos a esta orden</div>
-      <input type="text" id="oc-arts-buscar" placeholder="Buscar por marca, modelo o código…"
+      <input type="text" id="oc-arts-buscar" class="search-box" placeholder="Buscar por marca, modelo o código…"
         oninput="ocPintarArticulos()" style="width:100%;margin-bottom:8px">
       <div id="oc-arts-cand" class="oc-cand-list"></div>
     </div>
