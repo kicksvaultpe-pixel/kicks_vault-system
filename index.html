@@ -5216,14 +5216,23 @@ async function loadFlujo() {
   const totalAntesGanancias = cajaInicio + stockInicio + activoInicio;
   const total = totalAntesGanancias + ganancias;
   const netoMes = ingVentas - egrCompras - egrCostos - egrGastos - egrInversion;
-  const cajaActual = cajaInicio + netoMes;
-  const cajaFin = cajaActual;
+  // Caja fisica: la plata que hay en la mano, adelantos de reserva incluidos.
+  // Son cobros reales aunque el producto no se haya entregado. `cajaInicio`
+  // viene sin ellos (el cierre del mes anterior ya los descuenta), por eso se
+  // suman aca los que siguen retenidos hoy. Antes no se sumaban en ningun lado
+  // pero `cajaReal` si los restaba, asi que la caja salia corta por ese monto.
+  const cajaActual = cajaInicio + netoMes + reservasMes;
+  // El balance mide lo que es del negocio, sin lo que todavia se debe entregar.
+  const cajaFin = cajaInicio + netoMes;
   const totalFin = cajaFin + stockFin + activoFijo;
   const control = Math.round((total - totalFin) * 100) / 100;
 
   // ── INDICADORES ──
-  const patrimonio    = cajaActual + stockFin + activoFijo;
-  const cajaPct       = patrimonio > 0 ? Math.round(cajaActual / patrimonio * 1000) / 10 : 0;
+  // Patrimonio con cajaFin, no cajaActual: el adelanto de una reserva es plata
+  // que todavia se debe entregar en producto, y ese producto ya esta contado
+  // entero en stockFin. Sumar el adelanto tambien seria contarlo dos veces.
+  const patrimonio    = cajaFin + stockFin + activoFijo;
+  const cajaPct       = patrimonio > 0 ? Math.round(cajaFin / patrimonio * 1000) / 10 : 0;
   const stockPct      = patrimonio > 0 ? Math.round(stockFin   / patrimonio * 1000) / 10 : 0;
   const activoPct     = patrimonio > 0 ? Math.round(activoFijo / patrimonio * 1000) / 10 : 0;
   const utilidad      = cajaFin - cajaInicio;
