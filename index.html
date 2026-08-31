@@ -364,6 +364,14 @@ input[list] { cursor: text; }
 .pat-chip{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:7px}
 .pat-total{font-family:"Archivo Black";font-size:15px;color:var(--text);margin-bottom:2px;font-variant-numeric:tabular-nums}
 .pat-sub{font-size:10px;color:var(--muted2);margin-bottom:8px;letter-spacing:.2px}
+.oc-cand-list{max-height:210px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:4px}
+.oc-cand{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:12px}
+.oc-cand:hover{background:var(--bg)}
+.oc-cand.sel{background:rgba(79,134,247,.10)}
+.oc-cand-nom{flex:1;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.oc-quitar{width:22px;height:22px;border-radius:6px;border:1px solid var(--border);background:var(--card);
+  color:var(--muted2);cursor:pointer;font-size:13px;line-height:1;font-family:inherit}
+.oc-quitar:hover{border-color:var(--red);color:var(--red)}
 .oc-mas{font-size:9px;padding:1px 4px;border-radius:4px;background:var(--border2);color:var(--muted2)}
 .oc-edit-btn{padding:4px 11px;border-radius:7px;border:1px solid var(--border);
   background:var(--card);color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;
@@ -2907,29 +2915,116 @@ function renderOCTab(){
 // Los articulos de una OC salen del inventario: un producto apunta a su orden
 // por `orden_compra`. Mientras la compra no llega a Peru no hay producto aun,
 // y la OC se muestra sin articulos.
+let ocArtsCodigo=null, ocArtsSel=new Set();
+
 function ocVerArticulos(cod){
+  ocArtsCodigo=cod; ocArtsSel.clear();
   const oc=(ocCache||[]).find(o=>o.codigo===cod);
+  const t=document.getElementById('oc-arts-title');
+  if(t) t.textContent=`${cod} · ${oc?.descripcion||oc?.nombre||''}`.trim();
+  const b=document.getElementById('oc-arts-buscar'); if(b) b.value='';
+  ocPintarArticulos();
+  document.getElementById('modal-oc-arts')?.classList.add('open');
+}
+function ocCerrarArticulos(){
+  document.getElementById('modal-oc-arts')?.classList.remove('open');
+  ocArtsCodigo=null; ocArtsSel.clear();
+}
+
+// Los articulos de una OC salen del inventario: un producto apunta a su orden
+// por `orden_compra`. Mientras la compra no llega a Peru no hay producto aun.
+function ocPintarArticulos(){
+  const cod=ocArtsCodigo;
   const arts=inventarioCache.filter(x=>x.orden_compra===cod);
   const cuerpo=document.getElementById('oc-arts-body');
-  if(cuerpo){
-    cuerpo.innerHTML = arts.length ? `<table style="width:100%"><thead><tr>
-        <th style="width:88px">Código</th><th>Producto</th><th style="width:64px">Talla</th>
-        <th class="right" style="width:96px">Costo Total</th><th style="width:104px">Estado</th></tr></thead><tbody>`
+  if(!cuerpo) return;
+  const nom=p=>[p.marca,p.modelo,p.colorway].filter(Boolean).join(' · ');
+  cuerpo.innerHTML = arts.length
+    ? `<table style="width:100%"><thead><tr>
+         <th style="width:88px">Código</th><th>Producto</th><th style="width:60px">Talla</th>
+         <th class="right" style="width:92px">Costo Total</th><th style="width:96px">Estado</th>
+         <th style="width:36px"></th></tr></thead><tbody>`
       + arts.map(p=>`<tr>
           <td><span class="td-code">${p.codigo_producto}</span></td>
-          <td class="td-main">${esc([p.marca,p.modelo,p.colorway].filter(Boolean).join(' · '))}</td>
+          <td class="td-main">${esc(nom(p))}</td>
           <td class="td-unit">${esc(p.talla||'—')}</td>
           <td class="td-amt right">${fmt(valStock(p))}</td>
           <td><span class="badge badge-muted">${p.estado}</span></td>
+          <td class="right"><button class="oc-quitar" title="Quitar de esta orden"
+              onclick="ocQuitarArticulo('${p.codigo_producto}')">×</button></td>
         </tr>`).join('') + '</tbody></table>'
-      : '<div style="text-align:center;padding:26px;color:var(--muted2);font-size:12px">'
-        +'Todavía no hay productos registrados en esta orden.<br>'
-        +'<span style="font-size:11px">Se registran cuando la compra llega a Perú.</span></div>';
+    : '<div style="text-align:center;padding:22px;color:var(--muted2);font-size:12px">'
+      +'Todavía no hay productos en esta orden.<br>'
+      +'<span style="font-size:11px">Se registran cuando la compra llega a Perú.</span></div>';
+
+  // buscador de productos sueltos
+  const q=(document.getElementById('oc-arts-buscar')?.value||'').toLowerCase().trim();
+  const lista=document.getElementById('oc-arts-cand');
+  if(!lista) return;
+  if(!q){
+    lista.innerHTML='<div style="padding:10px 2px;color:var(--muted2);font-size:11px">'
+      +'Escribe marca, modelo o código para buscar productos que todavía no tienen orden.</div>';
+    ocPintarBotonAgregar(); return;
   }
-  const t=document.getElementById('oc-arts-title');
-  if(t) t.textContent=`${cod} · ${oc?.descripcion||oc?.nombre||''}`.trim();
-  document.getElementById('modal-oc-arts')?.classList.add('open');
+  const libres=inventarioCache
+    .filter(p=>!p.orden_compra && p.estado!=='CANCELADO')
+    .filter(p=>[p.codigo_producto,p.marca,p.modelo,p.colorway,p.talla]
+      .some(v=>String(v||'').toLowerCase().includes(q)))
+    .slice(0,40);
+  lista.innerHTML = libres.length
+    ? libres.map(p=>`<label class="oc-cand${ocArtsSel.has(p.codigo_producto)?' sel':''}">
+        <input type="checkbox" ${ocArtsSel.has(p.codigo_producto)?'checked':''}
+          onchange="ocToggleArticulo('${p.codigo_producto}',this.checked)">
+        <span class="td-code">${p.codigo_producto}</span>
+        <span class="oc-cand-nom">${esc(nom(p))}</span>
+        <span class="td-unit">${esc(p.talla||'')}</span>
+        <span class="td-unit">${p.pago_estado==='PENDIENTE'?'⏳ crédito':''}</span>
+      </label>`).join('')
+    : '<div style="padding:10px 2px;color:var(--muted2);font-size:11px">Ningún producto libre coincide.</div>';
+  ocPintarBotonAgregar();
 }
+
+function ocPintarBotonAgregar(){
+  const b=document.getElementById('oc-arts-add');
+  if(!b) return;
+  b.textContent = ocArtsSel.size
+    ? `Agregar ${ocArtsSel.size} producto${ocArtsSel.size>1?'s':''} a ${ocArtsCodigo}`
+    : 'Selecciona productos para agregar';
+  b.disabled = !ocArtsSel.size;
+}
+function ocToggleArticulo(cod,on){
+  if(on) ocArtsSel.add(cod); else ocArtsSel.delete(cod);
+  ocPintarArticulos();
+}
+
+async function ocAgregarArticulos(){
+  if(!ocArtsSel.size||!ocArtsCodigo) return;
+  const cods=[...ocArtsSel];
+  const b=document.getElementById('oc-arts-add');
+  if(b){ b.disabled=true; b.textContent='Agregando…'; }
+  try{
+    const{error}=await db.from('inventario').update({orden_compra:ocArtsCodigo}).in('codigo_producto',cods);
+    if(error) throw error;
+    cods.forEach(c=>{ const p=inventarioCache.find(x=>x.codigo_producto===c); if(p) p.orden_compra=ocArtsCodigo; });
+    toast(`✓ ${cods.length} producto${cods.length>1?'s':''} en ${ocArtsCodigo}`,'ok');
+    ocArtsSel.clear();
+    const q=document.getElementById('oc-arts-buscar'); if(q) q.value='';
+    ocPintarArticulos(); renderOCTab();
+  }catch(e){
+    toast('No se pudo agregar: '+(e.message||e),'err');
+  }finally{ ocPintarBotonAgregar(); }
+}
+
+async function ocQuitarArticulo(cod){
+  try{
+    const{error}=await db.from('inventario').update({orden_compra:null}).eq('codigo_producto',cod);
+    if(error) throw error;
+    const p=inventarioCache.find(x=>x.codigo_producto===cod); if(p) p.orden_compra=null;
+    toast(`${cod} quitado de ${ocArtsCodigo}`,'ok');
+    ocPintarArticulos(); renderOCTab();
+  }catch(e){ toast('No se pudo quitar: '+(e.message||e),'err'); }
+}
+
 function ocCerrarArticulos(){ document.getElementById('modal-oc-arts')?.classList.remove('open'); }
 
 // ── CREAR / EDITAR OC ──
@@ -6606,8 +6701,18 @@ init();
       <span id="oc-arts-title">Artículos</span>
       <button class="modal-close" onclick="ocCerrarArticulos()">&times;</button>
     </div>
-    <div id="oc-arts-body" style="margin-bottom:14px"></div>
-    <button class="btn btn-ghost" onclick="ocCerrarArticulos()" style="width:100%">Cerrar</button>
+    <div id="oc-arts-body" style="margin-bottom:16px"></div>
+    <div style="border-top:1px solid var(--border);padding-top:14px;margin-bottom:12px">
+      <div class="card-label" style="margin-bottom:8px">Agregar productos a esta orden</div>
+      <input type="text" id="oc-arts-buscar" placeholder="Buscar por marca, modelo o código…"
+        oninput="ocPintarArticulos()" style="width:100%;margin-bottom:8px">
+      <div id="oc-arts-cand" class="oc-cand-list"></div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn" id="oc-arts-add" onclick="ocAgregarArticulos()" disabled
+        style="flex:1;background:var(--accent);color:#fff;border:none">Selecciona productos para agregar</button>
+      <button class="btn btn-ghost" onclick="ocCerrarArticulos()">Cerrar</button>
+    </div>
   </div>
 </div>
 
