@@ -5278,7 +5278,11 @@ async function loadFlujo() {
   document.getElementById('fc-caja-inicio').textContent  = fmt(cajaInicio);
   document.getElementById('fc-stock-inicio').textContent = fmt(stockInicio);
   document.getElementById('fc-ganancias').textContent    = ganancias > 0 ? '+ ' + fmt(ganancias) : fmt(ganancias);
-  document.getElementById('fc-total-antes').textContent  = fmt(totalAntesGanancias);
+  // Patrimonio inicio = caja + stock + activo fijo + margen, o sea las cuatro
+  // lineas de la tarjeta. Antes mostraba totalAntesGanancias, que deja fuera el
+  // margen: la tarjeta listaba una fila que su propio total no sumaba, y la
+  // resta contra Patrimonio fin no daba el Control. Es el TOTAL de la hoja.
+  document.getElementById('fc-total-antes').textContent  = fmt(total);
   // En apertura va el activo al INICIO del mes; el aporte del mes propio entra
   // recien en el bloque de cierre. Para agosto dan igual (el ultimo aporte fue
   // en julio), pero en julio mismo cambia: 1,331.79 al abrir, 6,707.29 al cerrar.
