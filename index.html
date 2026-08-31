@@ -364,6 +364,19 @@ input[list] { cursor: text; }
 .pat-chip{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:7px}
 .pat-total{font-family:"Archivo Black";font-size:15px;color:var(--text);margin-bottom:2px;font-variant-numeric:tabular-nums}
 .pat-sub{font-size:10px;color:var(--muted2);margin-bottom:8px;letter-spacing:.2px}
+.oc-cod{cursor:pointer;border-bottom:1px dashed transparent}
+.oc-cod:hover{border-bottom-color:var(--accent)}
+.oc-sel-inline{width:100%;padding:3px 4px;border-radius:6px;border:1px solid transparent;
+  background:transparent;color:var(--text);font-family:inherit;font-size:10px;font-weight:700;
+  letter-spacing:.3px;cursor:pointer;appearance:none;text-align:left}
+.oc-sel-inline:hover{border-color:var(--border);background:var(--bg)}
+.oc-sel-inline:focus{outline:none;border-color:var(--accent);background:var(--bg)}
+.oc-sel-inline.badge-yellow{color:var(--yellow)}
+.oc-sel-inline.badge-accent{color:var(--accent)}
+.oc-sel-inline.badge-purple{color:var(--purple)}
+.oc-sel-inline.badge-green{color:var(--green)}
+.oc-sel-inline.badge-red{color:var(--red)}
+.oc-sel-inline option{background:var(--card);color:var(--text);font-weight:500}
 .oc-cand-list{max-height:210px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:4px}
 .oc-cand{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:12px}
 .oc-cand:hover{background:var(--bg)}
@@ -2840,6 +2853,10 @@ function ocLimpiarFiltros(){
 
 // Etapas por las que pasa una importacion. El orden importa: es el que se
 // muestra y el que decide si una OC sigue en la calle o ya aterrizo.
+// Estado y QC se cambian desde la tabla sin abrir el modal: son los dos campos
+// que se tocan a diario mientras la compra viaja. Van junto a OC_ETAPAS y no
+// mas abajo: renderOCTab los usa y un const se lee recien donde se declara.
+const OC_QC = ['', 'Por enviar', 'Enviado a QC', 'GOAT', 'No aplica'];
 const OC_ETAPAS = ['COMPRADO','EN CAMINO USA','ENTREGADO EN USA','ENTREGADO EN PERU'];
 const OC_BADGE = {
   'COMPRADO'          : ['badge-yellow','🛒 Comprado'],
@@ -2874,8 +2891,18 @@ function renderOCTab(){
   let ocs=(ocCache||[]).slice();
   if(estadoF) ocs=ocs.filter(o=>o.estado===estadoF);
   if(tipoF)   ocs=ocs.filter(o=>o.tipo===tipoF);
-  if(q) ocs=ocs.filter(o=>[o.codigo,o.descripcion,o.nombre,o.tienda,o.courier,o.tracking,o.orden_tienda,o.notas]
-    .some(v=>String(v||'').toLowerCase().includes(q)));
+  // Busca por varias palabras: "amiri ups" trae lo que cumpla las dos, en
+  // cualquier campo. Antes exigia que la frase completa estuviera en un solo
+  // campo, asi que buscar marca y courier juntos no devolvia nada.
+  const terminos=q.split(/\s+/).filter(Boolean);
+  if(terminos.length){
+    ocs=ocs.filter(o=>{
+      const heno=[o.codigo,o.descripcion,o.nombre,o.tienda,o.courier,o.tracking,
+                  o.orden_tienda,o.qc,o.grupo,o.estado,o.notas,o.fecha]
+        .map(v=>String(v||'').toLowerCase()).join(' | ');
+      return terminos.every(t=>heno.includes(t));
+    });
+  }
   ocs.sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||'')||(b.codigo||'').localeCompare(a.codigo||''));
 
   const _filasOcs=ocs.map(oc=>{
@@ -2890,16 +2917,22 @@ function renderOCTab(){
       : '<span class="td-muted">—</span>';
     const uni=v=>v?`<span class="td-unit">${esc(v)}</span>`:'<span class="td-muted">—</span>';
     return `<tr class="${cerrado?'row-dim':''}">
-      <td><span class="td-code" style="color:var(--accent)">${oc.codigo}</span></td>
+      <td><span class="td-code oc-cod" style="color:var(--accent)"
+            title="Ver los productos de esta orden"
+            onclick="ocVerArticulos('${oc.codigo}')">${oc.codigo}</span></td>
       <td class="td-fecha">${fmtFecha(oc.fecha)}</td>
       <td class="td-main">${esc(oc.descripcion||oc.nombre||'—')}</td>
-      <td><span class="badge ${cls}">${txt}</span></td>
+      <td><select class="oc-sel-inline ${cls}" onchange="ocCambiarCampo('${oc.codigo}','estado',this.value)">
+        ${OC_ETAPAS.concat('CANCELADO').map(e=>`<option value="${e}"${e===oc.estado?' selected':''}>${OC_BADGE[e]?OC_BADGE[e][1]:e}</option>`).join('')}
+      </select></td>
       <td>${uni(oc.tienda)}</td>
       <td>${oc.orden_tienda?`<span class="td-code td-trunc" title="${esc(oc.orden_tienda)}">${esc(oc.orden_tienda)}</span>`:'<span class="td-muted">—</span>'}</td>
       <td>${uni(oc.courier)}</td>
       <td>${trk}</td>
       <td>${uni(oc.grupo)}</td>
-      <td>${uni(oc.qc)}</td>
+      <td><select class="oc-sel-inline" onchange="ocCambiarCampo('${oc.codigo}','qc',this.value)">
+        ${OC_QC.map(v=>`<option value="${v}"${v===(oc.qc||'')?' selected':''}>${v||'—'}</option>`).join('')}
+      </select></td>
       <td class="td-amt right">${oc.valor_usd?fmtUsd(oc.valor_usd):'<span class="td-muted">—</span>'}</td>
       <td class="td-unit td-trunc" title="${esc(oc.notas||'')}">${esc(oc.notas||'—')}</td>
       <td class="right">${arts.length
@@ -2982,6 +3015,22 @@ function ocPintarArticulos(){
       </label>`).join('')
     : '<div style="padding:10px 2px;color:var(--muted2);font-size:11px">Ningún producto libre coincide.</div>';
   ocPintarBotonAgregar();
+}
+
+async function ocCambiarCampo(cod, campo, valor){
+  const oc=(ocCache||[]).find(o=>o.codigo===cod);
+  if(!oc) return;
+  const antes=oc[campo];
+  oc[campo]=valor||null;                       // pinta ya, sin esperar a la red
+  renderOCTab();
+  const{error}=await db.from('ordenes_compra').update({[campo]:valor||null}).eq('codigo',cod);
+  if(error){
+    oc[campo]=antes; renderOCTab();
+    toast('No se pudo guardar: '+error.message,'err');
+    return;
+  }
+  const et = campo==='estado' ? (OC_BADGE[valor]?OC_BADGE[valor][1]:valor) : (valor||'sin QC');
+  toast(`✓ ${cod} · ${et}`,'ok');
 }
 
 function ocPintarBotonAgregar(){
@@ -3567,6 +3616,10 @@ async function init(){
   await Promise.all([loadTCGlobal(), loadInventario(), loadClientes(), loadOCs(), loadReservas()]);
   initRowSel('inv-tbody');
   initRowSel('vt-tbody');
+  initRowSel('oc-tbody');
+  initRowSel('rsv-tbody');
+  initRowSel('cl-tbody');
+  initRowSel('fc-tabla-body');
 }
 
 function setToday(){
