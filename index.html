@@ -374,7 +374,12 @@ input[list] { cursor: text; }
 .oc-badge-edit i{font-style:normal;font-size:8px;opacity:.5}
 .oc-menu{position:absolute;left:0;right:auto;min-width:168px;width:max-content}
 .oc-menu .combo-opt{font-size:12px;padding:8px 13px}
-.oc-arts-tabla{width:100%;table-layout:fixed;border:1px solid var(--border2);border-radius:9px;
+.oc-arts-wrap{overflow-x:auto;overflow-y:visible;
+  scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
+.oc-arts-wrap::-webkit-scrollbar{height:6px}
+.oc-arts-wrap::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+.oc-arts-wrap::-webkit-scrollbar-thumb:hover{background:var(--muted2)}
+.oc-arts-tabla{width:100%;min-width:560px;table-layout:fixed;border:1px solid var(--border2);border-radius:9px;
   overflow:hidden;background:var(--bg)}
 .oc-arts-tabla th{padding:7px 9px;font-size:9px;letter-spacing:1px}
 .oc-arts-tabla td{padding:8px 9px;font-size:11px;overflow:hidden}
@@ -385,7 +390,7 @@ input[list] { cursor: text; }
 .oc-cand{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:12px}
 .oc-cand:hover{background:var(--bg)}
 .oc-cand.sel{background:rgba(79,134,247,.10)}
-.oc-cand-nom{flex:1;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.oc-cand-nom{flex:1;min-width:0;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .oc-quitar{width:22px;height:22px;border-radius:6px;border:1px solid var(--border);background:var(--card);
   color:var(--muted2);cursor:pointer;font-size:13px;line-height:1;font-family:inherit}
 .oc-quitar:hover{border-color:var(--red);color:var(--red)}
@@ -6821,7 +6826,7 @@ init();
       <span id="oc-arts-title">Artículos</span>
       <button class="modal-close" onclick="ocCerrarArticulos()">&times;</button>
     </div>
-    <div id="oc-arts-body" style="margin-bottom:16px"></div>
+    <div id="oc-arts-body" class="oc-arts-wrap" style="margin-bottom:16px"></div>
     <div style="border-top:1px solid var(--border);padding-top:14px;margin-bottom:12px">
       <div class="card-label" style="margin-bottom:8px">Agregar productos a esta orden</div>
       <input type="text" id="oc-arts-buscar" class="search-box" placeholder="Buscar por marca, modelo o código…"
