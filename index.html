@@ -366,29 +366,14 @@ input[list] { cursor: text; }
 .pat-sub{font-size:10px;color:var(--muted2);margin-bottom:8px;letter-spacing:.2px}
 .oc-cod{cursor:pointer;border-bottom:1px dashed transparent}
 .oc-cod:hover{border-bottom-color:var(--accent)}
-/* Se ve como un badge, no como un campo de formulario: la fila se lee igual
-   que antes pero el valor se puede cambiar. appearance:none quita la flecha
-   nativa, que ademas se comia el ancho y truncaba "Por enviar" en "Po". */
-.oc-sel-inline{appearance:none;-webkit-appearance:none;
-  max-width:100%;padding:4px 20px 4px 9px;border-radius:20px;
-  border:1px solid transparent;background-color:transparent;
-  background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),
-                   linear-gradient(135deg,currentColor 50%,transparent 50%);
-  background-position:calc(100% - 10px) calc(50% + 1px),calc(100% - 6px) calc(50% + 1px);
-  background-size:4px 4px,4px 4px;background-repeat:no-repeat;
-  color:var(--muted);font-family:inherit;font-size:10px;font-weight:700;
-  letter-spacing:.4px;text-transform:uppercase;cursor:pointer;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.oc-sel-inline:hover{border-color:currentColor}
-.oc-sel-inline:focus{outline:none;border-color:currentColor}
-.oc-sel-inline.badge-yellow{color:var(--yellow);background-color:rgba(180,83,9,.10)}
-.oc-sel-inline.badge-accent{color:var(--accent);background-color:rgba(96,165,250,.10)}
-.oc-sel-inline.badge-purple{color:var(--purple);background-color:rgba(167,139,250,.12)}
-.oc-sel-inline.badge-green {color:var(--green); background-color:rgba(22,163,74,.10)}
-.oc-sel-inline.badge-red   {color:var(--red);   background-color:rgba(220,38,38,.10)}
-.oc-sel-qc{color:var(--muted2);background-color:var(--border2)}
-.oc-sel-inline option{background:var(--card);color:var(--text);font-weight:500;
-  text-transform:none;letter-spacing:0}
+/* Badge que ademas se puede cambiar. Se mantiene identico al resto de badges
+   de la app; solo aparece un caret al pasar el mouse. */
+.oc-badge-edit{cursor:pointer;display:inline-flex;align-items:center;gap:4px;
+  border:1px solid transparent;transition:border-color .12s}
+.oc-badge-edit:hover{border-color:currentColor}
+.oc-badge-edit i{font-style:normal;font-size:8px;opacity:.5}
+.oc-menu{position:absolute;left:0;right:auto;min-width:168px;width:max-content}
+.oc-menu .combo-opt{font-size:12px;padding:8px 13px}
 .oc-arts-tabla{width:100%;table-layout:fixed;border:1px solid var(--border2);border-radius:9px;
   overflow:hidden;background:var(--bg)}
 .oc-arts-tabla th{padding:7px 9px;font-size:9px;letter-spacing:1px}
@@ -2335,7 +2320,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <span class="combo-arrow">▼</span>
       <div class="combo-list" id="cl-oc-f-tipo"></div>
     </div>
-    <input type="text" id="oc-buscar" class="search-box" placeholder="Buscar descripción, tienda, tracking…"
+    <input type="text" id="oc-buscar" class="search-box" placeholder="Buscar orden, producto, tienda, tracking…"
       oninput="renderOCTab()" style="flex:1;min-width:180px">
     <button onclick="ocLimpiarFiltros()" style="flex-shrink:0;padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--muted2);font-size:11px;cursor:pointer;white-space:nowrap;font-family:inherit">× Limpiar</button>
     <button class="btn" onclick="ocAbrirModal()" style="flex-shrink:0;background:var(--accent);color:#fff;border:none;padding:7px 14px;font-size:12px">✦ Nueva OC</button>
@@ -2875,6 +2860,15 @@ function ocLimpiarFiltros(){
 // que se tocan a diario mientras la compra viaja. Van junto a OC_ETAPAS y no
 // mas abajo: renderOCTab los usa y un const se lee recien donde se declara.
 const OC_QC = ['', 'Por enviar', 'Enviado a QC', 'GOAT', 'No aplica'];
+// El QC tiene su propio semaforo: lo que falta mandar en amarillo, lo que ya
+// esta en manos del verificador en azul.
+const OC_QC_BADGE = {
+  ''             : ['badge-muted',  '— sin QC'],
+  'Por enviar'   : ['badge-yellow', '⏳ Por enviar'],
+  'Enviado a QC' : ['badge-accent', '🔎 Enviado a QC'],
+  'GOAT'         : ['badge-purple', '🐐 GOAT'],
+  'No aplica'    : ['badge-muted',  '— No aplica'],
+};
 const OC_ETAPAS = ['COMPRADO','EN CAMINO USA','ENTREGADO EN USA','ENTREGADO EN PERU'];
 const OC_BADGE = {
   'COMPRADO'          : ['badge-yellow','🛒 Comprado'],
@@ -2915,8 +2909,12 @@ function renderOCTab(){
   const terminos=q.split(/\s+/).filter(Boolean);
   if(terminos.length){
     ocs=ocs.filter(o=>{
+      // Tambien busca dentro de los productos ya enganchados: escribir un
+      // codigo como P-01055 o una marca encuentra la orden que lo trae.
+      const prods=inventarioCache.filter(x=>x.orden_compra===o.codigo)
+        .flatMap(x=>[x.codigo_producto,x.marca,x.modelo,x.colorway,x.talla]);
       const heno=[o.codigo,o.descripcion,o.nombre,o.tienda,o.courier,o.tracking,
-                  o.orden_tienda,o.qc,o.grupo,o.estado,o.notas,o.fecha]
+                  o.orden_tienda,o.qc,o.grupo,o.estado,o.notas,o.fecha,...prods]
         .map(v=>String(v||'').toLowerCase()).join(' | ');
       return terminos.every(t=>heno.includes(t));
     });
@@ -2940,17 +2938,15 @@ function renderOCTab(){
             onclick="ocVerArticulos('${oc.codigo}')">${oc.codigo}</span></td>
       <td class="td-fecha">${fmtFecha(oc.fecha)}</td>
       <td class="td-main">${esc(oc.descripcion||oc.nombre||'—')}</td>
-      <td><select class="oc-sel-inline ${cls}" onchange="ocCambiarCampo('${oc.codigo}','estado',this.value)">
-        ${OC_ETAPAS.concat('CANCELADO').map(e=>`<option value="${e}"${e===oc.estado?' selected':''}>${OC_BADGE[e]?OC_BADGE[e][1]:e}</option>`).join('')}
-      </select></td>
+      <td><span class="badge ${cls} oc-badge-edit"
+            onclick="ocMenu(event,'${oc.codigo}','estado')">${txt}<i>▾</i></span></td>
       <td>${uni(oc.tienda)}</td>
       <td>${oc.orden_tienda?`<span class="td-code td-trunc" title="${esc(oc.orden_tienda)}">${esc(oc.orden_tienda)}</span>`:'<span class="td-muted">—</span>'}</td>
       <td>${uni(oc.courier)}</td>
       <td>${trk}</td>
       <td>${uni(oc.grupo)}</td>
-      <td><select class="oc-sel-inline oc-sel-qc" onchange="ocCambiarCampo('${oc.codigo}','qc',this.value)">
-        ${OC_QC.map(v=>`<option value="${v}"${v===(oc.qc||'')?' selected':''}>${v||'—'}</option>`).join('')}
-      </select></td>
+      <td>${(()=>{const[c,t]=OC_QC_BADGE[oc.qc||'']||['badge-muted',esc(oc.qc)];
+        return `<span class="badge ${c} oc-badge-edit" onclick="ocMenu(event,'${oc.codigo}','qc')">${t}<i>▾</i></span>`;})()}</td>
       <td class="td-amt right">${oc.valor_usd?fmtUsd(oc.valor_usd):'<span class="td-muted">—</span>'}</td>
       <td class="td-unit td-trunc" title="${esc(oc.notas||'')}">${esc(oc.notas||'—')}</td>
       <td class="right">${arts.length
@@ -3033,6 +3029,42 @@ function ocPintarArticulos(){
     : '<div style="padding:10px 2px;color:var(--muted2);font-size:11px">Ningún producto libre coincide.</div>';
   ocPintarBotonAgregar();
 }
+
+// Un solo menu flotante para toda la tabla, con los mismos estilos que los
+// combos del resto de la app. Un <select> nativo abre la lista del sistema
+// operativo, que no se puede estilizar y desentona con todo lo demas.
+let _ocMenuCerrar = null;
+function ocMenu(ev, cod, campo){
+  ev.stopPropagation();
+  ocMenuCerrar();
+  const oc = (ocCache||[]).find(o=>o.codigo===cod);
+  if(!oc) return;
+  const opciones = campo==='estado'
+    ? OC_ETAPAS.concat('CANCELADO').map(v=>[v, OC_BADGE[v]?OC_BADGE[v][1]:v])
+    : OC_QC.map(v=>[v, (OC_QC_BADGE[v]||['','—'])[1]]);
+  const actual = campo==='estado' ? oc.estado : (oc.qc||'');
+  const m = document.createElement('div');
+  m.className = 'combo-list oc-menu open';
+  m.innerHTML = opciones.map(([v,t])=>
+    `<div class="combo-opt${v===actual?' focused':''}" data-v="${esc(v)}">${t}</div>`).join('');
+  document.body.appendChild(m);
+  const r = ev.currentTarget.getBoundingClientRect();
+  m.style.top  = (window.scrollY + r.bottom + 4) + 'px';
+  m.style.left = (window.scrollX + r.left) + 'px';
+  // si no entra abajo, se abre hacia arriba
+  if(r.bottom + m.offsetHeight + 8 > window.innerHeight)
+    m.style.top = (window.scrollY + r.top - m.offsetHeight - 4) + 'px';
+  m.addEventListener('click', e=>{
+    const o = e.target.closest('.combo-opt');
+    if(!o) return;
+    ocMenuCerrar();
+    ocCambiarCampo(cod, campo, o.dataset.v);
+  });
+  const fuera = () => ocMenuCerrar();
+  setTimeout(()=>document.addEventListener('click', fuera, {once:true}), 0);
+  _ocMenuCerrar = () => { m.remove(); document.removeEventListener('click', fuera); _ocMenuCerrar=null; };
+}
+function ocMenuCerrar(){ if(_ocMenuCerrar) _ocMenuCerrar(); }
 
 async function ocCambiarCampo(cod, campo, valor){
   const oc=(ocCache||[]).find(o=>o.codigo===cod);
@@ -6766,7 +6798,7 @@ init();
 </div>
 
 <div class="modal-overlay" id="modal-oc-arts">
-  <div class="modal" style="max-width:640px">
+  <div class="modal" style="max-width:880px">
     <div class="modal-title">
       <span id="oc-arts-title">Artículos</span>
       <button class="modal-close" onclick="ocCerrarArticulos()">&times;</button>
