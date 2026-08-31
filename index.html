@@ -364,6 +364,10 @@ input[list] { cursor: text; }
 .pat-chip{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:7px}
 .pat-total{font-family:"Archivo Black";font-size:15px;color:var(--text);margin-bottom:2px;font-variant-numeric:tabular-nums}
 .pat-sub{font-size:10px;color:var(--muted2);margin-bottom:8px;letter-spacing:.2px}
+.oc-edit-btn{padding:4px 11px;border-radius:7px;border:1px solid var(--border);
+  background:var(--card);color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;
+  font-family:inherit;transition:border-color .15s,color .15s}
+.oc-edit-btn:hover{border-color:var(--accent);color:var(--accent)}
 .pag-row td{padding:0 !important;border-bottom:none !important}
 .pag-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;
   border-top:1px solid var(--border);background:var(--bg)}
@@ -2246,21 +2250,29 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
 <div id="view-oc" class="view">
   <div class="page-hd">
     <div class="page-title"><div class="dot"></div> Órdenes de Compra</div>
-    <div class="page-sub">Gestión de órdenes de importación y compra local</div>
+    <div class="page-sub">Seguimiento de importaciones, desde la compra hasta que llega a Perú</div>
   </div>
 
-  <div class="stats-row stats3">
+  <div class="stats-row stats4">
     <div class="stat-card">
-      <div class="stat-label">Total</div>
-      <div class="stat-val" id="oc-stat-total">—</div>
+      <div class="stat-label">🛒 Comprado</div>
+      <div class="stat-val" id="oc-st-comprado" style="color:var(--yellow)">—</div>
+      <div class="stat-sub" id="oc-st-comprado-usd">—</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Pendientes</div>
-      <div class="stat-val" id="oc-stat-pendiente" style="color:var(--accent)">—</div>
+      <div class="stat-label">✈️ En camino USA</div>
+      <div class="stat-val" id="oc-st-camino" style="color:var(--accent)">—</div>
+      <div class="stat-sub" id="oc-st-camino-usd">—</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Completadas</div>
-      <div class="stat-val" id="oc-stat-completada" style="color:var(--green)">—</div>
+      <div class="stat-label">📦 Entregado en USA</div>
+      <div class="stat-val" id="oc-st-usa" style="color:var(--purple)">—</div>
+      <div class="stat-sub" id="oc-st-usa-usd">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">En tránsito</div>
+      <div class="stat-val" id="oc-st-total" style="color:var(--green)">—</div>
+      <div class="stat-sub" id="oc-st-total-usd">—</div>
     </div>
   </div>
 
@@ -2283,19 +2295,30 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <span class="combo-arrow">▼</span>
       <div class="combo-list" id="cl-oc-f-tipo"></div>
     </div>
+    <input type="text" id="oc-buscar" placeholder="Buscar descripción, tienda, tracking…"
+      oninput="renderOCTab()" style="flex:1;min-width:180px">
+    <button onclick="ocLimpiarFiltros()" style="flex-shrink:0;padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--muted2);font-size:11px;cursor:pointer;white-space:nowrap;font-family:inherit">× Limpiar</button>
+    <button class="btn" onclick="ocAbrirModal()" style="flex-shrink:0;background:var(--accent);color:#fff;border:none;padding:7px 14px;font-size:12px">✦ Nueva OC</button>
   </div>
 
   <div class="table-wrap">
-    <table style="min-width:820px">
+    <table style="min-width:1080px">
       <thead>
         <tr>
-          <th style="width:90px">Código</th><th>Nombre</th><th style="width:100px">Tipo</th><th style="width:110px">Estado</th>
-          <th class="right" style="width:80px">Prods.</th><th class="right" style="width:120px">Monto S/.</th>
-          <th>Notas</th><th style="width:80px">Fecha</th>
+          <th style="width:78px">Código</th>
+          <th style="width:74px">Fecha</th>
+          <th>Descripción</th>
+          <th style="width:132px">Estado</th>
+          <th style="width:104px">Tienda</th>
+          <th style="width:74px">Courier</th>
+          <th style="width:96px">QC</th>
+          <th class="right" style="width:84px">Valor $</th>
+          <th class="right" style="width:64px">Arts.</th>
+          <th style="width:74px"></th>
         </tr>
       </thead>
       <tbody id="oc-tbody">
-        <tr class="loading-row"><td colspan="8"><div class="spinner"></div></td></tr>
+        <tr class="loading-row"><td colspan="10"><div class="spinner"></div></td></tr>
       </tbody>
     </table>
   </div>
@@ -2675,6 +2698,7 @@ async function loadOCs(){
   const{data}=await db.from('ordenes_compra').select('*').order('id',{ascending:false});
   ocCache=data||[];
   renderOCSelectExistente();
+  renderOCTab();
   if(tipoPagoActual==='CREDITO') pregenOC();
 }
 
@@ -2785,46 +2809,174 @@ function csProdChange(){
 }
 
 // ── OC TAB ──
+function ocLimpiarFiltros(){
+  ['oc-f-estado','oc-f-tipo','oc-buscar'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  renderOCTab();
+}
+
+// Etapas por las que pasa una importacion. El orden importa: es el que se
+// muestra y el que decide si una OC sigue en la calle o ya aterrizo.
+const OC_ETAPAS = ['COMPRADO','EN CAMINO USA','ENTREGADO EN USA','ENTREGADO EN PERU'];
+const OC_BADGE = {
+  'COMPRADO'          : ['badge-yellow','🛒 Comprado'],
+  'EN CAMINO USA'     : ['badge-accent','✈️ En camino USA'],
+  'ENTREGADO EN USA'  : ['badge-purple','📦 Entregado USA'],
+  'ENTREGADO EN PERU' : ['badge-green', '🇵🇪 En Perú'],
+  'CANCELADO'         : ['badge-red',   '❌ Cancelado'],
+};
+
 function renderOCTab(){
-  const estadoF=noEmoji(document.getElementById('oc-f-estado')?.value||'');
-  const tipoF=noEmoji(document.getElementById('oc-f-tipo')?.value||'');
-  const tipoFDB=tipoF.normalize('NFD').replace(/[̀-ͯ]/g,''); // quita tildes para comparar con DB
-  // Stats
-  const s=el=>document.getElementById(el);
-  if(s('oc-stat-total')) s('oc-stat-total').textContent=ocCache.length;
-  if(s('oc-stat-pendiente')) s('oc-stat-pendiente').textContent=ocCache.filter(o=>o.estado==='PENDIENTE').length;
-  if(s('oc-stat-completada')) s('oc-stat-completada').textContent=ocCache.filter(o=>o.estado==='COMPLETADA').length;
-  // Filter
-  let ocs=ocCache;
-  if(estadoF) ocs=ocs.filter(o=>o.estado===estadoF);
-  if(tipoFDB) ocs=ocs.filter(o=>o.tipo===tipoFDB);
-  const tbody=document.getElementById('oc-tbody');
-  if(!tbody) return;
-  if(!ocs.length){
-    tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--muted2)">Sin órdenes de compra</td></tr>';
-    return;
+  const s=id=>document.getElementById(id);
+  const estadoF=noEmoji((s('oc-f-estado')||{}).value||'');
+  const tipoF  =noEmoji((s('oc-f-tipo')||{}).value||'');
+  const q=((s('oc-buscar')||{}).value||'').toLowerCase().trim();
+
+  // Los indicadores miran SIEMPRE todo, no lo filtrado: sirven para saber que
+  // hay en la calle, y un filtro no deberia cambiar esa respuesta.
+  const enCalle=(ocCache||[]).filter(o=>o.estado!=='ENTREGADO EN PERU'&&o.estado!=='CANCELADO');
+  const usd=L=>L.reduce((t,o)=>t+parseFloat(o.valor_usd||0),0);
+  const put=(id,v)=>{const e=s(id); if(e) e.textContent=v;};
+  for(const [est,idN,idU] of [
+    ['COMPRADO','oc-st-comprado','oc-st-comprado-usd'],
+    ['EN CAMINO USA','oc-st-camino','oc-st-camino-usd'],
+    ['ENTREGADO EN USA','oc-st-usa','oc-st-usa-usd'],
+  ]){
+    const L=enCalle.filter(o=>o.estado===est);
+    put(idN,L.length); put(idU, L.length?fmtUsd(usd(L)):'—');
   }
-  const ESTADO_BADGE={
-    PENDIENTE:'<span class="badge badge-yellow">PENDIENTE</span>',
-    COMPLETADA:'<span class="badge badge-green">COMPLETADA</span>',
-    CANCELADA:'<span class="badge badge-red">CANCELADA</span>'
-  };
+  put('oc-st-total', enCalle.length);
+  put('oc-st-total-usd', enCalle.length?fmtUsd(usd(enCalle)):'—');
+
+  let ocs=(ocCache||[]).slice();
+  if(estadoF) ocs=ocs.filter(o=>o.estado===estadoF);
+  if(tipoF)   ocs=ocs.filter(o=>o.tipo===tipoF);
+  if(q) ocs=ocs.filter(o=>[o.codigo,o.descripcion,o.nombre,o.tienda,o.courier,o.tracking,o.orden_tienda,o.notas]
+    .some(v=>String(v||'').toLowerCase().includes(q)));
+  ocs.sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||'')||(b.codigo||'').localeCompare(a.codigo||''));
+
   const _filasOcs=ocs.map(oc=>{
-    const prods=inventarioCache.filter(p=>p.orden_compra===oc.codigo);
-    const monto=prods.reduce((sum,p)=>sum+parseFloat(p.precio_compra_soles||0),0);
-    const fecha=oc.fecha?oc.fecha.slice(8,10)+'/'+oc.fecha.slice(5,7)+'/'+oc.fecha.slice(2,4):'—';
-    return `<tr>
+    const arts=inventarioCache.filter(x=>x.orden_compra===oc.codigo);
+    const [cls,txt]=OC_BADGE[oc.estado]||['badge-muted',oc.estado||'—'];
+    const enPeru=oc.estado==='ENTREGADO EN PERU';
+    const trk=oc.tracking?`<span class="td-unit td-trunc" title="${esc(oc.tracking)}">${esc(String(oc.tracking).split(' / ')[0])}</span>`:'';
+    return `<tr class="${enPeru?'row-dim':''}">
       <td><span class="td-code" style="color:var(--accent)">${oc.codigo}</span></td>
-      <td class="td-main">${oc.nombre||'<span class="td-unit">—</span>'}</td>
-      <td>${oc.tipo==='IMPORTACION'?'<span class="badge badge-accent">Import.</span>':'<span class="badge badge-muted">Local</span>'}</td>
-      <td>${ESTADO_BADGE[oc.estado]||oc.estado}</td>
-      <td class="td-amt right">${prods.length}</td>
-      <td class="td-amt right" style="color:var(--accent)">${fmt(monto)}</td>
-      <td class="td-unit td-trunc" title="${oc.notas||''}">${oc.notas||'—'}</td>
-      <td class="td-code">${fecha}</td>
+      <td class="td-fecha">${fmtFecha(oc.fecha)}</td>
+      <td class="td-main">${esc(oc.descripcion||oc.nombre||'—')}${trk?'<br>'+trk:''}</td>
+      <td><span class="badge ${cls}">${txt}</span></td>
+      <td class="td-unit">${esc(oc.tienda||'—')}</td>
+      <td class="td-unit">${esc(oc.courier||'—')}</td>
+      <td class="td-unit">${esc(oc.qc||'—')}</td>
+      <td class="td-amt right">${oc.valor_usd?fmtUsd(oc.valor_usd):'<span class="td-muted">—</span>'}</td>
+      <td class="right">${arts.length
+        ? `<span class="badge badge-muted" style="cursor:pointer" onclick="ocVerArticulos('${oc.codigo}')">${arts.length}</span>`
+        : '<span class="td-muted">—</span>'}</td>
+      <td class="right"><button class="oc-edit-btn" onclick="ocAbrirModal('${oc.codigo}')">Editar</button></td>
     </tr>`;
   });
-  pagRender('ocs', _filasOcs, 'oc-tbody', 8, '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--muted2)">Sin órdenes de compra</td></tr>');
+  pagRender('ocs', _filasOcs, 'oc-tbody', 10,
+    '<tr><td colspan="10" style="text-align:center;padding:32px;color:var(--muted2)">Sin órdenes de compra</td></tr>');
+}
+
+// Los articulos de una OC salen del inventario: un producto apunta a su orden
+// por `orden_compra`. Mientras la compra no llega a Peru no hay producto aun,
+// y la OC se muestra sin articulos.
+function ocVerArticulos(cod){
+  const oc=(ocCache||[]).find(o=>o.codigo===cod);
+  const arts=inventarioCache.filter(x=>x.orden_compra===cod);
+  const cuerpo=document.getElementById('oc-arts-body');
+  if(cuerpo){
+    cuerpo.innerHTML = arts.length ? `<table style="width:100%"><thead><tr>
+        <th style="width:88px">Código</th><th>Producto</th><th style="width:64px">Talla</th>
+        <th class="right" style="width:96px">Costo Total</th><th style="width:104px">Estado</th></tr></thead><tbody>`
+      + arts.map(p=>`<tr>
+          <td><span class="td-code">${p.codigo_producto}</span></td>
+          <td class="td-main">${esc([p.marca,p.modelo,p.colorway].filter(Boolean).join(' · '))}</td>
+          <td class="td-unit">${esc(p.talla||'—')}</td>
+          <td class="td-amt right">${fmt(valStock(p))}</td>
+          <td><span class="badge badge-muted">${p.estado}</span></td>
+        </tr>`).join('') + '</tbody></table>'
+      : '<div style="text-align:center;padding:26px;color:var(--muted2);font-size:12px">'
+        +'Todavía no hay productos registrados en esta orden.<br>'
+        +'<span style="font-size:11px">Se registran cuando la compra llega a Perú.</span></div>';
+  }
+  const t=document.getElementById('oc-arts-title');
+  if(t) t.textContent=`${cod} · ${oc?.descripcion||oc?.nombre||''}`.trim();
+  document.getElementById('modal-oc-arts')?.classList.add('show');
+}
+function ocCerrarArticulos(){ document.getElementById('modal-oc-arts')?.classList.remove('show'); }
+
+// ── CREAR / EDITAR OC ──
+let ocEditando=null;
+async function ocAbrirModal(cod){
+  ocEditando=cod||null;
+  const oc=cod?(ocCache||[]).find(o=>o.codigo===cod):null;
+  const v=(id,val)=>{const e=document.getElementById(id); if(e) e.value=val??'';};
+  document.getElementById('oc-modal-title').textContent=oc?`Editar ${oc.codigo}`:'Nueva orden de compra';
+  if(oc){
+    v('ocm-codigo',oc.codigo); v('ocm-fecha',oc.fecha); v('ocm-desc',oc.descripcion||oc.nombre);
+    v('ocm-tienda',oc.tienda); v('ocm-orden',oc.orden_tienda); v('ocm-courier',oc.courier);
+    v('ocm-tracking',oc.tracking); v('ocm-usd',oc.valor_usd); v('ocm-notas',oc.notas);
+    setCombo('ocm-estado', OC_BADGE[oc.estado]?OC_BADGE[oc.estado][1]:oc.estado);
+    setCombo('ocm-tipo', oc.tipo==='IMPORTACION'?'✈️ IMPORTACIÓN':'🏪 LOCAL');
+    setCombo('ocm-qc', oc.qc||'');
+  }else{
+    ['ocm-desc','ocm-tienda','ocm-orden','ocm-courier','ocm-tracking','ocm-usd','ocm-notas'].forEach(i=>v(i,''));
+    v('ocm-fecha', fechaHoy());
+    v('ocm-codigo', ocSiguienteCodigo());
+    setCombo('ocm-estado','🛒 Comprado'); setCombo('ocm-tipo','✈️ IMPORTACIÓN'); setCombo('ocm-qc','Por enviar');
+  }
+  document.getElementById('modal-oc')?.classList.add('show');
+}
+function ocCerrarModal(){ document.getElementById('modal-oc')?.classList.remove('show'); ocEditando=null; }
+function setCombo(id,val){ const e=document.getElementById(id); if(e) e.value=val||''; }
+
+// El correlativo sale de lo que ya existe, no de una secuencia de Postgres:
+// una secuencia no retrocede al borrar y deja huecos.
+function ocSiguienteCodigo(){
+  const n=(ocCache||[]).map(o=>parseInt(String(o.codigo||'').replace(/\D/g,''),10)).filter(x=>!isNaN(x));
+  return 'OC-'+String((n.length?Math.max(...n):0)+1).padStart(3,'0');
+}
+
+async function ocGuardar(){
+  const g=id=>(document.getElementById(id)?.value||'').trim();
+  const desc=g('ocm-desc');
+  if(!desc){ toast('Falta la descripción','warn'); return; }
+  const estado=noEmoji(g('ocm-estado')).toUpperCase().replace('EN PERÚ','EN PERU');
+  const est=OC_ETAPAS.concat('CANCELADO').find(e=>estado.includes(e.split(' ')[0])&&estado.replace(/\s+/g,' ')===e)||
+            OC_ETAPAS.concat('CANCELADO').find(e=>e===estado);
+  const payload={
+    fecha:g('ocm-fecha')||fechaHoy(),
+    tipo: noEmoji(g('ocm-tipo')).includes('LOCAL')?'LOCAL':'IMPORTACION',
+    estado: est||'COMPRADO',
+    descripcion:desc, nombre:desc.slice(0,120),
+    tienda:g('ocm-tienda')||null, orden_tienda:g('ocm-orden')||null,
+    courier:g('ocm-courier')||null, tracking:g('ocm-tracking')||null,
+    qc:noEmoji(g('ocm-qc'))||null,
+    valor_usd:parseFloat(g('ocm-usd'))||null,
+    notas:g('ocm-notas')||null,
+  };
+  const btn=document.getElementById('oc-btn-guardar');
+  if(btn){ btn.disabled=true; btn.textContent='Guardando…'; }
+  try{
+    if(ocEditando){
+      const{error}=await db.from('ordenes_compra').update(payload).eq('codigo',ocEditando);
+      if(error) throw error;
+      toast('✓ '+ocEditando+' actualizada','ok');
+    }else{
+      const{error}=await db.from('ordenes_compra').insert({...payload,codigo:g('ocm-codigo')||ocSiguienteCodigo()});
+      if(error) throw error;
+      toast('✓ Orden creada','ok');
+    }
+    ocCerrarModal();
+    await loadOCs();
+  }catch(e){
+    toast('No se pudo guardar: '+(e.message||e),'err');
+  }finally{
+    if(btn){ btn.disabled=false; btn.textContent='Guardar'; }
+  }
 }
 
 // ── TC GLOBAL ──
@@ -3529,7 +3681,11 @@ function fillDataLists(){
   // Opciones fijas — toolbars otros tabs
   comboSetData('cl-vt-f-canal', ['— Todos —','📸 INSTAGRAM','💬 WHATSAPP','🏪 PRESENCIAL','🔹 OTRO']);
   comboSetData('cl-clf-tipo', ['— Todos —','👤 REGULAR','⭐ VIP','📦 MAYORISTA']);
-  comboSetData('cl-oc-f-estado', ['— Todos —','⏳ PENDIENTE','✅ COMPLETADA','❌ CANCELADA']);
+  const OC_OPC=['🛒 COMPRADO','✈️ EN CAMINO USA','📦 ENTREGADO EN USA','🇵🇪 ENTREGADO EN PERU','❌ CANCELADO'];
+  comboSetData('cl-oc-f-estado', ['— Todos —', ...OC_OPC]);
+  comboSetData('cl-ocm-estado', OC_OPC);
+  comboSetData('cl-ocm-tipo',   ['✈️ IMPORTACIÓN','🏪 LOCAL']);
+  comboSetData('cl-ocm-qc',     ['Por enviar','Enviado a QC','GOAT','No aplica']);
   comboSetData('cl-oc-f-tipo', ['— Todos —','✈️ IMPORTACIÓN','🏪 LOCAL']);
   comboSetData('cl-fc-accion', ['— Todos —','VENTA','COMPRA','COSTO','GASTO','INVERSIÓN','PENDIENTE','RESERVA','CANCELACIÓN']);
   // Opciones fijas — formularios registro
@@ -5536,11 +5692,6 @@ function renderFlujoTabla() {
     return;
   }
 
-  const fmtFecha = f => {
-    if(!f) return '—';
-    const s=String(f).slice(0,10);
-    return s.slice(8,10)+'/'+s.slice(5,7)+'/'+s.slice(2,4);
-  };
 
   const fmtUsdAmt = v => parseFloat(v||0) > 0 ? '$ '+parseFloat(v).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
 
@@ -5658,6 +5809,23 @@ function fechaHoy(){const d=new Date();return d.getFullYear()+'-'+String(d.getMo
 function fmt(n){return'S/. '+parseFloat(n||0).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2});}
 // Global y declarada con `function` (hoisted): habia un `const fmtUsd` local
 // dentro de renderFlujoTabla, asi que llamarlo desde fuera tiraba ReferenceError.
+// Escapa texto que va dentro del HTML. Los nombres de producto y las notas
+// vienen del usuario: una comilla en un title= parte el atributo y se come el
+// resto de la fila.
+function esc(v){
+  return String(v==null?'':v)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+// Global a proposito: la usan el tab de Flujo y el de OC. Estaba declarada
+// con const dentro de renderFlujoTabla, asi que llamarla desde fuera tiraba
+// ReferenceError y cortaba el render a la mitad. Mismo caso que fmtUsd.
+function fmtFecha(f){
+  if(!f) return '—';
+  const s=String(f).slice(0,10);
+  return s.slice(8,10)+'/'+s.slice(5,7)+'/'+s.slice(2,4);
+}
+
 function fmtUsd(v){return'$ '+parseFloat(v||0).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function setLoading(btn,on,label){btn.disabled=on;btn.innerHTML=on?'<div class="spinner"></div> Guardando...':(label||'');}
 let toastTimer;
@@ -6362,6 +6530,59 @@ init();
               id="fc-cerrar-confirm" onclick="fcConfirmarCerrarMes()">Cerrar mes</button>
       <button class="btn btn-ghost" onclick="fcCerrarModalCerrarMes()">Volver</button>
     </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-oc">
+  <div class="modal" style="max-width:620px">
+    <div class="modal-title">
+      <span id="oc-modal-title">Nueva orden de compra</span>
+      <button class="modal-close" onclick="ocCerrarModal()">&times;</button>
+    </div>
+    <div class="form-grid g2" style="margin-bottom:10px">
+      <div class="field"><label>Código</label><input type="text" id="ocm-codigo" placeholder="OC-001"></div>
+      <div class="field"><label>Fecha de compra</label><input type="date" id="ocm-fecha" placeholder=""></div>
+    </div>
+    <div class="field" style="margin-bottom:10px">
+      <label>Descripción</label>
+      <input type="text" id="ocm-desc" placeholder="AMIRI MA-1 BLACK SILVER 42IT">
+    </div>
+    <div class="form-grid g2" style="margin-bottom:10px">
+      <div class="field"><label>Estado</label><div class="combo-wrap"><input type="text" id="ocm-estado" autocomplete="off" readonly oninput="comboFilter('ocm-estado','cl-ocm-estado')" onfocus="comboOpen('ocm-estado','cl-ocm-estado')" onblur="comboBlurStrict('ocm-estado','cl-ocm-estado')" onkeydown="comboKey(event,'ocm-estado','cl-ocm-estado')"><span class="combo-arrow">▼</span><div class="combo-list" id="cl-ocm-estado"></div></div></div>
+      <div class="field"><label>Tipo</label><div class="combo-wrap"><input type="text" id="ocm-tipo" autocomplete="off" readonly oninput="comboFilter('ocm-tipo','cl-ocm-tipo')" onfocus="comboOpen('ocm-tipo','cl-ocm-tipo')" onblur="comboBlurStrict('ocm-tipo','cl-ocm-tipo')" onkeydown="comboKey(event,'ocm-tipo','cl-ocm-tipo')"><span class="combo-arrow">▼</span><div class="combo-list" id="cl-ocm-tipo"></div></div></div>
+    </div>
+    <div class="form-grid g2" style="margin-bottom:10px">
+      <div class="field"><label>Tienda</label><input type="text" id="ocm-tienda" placeholder="STOCKX, GOAT, SUPREME…"></div>
+      <div class="field"><label>N° de orden de la tienda</label><input type="text" id="ocm-orden" placeholder="#547728766"></div>
+    </div>
+    <div class="form-grid g2" style="margin-bottom:10px">
+      <div class="field"><label>Courier</label><input type="text" id="ocm-courier" placeholder="UPS, FEDEX, DHL…"></div>
+      <div class="field"><label>QC</label><div class="combo-wrap"><input type="text" id="ocm-qc" autocomplete="off" readonly oninput="comboFilter('ocm-qc','cl-ocm-qc')" onfocus="comboOpen('ocm-qc','cl-ocm-qc')" onblur="comboBlurStrict('ocm-qc','cl-ocm-qc')" onkeydown="comboKey(event,'ocm-qc','cl-ocm-qc')"><span class="combo-arrow">▼</span><div class="combo-list" id="cl-ocm-qc"></div></div></div>
+    </div>
+    <div class="form-grid g2" style="margin-bottom:10px">
+      <div class="field"><label>Tracking</label><input type="text" id="ocm-tracking" placeholder="#1Z24WA430326764143"></div>
+      <div class="field"><label>Valor US$</label><input type="number" id="ocm-usd" placeholder="0.00"></div>
+    </div>
+    <div class="field" style="margin-bottom:16px">
+      <label>Notas</label>
+      <input type="text" id="ocm-notas" placeholder="Falta FUDGE 11US…">
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn" id="oc-btn-guardar" onclick="ocGuardar()"
+        style="flex:1;background:var(--accent);color:#fff;border:none">Guardar</button>
+      <button class="btn btn-ghost" onclick="ocCerrarModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-oc-arts">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-title">
+      <span id="oc-arts-title">Artículos</span>
+      <button class="modal-close" onclick="ocCerrarArticulos()">&times;</button>
+    </div>
+    <div id="oc-arts-body" style="margin-bottom:14px"></div>
+    <button class="btn btn-ghost" onclick="ocCerrarArticulos()" style="width:100%">Cerrar</button>
   </div>
 </div>
 
