@@ -373,10 +373,10 @@ input[list] { cursor: text; }
 .pat-leg-dot.right{justify-content:flex-end}
 .pat-leg-dot::before{content:'';width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .caja-dot::before{background:var(--accent)}
-.stock-dot::before{background:var(--blue)}
+.stock-dot::before{background:var(--purple)}
 .pat-leg-pct{font-family:"Archivo Black";font-size:17px;line-height:1;font-variant-numeric:tabular-nums}
 .pat-leg-pct.accent{color:var(--accent)}
-.pat-leg-pct.blue{color:var(--blue)}
+.pat-leg-pct.blue{color:var(--purple)}
 .pat-leg-pct.green{color:var(--green)}
 .activo-dot::before{background:var(--green)}
 .pat-leg-amt{font-size:10px;color:var(--muted2);font-variant-numeric:tabular-nums;margin-top:1px}
@@ -415,6 +415,14 @@ input[list] { cursor: text; }
 .inv-pag{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;margin-top:10px;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow)}
 .inv-pag-info{font-size:11px;color:var(--muted2)}
 .fc-mes-label{font-family:"Archivo Black";font-size:20px;color:var(--text);letter-spacing:.5px}
+.fc-cerrar-btn{margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:7px 14px;
+  border-radius:9px;border:1px solid rgba(96,165,250,.28);background:rgba(96,165,250,.10);
+  color:var(--blue);font-family:inherit;font-size:12.5px;font-weight:600;letter-spacing:.3px;
+  cursor:pointer;transition:background .15s,border-color .15s}
+.fc-cerrar-btn:hover{background:rgba(96,165,250,.18);border-color:rgba(96,165,250,.45)}
+.fc-cerrar-btn:disabled{opacity:.4;cursor:not-allowed}
+.fc-cerrado-tag{margin-left:auto;padding:7px 14px;border-radius:9px;font-size:12.5px;font-weight:600;
+  color:var(--green);background:rgba(22,163,74,.10);border:1px solid rgba(22,163,74,.24)}
 
 /* 3 burbujas principales */
 .fc-trio{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
@@ -1940,6 +1948,11 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
     <button class="fc-nav-btn" onclick="fcMesAnterior()">‹</button>
     <div class="fc-mes-label" id="fc-mes-label">—</div>
     <button class="fc-nav-btn" onclick="fcMesSiguiente()">›</button>
+    <button class="fc-cerrar-btn" id="fc-cerrar-btn" onclick="fcAbrirCerrarMes()"
+            title="Guarda la caja y el stock de cierre como apertura del mes siguiente">
+      🔒 Cerrar mes
+    </button>
+    <span class="fc-cerrado-tag" id="fc-cerrado-tag" style="display:none">✓ Cerrado</span>
   </div>
 
   <!-- 3 Burbujas principales -->
@@ -2077,10 +2090,10 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
     <div class="ind-card ind-patrimonio">
       <div class="pat-chip">Patrimonio</div>
       <div class="pat-total" id="ind-patrimonio">—</div>
-      <div class="pat-sub"><span style="color:var(--accent)">Caja</span> <span style="color:var(--muted2)">+</span> <span style="color:var(--blue)">Stock</span> <span style="color:var(--muted2)">+</span> <span style="color:var(--green)">Activo fijo</span></div>
+      <div class="pat-sub"><span style="color:var(--accent)">Caja</span> <span style="color:var(--muted2)">+</span> <span style="color:var(--purple)">Stock</span> <span style="color:var(--muted2)">+</span> <span style="color:var(--green)">Activo fijo</span></div>
       <div class="pat-bar-wrap">
         <div id="ind-bar-caja"   style="height:100%;background:var(--accent);border-radius:4px 0 0 4px;transition:width .7s cubic-bezier(.4,0,.2,1);width:50%"></div>
-        <div id="ind-bar-stock"  style="height:100%;background:var(--blue);border-radius:0;transition:width .7s cubic-bezier(.4,0,.2,1);width:50%"></div>
+        <div id="ind-bar-stock"  style="height:100%;background:var(--purple);border-radius:0;transition:width .7s cubic-bezier(.4,0,.2,1);width:50%"></div>
         <div id="ind-bar-activo" style="height:100%;background:var(--green);border-radius:0 4px 4px 0;transition:width .7s cubic-bezier(.4,0,.2,1);width:0%"></div>
       </div>
       <div class="pat-legend">
@@ -5049,6 +5062,76 @@ function fcMesSiguiente() {
   loadFlujo();
 }
 
+// ── CIERRE DE MES ──────────────────────────────────────────────
+// Guarda la caja y el stock al cierre como apertura del mes siguiente.
+// Sirve para dos cosas: el mes queda congelado con lo que de verdad paso, y
+// el stock de meses viejos deja de reconstruirse desde el inventario de hoy
+// (reconstruirlo no funciona: lo que se compro y vendio en el pasado ya no
+// esta en la base).
+function fcPintarEstadoCierre(cerrado){
+  const btn = document.getElementById('fc-cerrar-btn');
+  const tag = document.getElementById('fc-cerrado-tag');
+  if(!btn||!tag) return;
+  btn.style.display = cerrado ? 'none' : '';
+  tag.style.display = cerrado ? '' : 'none';
+  if(cerrado){
+    const c = window._fcCierre;
+    tag.title = c ? `El cierre de ${fcMesLabel(c.mes)} ya esta guardado como apertura de ${fcMesLabel(c.mesSig)}` : '';
+  }
+}
+
+function fcAbrirCerrarMes(){
+  const c = window._fcCierre;
+  if(!c){ toast('Espera a que termine de cargar el mes','warn'); return; }
+  const cuerpo = document.getElementById('fc-cerrar-body');
+  if(cuerpo){
+    cuerpo.innerHTML = `
+      <p style="margin:0 0 14px;color:var(--muted);font-size:13px;line-height:1.55">
+        Se guardara el cierre de <strong style="color:var(--text)">${fcMesLabel(c.mes)}</strong>
+        como apertura de <strong style="color:var(--text)">${fcMesLabel(c.mesSig)}</strong>.
+      </p>
+      <div class="fc-row"><span class="fc-row-lbl">Caja al cierre</span>
+        <span class="fc-row-val">${fmt(c.caja)}</span></div>
+      <div class="fc-row"><span class="fc-row-lbl">Valor de stock</span>
+        <span class="fc-row-val blue">${fmt(c.stock)}</span></div>
+      <p style="margin:14px 0 0;color:var(--muted2);font-size:12px;line-height:1.5">
+        A partir de ahi ${fcMelLabelSafe(c.mes)} deja de recalcularse y muestra siempre estas cifras.
+        Si vuelves a cerrarlo, se sobrescriben.
+      </p>`;
+  }
+  const m = document.getElementById('modal-cerrar-mes');
+  if(m) m.classList.add('show');
+}
+function fcMelLabelSafe(m){ try{ return fcMesLabel(m); }catch(e){ return m; } }
+function fcCerrarModalCerrarMes(){
+  const m = document.getElementById('modal-cerrar-mes');
+  if(m) m.classList.remove('show');
+}
+
+async function fcConfirmarCerrarMes(){
+  const c = window._fcCierre;
+  if(!c) return;
+  const btn = document.getElementById('fc-cerrar-confirm');
+  if(btn){ btn.disabled = true; btn.textContent = 'Guardando...'; }
+  try{
+    // upsert manual: la tabla puede no tener constraint unica sobre `mes`
+    const{data:ya}=await db.from('caja_mensual').select('mes').eq('mes',c.mesSig);
+    const payload={ mes:c.mesSig, caja_inicio:Math.round(c.caja*100)/100,
+                    stock_inicio:Math.round(c.stock*100)/100 };
+    const{error}= (ya&&ya.length)
+      ? await db.from('caja_mensual').update(payload).eq('mes',c.mesSig)
+      : await db.from('caja_mensual').insert(payload);
+    if(error) throw error;
+    toast(`✓ ${fcMesLabel(c.mes)} cerrado — apertura de ${fcMesLabel(c.mesSig)} guardada`,'ok');
+    fcCerrarModalCerrarMes();
+    await loadFlujo();
+  }catch(e){
+    toast('No se pudo cerrar el mes: '+(e.message||e),'err');
+  }finally{
+    if(btn){ btn.disabled=false; btn.textContent='Cerrar mes'; }
+  }
+}
+
 async function loadFlujo() {
   if(!fcMesActual) {
     const now = new Date();
@@ -5310,6 +5393,12 @@ async function loadFlujo() {
   document.getElementById('fc-caja-fin').textContent     = fmt(cajaFin);
   document.getElementById('fc-stock-fin').textContent    = fmt(stockFin);
   document.getElementById('fc-total-label').textContent  = fmt(totalFin);
+
+  // Lo que necesita el boton de cerrar mes: el cierre de este mes es la
+  // apertura del siguiente. Se guarda aca porque son valores locales de
+  // loadFlujo() y el boton corre despues, fuera de este scope.
+  window._fcCierre = { mes: fcMesActual, mesSig: _mesSig, caja: cajaFin, stock: stockFin };
+  fcPintarEstadoCierre(!!cierreSig);
   const crFinEl = document.getElementById('fc-caja-real-fin');
   if(crFinEl){ crFinEl.textContent = fmt(cajaReal); crFinEl.style.color = realColor; }
   // Control
@@ -6191,6 +6280,26 @@ init();
     <div style="display:flex;gap:8px">
       <button class="btn" style="flex:1;background:var(--red);color:#fff;border:none" id="btn-mxrv-confirm" onclick="confirmarCancelarReserva()">Sí, cancelar reserva</button>
       <button class="btn btn-ghost" onclick="cerrarModalCancelarRsv()">No, volver</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-cerrar-mes">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-title">
+      <span>Cerrar mes</span>
+      <button class="modal-close" onclick="fcCerrarModalCerrarMes()">&times;</button>
+    </div>
+    <div id="fc-cerrar-body" style="margin-bottom:16px"></div>
+    <div class="info-box" style="margin-bottom:16px;font-size:11px">
+      Guardar el cierre es lo que permite que un mes viejo muestre lo que de verdad pas&oacute;.
+      Sin esto la app intenta reconstruir el stock desde el inventario de hoy, y no puede:
+      lo que se compr&oacute; y vendi&oacute; en el pasado ya no figura.
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn" style="flex:1;background:var(--accent);color:#fff;border:none"
+              id="fc-cerrar-confirm" onclick="fcConfirmarCerrarMes()">Cerrar mes</button>
+      <button class="btn btn-ghost" onclick="fcCerrarModalCerrarMes()">Volver</button>
     </div>
   </div>
 </div>
