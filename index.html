@@ -1136,7 +1136,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <!-- Preview precios -->
         <div id="vt-info" style="display:none;grid-column:span 2">
           <div class="precio-preview show">
-            <div class="pp-item"><div class="pp-label">Precio Final S/.</div><div class="pp-val" id="vt-precio-final" style="color:var(--red)">—</div></div>
+            <div class="pp-item"><div class="pp-label">Costo Total S/.</div><div class="pp-val" id="vt-precio-final" style="color:var(--red)">—</div></div>
             <div class="pp-item"><div class="pp-label">Sugerido S/.</div><div class="pp-val" id="vt-precio-sug" style="color:var(--accent)">—</div></div>
             <div class="pp-item"><div class="pp-label">Ganancia estimada</div><div class="pp-val" id="vt-ganancia-prev" style="color:var(--green)">—</div></div>
           </div>
@@ -5926,7 +5926,7 @@ document.addEventListener('keydown',function(e){
 
 // ── EXPORT CSV ──
 function exportInventarioCSV(){
-  const h=['Fecha','Código','Marca','Modelo','Colorway','Talla','Categoría','Estado','P.Compra S/.','Costos S/.','P.Final S/.','P.Venta Sug.','Margen %','Tipo Pago'];
+  const h=['Fecha','Código','Marca','Modelo','Colorway','Talla','Categoría','Estado','P.Compra S/.','Costos S/.','Costo Total S/.','P.Venta Sug.','Margen %','Tipo Pago'];
   const r=inventarioCache.map(p=>{
     const pF=parseFloat(p.precio_final||p.precio_compra_soles||0);
     const pV=parseFloat(p.precio_venta_sugerido||0);
