@@ -1,0 +1,4 @@
+# scripts sueltos de analisis, no son parte de la app
+*.py
+!database/*.py
+chk*.py
