@@ -377,9 +377,10 @@ input[list] { cursor: text; }
 .oc-arts-tabla{width:100%;table-layout:fixed;border:1px solid var(--border2);border-radius:9px;
   overflow:hidden;background:var(--bg)}
 .oc-arts-tabla th{padding:7px 9px;font-size:9px;letter-spacing:1px}
-.oc-arts-tabla td{padding:8px 9px;font-size:11px}
+.oc-arts-tabla td{padding:8px 9px;font-size:11px;overflow:hidden}
+.oc-arts-tabla .badge{max-width:100%;overflow:hidden;text-overflow:ellipsis}
 .oc-arts-tabla tr:first-child td{border-top:none}
-.oc-arts-nom{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:0}
+.oc-arts-nom{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:0;padding-right:18px}
 .oc-cand-list{max-height:210px;overflow-y:auto;border:1px solid var(--border2);border-radius:9px;padding:4px;background:var(--bg);scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
 .oc-cand{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:12px}
 .oc-cand:hover{background:var(--bg)}
@@ -2988,14 +2989,17 @@ function ocPintarArticulos(){
   const nom=p=>[p.marca,p.modelo,p.colorway].filter(Boolean).join(' · ');
   cuerpo.innerHTML = arts.length
     ? `<table class="oc-arts-tabla"><thead><tr>
-         <th style="width:76px">Código</th><th>Producto</th><th style="width:58px">Talla</th>
-         <th style="width:98px">Estado</th><th style="width:30px"></th></tr></thead><tbody>`
+         <th style="width:88px">Código</th><th>Producto</th><th style="width:66px">Talla</th>
+         <th style="width:52px">Pago</th><th style="width:126px">Estado</th>
+         <th style="width:46px"></th></tr></thead><tbody>`
       + arts.map(p=>`<tr>
           <td><span class="td-code">${p.codigo_producto}</span></td>
           <td class="td-main oc-arts-nom" title="${esc(nom(p))}">${esc(nom(p))}</td>
           <td class="td-unit">${esc(p.talla||'—')}</td>
-          <td><span class="badge badge-muted">${p.estado}</span>${
-            p.pago_estado==='PENDIENTE'?' <span class="td-unit" title="Comprado a crédito, aún sin pagar">⏳</span>':''}</td>
+          <td>${p.pago_estado==='PENDIENTE'
+            ? '<span class="td-pend" title="Comprado a crédito, aún sin pagar">⏳</span>'
+            : '<span class="td-muted">—</span>'}</td>
+          <td><span class="badge badge-muted">${p.estado}</span></td>
           <td class="right"><button class="oc-quitar" title="Quitar de esta orden"
               onclick="ocQuitarArticulo('${p.codigo_producto}')">×</button></td>
         </tr>`).join('') + '</tbody></table>'
