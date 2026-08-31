@@ -2975,17 +2975,14 @@ function ocPintarArticulos(){
   const nom=p=>[p.marca,p.modelo,p.colorway].filter(Boolean).join(' · ');
   cuerpo.innerHTML = arts.length
     ? `<table style="width:100%"><thead><tr>
-         <th style="width:88px">Código</th><th>Producto</th><th style="width:60px">Talla</th>
-         <th class="right" style="width:104px">Costo / por pagar</th><th style="width:96px">Estado</th>
-         <th style="width:36px"></th></tr></thead><tbody>`
+         <th style="width:88px">Código</th><th>Producto</th><th style="width:64px">Talla</th>
+         <th style="width:104px">Estado</th><th style="width:36px"></th></tr></thead><tbody>`
       + arts.map(p=>`<tr>
           <td><span class="td-code">${p.codigo_producto}</span></td>
           <td class="td-main">${esc(nom(p))}</td>
           <td class="td-unit">${esc(p.talla||'—')}</td>
-          <td class="td-amt right">${p.pago_estado==='PENDIENTE'
-            ? `<span class="td-pend" title="Comprado a crédito, todavía sin pagar">⏳ ${fmt(p.precio_compra_soles||0)}</span>`
-            : fmt(valStock(p))}</td>
-          <td><span class="badge badge-muted">${p.estado}</span></td>
+          <td><span class="badge badge-muted">${p.estado}</span>${
+            p.pago_estado==='PENDIENTE'?' <span class="td-unit" title="Comprado a crédito, aún sin pagar">⏳</span>':''}</td>
           <td class="right"><button class="oc-quitar" title="Quitar de esta orden"
               onclick="ocQuitarArticulo('${p.codigo_producto}')">×</button></td>
         </tr>`).join('') + '</tbody></table>'
