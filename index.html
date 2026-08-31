@@ -366,18 +366,35 @@ input[list] { cursor: text; }
 .pat-sub{font-size:10px;color:var(--muted2);margin-bottom:8px;letter-spacing:.2px}
 .oc-cod{cursor:pointer;border-bottom:1px dashed transparent}
 .oc-cod:hover{border-bottom-color:var(--accent)}
-.oc-sel-inline{width:100%;padding:4px 6px;border-radius:6px;border:1px solid transparent;
-  background:transparent;color:var(--text);font-family:inherit;font-size:10.5px;font-weight:700;
-  letter-spacing:.2px;cursor:pointer;text-align:left;
-  text-overflow:ellipsis;white-space:nowrap;overflow:hidden}
-.oc-sel-inline:hover{border-color:var(--border);background:var(--bg)}
-.oc-sel-inline:focus{outline:none;border-color:var(--accent);background:var(--bg)}
-.oc-sel-inline.badge-yellow{color:var(--yellow)}
-.oc-sel-inline.badge-accent{color:var(--accent)}
-.oc-sel-inline.badge-purple{color:var(--purple)}
-.oc-sel-inline.badge-green{color:var(--green)}
-.oc-sel-inline.badge-red{color:var(--red)}
-.oc-sel-inline option{background:var(--card);color:var(--text);font-weight:500}
+/* Se ve como un badge, no como un campo de formulario: la fila se lee igual
+   que antes pero el valor se puede cambiar. appearance:none quita la flecha
+   nativa, que ademas se comia el ancho y truncaba "Por enviar" en "Po". */
+.oc-sel-inline{appearance:none;-webkit-appearance:none;
+  max-width:100%;padding:4px 20px 4px 9px;border-radius:20px;
+  border:1px solid transparent;background-color:transparent;
+  background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),
+                   linear-gradient(135deg,currentColor 50%,transparent 50%);
+  background-position:calc(100% - 10px) calc(50% + 1px),calc(100% - 6px) calc(50% + 1px);
+  background-size:4px 4px,4px 4px;background-repeat:no-repeat;
+  color:var(--muted);font-family:inherit;font-size:10px;font-weight:700;
+  letter-spacing:.4px;text-transform:uppercase;cursor:pointer;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.oc-sel-inline:hover{border-color:currentColor}
+.oc-sel-inline:focus{outline:none;border-color:currentColor}
+.oc-sel-inline.badge-yellow{color:var(--yellow);background-color:rgba(180,83,9,.10)}
+.oc-sel-inline.badge-accent{color:var(--accent);background-color:rgba(96,165,250,.10)}
+.oc-sel-inline.badge-purple{color:var(--purple);background-color:rgba(167,139,250,.12)}
+.oc-sel-inline.badge-green {color:var(--green); background-color:rgba(22,163,74,.10)}
+.oc-sel-inline.badge-red   {color:var(--red);   background-color:rgba(220,38,38,.10)}
+.oc-sel-qc{color:var(--muted2);background-color:var(--border2)}
+.oc-sel-inline option{background:var(--card);color:var(--text);font-weight:500;
+  text-transform:none;letter-spacing:0}
+.oc-arts-tabla{width:100%;table-layout:fixed;border:1px solid var(--border2);border-radius:9px;
+  overflow:hidden;background:var(--bg)}
+.oc-arts-tabla th{padding:7px 9px;font-size:9px;letter-spacing:1px}
+.oc-arts-tabla td{padding:8px 9px;font-size:11px}
+.oc-arts-tabla tr:first-child td{border-top:none}
+.oc-arts-nom{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:0}
 .oc-cand-list{max-height:210px;overflow-y:auto;border:1px solid var(--border2);border-radius:9px;padding:4px;background:var(--bg);scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
 .oc-cand{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:12px}
 .oc-cand:hover{background:var(--bg)}
@@ -2325,19 +2342,19 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   </div>
 
   <div class="table-wrap">
-    <table style="min-width:1560px">
+    <table style="min-width:1610px">
       <thead>
         <tr>
           <th style="width:70px">Código</th>
           <th style="width:74px">Fecha</th>
           <th style="min-width:200px">Descripción</th>
-          <th style="width:152px">Estado</th>
+          <th style="width:168px">Estado</th>
           <th style="width:98px">Tienda</th>
           <th style="width:118px">Order</th>
           <th style="width:70px">Courier</th>
           <th style="width:140px">Tracking</th>
           <th style="width:54px">Grupo</th>
-          <th style="width:118px">QC</th>
+          <th style="width:126px">QC</th>
           <th class="right" style="width:82px">Valor $</th>
           <th style="min-width:120px">Información</th>
           <th class="right" style="width:56px">Arts.</th>
@@ -2863,7 +2880,7 @@ const OC_BADGE = {
   'COMPRADO'          : ['badge-yellow','🛒 Comprado'],
   'EN CAMINO USA'     : ['badge-accent','✈️ En camino USA'],
   'ENTREGADO EN USA'  : ['badge-purple','📦 Entregado USA'],
-  'ENTREGADO EN PERU' : ['badge-green', '🇵🇪 En Perú'],
+  'ENTREGADO EN PERU' : ['badge-green', '✅ En Perú'],
   'CANCELADO'         : ['badge-red',   '❌ Cancelado'],
 };
 
@@ -2931,7 +2948,7 @@ function renderOCTab(){
       <td>${uni(oc.courier)}</td>
       <td>${trk}</td>
       <td>${uni(oc.grupo)}</td>
-      <td><select class="oc-sel-inline" onchange="ocCambiarCampo('${oc.codigo}','qc',this.value)">
+      <td><select class="oc-sel-inline oc-sel-qc" onchange="ocCambiarCampo('${oc.codigo}','qc',this.value)">
         ${OC_QC.map(v=>`<option value="${v}"${v===(oc.qc||'')?' selected':''}>${v||'—'}</option>`).join('')}
       </select></td>
       <td class="td-amt right">${oc.valor_usd?fmtUsd(oc.valor_usd):'<span class="td-muted">—</span>'}</td>
@@ -2974,12 +2991,12 @@ function ocPintarArticulos(){
   if(!cuerpo) return;
   const nom=p=>[p.marca,p.modelo,p.colorway].filter(Boolean).join(' · ');
   cuerpo.innerHTML = arts.length
-    ? `<table style="width:100%"><thead><tr>
-         <th style="width:88px">Código</th><th>Producto</th><th style="width:64px">Talla</th>
-         <th style="width:104px">Estado</th><th style="width:36px"></th></tr></thead><tbody>`
+    ? `<table class="oc-arts-tabla"><thead><tr>
+         <th style="width:76px">Código</th><th>Producto</th><th style="width:58px">Talla</th>
+         <th style="width:98px">Estado</th><th style="width:30px"></th></tr></thead><tbody>`
       + arts.map(p=>`<tr>
           <td><span class="td-code">${p.codigo_producto}</span></td>
-          <td class="td-main">${esc(nom(p))}</td>
+          <td class="td-main oc-arts-nom" title="${esc(nom(p))}">${esc(nom(p))}</td>
           <td class="td-unit">${esc(p.talla||'—')}</td>
           <td><span class="badge badge-muted">${p.estado}</span>${
             p.pago_estado==='PENDIENTE'?' <span class="td-unit" title="Comprado a crédito, aún sin pagar">⏳</span>':''}</td>
@@ -3853,7 +3870,7 @@ function fillDataLists(){
   // Opciones fijas — toolbars otros tabs
   comboSetData('cl-vt-f-canal', ['— Todos —','📸 INSTAGRAM','💬 WHATSAPP','🏪 PRESENCIAL','🔹 OTRO']);
   comboSetData('cl-clf-tipo', ['— Todos —','👤 REGULAR','⭐ VIP','📦 MAYORISTA']);
-  const OC_OPC=['🛒 COMPRADO','✈️ EN CAMINO USA','📦 ENTREGADO EN USA','🇵🇪 ENTREGADO EN PERU','❌ CANCELADO'];
+  const OC_OPC=['🛒 COMPRADO','✈️ EN CAMINO USA','📦 ENTREGADO EN USA','✅ ENTREGADO EN PERU','❌ CANCELADO'];
   comboSetData('cl-oc-f-estado', ['— Todos —', ...OC_OPC]);
   comboSetData('cl-ocm-estado', OC_OPC);
   comboSetData('cl-ocm-tipo',   ['✈️ IMPORTACIÓN','🏪 LOCAL']);
@@ -3862,18 +3879,18 @@ function fillDataLists(){
   comboSetData('cl-fc-accion', ['— Todos —','VENTA','COMPRA','COSTO','GASTO','INVERSIÓN','PENDIENTE','RESERVA','CANCELACIÓN']);
   // Opciones fijas — formularios registro
   comboSetData('cl-cp-cat', ['👟 ZAPATILLAS','👕 ROPA','🧢 ACCESORIOS','📦 OTROS']);
-  comboSetData('cl-cp-moneda', ['🇺🇸 USD','🇵🇪 SOLES']);
+  comboSetData('cl-cp-moneda', ['💵 USD','🪙 SOLES']);
   comboSetData('cl-cp-oc-tipo', ['✈️ IMPORTACIÓN','🏪 LOCAL']);
   comboSetData('cl-vt-canal', ['📸 INSTAGRAM','💬 WHATSAPP','🏪 PRESENCIAL','🔹 OTRO']);
   comboSetData('cl-vt-medio-pago', ['💵 EFECTIVO','🏦 TRANSFERENCIA','💳 TARJETA','💜 YAPE','💙 PLIN']);
   comboSetData('cl-pg-cat', ['🏪 OPERATIVO','👤 PERSONAL','📦 IMPORTACIÓN','📣 MARKETING']);
   comboSetData('cl-inv-a-tipo', ['🏠 HIPOTECA','🚗 VEHICULO','🖥 EQUIPO','📂 OTRO']);
-  comboSetData('cl-inv-a-moneda', ['🇵🇪 SOLES','🇺🇸 USD']);
+  comboSetData('cl-inv-a-moneda', ['🪙 SOLES','💵 USD']);
   comboSetData('cl-cl-canal', ['📸 INSTAGRAM','💬 WHATSAPP','🏪 PRESENCIAL','🔹 OTRO']);
   comboSetData('cl-cl-tipo', ['👤 REGULAR','⭐ VIP','📦 MAYORISTA']);
   // Defaults iniciales para combos que arrancan con un valor fijo
   const elMoneda=document.getElementById('cp-moneda');
-  if(elMoneda&&!elMoneda.value) elMoneda.value='🇺🇸 USD';
+  if(elMoneda&&!elMoneda.value) elMoneda.value='💵 USD';
   setRvTipo('STOCK');
   // Suprimir autocomplete/autocorrect del browser en todos los combos
   document.querySelectorAll('.combo-wrap input').forEach(el=>{
