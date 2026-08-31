@@ -3838,8 +3838,12 @@ async function pageAll(build){
 // ambas monedas y es lo que realmente hay que pagar.
 function deudaCreditos(){
   const pend=(inventarioCache||[]).filter(p=>p.pago_estado==='PENDIENTE');
+  // Pedido = el producto ya tiene dueno: esta RESERVADO. Todo lo demas es stock
+  // libre. Antes se miraba el tipo de la reserva (PEDIDO vs STOCK), pero las
+  // reservas se registran como STOCK aunque el producto no este pagado, asi que
+  // ese criterio dejaba la columna Pedido siempre en cero.
   const pedidoSet=new Set(
-    (reservasCache||[]).filter(r=>r.tipo==='PEDIDO'&&r.codigo_producto).map(r=>r.codigo_producto)
+    pend.filter(p=>p.estado==='RESERVADO').map(p=>p.codigo_producto)
   );
   const acum=L=>({
     n:L.length,
