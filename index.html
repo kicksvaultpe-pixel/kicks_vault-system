@@ -3799,8 +3799,12 @@ async function invMesAnterior(){
   invMesActual=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
   await loadInventario();
 }
+// Mes en curso: no tiene sentido avanzar mas alla, no hay nada que mostrar.
+function mesHoy(){const n=new Date();return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0');}
+
 async function invMesSiguiente(){
-  if(!invMesActual){const n=new Date();invMesActual=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0');}
+  if(!invMesActual) invMesActual=mesHoy();
+  if(invMesActual>=mesHoy()) return;
   const[y,m]=invMesActual.split('-').map(Number);
   const d=new Date(y,m,1);
   invMesActual=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
@@ -5558,9 +5562,19 @@ async function fcConfirmarCerrarMes(){
       ? await db.from('caja_mensual').update(payload).eq('mes',c.mesSig)
       : await db.from('caja_mensual').insert(payload);
     if(error) throw error;
-    toast(`✓ ${fcMesLabel(c.mes)} cerrado — apertura de ${fcMesLabel(c.mesSig)} guardada`,'ok');
+    toast(`✓ ${fcMesLabel(c.mes)} cerrado — los tres tabs pasan a ${fcMesLabel(c.mesSig)}`,'ok');
     fcCerrarModalCerrarMes();
-    await loadFlujo();
+    // Cerrar un mes lo cierra para todo el sistema, no solo para este tab, asi
+    // que los tres avanzan juntos. Pero solo si el mes siguiente ya empezo: si
+    // cierras agosto estando en agosto, quedarse aca y mostrar "Cerrado" dice
+    // mas que saltar a un septiembre vacio. Antes Flujo saltaba igual y los
+    // otros dos se quedaban, que era lo peor de las dos opciones.
+    if(c.mesSig <= mesHoy()){
+      fcMesActual  = c.mesSig;
+      invMesActual = c.mesSig; invHistorico = false;
+      vtMesActual  = c.mesSig; vtHistorico  = false;
+    }
+    await Promise.all([loadFlujo(), loadInventario(), loadVentas()]);
   }catch(e){
     toast('No se pudo cerrar el mes: '+(e.message||e),'err');
   }finally{
@@ -5875,7 +5889,6 @@ async function loadFlujo() {
 
   const pendReservasAmt  = reservasMes;
 
-  const fmtUsd = v => '$ ' + parseFloat(v).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2});
   document.getElementById('fc-pend-reservas').textContent  = fmt(pendReservasAmt);
 
   // Bubble compras
@@ -6083,7 +6096,8 @@ async function vtMesAnterior(){
   await loadVentas();
 }
 async function vtMesSiguiente(){
-  if(!vtMesActual){const n=new Date();vtMesActual=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0');}
+  if(!vtMesActual) vtMesActual=mesHoy();
+  if(vtMesActual>=mesHoy()) return;
   const[y,m]=vtMesActual.split('-').map(Number);
   const d=new Date(y,m,1);
   vtMesActual=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
