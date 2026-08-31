@@ -2142,21 +2142,24 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <div id="ind-bar-stock"  style="height:100%;background:var(--purple);border-radius:0;transition:width .7s cubic-bezier(.4,0,.2,1);width:50%"></div>
         <div id="ind-bar-activo" style="height:100%;background:var(--green);border-radius:0 4px 4px 0;transition:width .7s cubic-bezier(.4,0,.2,1);width:0%"></div>
       </div>
+      <!-- Mismo orden que la barra de arriba y que el subtitulo: caja, stock,
+           activo fijo. Antes la leyenda ponia Activo al medio y no coincidia
+           con ninguno de los dos. -->
       <div class="pat-legend">
         <div class="pat-leg-item">
           <div class="pat-leg-dot caja-dot">Caja</div>
           <div class="pat-leg-pct accent" id="ind-caja-pct">—</div>
           <div class="pat-leg-amt" id="ind-caja-amt">—</div>
         </div>
-        <div class="pat-leg-item" id="ind-activo-leg" style="text-align:center;display:none">
-          <div class="pat-leg-dot activo-dot" style="justify-content:center">Activo</div>
-          <div class="pat-leg-pct green" id="ind-activo-pct">—</div>
-          <div class="pat-leg-amt" id="ind-activo-fijo">—</div>
-        </div>
-        <div class="pat-leg-item">
-          <div class="pat-leg-dot stock-dot right">Stock</div>
-          <div class="pat-leg-pct blue" style="text-align:right" id="ind-stock-pct">—</div>
+        <div class="pat-leg-item" style="text-align:center">
+          <div class="pat-leg-dot stock-dot" style="justify-content:center">Stock</div>
+          <div class="pat-leg-pct blue" id="ind-stock-pct">—</div>
           <div class="pat-leg-amt" id="ind-stock-amt">—</div>
+        </div>
+        <div class="pat-leg-item" id="ind-activo-leg" style="text-align:right;display:none">
+          <div class="pat-leg-dot activo-dot right">Activo</div>
+          <div class="pat-leg-pct green" style="text-align:right" id="ind-activo-pct">—</div>
+          <div class="pat-leg-amt" id="ind-activo-fijo">—</div>
         </div>
       </div>
     </div>
