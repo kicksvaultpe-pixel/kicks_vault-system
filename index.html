@@ -364,6 +364,12 @@ input[list] { cursor: text; }
 .pat-chip{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:7px}
 .pat-total{font-family:"Archivo Black";font-size:15px;color:var(--text);margin-bottom:2px;font-variant-numeric:tabular-nums}
 .pat-sub{font-size:10px;color:var(--muted2);margin-bottom:8px;letter-spacing:.2px}
+.pag-row td{padding:0 !important;border-bottom:none !important}
+.pag-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;
+  border-top:1px solid var(--border);background:var(--bg)}
+.pag-info{font-size:11px;color:var(--muted2);letter-spacing:.3px}
+.pag-ctrl{display:flex;align-items:center;gap:6px}
+.pag-page{font-size:11px;font-weight:600;color:var(--text);min-width:70px;text-align:center}
 .pat-bar-wrap{height:4px;background:var(--border2);border-radius:4px;overflow:hidden;margin-bottom:8px;display:flex}
 .pat-bar-inner{height:100%;border-radius:0;background:var(--accent);transition:width .7s cubic-bezier(.4,0,.2,1)}
 .pat-legend{display:flex;justify-content:space-between;align-items:flex-end}
@@ -2803,7 +2809,7 @@ function renderOCTab(){
     COMPLETADA:'<span class="badge badge-green">COMPLETADA</span>',
     CANCELADA:'<span class="badge badge-red">CANCELADA</span>'
   };
-  tbody.innerHTML=ocs.map(oc=>{
+  const _filasOcs=ocs.map(oc=>{
     const prods=inventarioCache.filter(p=>p.orden_compra===oc.codigo);
     const monto=prods.reduce((sum,p)=>sum+parseFloat(p.precio_compra_soles||0),0);
     const fecha=oc.fecha?oc.fecha.slice(8,10)+'/'+oc.fecha.slice(5,7)+'/'+oc.fecha.slice(2,4):'—';
@@ -2817,7 +2823,8 @@ function renderOCTab(){
       <td class="td-unit td-trunc" title="${oc.notas||''}">${oc.notas||'—'}</td>
       <td class="td-code">${fecha}</td>
     </tr>`;
-  }).join('');
+  });
+  pagRender('ocs', _filasOcs, 'oc-tbody', 8, '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--muted2)">Sin órdenes de compra</td></tr>');
 }
 
 // ── TC GLOBAL ──
@@ -2914,6 +2921,48 @@ function setRsvFiltro(estado,btn){
 
 function filtrarReservas(){renderReservas();}
 
+// ── PAGINACION DE TABLAS ───────────────────────────────────────
+// Generica: recibe las filas ya armadas y pinta solo las de la pagina, con
+// una barra de navegacion como ultima fila del tbody. Sirve para cualquier
+// tabla sin tocar su HTML. El inventario tiene la suya propia, mas vieja,
+// con la barra fuera de la tabla.
+const PAG_SIZE = 100;
+const _pag = {};
+
+function pagRender(key, rows, tbodyId, colspan, vacio, mantenerPag){
+  const tb = document.getElementById(tbodyId);
+  if(!tb) return;
+  const st = _pag[key] || (_pag[key] = {page:0});
+  st.rows = rows; st.tbody = tbodyId; st.colspan = colspan; st.vacio = vacio;
+  const total = rows.length;
+  if(!mantenerPag) st.page = 0;
+  const pages = Math.max(1, Math.ceil(total / PAG_SIZE));
+  if(st.page >= pages) st.page = pages - 1;
+  if(st.page < 0) st.page = 0;
+  if(!total){ tb.innerHTML = vacio; return; }
+  const ini = st.page * PAG_SIZE, fin = Math.min(ini + PAG_SIZE, total);
+  let html = rows.slice(ini, fin).join('');
+  if(total > PAG_SIZE){
+    html += `<tr class="pag-row"><td colspan="${colspan}">
+      <div class="pag-bar">
+        <span class="pag-info">${ini+1}–${fin} de ${total}</span>
+        <div class="pag-ctrl">
+          <button class="fc-nav-btn" ${st.page===0?'disabled':''} onclick="pagMove('${key}',-1)">‹</button>
+          <span class="pag-page">Pág ${st.page+1} / ${pages}</span>
+          <button class="fc-nav-btn" ${st.page>=pages-1?'disabled':''} onclick="pagMove('${key}',1)">›</button>
+        </div>
+      </div></td></tr>`;
+  }
+  tb.innerHTML = html;
+}
+
+function pagMove(key, dir){
+  const st = _pag[key];
+  if(!st) return;
+  st.page += dir;
+  pagRender(key, st.rows, st.tbody, st.colspan, st.vacio, true);
+}
+
 function renderReservas(){
   const tbody=document.getElementById('rsv-tbody');
   if(!tbody)return;
@@ -2934,7 +2983,7 @@ function renderReservas(){
     tbody.innerHTML=`<tr><td colspan="12"><div class="empty-state"><div class="empty-icon">🔖</div><div class="empty-text">Sin reservas</div></div></td></tr>`;
     return;
   }
-  tbody.innerHTML=rows.map(r=>{
+  const _filasReservas=rows.map(r=>{
     const fecha=r.fecha?r.fecha.slice(8,10)+'/'+r.fecha.slice(5,7)+'/'+r.fecha.slice(2,4):'—';
     const partes=[r.marca,r.modelo,r.colorway].filter(Boolean).join(' ');
     const productoNombre=partes||'—';
@@ -2960,7 +3009,8 @@ function renderReservas(){
       <td>${estadoBadge}</td>
       <td style="text-align:center"><button class="btn-edit-inv" onclick="event.stopPropagation();abrirReservaDetalle('${r.codigo_reserva}')" title="Ver detalle">›</button></td>
     </tr>`;
-  }).join('');
+  });
+  pagRender('reservas', _filasReservas, 'rsv-tbody', 12, '<tr><td colspan="12" style="text-align:center;padding:30px;color:var(--muted2)">Sin registros</td></tr>');
 }
 
 function abrirReservaDetalle(codigo){
@@ -3529,7 +3579,7 @@ async function loadClientes(){
 
 // ── PAGINACIÓN INVENTARIO ──
 let invPage=0;
-const INV_PAGE_SIZE=50;
+const INV_PAGE_SIZE=100;
 let _invAllRows=[];
 
 function renderInventario(rows){
@@ -4019,7 +4069,7 @@ function renderClientes(data){
     tbody.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:44px 20px;color:var(--muted2)"><div style="font-size:28px;margin-bottom:8px;opacity:.4">👥</div>Sin clientes aún</td></tr>`;
     return;
   }
-  tbody.innerHTML=data.map(c=>{
+  const _filasClientes=data.map(c=>{
     const cod=clCodigo(c.id_cliente);
     const nombre=[c.nombre,c.apellido].filter(Boolean).join(' ')||'—';
     const ig=c.instagram?`<span style="color:var(--accent)">${c.instagram}</span>`:'—';
@@ -4035,7 +4085,8 @@ function renderClientes(data){
       <td class="td-amt right" style="color:${monto>0?'var(--accent)':'var(--muted2)'}">${monto>0?fmt(monto):'—'}</td>
       <td><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();abrirModalCliente(${c.id_cliente})" style="padding:4px 10px">✏</button></td>
     </tr>`;
-  }).join('');
+  });
+  pagRender('clientes', _filasClientes, 'cl-tbody', 9, '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--muted2)">Sin registros</td></tr>');
 }
 
 function clLimpiarFiltros(){
@@ -5592,7 +5643,7 @@ function renderFlujoTabla() {
     if(!fcQ) return true;
     return row.toLowerCase().includes(fcQ);
   };
-  body.innerHTML=[...rows.filter(filterFlujo),...pendRows2.filter(filterFlujo)].join('');
+  pagRender('flujo', [...rows.filter(filterFlujo),...pendRows2.filter(filterFlujo)], 'fc-tabla-body', 9, '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--muted2)">Sin movimientos este mes</td></tr>');
 }
 
 // ── GENERAR CODIGO ──
@@ -5730,7 +5781,7 @@ function renderVentas(rows){
   }
   if(hint)hint.style.display='';
   const cb={'INSTAGRAM':'badge-purple','WHATSAPP':'badge-green','PRESENCIAL':'badge-accent','OTRO':'badge-muted'};
-  tbody.innerHTML=rows.map(v=>{
+  const _filasVentas=rows.map(v=>{
     const inv=v.inventario||{};
     const cl=v.clientes||{};
     const nombre=[inv.marca,inv.modelo,inv.colorway].filter(Boolean).join(' ')||'—';
@@ -5756,7 +5807,8 @@ function renderVentas(rows){
       <td class="td-amt right" style="color:${gc}">${gan>=0?'+':''}${fmt(gan)}</td>
       <td class="right"><span class="badge ${roi>=0?'badge-green':'badge-red'}">${(roi*100).toFixed(0)}%</span></td>
     </tr>`;
-  }).join('');
+  });
+  pagRender('ventas', _filasVentas, 'vt-tbody', 12, '<tr><td colspan="12" style="text-align:center;padding:30px;color:var(--muted2)">Sin registros</td></tr>');
 }
 
 function updateVentasStats(rows,pagos,mes){
@@ -5795,7 +5847,7 @@ function renderPagos(rows){
     return;
   }
   const catBadge={'OPERATIVO':'badge-muted','MARKETING':'badge-purple','PERSONAL':'badge-accent','IMPORTACION':'badge-accent','PAGO':'badge-muted'};
-  tbody.innerHTML=rows.map(p=>{
+  const _filasGastos=rows.map(p=>{
     // negativo = gasto; positivo = ajuste que devuelve plata (trade, reembolso)
     const raw=parseFloat(p.monto_soles||0);
     const esAjuste=raw>0;
@@ -5809,7 +5861,8 @@ function renderPagos(rows){
       <td><span class="badge ${badge}">${cat}</span></td>
       <td class="td-amt right" style="color:var(--${esAjuste?'green':'red'})">${esAjuste?'+':'−'} ${fmt(Math.abs(raw))}</td>
     </tr>`;
-  }).join('');
+  });
+  pagRender('gastos', _filasGastos, 'pg-tbody', 5, '<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--muted2)">Sin registros</td></tr>');
 }
 
 function filterPagosLocal(){
