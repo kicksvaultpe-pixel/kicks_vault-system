@@ -3404,8 +3404,10 @@ async function loadInventario(){
     const[y,m]=invMesActual.split('-');
     const ini=`${y}-${m}-01`;
     const fin=new Date(parseInt(y),parseInt(m),0).toISOString().substring(0,10);
-    const{data:vm}=await db.from('ventas').select('codigo_producto').gte('fecha',ini).lte('fecha',fin);
-    const{data:vd}=await db.from('ventas').select('codigo_producto').gt('fecha',fin);
+    const{data:vm}=await pageAll(()=>db.from('ventas').select('codigo_producto').gte('fecha',ini).lte('fecha',fin));
+    // Sin paginar: para un mes antiguo las ventas posteriores pasan de 1000 y
+    // el stock a esa fecha salia inflado (productos ya vendidos contados aun).
+    const{data:vd}=await pageAll(()=>db.from('ventas').select('codigo_producto').gt('fecha',fin));
     vendidosMes=vm||[];
     vendidosDespues=vd||[];
   }
@@ -3498,7 +3500,9 @@ async function loadClientes(){
   const{data}=await db.from('clientes').select('*').order('nombre');
   clientesCache=data||[];
   // Calcular ventas por cliente
-  const{data:vtData}=await db.from('ventas').select('id_cliente,precio_venta_soles').not('id_cliente','is',null);
+  // Paginado: hoy son pocas, pero al ir enlazando las ventas historicas a su
+  // cliente esto pasa de 1000 y los totales por cliente saldrian cortos.
+  const{data:vtData}=await pageAll(()=>db.from('ventas').select('id_cliente,precio_venta_soles').not('id_cliente','is',null));
   const uniq=new Set((vtData||[]).map(v=>v.id_cliente).filter(Boolean));
   clMontoMap={};
   (vtData||[]).forEach(v=>{
@@ -3797,6 +3801,23 @@ function valStock(p){
     : parseFloat(p.precio_final||0);
 }
 function sumVal(L){ return (L||[]).reduce((s,p)=>s+valStock(p),0); }
+
+// PostgREST corta en max-rows (1000) y un .limit() mayor NO lo supera: pasado
+// ese tope se pierden filas sin ningun aviso. `build` debe devolver una query
+// NUEVA en cada llamada — reusar el mismo builder tras await no es seguro.
+async function pageAll(build){
+  const PAGE=1000;
+  let out=[],from=0;
+  for(;;){
+    const{data,error}=await build().range(from,from+PAGE-1);
+    if(error)return{data:null,error};
+    if(!data||!data.length)break;
+    out=out.concat(data);
+    if(data.length<PAGE)break;
+    from+=data.length;
+  }
+  return{data:out,error:null};
+}
 
 // Deuda de compras a credito: saldo vivo, sin filtro de mes. Separa Stock de
 // Pedido (producto ligado a una reserva tipo PEDIDO). precio_compra_soles ya
@@ -5060,9 +5081,13 @@ async function loadFlujo() {
     (vtR||[]).forEach(v=>{ window._vtProdMap[v.codigo_venta]=v.codigo_producto; });
   }
 
-  // Cargar caja_mensual para este mes
-  const {data:cajaMes} = await db.from('caja_mensual')
-    .select('*').eq('mes', fcMesActual).single();
+  // Cierre mensual guardado: este mes y el siguiente. El del mes siguiente da
+  // el stock de cierre de este (el cierre de uno es la apertura del otro).
+  const _mesSig = fcMesStr(new Date(y, m, 1));
+  const {data:_cierres} = await db.from('caja_mensual')
+    .select('*').in('mes',[fcMesActual,_mesSig]);
+  const cajaMes = (_cierres||[]).find(x=>x.mes===fcMesActual) || null;
+  const cierreSig = (_cierres||[]).find(x=>x.mes===_mesSig) || null;
 
   // Calcular caja_inicio
   let cajaInicio = 0;
@@ -5097,14 +5122,15 @@ async function loadFlujo() {
   }
 
   // GANANCIAS y vendidos del mes — se necesita antes de stockInicio
-  const {data:ventasMes} = await db.from('ventas')
+  const {data:ventasMes} = await pageAll(()=>db.from('ventas')
     .select('ganancia,codigo_producto')
     .gte('fecha', fechaInicio)
-    .lte('fecha', fechaFinStr);
-  const ganancias = (ventasMes||[]).reduce((s,v) => s + parseFloat(v.ganancia||0), 0);
+    .lte('fecha', fechaFinStr));
+  const gananciaVentas = (ventasMes||[]).reduce((s,v) => s + parseFloat(v.ganancia||0), 0);
   const vendidosMesSet = new Set((ventasMes||[]).map(v=>v.codigo_producto).filter(Boolean));
   // Vendidos DESPUES del mes: al cierre del mes todavia estaban en stock.
-  const {data:ventasPost} = await db.from('ventas').select('codigo_producto').gt('fecha', fechaFinStr);
+  // Paginado: para un mes antiguo esto pasa de 1000 filas.
+  const {data:ventasPost} = await pageAll(()=>db.from('ventas').select('codigo_producto').gt('fecha', fechaFinStr));
   const vendidosPostSet = new Set((ventasPost||[]).map(v=>v.codigo_producto).filter(Boolean));
 
   // Estaba en stock al cierre de `hasta`: comprado antes, no cancelado, y o bien
@@ -5121,15 +5147,26 @@ async function loadFlujo() {
 
   // STOCK INICIO — al último día del mes anterior. Lo vendido durante el mes
   // todavia estaba en stock al empezar, por eso entra vendidosMesSet.
+  //
+  // Si el mes tiene cierre guardado se usa ese valor. Reconstruir el stock de
+  // un mes viejo caminando hacia atras desde el inventario de hoy no funciona:
+  // los productos que se compraron Y vendieron en el pasado no estan en la
+  // base (la hoja STOCK del Excel solo lleva lo vigente), asi que el calculo
+  // sale corto. Para el mes en curso no hay cierre y el calculo si es exacto.
   const dPrevEnd = new Date(y, m-1, 0);
   const prevEndStr = dPrevEnd.toISOString().substring(0,10);
   const vendidosDesdeInicio = new Set([...vendidosMesSet, ...vendidosPostSet]);
   const stockInicioProds = inventarioCache.filter(p => enStockAl(p, prevEndStr, vendidosDesdeInicio));
-  const stockInicio = sumVal(stockInicioProds);
+  const stockInicio = (cajaMes && cajaMes.stock_inicio != null)
+    ? parseFloat(cajaMes.stock_inicio)
+    : sumVal(stockInicioProds);
 
-  // STOCK FIN — al último día del mes.
+  // STOCK FIN — al último día del mes. El cierre de este mes es la apertura
+  // del siguiente, por eso se lee de ahi cuando ese mes ya esta guardado.
   const stockFinProds = inventarioCache.filter(p => enStockAl(p, fechaFinStr, vendidosPostSet));
-  const stockFin = sumVal(stockFinProds);
+  const stockFin = (cierreSig && cierreSig.stock_inicio != null)
+    ? parseFloat(cierreSig.stock_inicio)
+    : sumVal(stockFinProds);
 
   // MOVIMIENTOS del mes desde flujo_caja
   const sumIng = arr => arr.reduce((s,f)=>s+parseFloat(f.ingreso_soles||0),0);
@@ -5146,6 +5183,11 @@ async function loadFlujo() {
   const egrGastos   = sumEgr(flujoCache.filter(f=>['OPERATIVO','MARKETING','PERSONAL','IMPORTACION','PAGO','INTERES'].includes(cat(f))));
   const egrInversion= sumEgr(flujoCache.filter(f=>cat(f)==='INVERSION'));
 
+  // Margen del mes = ganancia de las ventas MENOS los gastos. Tiene que ser
+  // neto: `netoMes` ya descuenta los gastos, asi que si aca fuera bruto el
+  // CONTROL nunca cerraria. Es la misma definicion que usa la hoja FLUJO.
+  const ganancias = gananciaVentas - egrGastos;
+
   // PENDIENTES — créditos sin pagar (todos los meses)
   const pendMes = inventarioCache.filter(p => p.pago_estado === 'PENDIENTE');
 
@@ -5157,19 +5199,27 @@ async function loadFlujo() {
     .filter(r => r.estado === 'ACTIVA')
     .reduce((s, r) => s + (r.total_abonado || 0), 0);
 
+  // Activo fijo — aportes a activos (la hipoteca). Se necesita ANTES de los
+  // calculos: un aporte sale de la caja pero no se pierde, se convierte en
+  // patrimonio. Si solo se resta de la caja y no se suma al total, el CONTROL
+  // se rompe por el monto del aporte. Por eso van los dos cortes: al inicio
+  // del mes y al final, igual que el bloque PATRIMONIO de la hoja FLUJO.
+  const{data:invTodas,error:invErr}=await db.from('inversiones').select('monto_activo,fecha');
+  const _inv = invErr ? [] : (invTodas||[]);
+  const sumaActivo = hasta => _inv
+    .filter(i => !hasta || (i.fecha && i.fecha <= hasta))
+    .reduce((s,i)=>s+parseFloat(i.monto_activo||0),0);
+  const activoInicio = sumaActivo(prevEndStr);
+  const activoFijo   = sumaActivo(fechaFinStr);
+
   // CÁLCULOS — egresos son positivos en BD, se restan
-  const totalAntesGanancias = cajaInicio + stockInicio;
+  const totalAntesGanancias = cajaInicio + stockInicio + activoInicio;
   const total = totalAntesGanancias + ganancias;
   const netoMes = ingVentas - egrCompras - egrCostos - egrGastos - egrInversion;
   const cajaActual = cajaInicio + netoMes;
   const cajaFin = cajaActual;
-  const totalFin = cajaFin + stockFin;
+  const totalFin = cajaFin + stockFin + activoFijo;
   const control = Math.round((total - totalFin) * 100) / 100;
-
-
-  // Activo fijo acumulado (todas las inversiones históricas)
-  const{data:invTodas,error:invErr}=await db.from('inversiones').select('monto_activo');
-  const activoFijo=invErr?0:(invTodas||[]).reduce((s,i)=>s+parseFloat(i.monto_activo||0),0);
 
   // ── INDICADORES ──
   const patrimonio    = cajaActual + stockFin + activoFijo;
@@ -5229,8 +5279,11 @@ async function loadFlujo() {
   document.getElementById('fc-stock-inicio').textContent = fmt(stockInicio);
   document.getElementById('fc-ganancias').textContent    = ganancias > 0 ? '+ ' + fmt(ganancias) : fmt(ganancias);
   document.getElementById('fc-total-antes').textContent  = fmt(totalAntesGanancias);
+  // En apertura va el activo al INICIO del mes; el aporte del mes propio entra
+  // recien en el bloque de cierre. Para agosto dan igual (el ultimo aporte fue
+  // en julio), pero en julio mismo cambia: 1,331.79 al abrir, 6,707.29 al cerrar.
   const activoFijoEl=document.getElementById('fc-activo-inicio');
-  if(activoFijoEl)activoFijoEl.textContent=activoFijo>0?fmt(activoFijo):'—';
+  if(activoFijoEl)activoFijoEl.textContent=activoInicio>0?fmt(activoInicio):'—';
   const activoFijoFinEl=document.getElementById('fc-activo-fin');
   if(activoFijoFinEl)activoFijoFinEl.textContent=activoFijo>0?fmt(activoFijo):'—';
   const activoFijoInd=document.getElementById('ind-activo-fijo');
@@ -5496,23 +5549,31 @@ async function loadVentas(){
   const pgBody=document.getElementById('pg-tbody');
   if(pgBody)pgBody.innerHTML='<tr class="loading-row"><td colspan="4"><div class="spinner"></div></td></tr>';
 
-  let q=db.from('ventas')
-    .select('*,inventario(marca,modelo,colorway,talla,precio_final),clientes(nombre,apellido)')
-    .order('fecha',{ascending:false})
-    .order('codigo_venta',{ascending:false});
-  let pq=db.from('pagos').select('*').order('fecha',{ascending:false});
-
+  let ini=null,fin=null;
   if(mes){
     const[y,m]=mes.split('-');
     const ld=new Date(parseInt(y),parseInt(m),0).getDate();
-    const ini=`${y}-${m}-01`;
-    const fin=`${y}-${m}-${String(ld).padStart(2,'0')}`;
-    q=q.gte('fecha',ini).lte('fecha',fin);
-    pq=pq.gte('fecha',ini).lte('fecha',fin);
+    ini=`${y}-${m}-01`;
+    fin=`${y}-${m}-${String(ld).padStart(2,'0')}`;
   }
-  if(canal)q=q.eq('canal',canal);
+  // Via pageAll: en modo Historico no hay filtro de mes y las ventas ya pasan
+  // de 1000, asi que sin paginar el tab mostraba menos de las que hay.
+  const buildV=()=>{
+    let q=db.from('ventas')
+      .select('*,inventario(marca,modelo,colorway,talla,precio_final),clientes(nombre,apellido)')
+      .order('fecha',{ascending:false})
+      .order('codigo_venta',{ascending:false});
+    if(mes)q=q.gte('fecha',ini).lte('fecha',fin);
+    if(canal)q=q.eq('canal',canal);
+    return q;
+  };
+  const buildP=()=>{
+    let pq=db.from('pagos').select('*').order('fecha',{ascending:false});
+    if(mes)pq=pq.gte('fecha',ini).lte('fecha',fin);
+    return pq;
+  };
 
-  const[{data,error},{data:pgData}]=await Promise.all([q,pq]);
+  const[{data,error},{data:pgData}]=await Promise.all([pageAll(buildV),pageAll(buildP)]);
   if(error){toast('Error: '+error.message,'err');return;}
   ventasCache=data||[];
   pagosCache=pgData||[];
