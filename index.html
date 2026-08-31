@@ -364,6 +364,7 @@ input[list] { cursor: text; }
 .pat-chip{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:7px}
 .pat-total{font-family:"Archivo Black";font-size:15px;color:var(--text);margin-bottom:2px;font-variant-numeric:tabular-nums}
 .pat-sub{font-size:10px;color:var(--muted2);margin-bottom:8px;letter-spacing:.2px}
+.oc-mas{font-size:9px;padding:1px 4px;border-radius:4px;background:var(--border2);color:var(--muted2)}
 .oc-edit-btn{padding:4px 11px;border-radius:7px;border:1px solid var(--border);
   background:var(--card);color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;
   font-family:inherit;transition:border-color .15s,color .15s}
@@ -2302,23 +2303,27 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   </div>
 
   <div class="table-wrap">
-    <table style="min-width:1080px">
+    <table style="min-width:1560px">
       <thead>
         <tr>
-          <th style="width:78px">Código</th>
+          <th style="width:70px">Código</th>
           <th style="width:74px">Fecha</th>
-          <th>Descripción</th>
-          <th style="width:132px">Estado</th>
-          <th style="width:104px">Tienda</th>
-          <th style="width:74px">Courier</th>
-          <th style="width:96px">QC</th>
-          <th class="right" style="width:84px">Valor $</th>
-          <th class="right" style="width:64px">Arts.</th>
-          <th style="width:74px"></th>
+          <th style="min-width:200px">Descripción</th>
+          <th style="width:130px">Estado</th>
+          <th style="width:98px">Tienda</th>
+          <th style="width:118px">Order</th>
+          <th style="width:70px">Courier</th>
+          <th style="width:140px">Tracking</th>
+          <th style="width:54px">Grupo</th>
+          <th style="width:92px">QC</th>
+          <th class="right" style="width:82px">Valor $</th>
+          <th style="min-width:120px">Información</th>
+          <th class="right" style="width:56px">Arts.</th>
+          <th style="width:70px"></th>
         </tr>
       </thead>
       <tbody id="oc-tbody">
-        <tr class="loading-row"><td colspan="10"><div class="spinner"></div></td></tr>
+        <tr class="loading-row"><td colspan="14"><div class="spinner"></div></td></tr>
       </tbody>
     </table>
   </div>
@@ -2702,12 +2707,21 @@ async function loadOCs(){
   if(tipoPagoActual==='CREDITO') pregenOC();
 }
 
+// Una orden se cierra cuando la compra llega a Peru: ahi se registra el
+// producto y ya no hay nada que seguir. Las abiertas son las que todavia estan
+// en la calle, y son las unicas a las que tiene sentido enganchar un producto.
+const OC_CERRADAS = ['ENTREGADO EN PERU','CANCELADO'];
+const ocAbierta = oc => !OC_CERRADAS.includes(oc.estado);
+
 function renderOCSelectExistente(){
-  // Compra crédito: solo OCs PENDIENTES → combobox
-  const pendientes=ocCache.filter(oc=>oc.estado==='PENDIENTE');
-  comboSetData('cl-oc-sel', pendientes.map(oc=>`${oc.codigo}${oc.nombre?' · '+oc.nombre:''} — ${oc.tipo}`));
-  // Costo: combobox (todas las OCs)
-  comboSetData('cl-cs-oc-sel', ocCache.map(oc=>`${oc.codigo}${oc.nombre?' · '+oc.nombre:''} — ${oc.tipo}${oc.estado==='COMPLETADA'?' ✓':''}`));
+  const et = oc => `${oc.codigo}${oc.descripcion||oc.nombre?' · '+(oc.descripcion||oc.nombre):''} — ${oc.tipo}`;
+  // Compra a credito: solo las ordenes todavia abiertas.
+  // Antes filtraba por estado==='PENDIENTE', que dejo de existir cuando los
+  // estados pasaron al pipeline, asi que el combo quedaba vacio y no se podia
+  // enganchar ningun producto a su orden.
+  comboSetData('cl-oc-sel', ocCache.filter(ocAbierta).map(et));
+  // Costos: todas, con una marca en las ya cerradas.
+  comboSetData('cl-cs-oc-sel', ocCache.map(oc=>et(oc)+(ocAbierta(oc)?'':' ✓')));
 }
 
 function ocSetMode(modo){
@@ -2859,25 +2873,35 @@ function renderOCTab(){
   const _filasOcs=ocs.map(oc=>{
     const arts=inventarioCache.filter(x=>x.orden_compra===oc.codigo);
     const [cls,txt]=OC_BADGE[oc.estado]||['badge-muted',oc.estado||'—'];
-    const enPeru=oc.estado==='ENTREGADO EN PERU';
-    const trk=oc.tracking?`<span class="td-unit td-trunc" title="${esc(oc.tracking)}">${esc(String(oc.tracking).split(' / ')[0])}</span>`:'';
-    return `<tr class="${enPeru?'row-dim':''}">
+    const cerrado=!ocAbierta(oc);
+    // El tracking puede traer varios numeros separados por " / ": se muestra el
+    // primero y el resto queda en el title, si no la fila se estira.
+    const tks=String(oc.tracking||'').split(' / ').filter(Boolean);
+    const trk=tks.length
+      ? `<span class="td-unit td-trunc" title="${esc(tks.join('\n'))}">${esc(tks[0])}${tks.length>1?` <span class="oc-mas">+${tks.length-1}</span>`:''}</span>`
+      : '<span class="td-muted">—</span>';
+    const uni=v=>v?`<span class="td-unit">${esc(v)}</span>`:'<span class="td-muted">—</span>';
+    return `<tr class="${cerrado?'row-dim':''}">
       <td><span class="td-code" style="color:var(--accent)">${oc.codigo}</span></td>
       <td class="td-fecha">${fmtFecha(oc.fecha)}</td>
-      <td class="td-main">${esc(oc.descripcion||oc.nombre||'—')}${trk?'<br>'+trk:''}</td>
+      <td class="td-main">${esc(oc.descripcion||oc.nombre||'—')}</td>
       <td><span class="badge ${cls}">${txt}</span></td>
-      <td class="td-unit">${esc(oc.tienda||'—')}</td>
-      <td class="td-unit">${esc(oc.courier||'—')}</td>
-      <td class="td-unit">${esc(oc.qc||'—')}</td>
+      <td>${uni(oc.tienda)}</td>
+      <td>${oc.orden_tienda?`<span class="td-code td-trunc" title="${esc(oc.orden_tienda)}">${esc(oc.orden_tienda)}</span>`:'<span class="td-muted">—</span>'}</td>
+      <td>${uni(oc.courier)}</td>
+      <td>${trk}</td>
+      <td>${uni(oc.grupo)}</td>
+      <td>${uni(oc.qc)}</td>
       <td class="td-amt right">${oc.valor_usd?fmtUsd(oc.valor_usd):'<span class="td-muted">—</span>'}</td>
+      <td class="td-unit td-trunc" title="${esc(oc.notas||'')}">${esc(oc.notas||'—')}</td>
       <td class="right">${arts.length
         ? `<span class="badge badge-muted" style="cursor:pointer" onclick="ocVerArticulos('${oc.codigo}')">${arts.length}</span>`
         : '<span class="td-muted">—</span>'}</td>
       <td class="right"><button class="oc-edit-btn" onclick="ocAbrirModal('${oc.codigo}')">Editar</button></td>
     </tr>`;
   });
-  pagRender('ocs', _filasOcs, 'oc-tbody', 10,
-    '<tr><td colspan="10" style="text-align:center;padding:32px;color:var(--muted2)">Sin órdenes de compra</td></tr>');
+  pagRender('ocs', _filasOcs, 'oc-tbody', 14,
+    '<tr><td colspan="14" style="text-align:center;padding:32px;color:var(--muted2)">Sin órdenes de compra</td></tr>');
 }
 
 // Los articulos de una OC salen del inventario: un producto apunta a su orden
@@ -2904,9 +2928,9 @@ function ocVerArticulos(cod){
   }
   const t=document.getElementById('oc-arts-title');
   if(t) t.textContent=`${cod} · ${oc?.descripcion||oc?.nombre||''}`.trim();
-  document.getElementById('modal-oc-arts')?.classList.add('show');
+  document.getElementById('modal-oc-arts')?.classList.add('open');
 }
-function ocCerrarArticulos(){ document.getElementById('modal-oc-arts')?.classList.remove('show'); }
+function ocCerrarArticulos(){ document.getElementById('modal-oc-arts')?.classList.remove('open'); }
 
 // ── CREAR / EDITAR OC ──
 let ocEditando=null;
@@ -2918,19 +2942,19 @@ async function ocAbrirModal(cod){
   if(oc){
     v('ocm-codigo',oc.codigo); v('ocm-fecha',oc.fecha); v('ocm-desc',oc.descripcion||oc.nombre);
     v('ocm-tienda',oc.tienda); v('ocm-orden',oc.orden_tienda); v('ocm-courier',oc.courier);
-    v('ocm-tracking',oc.tracking); v('ocm-usd',oc.valor_usd); v('ocm-notas',oc.notas);
+    v('ocm-tracking',oc.tracking); v('ocm-usd',oc.valor_usd); v('ocm-grupo',oc.grupo); v('ocm-notas',oc.notas);
     setCombo('ocm-estado', OC_BADGE[oc.estado]?OC_BADGE[oc.estado][1]:oc.estado);
     setCombo('ocm-tipo', oc.tipo==='IMPORTACION'?'✈️ IMPORTACIÓN':'🏪 LOCAL');
     setCombo('ocm-qc', oc.qc||'');
   }else{
-    ['ocm-desc','ocm-tienda','ocm-orden','ocm-courier','ocm-tracking','ocm-usd','ocm-notas'].forEach(i=>v(i,''));
+    ['ocm-desc','ocm-tienda','ocm-orden','ocm-courier','ocm-tracking','ocm-usd','ocm-grupo','ocm-notas'].forEach(i=>v(i,''));
     v('ocm-fecha', fechaHoy());
     v('ocm-codigo', ocSiguienteCodigo());
     setCombo('ocm-estado','🛒 Comprado'); setCombo('ocm-tipo','✈️ IMPORTACIÓN'); setCombo('ocm-qc','Por enviar');
   }
-  document.getElementById('modal-oc')?.classList.add('show');
+  document.getElementById('modal-oc')?.classList.add('open');
 }
-function ocCerrarModal(){ document.getElementById('modal-oc')?.classList.remove('show'); ocEditando=null; }
+function ocCerrarModal(){ document.getElementById('modal-oc')?.classList.remove('open'); ocEditando=null; }
 function setCombo(id,val){ const e=document.getElementById(id); if(e) e.value=val||''; }
 
 // El correlativo sale de lo que ya existe, no de una secuencia de Postgres:
@@ -2955,7 +2979,7 @@ async function ocGuardar(){
     tienda:g('ocm-tienda')||null, orden_tienda:g('ocm-orden')||null,
     courier:g('ocm-courier')||null, tracking:g('ocm-tracking')||null,
     qc:noEmoji(g('ocm-qc'))||null,
-    valor_usd:parseFloat(g('ocm-usd'))||null,
+    valor_usd:parseFloat(g('ocm-usd'))||null, grupo:g('ocm-grupo')||null,
     notas:g('ocm-notas')||null,
   };
   const btn=document.getElementById('oc-btn-guardar');
@@ -5311,12 +5335,12 @@ function fcAbrirCerrarMes(){
       </p>`;
   }
   const m = document.getElementById('modal-cerrar-mes');
-  if(m) m.classList.add('show');
+  if(m) m.classList.add('open');
 }
 function fcMelLabelSafe(m){ try{ return fcMesLabel(m); }catch(e){ return m; } }
 function fcCerrarModalCerrarMes(){
   const m = document.getElementById('modal-cerrar-mes');
-  if(m) m.classList.remove('show');
+  if(m) m.classList.remove('open');
 }
 
 async function fcConfirmarCerrarMes(){
@@ -6562,6 +6586,7 @@ init();
     <div class="form-grid g2" style="margin-bottom:10px">
       <div class="field"><label>Tracking</label><input type="text" id="ocm-tracking" placeholder="#1Z24WA430326764143"></div>
       <div class="field"><label>Valor US$</label><input type="number" id="ocm-usd" placeholder="0.00"></div>
+      <div class="field"><label>Grupo</label><input type="text" id="ocm-grupo" placeholder="1"></div>
     </div>
     <div class="field" style="margin-bottom:16px">
       <label>Notas</label>
