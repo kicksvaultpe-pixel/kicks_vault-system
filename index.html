@@ -2119,7 +2119,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
     <div class="ind-card ind-ganancias">
       <div class="sim-chip"><div class="sim-chip-dot dot-green"></div>Margen</div>
       <div class="sim-num" id="ind-ganancias" style="color:var(--green)">—</div>
-      <div class="sim-lbl">Margen en ventas</div>
+      <div class="sim-lbl">Ventas − costo − gastos</div>
       <div class="sim-trend trend-up" id="ind-ganancias-trend">—</div>
     </div>
 
@@ -3473,7 +3473,7 @@ function fillDataLists(){
   comboSetData('cl-inv-colorway', colorways);
   comboSetData('cl-inv-talla', tallas);
   // Opciones fijas — inventario filtros
-  comboSetData('cl-inv-cat', ['— Todos —','👟 ZAPATILLAS','👕 ROPA','💎 ACCESORIOS','📦 OTROS']);
+  comboSetData('cl-inv-cat', ['— Todos —','👟 ZAPATILLAS','👕 ROPA','🧢 ACCESORIOS','📦 OTROS']);
   comboSetData('cl-inv-estado', ['— Todos —','✅ DISPONIBLE','🔒 RESERVADO','💰 VENDIDO','❌ CANCELADO']);
   comboSetData('cl-inv-tpago',  ['— Todos —','💵 CONTADO','🔄 CRÉDITO','⏳ PENDIENTE']);
   // Opciones fijas — toolbars otros tabs
@@ -5515,7 +5515,11 @@ function renderFlujoTabla() {
     const pendU = esUsdPend ? `<span class="td-egr-usd">⏳ ${fmtUsdAmt(egrUsd)}</span>` : '<span class="td-muted">—</span>';
     // Códigos y descripción según tipo de movimiento
     const buildProdDesc=p=>[p.marca,p.modelo,p.colorway,p.talla].filter(Boolean).join(' · ');
+    // Quita el prefijo redundante ("Venta SUPREME BOXER", "Compra - NIKE"): el
+    // badge de TIPO ya lo dice. NO se usa en gastos, donde la descripcion ES el
+    // nombre y "PAGO DE WEB" o "PAGO SUNAT" perderian la primera palabra.
     const cleanDesc=s=>(s||'').replace(/^[:\s—\-]*/,'').replace(/^(venta|compra|costo|pago|reserva|cancelacion)[—:\s\-]*/i,'').replace(/\bT:/gi,'').trim();
+    const soloTalla=s=>(s||'').replace(/^[:\s—\-]*/,'').replace(/\bT:/gi,'').trim();
     let codOp='—',codRef='—',desc='—';
     if(accion==='VENTA'){
       codOp=f.referencia_id||f.codigo_operacion||'—';
@@ -5536,7 +5540,7 @@ function renderFlujoTabla() {
     } else if(accion==='PAGO'){
       const n=parseInt(f.referencia_id)||0;
       codOp=n?'GS-'+String(n).padStart(4,'0'):(f.codigo_operacion||'—');
-      desc=cleanDesc(f.descripcion)||f.categoria||'—';
+      desc=soloTalla(f.descripcion)||f.categoria||'—';
     } else if(accion==='RESERVA'){
       codOp=f.referencia_id||'—'; // RSV-XXX
       codRef=rsvData?.codigo_producto||'—'; // P-XXX
