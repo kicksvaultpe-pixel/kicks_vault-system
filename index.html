@@ -3949,6 +3949,13 @@ async function loadInventario(){
 }
 
 const noEmoji=s=>s.replace(/^[^A-Za-z0-9À-ɏ]*/,'').trim();
+// noEmoji saca el icono pero deja la tilde, y los combos muestran
+// "IMPORTACION" acentuado mientras las tablas guardan la version sin tilde.
+// Varias columnas tienen un CHECK sobre ese valor, asi que la tilde reventaba
+// el insert (pagos.categoria) o guardaba basura (costos.concepto, que no tiene
+// CHECK y se quedo con 3 filas "📦 IMPORTACIÓN" entre 619 "IMPORTACION").
+const noTilde=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'');
+const comboVal=s=>noTilde(noEmoji(String(s||''))).toUpperCase().trim();
 
 function fillDataLists(){
   const marcas=[...new Set(inventarioCache.map(p=>p.marca).filter(Boolean))].sort();
@@ -5260,7 +5267,7 @@ async function registrarPago(){
     const{error}=await db.from('pagos').insert({
       codigo_pago:codigoPago,
       concepto,monto_soles:-Math.abs(monto),
-      categoria:noEmoji(document.getElementById('pg-cat').value),
+      categoria:comboVal(document.getElementById('pg-cat').value),
       fecha:document.getElementById('pg-fecha').value||fechaHoy()
     });
     if(error)throw error;
@@ -5316,7 +5323,7 @@ function csAgregarProducto(codigo){
   const p=inventarioCache.find(x=>x.codigo_producto===codigo);
   if(!p) return;
   const nombre=[p.marca,p.modelo,p.colorway].filter(Boolean).join(' ');
-  const conceptoGlobal=document.getElementById('cs-concepto-global').value||'';
+  const conceptoGlobal=comboVal(document.getElementById('cs-concepto-global').value);
   costoLista.push({codigo, nombre, talla:p.talla||'—', concepto:conceptoGlobal, soles:''});
   csRenderLista();
   buscarProductoCosto(true);  // refresca tabla sin cerrarla
@@ -5550,22 +5557,27 @@ async function registrarInversion(){
     // Capital → flujo_caja directo. Usa tipo='PAGO' (valor existente en enum) + categoria='INVERSION'
     // cat(f) = f.categoria||f.tipo → 'INVERSION', separado de egrGastos y egrCompras
     if(montoActivo>0){
-      await db.from('flujo_caja').insert({
+      const{error:eFl}=await db.from('flujo_caja').insert({
         fecha,tipo:'PAGO',categoria:'INVERSION',
         descripcion:`${codInv} · ${activo.nombre}${concepto?' · '+concepto:''}`,
         ingreso_soles:0,egreso_soles:montoActivo,referencia_id:codInv
       });
+      if(eFl)throw new Error(`La cuota ${codInv} se guardó, pero el capital no entró al flujo: ${eFl.message}`);
     }
     // Interés → pagos table (trigger crea flujo_caja como PAGO) → aparece en Resultado
     let codPago=null;
     if(montoGasto>0){
       codPago=await genCodigo('pago');
-      await db.from('pagos').insert({
+      // Sin revisar el error, este insert fallaba callado y la pantalla decia
+      // "Cuota registrada" igual: asi se perdieron los S/ 1,366.66 de interes
+      // de la INV-0007, que el CHECK de pagos.categoria rechazo por 'INTERES'.
+      const{error:ePg}=await db.from('pagos').insert({
         codigo_pago:codPago,
         concepto:'Interés · '+activo.nombre+(concepto?' · '+concepto:''),
         monto_soles:-Math.abs(montoGasto),
         categoria:'INTERES',fecha
       });
+      if(ePg)throw new Error(`La cuota ${codInv} se guardó, pero el interés no: ${ePg.message}`);
     }
     // El interes se guarda como un gasto aparte, con su propio correlativo. Si
     // no se nombra, no hay forma de saber desde aca que se creo un segundo
