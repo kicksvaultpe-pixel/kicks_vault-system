@@ -3923,7 +3923,7 @@ function fillDataLists(){
   comboSetData('cl-inv-estado', ['— Todos —','✅ DISPONIBLE','🔒 RESERVADO','💰 VENDIDO','❌ CANCELADO']);
   comboSetData('cl-inv-tpago',  ['— Todos —','💵 CONTADO','🔄 CRÉDITO','⏳ PENDIENTE']);
   // Opciones fijas — toolbars otros tabs
-  comboSetData('cl-vt-f-canal', ['— Todos —','📸 INSTAGRAM','💬 WHATSAPP','🏪 PRESENCIAL','🔹 OTRO']);
+  comboSetData('cl-vt-f-canal', ['— Todos —','📸 INSTAGRAM','💬 WHATSAPP','👥 FACEBOOK','🏪 PRESENCIAL','🔹 OTRO']);
   comboSetData('cl-clf-tipo', ['— Todos —','👤 REGULAR','⭐ VIP','📦 MAYORISTA']);
   const OC_OPC=['🛒 COMPRADO','✈️ EN CAMINO USA','📦 ENTREGADO EN USA','✅ ENTREGADO EN PERU','❌ CANCELADO'];
   comboSetData('cl-oc-f-estado', ['— Todos —', ...OC_OPC]);
@@ -3936,12 +3936,12 @@ function fillDataLists(){
   comboSetData('cl-cp-cat', ['👟 ZAPATILLAS','👕 ROPA','🧢 ACCESORIOS','📦 OTROS']);
   comboSetData('cl-cp-moneda', ['💵 USD','🪙 SOLES']);
   comboSetData('cl-cp-oc-tipo', ['✈️ IMPORTACIÓN','🏪 LOCAL']);
-  comboSetData('cl-vt-canal', ['📸 INSTAGRAM','💬 WHATSAPP','🏪 PRESENCIAL','🔹 OTRO']);
+  comboSetData('cl-vt-canal', ['📸 INSTAGRAM','💬 WHATSAPP','👥 FACEBOOK','🏪 PRESENCIAL','🔹 OTRO']);
   comboSetData('cl-vt-medio-pago', ['💵 EFECTIVO','🏦 TRANSFERENCIA','💳 TARJETA','💜 YAPE','💙 PLIN']);
   comboSetData('cl-pg-cat', ['🏪 OPERATIVO','👤 PERSONAL','📦 IMPORTACIÓN','📣 MARKETING']);
   comboSetData('cl-inv-a-tipo', ['🏠 HIPOTECA','🚗 VEHICULO','🖥 EQUIPO','📂 OTRO']);
   comboSetData('cl-inv-a-moneda', ['🪙 SOLES','💵 USD']);
-  comboSetData('cl-cl-canal', ['📸 INSTAGRAM','💬 WHATSAPP','🏪 PRESENCIAL','🔹 OTRO']);
+  comboSetData('cl-cl-canal', ['📸 INSTAGRAM','💬 WHATSAPP','👥 FACEBOOK','🏪 PRESENCIAL','🔹 OTRO']);
   comboSetData('cl-cl-tipo', ['👤 REGULAR','⭐ VIP','📦 MAYORISTA']);
   // Defaults iniciales para combos que arrancan con un valor fijo
   const elMoneda=document.getElementById('cp-moneda');
@@ -6246,7 +6246,7 @@ function renderVentas(rows){
     return;
   }
   if(hint)hint.style.display='';
-  const cb={'INSTAGRAM':'badge-purple','WHATSAPP':'badge-green','PRESENCIAL':'badge-accent','OTRO':'badge-muted'};
+  const cb={'INSTAGRAM':'badge-purple','WHATSAPP':'badge-green','FACEBOOK':'badge-accent','PRESENCIAL':'badge-yellow','OTRO':'badge-muted'};
   const _filasVentas=rows.map(v=>{
     const inv=v.inventario||{};
     const cl=v.clientes||{};
