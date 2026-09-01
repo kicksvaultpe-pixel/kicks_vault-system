@@ -6054,7 +6054,41 @@ function renderFlujoTabla() {
 }
 
 // ── GENERAR CODIGO ──
+// A que tabla y columna corresponde cada codigo, para poder comprobarlo.
+const COD_TABLA = {
+  venta    : ['ventas',         'codigo_venta'],
+  producto : ['inventario',     'codigo_producto'],
+  cliente  : ['clientes',       'codigo_cliente'],
+  inversion: ['inversiones',    'codigo_inversion'],
+  pago     : ['pagos',          'codigo_pago'],
+  oc       : ['ordenes_compra', 'codigo'],
+};
+
+// Los RPC gen_codigo_* usan una secuencia de Postgres, y una secuencia no se
+// entera de las filas que entraron por carga masiva: proponia V-00035 con
+// ventas hasta la V-01231, y el insert moria con "duplicate key value violates
+// unique constraint". Se pregunta a la tabla cual es el mayor y se sigue desde
+// ahi. Los codigos van con ceros a la izquierda, asi que ordenar como texto da
+// el mismo resultado que ordenar como numero.
+async function siguienteCodigo(tipo){
+  const t = COD_TABLA[tipo];
+  if(!t) return null;
+  const [tabla, campo] = t;
+  const{data,error}=await db.from(tabla).select(campo).order(campo,{ascending:false}).limit(1);
+  if(error||!data||!data.length) return null;
+  const ult = String(data[0][campo]||'');
+  const m = ult.match(/^(.*?)(\d+)$/);
+  if(!m) return null;
+  return m[1] + String(parseInt(m[2],10)+1).padStart(m[2].length,'0');
+}
+
 async function genCodigo(tipo){
+  // Manda lo que dice la tabla. La secuencia no solo se queda atras: en
+  // clientes va adelantada (proponia C-040 con el ultimo en C-023) y dejaria
+  // huecos en el correlativo. Solo se usa el RPC cuando la tabla no puede
+  // responder, como en `pagos`, donde codigo_pago esta vacio en todas.
+  const propio = await siguienteCodigo(tipo);
+  if(propio) return propio;
   const{data,error}=await db.rpc('gen_codigo_'+tipo);
   if(error)throw new Error('No se pudo generar código: '+error.message);
   return data;
