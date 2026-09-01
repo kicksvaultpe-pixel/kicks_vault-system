@@ -1183,6 +1183,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         </div>
         <!-- Precio + Fecha -->
         <div class="field"><label>Precio de venta S/.</label><input type="number" id="vt-precio" placeholder="0.00" step="0.01" oninput="calcVentaGanancia()"></div>
+        <div class="field"><label>Fecha de venta</label><input type="date" id="vt-fecha"></div>
         <!-- Cliente (combobox) -->
         <div class="field span2">
           <label>Cliente <span style="font-size:9px;opacity:.6;font-weight:400">(opcional)</span>
@@ -1360,6 +1361,12 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
           </div>
         </div>
 
+        <!-- Fecha -->
+        <div class="field">
+          <label>Fecha de reserva</label>
+          <input type="date" id="rv-fecha">
+        </div>
+
         <!-- Notas -->
         <div class="field span2">
           <label>Notas <span style="font-size:9px;font-weight:400;opacity:.6">(opcional)</span></label>
@@ -1388,6 +1395,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
           </div>
         </div>
         <div class="field"><label>Monto S/.</label><input type="number" id="pg-monto" placeholder="100.00" step="0.01" min="0"></div>
+        <div class="field"><label>Fecha del gasto</label><input type="date" id="pg-fecha"></div>
       </div>
     </div>
     <button class="btn btn-orange" id="btn-pago" onclick="registrarPago()">✓ Registrar Gasto</button>
@@ -3780,17 +3788,26 @@ function showView(n,btn){
   if(n==='reservas') loadReservas();
 }
 
+// Que input de fecha le toca a cada form del tab Registro.
+const FECHA_INPUT={compra:'cp-fecha', venta:'vt-fecha', reserva:'rv-fecha',
+                   pago:'pg-fecha', costo:'cs-fecha', inversion:'inv-fecha'};
 function setTipo(tipo,btn){
   document.querySelectorAll('.tipo-btn').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.form-panel').forEach(p=>p.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('form-'+tipo).classList.add('active');
   if(['venta','costo','reserva'].includes(tipo))fillProductoSelects();
+  // Cada form escribe la fecha en la columna de SU tabla, no en una comun:
+  //   compra    -> inventario.fecha_compra     venta     -> ventas.fecha
+  //   reserva   -> reservas.fecha              gasto     -> pagos.fecha
+  //   costo     -> costos.fecha                inversion -> inversiones.fecha
+  // El campo arranca en hoy pero no se pisa si ya tiene algo: asi se pueden
+  // cargar varios movimientos de una fecha pasada sin volver a escribirla.
+  const fEl=document.getElementById(FECHA_INPUT[tipo]||'');
+  if(fEl&&!fEl.value)fEl.value=fechaHoy();
   if(tipo==='inversion'){
     loadActivos();
     loadInversiones();
-    const fEl=document.getElementById('inv-fecha');
-    if(fEl&&!fEl.value)fEl.value=fechaHoy();
   }
 }
 
@@ -5140,7 +5157,7 @@ async function registrarVenta(){
       comprador:vtCl?[vtCl.nombre,vtCl.apellido].filter(Boolean).join(' ')||null:null,
       id_cliente:vtClId||null,
       ganancia:g,rentabilidad:r,
-      fecha:fechaHoy()
+      fecha:document.getElementById('vt-fecha').value||fechaHoy()
     });
     if(error)throw error;
     await db.from('inventario').update({estado:'VENDIDO'}).eq('codigo_producto',codProd);
@@ -5190,7 +5207,7 @@ async function registrarReserva(){
   const btn=document.getElementById('btn-reserva');setLoading(btn,true);
   try{
     const codigoReserva=await genCodigoReserva();
-    const fecha=fechaHoy();
+    const fecha=document.getElementById('rv-fecha').value||fechaHoy();
     const{error}=await db.from('reservas').insert({
       codigo_reserva:codigoReserva,tipo,estado:'ACTIVA',
       id_cliente:clId||null,nombre_cliente:nombreCliente,
@@ -5244,7 +5261,7 @@ async function registrarPago(){
       codigo_pago:codigoPago,
       concepto,monto_soles:-Math.abs(monto),
       categoria:noEmoji(document.getElementById('pg-cat').value),
-      fecha:fechaHoy()
+      fecha:document.getElementById('pg-fecha').value||fechaHoy()
     });
     if(error)throw error;
     toast('✓ Pago registrado · '+codigoPago,'ok');
