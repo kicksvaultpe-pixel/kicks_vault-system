@@ -1325,7 +1325,9 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
 
         <!-- Cliente -->
         <div class="field span2">
-          <label>Cliente *</label>
+          <label>Cliente *
+            <button type="button" onclick="abrirClRapido('rv')" style="margin-left:8px;border:none;background:none;color:var(--accent);font-size:10px;font-weight:700;cursor:pointer;font-family:'Archivo';padding:0">+ Nuevo</button>
+          </label>
           <div class="cl-search-wrap" id="rv-cl-wrap">
             <input class="cl-search-input" id="rv-cl-input" placeholder="Buscar por nombre o código…" autocomplete="off"
               oninput="clSearch('rv')" onfocus="clSearchFocus('rv')" onblur="clSearchBlur('rv')" onkeydown="clSearchKey(event,'rv')">
