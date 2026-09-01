@@ -5406,6 +5406,23 @@ async function registrarCosto(){
     const{error}=await db.from('costos').insert(inserts);
     if(error)throw error;
     // flujo_caja lo maneja el trigger after_costo en Supabase
+    // precio_final NO lo mantiene nadie: ni un trigger ni este formulario. Es lo
+    // que vale el producto en el stock (compra + costos) y si se queda corto, el
+    // dia que se venda o se pague su credito el CONTROL del flujo se rompe por
+    // la diferencia. Paso con P-00989: costo de S/ 106.00 sin sumar, y al pagar
+    // el credito la caja bajo S/ 1,590.79 mientras el stock solo subio
+    // S/ 1,484.79. Solo el modal de editar producto lo recalculaba.
+    const afectados=[...new Set(inserts.map(i=>i.codigo_producto))];
+    for(const cod of afectados){
+      const prod=(inventarioCache||[]).find(x=>x.codigo_producto===cod);
+      if(!prod) continue;
+      const{data:cs,error:eCs}=await db.from('costos').select('costo_soles').eq('codigo_producto',cod);
+      if(eCs) continue;
+      const total=(cs||[]).reduce((t,c)=>t+parseFloat(c.costo_soles||0),0);
+      const nuevo=Math.round((parseFloat(prod.precio_compra_soles||0)+total)*100)/100;
+      const{error:ePf}=await db.from('inventario').update({precio_final:nuevo}).eq('codigo_producto',cod);
+      if(ePf) toast('⚠ Costo guardado, pero no se pudo actualizar el precio final de '+cod,'warn');
+    }
     toast('✓ '+inserts.length+' costo'+(inserts.length>1?'s registrados':'registrado'),'ok');
     limpiarSeleccionCosto();
     await loadInventario();
