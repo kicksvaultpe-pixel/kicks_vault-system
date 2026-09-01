@@ -2753,6 +2753,24 @@ async function loadOCs(){
 const OC_CERRADAS = ['ENTREGADO EN PERU','CANCELADO'];
 const ocAbierta = oc => !OC_CERRADAS.includes(oc.estado);
 
+// El valor de una OC es lo que suman sus articulos. `valor_usd` es un campo
+// que se escribe a mano en el modal y que el formulario de compra nunca llena,
+// asi que las ordenes creadas al registrar una compra salian con la columna
+// vacia aunque trajeran mercaderia. Se cae al valor manual solo cuando no hay
+// nada que sumar: una OC abierta antes de registrar sus productos, que en este
+// tab es lo normal — primero anotas el pedido, despues llega.
+function ocValorUsd(oc, arts){
+  const items=(arts||(inventarioCache||[]).filter(x=>x.orden_compra===oc.codigo))
+    .filter(p=>p.estado!=='CANCELADO');
+  const suma=items.reduce((t,p)=>t+parseFloat(p.precio_compra_usd||0),0);
+  // Un producto comprado en soles no tiene precio en USD: se cuenta aparte para
+  // avisar que la suma esta incompleta en vez de mostrarla como si fuera total.
+  const sinUsd=items.filter(p=>!parseFloat(p.precio_compra_usd||0)).length;
+  return suma>0
+    ? {usd:suma, calc:true,  sinUsd, n:items.length}
+    : {usd:parseFloat(oc.valor_usd||0), calc:false, sinUsd:0, n:items.length};
+}
+
 function renderOCSelectExistente(){
   const et = oc => `${oc.codigo}${oc.descripcion||oc.nombre?' · '+(oc.descripcion||oc.nombre):''} — ${oc.tipo}`;
   // Compra a credito: solo las ordenes todavia abiertas.
@@ -2903,7 +2921,7 @@ function renderOCTab(){
   // Los indicadores miran SIEMPRE todo, no lo filtrado: sirven para saber que
   // hay en la calle, y un filtro no deberia cambiar esa respuesta.
   const enCalle=(ocCache||[]).filter(o=>o.estado!=='ENTREGADO EN PERU'&&o.estado!=='CANCELADO');
-  const usd=L=>L.reduce((t,o)=>t+parseFloat(o.valor_usd||0),0);
+  const usd=L=>L.reduce((t,o)=>t+ocValorUsd(o).usd,0);
   const put=(id,v)=>{const e=s(id); if(e) e.textContent=v;};
   for(const [est,idN,idU] of [
     ['COMPRADO','oc-st-comprado','oc-st-comprado-usd'],
@@ -2939,6 +2957,7 @@ function renderOCTab(){
 
   const _filasOcs=ocs.map(oc=>{
     const arts=inventarioCache.filter(x=>x.orden_compra===oc.codigo);
+    const val=ocValorUsd(oc,arts);
     const [cls,txt]=OC_BADGE[oc.estado]||['badge-muted',oc.estado||'—'];
     const cerrado=!ocAbierta(oc);
     // El tracking puede traer varios numeros separados por " / ": se muestra el
@@ -2963,7 +2982,18 @@ function renderOCTab(){
       <td>${uni(oc.grupo)}</td>
       <td>${(()=>{const[c,t]=OC_QC_BADGE[oc.qc||'']||['badge-muted',esc(oc.qc)];
         return `<span class="badge ${c} oc-badge-edit" onclick="ocMenu(event,'${oc.codigo}','qc')">${t}<i>▾</i></span>`;})()}</td>
-      <td class="td-amt right">${oc.valor_usd?fmtUsd(oc.valor_usd):'<span class="td-muted">—</span>'}</td>
+      <td class="td-amt right">${(()=>{
+        if(!val.usd) return '<span class="td-muted">—</span>';
+        const pl=k=>k===1?'artículo':'artículos';
+        const tip=val.calc
+          ? (val.sinUsd
+              ? `Suma de ${val.n-val.sinUsd} de ${val.n} ${pl(val.n)}. ${val.sinUsd} sin precio en dólares.`
+              : `Suma de ${val.n} ${pl(val.n)} de la orden`)
+          : (val.n
+              ? `Escrito a mano — sus ${val.n} ${pl(val.n)} no tienen precio en dólares`
+              : 'Escrito a mano — esta orden todavía no tiene artículos registrados');
+        return `<span title="${tip}">${fmtUsd(val.usd)}${val.calc&&val.sinUsd?'<span class="oc-mas"> *</span>':''}</span>`;
+      })()}</td>
       <td class="td-unit td-trunc" title="${esc(oc.notas||'')}">${esc(oc.notas||'—')}</td>
       <td class="right">${arts.length
         ? `<span class="badge badge-muted" style="cursor:pointer" onclick="ocVerArticulos('${oc.codigo}')">${arts.length}</span>`
@@ -3155,6 +3185,11 @@ async function ocAbrirModal(cod){
     v('ocm-codigo',oc.codigo); v('ocm-fecha',oc.fecha); v('ocm-desc',oc.descripcion||oc.nombre);
     v('ocm-tienda',oc.tienda); v('ocm-orden',oc.orden_tienda); v('ocm-courier',oc.courier);
     v('ocm-tracking',oc.tracking); v('ocm-usd',oc.valor_usd); v('ocm-grupo',oc.grupo); v('ocm-notas',oc.notas);
+    // Si la orden ya tiene articulos, la tabla muestra la suma de ellos y no
+    // esto. Se avisa en el placeholder para que no parezca que el campo se
+    // ignora sin razon.
+    const _vu=ocValorUsd(oc), _eu=document.getElementById('ocm-usd');
+    if(_eu) _eu.placeholder=_vu.calc?`Los artículos suman ${fmtUsd(_vu.usd)}`:'0.00';
     setCombo('ocm-estado', OC_BADGE[oc.estado]?OC_BADGE[oc.estado][1]:oc.estado);
     setCombo('ocm-tipo', oc.tipo==='IMPORTACION'?'✈️ IMPORTACIÓN':'🏪 LOCAL');
     setCombo('ocm-qc', oc.qc||'');
