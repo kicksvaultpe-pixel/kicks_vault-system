@@ -5264,10 +5264,10 @@ async function registrarPago(){
       fecha:document.getElementById('pg-fecha').value||fechaHoy()
     });
     if(error)throw error;
-    toast('✓ Pago registrado · '+codigoPago,'ok');
+    toast('✓ Gasto registrado · '+codigoPago,'ok');
     ['pg-concepto','pg-monto'].forEach(id=>document.getElementById(id).value='');
   }catch(e){toast('Error: '+e.message,'err');}
-  finally{setLoading(btn,false,'✓ Registrar Pago');}
+  finally{setLoading(btn,false,'✓ Registrar Gasto');}
 }
 
 // ── REGISTRAR COSTO ──
@@ -6212,7 +6212,14 @@ async function siguienteCodigo(tipo){
   const t = COD_TABLA[tipo];
   if(!t) return null;
   const [tabla, campo] = t;
-  const{data,error}=await db.from(tabla).select(campo).order(campo,{ascending:false}).limit(1);
+  // .not(...is null) es imprescindible: Postgres ordena los NULL PRIMERO cuando
+  // el orden es descendente, asi que en una tabla con el codigo a medio llenar
+  // —como `pagos`, con 244 filas viejas sin codigo— la primera fila venia vacia
+  // y esta funcion devolvia null. El correlativo caia al RPC y arrancaba de
+  // GS-0001 teniendo 245 gastos registrados.
+  const{data,error}=await db.from(tabla).select(campo)
+    .not(campo,'is',null)
+    .order(campo,{ascending:false}).limit(1);
   if(error||!data||!data.length) return null;
   const ult = String(data[0][campo]||'');
   const m = ult.match(/^(.*?)(\d+)$/);
