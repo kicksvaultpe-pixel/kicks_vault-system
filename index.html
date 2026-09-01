@@ -2458,7 +2458,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   <div class="modal" style="max-width:520px">
     <div class="modal-title">
       <span id="modal-cl-title">+ Nuevo Cliente</span>
-      <button class="modal-close" onclick="cerrarModalCliente()">×</button>
+      <button class="modal-close" onclick="cancelarModalCliente()">×</button>
     </div>
     <div class="form-grid g2">
       <div class="field"><label>Nombre *</label><input type="text" id="cl-nombre" placeholder="Nombre"></div>
@@ -2503,7 +2503,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
     </div>
     <div style="margin-top:16px;display:flex;gap:8px">
       <button class="btn btn-primary" id="btn-guardar-cl" onclick="guardarCliente()">✓ Guardar</button>
-      <button class="btn btn-ghost" onclick="cerrarModalCliente()">Cancelar</button>
+      <button class="btn btn-ghost" onclick="cancelarModalCliente()">Cancelar</button>
     </div>
   </div>
 </div>
@@ -4420,6 +4420,7 @@ function fillProductoSelects(){
 // ══════════════════════════════════════════
 let clSelectedId={vt:null,rv:null};
 let clEditingId=null;
+let nuevoParaCtx=null;   // cliente recien creado, para devolverlo al formulario que lo pidio
 let clPanelId=null;
 let vtProdSelected=null; // producto activo en form venta
 let rvProdSelected=null; // producto activo en form reserva
@@ -4628,6 +4629,9 @@ function cerrarModalCliente(){
   document.getElementById('modal-nuevo-cliente').classList.remove('open');
   clEditingId=null;
 }
+// Cancelar no debe dejar el contexto colgado: si despues creas un cliente desde
+// el tab, no tendria que saltar al formulario de venta.
+function cancelarModalCliente(){ _clRapidoCtx=null; nuevoParaCtx=null; cerrarModalCliente(); }
 
 function editarCliente(){
   if(clPanelId) abrirModalCliente(clPanelId);
@@ -4655,12 +4659,21 @@ async function guardarCliente(){
       if(error)throw error;
       toast('✓ Cliente actualizado','ok');
     }else{
-      const{error}=await db.from('clientes').insert({...payload,codigo_cliente:clSiguienteCodigo()});
+      const{data:creado,error}=await db.from('clientes')
+        .insert({...payload,codigo_cliente:clSiguienteCodigo()}).select().single();
       if(error)throw error;
       toast('✓ Cliente creado','ok');
+      // Si el modal se abrio desde una venta o una reserva, el cliente recien
+      // creado queda elegido ahi mismo.
+      nuevoParaCtx = creado || null;
     }
     cerrarModalCliente();
     await loadClientes();
+    if(nuevoParaCtx && _clRapidoCtx){
+      clSelect(_clRapidoCtx, nuevoParaCtx.id_cliente);
+      _clRapidoCtx=null;
+    }
+    nuevoParaCtx=null;
   }catch(e){toast('Error: '+e.message,'err');}
   finally{setLoading(btn,false,'✓ Guardar');}
 }
@@ -4739,7 +4752,17 @@ function clClear(ctx){
 
 // ── Modal cliente rápido ──
 let _clRapidoCtx=null;
+// El "+ Nuevo" de los formularios de venta y reserva abre el modal completo del
+// tab Clientes, no uno reducido: si vas a dar de alta a alguien conviene poder
+// poner su apellido, su Instagram y su talla de una vez, y no tener que ir
+// despues al tab a completarlo.
 function abrirClRapido(ctx){
+  _clRapidoCtx=ctx;
+  abrirModalCliente();
+  return;
+}
+
+function abrirClRapidoViejo(ctx){
   _clRapidoCtx=ctx;
   ['clr-nombre','clr-telefono','clr-talla'].forEach(id=>document.getElementById(id).value='');
   comboSetData('cl-clr-talla', TALLAS);
