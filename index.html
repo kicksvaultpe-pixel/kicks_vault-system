@@ -601,6 +601,10 @@ input[list] { cursor: text; }
 .inv-dash{color:var(--muted2);font-size:10px;font-family:inherit}
 
 /* ── Inventario Edit Panel ── */
+.btn-vender-rsv{background:rgba(22,163,74,.10);border:1px solid rgba(22,163,74,.28);color:var(--green);
+  width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:12px;display:inline-flex;
+  align-items:center;justify-content:center;transition:all .15s;padding:0;vertical-align:middle}
+.btn-vender-rsv:hover{background:rgba(22,163,74,.20);border-color:var(--green)}
 .btn-edit-inv{background:none;border:1px solid var(--border);color:var(--muted2);width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;justify-content:center;transition:all .15s;padding:0}
 .btn-edit-inv:hover{border-color:var(--accent);color:var(--accent);background:rgba(99,102,241,.08)}
 #inv-edit-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:none;opacity:0;transition:opacity .2s;pointer-events:none}
@@ -812,7 +816,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   #inv-edit-panel{width:100vw;max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;top:auto;bottom:0;border-left:none;border-top:1px solid var(--border);border-radius:16px 16px 0 0;transform:translateY(100%)}
   #inv-edit-overlay.open #inv-edit-panel{transform:translateY(0)}
   .iep-section .form-grid.g2{grid-template-columns:1fr}
-  .btn-edit-inv{width:36px;height:36px;font-size:15px}
+  .btn-edit-inv,.btn-vender-rsv{width:36px;height:36px;font-size:15px}
   #rsv-panel{width:100vw;max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;top:auto;bottom:0;border-left:none;border-top:1px solid var(--border);border-radius:16px 16px 0 0;transform:translateY(100%)}
   #rsv-overlay.open #rsv-panel{transform:translateY(0)}
   .rsv-filter-btn{min-height:36px}
@@ -3393,7 +3397,12 @@ function renderReservas(){
       <td class="right td-amt" style="color:var(--green)">${fmt(r.total_abonado)}</td>
       <td class="right td-amt" style="${saldo<=0?'color:var(--green)':'color:var(--accent)'}">${fmt(saldo)}</td>
       <td>${estadoBadge}</td>
-      <td style="text-align:center"><button class="btn-edit-inv" onclick="event.stopPropagation();abrirReservaDetalle('${r.codigo_reserva}')" title="Ver detalle">›</button></td>
+      <td style="text-align:center;white-space:nowrap">${
+        r.estado==='ACTIVA' && r.codigo_producto
+          ? `<button class="btn-vender-rsv" title="Completar y generar la venta"
+               onclick="event.stopPropagation();rsvVenderDirecto('${r.codigo_reserva}')">💰</button> `
+          : ''
+        }<button class="btn-edit-inv" onclick="event.stopPropagation();abrirReservaDetalle('${r.codigo_reserva}')" title="Ver detalle">›</button></td>
     </tr>`;
   });
   pagRender('reservas', _filasReservas, 'rsv-tbody', 12, '<tr><td colspan="12" style="text-align:center;padding:30px;color:var(--muted2)">Sin registros</td></tr>');
@@ -3503,6 +3512,18 @@ async function registrarAbono(){
     await loadReservas();
     abrirReservaDetalle(rsvCodigoActivo);
   }catch(e){toast('Error: '+e.message,'err');}
+}
+
+// Vender directo desde la tabla, sin abrir el panel de detalle primero. Es el
+// mismo modal de siempre; solo se fija cual es la reserva activa, que es lo que
+// hacia abrirReservaDetalle.
+function rsvVenderDirecto(codigo){
+  const r=(reservasCache||[]).find(x=>x.codigo_reserva===codigo);
+  if(!r){ toast('No encuentro la reserva '+codigo,'warn'); return; }
+  if(r.estado!=='ACTIVA'){ toast('La reserva ya esta '+String(r.estado||'').toLowerCase(),'warn'); return; }
+  if(!r.codigo_producto){ toast('Primero vincula un producto del inventario','warn'); return; }
+  rsvCodigoActivo=codigo;
+  abrirModalCompletarRsv();
 }
 
 function abrirModalCompletarRsv(){
