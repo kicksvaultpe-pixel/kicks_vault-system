@@ -5557,8 +5557,9 @@ async function registrarInversion(){
       });
     }
     // Interés → pagos table (trigger crea flujo_caja como PAGO) → aparece en Resultado
+    let codPago=null;
     if(montoGasto>0){
-      const codPago=await genCodigo('pago');
+      codPago=await genCodigo('pago');
       await db.from('pagos').insert({
         codigo_pago:codPago,
         concepto:'Interés · '+activo.nombre+(concepto?' · '+concepto:''),
@@ -5566,7 +5567,10 @@ async function registrarInversion(){
         categoria:'INTERES',fecha
       });
     }
-    toast('✓ Cuota registrada · '+codInv,'ok');
+    // El interes se guarda como un gasto aparte, con su propio correlativo. Si
+    // no se nombra, no hay forma de saber desde aca que se creo un segundo
+    // registro.
+    toast('✓ Cuota registrada · '+codInv+(codPago?' · interés '+codPago:''),'ok');
     ['inv-monto-activo','inv-monto-gasto','inv-concepto'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
     document.getElementById('inv-activo-sel').value='';
     document.getElementById('inv-cuota-preview').style.display='none';
