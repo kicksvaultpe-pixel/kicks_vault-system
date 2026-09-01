@@ -5036,6 +5036,19 @@ async function confirmarPago(){
     });
     if(error)throw error;
     // flujo_caja lo maneja el RPC pagar_credito: UPDATE PENDIENTE → COMPRA
+    // El RPC tambien deja precio_final = el monto pagado, y ahi se lleva por
+    // delante los costos que el producto ya tenia: uno de S/ 1000 con S/ 100 de
+    // importacion queda valorizado en 1000 y no en 1100. Como precio_final es
+    // lo que vale en el stock, la caja baja mas de lo que sube el stock y el
+    // CONTROL del flujo se rompe por el monto de los costos. Se recalcula aca.
+    const{data:csPago}=await db.from('costos').select('costo_soles').eq('codigo_producto',modalCodigo);
+    const totalCostos=(csPago||[]).reduce((t,c)=>t+parseFloat(c.costo_soles||0),0);
+    if(totalCostos>0){
+      const{error:ePf}=await db.from('inventario')
+        .update({precio_final:Math.round((monto+totalCostos)*100)/100})
+        .eq('codigo_producto',modalCodigo);
+      if(ePf)toast('⚠ Pago registrado, pero no se pudo actualizar el precio final: '+ePf.message,'warn');
+    }
     toast('✓ Crédito pagado — flujo de caja actualizado','ok');
     closeModal();
     await loadInventario();
