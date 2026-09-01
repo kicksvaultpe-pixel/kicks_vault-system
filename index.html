@@ -5900,9 +5900,13 @@ async function loadFlujo() {
   // compartida con el tab Inventario (ver mas abajo, bloque "POR PAGAR").
 
   // RESERVAS ACTIVAS — adelantos reales bloqueados (solo reservas que no se completaron ni cancelaron)
+  // Solo lo retenido AL CIERRE de este mes: una reserva abierta en setiembre no
+  // estaba reteniendo nada en agosto, y un abono posterior tampoco. Antes se
+  // sumaban todas las activas sin mirar la fecha, asi que un mes viejo mostraba
+  // adelantos que en su momento no existian.
   const reservasMes = (reservasCache||[])
-    .filter(r => r.estado === 'ACTIVA')
-    .reduce((s, r) => s + (r.total_abonado || 0), 0);
+    .filter(r => r.estado === 'ACTIVA' && r.fecha && r.fecha <= fechaFinStr)
+    .reduce((s, r) => s + abonadoHasta(r, fechaFinStr), 0);
 
   // Activo fijo — aportes a activos (la hipoteca). Se necesita ANTES de los
   // calculos: un aporte sale de la caja pero no se pierde, se convierte en
@@ -6075,6 +6079,15 @@ async function loadFlujo() {
   renderFlujoTabla();
 }
 
+// Lo abonado a una reserva hasta cierta fecha. Se declara con `function` y no
+// con `const` porque la usan dos funciones distintas: un const aca abajo entra
+// en zona muerta si alguna la llama antes de tiempo.
+function abonadoHasta(r, hasta){
+  return (r.abonos||[])
+    .filter(a => !a.fecha || !hasta || a.fecha <= hasta)
+    .reduce((s,a) => s + parseFloat(a.monto||0), 0);
+}
+
 function renderFlujoTabla() {
   const body = document.getElementById('fc-tabla-body');
   body.innerHTML = '';
@@ -6097,7 +6110,22 @@ function renderFlujoTabla() {
     !codigosEnFlujo.has(p.codigo_producto)
   ) : [];
 
-  if(!flujoFiltrado.length && !pendRows.length) {
+  // Reservas abiertas de meses anteriores. Una reserva retiene plata hasta que
+  // se cierra, igual que un credito pendiente, pero su fila de flujo solo vive
+  // en el mes del adelanto: de ahi en adelante la burbuja la contaba y la tabla
+  // no la mostraba. Se arrastra hasta que la reserva deja de estar ACTIVA.
+  const rsvEnFlujo = new Set(flujoCache
+    .filter(f=>(f.categoria||f.tipo||'').toUpperCase()==='RESERVA')
+    .map(f=>f.referencia_id));
+  const rsvRows = (!accionActiva||accionActiva==='RESERVA')
+    ? (reservasCache||[]).filter(r =>
+        r.estado==='ACTIVA' &&
+        r.fecha && r.fecha <= fechaFinStr &&
+        !rsvEnFlujo.has(r.codigo_reserva) &&
+        abonadoHasta(r, fechaFinStr) > 0)
+    : [];
+
+  if(!flujoFiltrado.length && !pendRows.length && !rsvRows.length) {
     body.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--muted2)">Sin movimientos este mes</td></tr>';
     return;
   }
@@ -6198,13 +6226,32 @@ function renderFlujoTabla() {
     </tr>`;
   });
 
+  // Filas de reservas abiertas que vienen de meses anteriores. El monto va en la
+  // columna PEND. y no en INGRESO: la plata entro en su mes, aca solo sigue
+  // retenida. Ponerla como ingreso haria parecer que se cobro otra vez.
+  const rsvRows2 = rsvRows.map(r => {
+    const prod=[r.marca,r.modelo,r.colorway,r.talla].filter(Boolean).join(' ');
+    const desc=[prod, r.nombre_cliente].filter(Boolean).join(' · ')||'—';
+    return `<tr class="row-rsv">
+      <td class="td-fecha">${fmtFecha(r.fecha)}</td>
+      <td><span class="fc-accion-badge fc-accion-RESERVA">RESERVA</span></td>
+      <td><span class="td-code">${r.codigo_reserva}</span></td>
+      <td>${r.codigo_producto?`<span class="td-code">${r.codigo_producto}</span>`:'<span class="td-muted">—</span>'}</td>
+      <td class="td-desc">${desc}</td>
+      <td class="right"><span class="td-muted">—</span></td>
+      <td class="right"><span class="td-muted">—</span></td>
+      <td class="right"><span class="td-pend">🔒 ${fmt(abonadoHasta(r, fechaFinStr))}</span></td>
+      <td class="right"><span class="td-muted">—</span></td>
+    </tr>`;
+  });
+
   // Filtrar por buscador
   const fcQ=(document.getElementById('fc-buscar')?.value||'').toLowerCase().trim();
   const filterFlujo=row=>{
     if(!fcQ) return true;
     return row.toLowerCase().includes(fcQ);
   };
-  pagRender('flujo', [...rows.filter(filterFlujo),...pendRows2.filter(filterFlujo)], 'fc-tabla-body', 9, '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--muted2)">Sin movimientos este mes</td></tr>');
+  pagRender('flujo', [...rows.filter(filterFlujo),...rsvRows2.filter(filterFlujo),...pendRows2.filter(filterFlujo)], 'fc-tabla-body', 9, '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--muted2)">Sin movimientos este mes</td></tr>');
 }
 
 // ── GENERAR CODIGO ──
