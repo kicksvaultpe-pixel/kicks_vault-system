@@ -64,8 +64,40 @@ END
 $do$;
 
 
+-- ── 3. Sacar las politicas viejas que dejaban pasar a cualquiera ──
+-- El setup original creo una politica por tabla con rol PUBLIC y comando ALL:
+-- public_ventas, public_clientes, public_inventario, public_pagos,
+-- public_costos, public_flujo_caja y caja_mensual_all. PUBLIC incluye a `anon`,
+-- que es el rol con el que entra cualquiera desde el navegador.
+--
+-- Las politicas de RLS se SUMAN: basta con que una permita para que se entre.
+-- Mientras esas siete existan, agregar kv_solo_autenticados no cierra nada
+-- —comprobado leyendo 1239 ventas y 24 clientes sin sesion, y escribiendo un
+-- gasto de prueba— asi que hay que eliminarlas.
+--
+-- Solo toca el esquema `public`: no roza nada de Supabase Auth ni Storage.
+DO $do$
+DECLARE
+  p record;
+BEGIN
+  FOR p IN
+    SELECT c.relname AS tabla, pol.polname AS politica
+    FROM pg_policy pol
+    JOIN pg_class c ON c.oid = pol.polrelid
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public'
+      AND pol.polname <> 'kv_solo_autenticados'
+  LOOP
+    RAISE NOTICE 'Eliminando % en %', p.politica, p.tabla;
+    EXECUTE format('DROP POLICY %I ON public.%I', p.politica, p.tabla);
+  END LOOP;
+END
+$do$;
+
+
 -- ── COMPROBACION ────────────────────────────────────────────
--- `rls` debe decir true en todas, y `politicas` 1 en todas.
+-- `rls` debe decir true en todas, y `politicas` EXACTAMENTE 1 en todas.
+-- Si alguna dice 2, le quedo una politica vieja abierta.
 SELECT c.relname AS tabla,
        c.relrowsecurity AS rls,
        count(pol.polname) AS politicas
