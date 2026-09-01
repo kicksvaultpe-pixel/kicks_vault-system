@@ -4664,12 +4664,17 @@ async function guardarCliente(){
 }
 
 // ── Búsqueda de cliente en formularios ──
+// El codigo NO es el id: id_cliente es una secuencia de Postgres que no se
+// reinicia al borrar, asi que C-021 tiene id 37. Tomar el numero del codigo
+// como id elegia a otro cliente —C-021 traia a C-005— o a ninguno cuando ese
+// id ni existia. Hay que buscar por codigo_cliente.
 function onPickVtCliente(){
   const raw=document.getElementById('vt-cl-input').value;
   const code=(raw.match(/(C-\d+)/)||[])[1]||'';
   if(!code)return;
-  const id=parseInt(code.replace('C-',''));
-  clSelect('vt',id);
+  const c=(clientesCache||[]).find(x=>x.codigo_cliente===code);
+  if(!c){ toast('No encuentro el cliente '+code,'warn'); return; }
+  clSelect('vt',c.id_cliente);
 }
 
 function clSearch(ctx){
