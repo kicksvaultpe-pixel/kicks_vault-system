@@ -5773,6 +5773,26 @@ async function fcConfirmarCerrarMes(){
   }
 }
 
+// Neto de caja de un mes a partir de sus filas de flujo.
+//
+// Lo usan los dos caminos que necesitan la cifra: el mes que se esta viendo y
+// el arrastre del mes anterior cuando ese mes no tiene cierre guardado. Estaba
+// escrito dos veces y las copias se separaron: la del arrastre pedia a la base
+// solo `categoria` pero clasificaba con `categoria||tipo`, asi que toda fila con
+// categoria en NULL —las ventas, los gastos y los costos que escriben los
+// triggers son asi— caia fuera de toda suma. Resultado: agosto cerraba en
+// 24,162.61 y setiembre abria en 20,670.43.
+const FC_GASTOS = ['OPERATIVO','MARKETING','PERSONAL','IMPORTACION','PAGO','INTERES'];
+function fcCat(f){ return (f.categoria||f.tipo||'').toUpperCase(); }
+function fcNeto(filas){
+  const L = filas||[];
+  const ing = c => L.filter(f=>fcCat(f)===c).reduce((s,f)=>s+parseFloat(f.ingreso_soles||0),0);
+  const egr = ok => L.filter(f=>ok(fcCat(f))).reduce((s,f)=>s+parseFloat(f.egreso_soles||0),0);
+  return ing('VENTA') + ing('CANCELACION')
+       - egr(c=>c==='COMPRA') - egr(c=>c==='COSTO')
+       - egr(c=>FC_GASTOS.includes(c)) - egr(c=>c==='INVERSION');
+}
+
 async function loadFlujo() {
   if(!fcMesActual) {
     const now = new Date();
@@ -5789,12 +5809,12 @@ async function loadFlujo() {
   const fechaFinStr = fechaFin.toISOString().substring(0,10);
 
   // Cargar flujo_caja del mes
-  const {data:flujoMes} = await db.from('flujo_caja')
+  const {data:flujoMes} = await pageAll(()=>db.from('flujo_caja')
     .select('*')
     .gte('fecha', fechaInicio)
     .lte('fecha', fechaFinStr)
     .order('fecha', {ascending:false})
-    .order('id', {ascending:false});
+    .order('id', {ascending:false}));
   flujoCache = flujoMes || [];
 
   // Mapa codigo_venta → codigo_producto para filas VENTA en flujo
@@ -5830,20 +5850,15 @@ async function loadFlujo() {
       .select('*').eq('mes', mesPrev).maybeSingle();
     const cajaPrevInicio = cajaPrev ? parseFloat(cajaPrev.caja_inicio||0) : 0;
 
-    // Sumar movimientos del mes anterior para derivar caja_fin
-    const {data:flujoPrev} = await db.from('flujo_caja')
-      .select('ingreso_soles,egreso_soles,categoria')
-      .gte('fecha', prevIni).lte('fecha', prevFinStr);
-    const fp = flujoPrev || [];
-    const pcat = f => (f.categoria||f.tipo||'').toUpperCase();
-    const pIngV  = fp.filter(f=>pcat(f)==='VENTA').reduce((s,f)=>s+parseFloat(f.ingreso_soles||0),0);
-    const pEgrC  = fp.filter(f=>pcat(f)==='COMPRA').reduce((s,f)=>s+parseFloat(f.egreso_soles||0),0);
-    const pEgrCo = fp.filter(f=>pcat(f)==='COSTO').reduce((s,f)=>s+parseFloat(f.egreso_soles||0),0);
-    const pEgrG  = fp.filter(f=>['OPERATIVO','MARKETING','PERSONAL','IMPORTACION','PAGO','INTERES'].includes(pcat(f))).reduce((s,f)=>s+parseFloat(f.egreso_soles||0),0);
-    const pEgrI  = fp.filter(f=>pcat(f)==='INVERSION').reduce((s,f)=>s+parseFloat(f.egreso_soles||0),0);
-    const pIngCan= fp.filter(f=>pcat(f)==='CANCELACION').reduce((s,f)=>s+parseFloat(f.ingreso_soles||0),0);
-    const cajaPrevFin = cajaPrevInicio + pIngV + pIngCan - pEgrC - pEgrCo - pEgrG - pEgrI;
-    cajaInicio = cajaPrevFin;
+    // Sumar movimientos del mes anterior para derivar caja_fin. Con la fila
+    // entera (`*`), no solo unas columnas: fcNeto() clasifica por
+    // `categoria||tipo` y sin `tipo` se pierden las filas que lo traen vacio.
+    // Paginado, que un mes movido puede pasar de las 1000 filas que devuelve
+    // PostgREST de una sola vez.
+    const {data:flujoPrev} = await pageAll(()=>db.from('flujo_caja')
+      .select('*')
+      .gte('fecha', prevIni).lte('fecha', prevFinStr));
+    cajaInicio = cajaPrevInicio + fcNeto(flujoPrev);
   }
 
   // GANANCIAS y vendidos del mes — se necesita antes de stockInicio
@@ -5978,7 +5993,9 @@ async function loadFlujo() {
   // CÁLCULOS — egresos son positivos en BD, se restan
   const totalAntesGanancias = cajaInicio + stockInicio + activoInicio;
   const total = totalAntesGanancias + ganancias;
-  const netoMes = ingVentas + ingCancel - egrCompras - egrCostos - egrGastos - egrInversion;
+  // Misma funcion que el arrastre: asi el cierre de un mes y la apertura del
+  // siguiente no pueden volver a separarse.
+  const netoMes = fcNeto(flujoCache);
   // Caja fisica: la plata que hay en la mano, adelantos de reserva incluidos.
   // Son cobros reales aunque el producto no se haya entregado. `cajaInicio`
   // viene sin ellos (el cierre del mes anterior ya los descuenta), por eso se
