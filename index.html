@@ -5004,13 +5004,21 @@ async function registrarCompra(){
     if(esCredito){
       if(ocModo==='nueva'){
         const ocCod=document.getElementById('cp-oc-nueva').value;
-        const ocTipo=noEmoji(document.getElementById('cp-oc-tipo').value);
+        // El combo dice "IMPORTACION" con tilde y la base la guarda sin tilde,
+        // asi que noEmoji solo no alcanza: hay que normalizar como en el modal.
+        const ocTipo=noEmoji(document.getElementById('cp-oc-tipo').value)
+          .includes('LOCAL')?'LOCAL':'IMPORTACION';
         const ocNombre=document.getElementById('cp-oc-nombre')?.value.trim()||null;
         const ocNotas=document.getElementById('cp-oc-notas').value.trim()||null;
+        // COMPRADO es la primera etapa del pipeline: acabas de comprarlo y aun
+        // no viaja. Antes mandaba 'PENDIENTE', un estado que dejo de existir al
+        // pasar las OC al seguimiento de importacion, y el insert moria con
+        // "violates check constraint ordenes_compra_estado_check".
         const{error:eOC}=await db.from('ordenes_compra').upsert({
           codigo:ocCod, tipo:ocTipo, nombre:ocNombre,
+          descripcion:ocNombre,
           fecha:document.getElementById('cp-fecha').value,
-          estado:'PENDIENTE', notas:ocNotas
+          estado:'COMPRADO', notas:ocNotas
         },{onConflict:'codigo'});
         if(eOC) throw eOC;
         ordenCompra=ocCod;
