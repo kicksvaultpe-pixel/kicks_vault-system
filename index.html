@@ -4897,9 +4897,17 @@ async function cancelarProducto(codigo){
   const prod=inventarioCache.find(p=>p.codigo_producto===codigo);
   if(!prod) return;
   const nombre=[prod.marca,prod.modelo,prod.colorway].filter(Boolean).join(' ');
+  // A la caja solo vuelve lo que salio de ella. Un credito sin pagar nunca la
+  // toco — quedo como fila PENDIENTE — asi que devolver el precio de compra
+  // seria inventar un ingreso. Lo que corresponde ahi es anular la deuda.
+  const aCredito=prod.pago_estado==='PENDIENTE';
+  const monto=aCredito?0:parseFloat(prod.precio_compra_soles||0);
+  const detalle=aCredito
+    ? `Se anulará la deuda de ${fmt(prod.precio_compra_soles||0)}. No entra plata a la caja porque esta compra todavía no se pagó.`
+    : `Vuelven ${fmt(monto)} a la caja.`;
   if(!confirm(`¿Cancelar compra de ${nombre} (${prod.talla||'—'})?
 
-Se revertirá el egreso de S/. ${fmt(prod.precio_compra_soles||0)} en flujo de caja.`)) return;
+${detalle}`)) return;
 
   try{
     // 1. Marcar inventario como CANCELADO
@@ -4908,24 +4916,29 @@ Se revertirá el egreso de S/. ${fmt(prod.precio_compra_soles||0)} en flujo de c
       .eq('codigo_producto',codigo);
     if(e1) throw e1;
 
-    // 2. Registrar ingreso en flujo_caja para revertir el egreso
-    const monto=parseFloat(prod.precio_compra_soles||0);
-    if(monto>0){
-      const now=new Date();
-      const fecha=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
-      const{error:e2}=await db.from('flujo_caja').insert({
-        fecha,
-        tipo:'CANCELACION',
-        categoria:'CANCELACION',
-        descripcion:`Cancelación compra ${codigo} — ${nombre}`,
-        ingreso_soles:monto,
-        egreso_soles:0,
-        referencia_id:codigo
-      });
-      if(e2) throw e2;
+    // 2. Revertir el egreso. La fila se escribe SIEMPRE, aunque el monto sea 0:
+    //    el tab Flujo la usa para saber en que fecha el producto dejo de ser
+    //    stock. Sin ella, cancelar borraria el producto del stock de todos los
+    //    meses pasados y el CONTROL se rompia por su valor.
+    const{error:e2}=await db.from('flujo_caja').insert({
+      fecha:fechaHoy(),
+      tipo:'CANCELACION',
+      categoria:'CANCELACION',
+      descripcion:`Cancelación compra ${codigo} — ${nombre}`,
+      ingreso_soles:monto,
+      egreso_soles:0,
+      referencia_id:codigo
+    });
+    if(e2) throw e2;
+
+    // 3. Si era a credito, la compra cancelada ya no se debe.
+    if(aCredito){
+      const{error:e3}=await db.from('flujo_caja').delete()
+        .eq('referencia_id',codigo).eq('categoria','PENDIENTE');
+      if(e3) throw e3;
     }
 
-    toast('✓ Compra cancelada — flujo de caja revertido','ok');
+    toast(aCredito?'✓ Compra cancelada — deuda anulada':'✓ Compra cancelada — flujo de caja revertido','ok');
     loadInventario();
   } catch(err){
     toast('Error: '+err.message,'err');
@@ -5706,7 +5719,8 @@ async function loadFlujo() {
     const pEgrCo = fp.filter(f=>pcat(f)==='COSTO').reduce((s,f)=>s+parseFloat(f.egreso_soles||0),0);
     const pEgrG  = fp.filter(f=>['OPERATIVO','MARKETING','PERSONAL','IMPORTACION','PAGO','INTERES'].includes(pcat(f))).reduce((s,f)=>s+parseFloat(f.egreso_soles||0),0);
     const pEgrI  = fp.filter(f=>pcat(f)==='INVERSION').reduce((s,f)=>s+parseFloat(f.egreso_soles||0),0);
-    const cajaPrevFin = cajaPrevInicio + pIngV - pEgrC - pEgrCo - pEgrG - pEgrI;
+    const pIngCan= fp.filter(f=>pcat(f)==='CANCELACION').reduce((s,f)=>s+parseFloat(f.ingreso_soles||0),0);
+    const cajaPrevFin = cajaPrevInicio + pIngV + pIngCan - pEgrC - pEgrCo - pEgrG - pEgrI;
     cajaInicio = cajaPrevFin;
   }
 
@@ -5722,17 +5736,35 @@ async function loadFlujo() {
   const {data:ventasPost} = await pageAll(()=>db.from('ventas').select('codigo_producto').gt('fecha', fechaFinStr));
   const vendidosPostSet = new Set((ventasPost||[]).map(v=>v.codigo_producto).filter(Boolean));
 
-  // Estaba en stock al cierre de `hasta`: comprado antes, no cancelado, y o bien
-  // sigue en stock hoy o se vendio despues de esa fecha. Mismo criterio que
-  // `atFin` en updateStats — pago_estado !== 'PENDIENTE' en ambos extremos.
-  // No se excluye al credito pendiente: valStock() ya lo valoriza en lo que se
-  // desembolso (su importacion). Excluirlo entero hacia que este tab y el de
-  // Inventario mostraran distinto valor para el mismo stock.
-  const enStockAl = (p, hasta, vendidosDespues) =>
-    p.fecha_compra && p.fecha_compra <= hasta &&
-    p.estado !== 'CANCELADO' &&
-    (p.estado === 'DISPONIBLE' || p.estado === 'RESERVADO' ||
-     (p.estado === 'VENDIDO' && vendidosDespues.has(p.codigo_producto)));
+  // CANCELADOS — con la fecha en que se cancelo cada compra, que vive en la
+  // fila CANCELACION del flujo (cancelarProducto siempre escribe una, aunque
+  // el monto devuelto sea 0, justamente para dejar la fecha registrada).
+  const {data:cancelTodas} = await pageAll(()=>db.from('flujo_caja')
+    .select('referencia_id,fecha')
+    .eq('categoria','CANCELACION'));
+  const cancelFecha = new Map((cancelTodas||[])
+    .filter(c => c.referencia_id && c.fecha)
+    .map(c => [c.referencia_id, c.fecha]));
+
+  // Estaba en stock al cierre de `hasta`: comprado antes, y o bien sigue en
+  // stock hoy, o se vendio despues de esa fecha, o se cancelo despues.
+  // Mismo criterio que `atFin` en updateStats — pago_estado !== 'PENDIENTE' en
+  // ambos extremos. No se excluye al credito pendiente: valStock() ya lo
+  // valoriza en lo que se desembolso (su importacion). Excluirlo entero hacia
+  // que este tab y el de Inventario mostraran distinto valor para el mismo stock.
+  //
+  // Un CANCELADO se trata igual que un VENDIDO: al cierre de un mes anterior a
+  // su cancelacion todavia estaba en stock. Si se lo excluyera siempre, cancelar
+  // una compra hoy borraria ese producto del stock de todos los meses pasados.
+  const enStockAl = (p, hasta, vendidosDespues) => {
+    if(!p.fecha_compra || p.fecha_compra > hasta) return false;
+    if(p.estado === 'CANCELADO'){
+      const fCan = cancelFecha.get(p.codigo_producto);
+      return !!fCan && fCan > hasta;
+    }
+    return p.estado === 'DISPONIBLE' || p.estado === 'RESERVADO' ||
+      (p.estado === 'VENDIDO' && vendidosDespues.has(p.codigo_producto));
+  };
 
   // STOCK INICIO — al último día del mes anterior. Lo vendido durante el mes
   // todavia estaba en stock al empezar, por eso entra vendidosMesSet.
@@ -5771,11 +5803,27 @@ async function loadFlujo() {
   const egrCostos  = sumEgr(flujoCache.filter(f=>cat(f)==='COSTO'));
   const egrGastos   = sumEgr(flujoCache.filter(f=>['OPERATIVO','MARKETING','PERSONAL','IMPORTACION','PAGO','INTERES'].includes(cat(f))));
   const egrInversion= sumEgr(flujoCache.filter(f=>cat(f)==='INVERSION'));
+  // CANCELACIONES — cancelar una compra devuelve plata a la caja y saca el
+  // producto del stock. Antes esta categoria no la sumaba nadie: el producto
+  // desaparecia del stock, el ingreso quedaba invisible y el CONTROL se rompia
+  // por el valor del producto.
+  const filasCancel = flujoCache.filter(f=>cat(f)==='CANCELACION');
+  const ingCancel   = sumIng(filasCancel);
+  // Lo que valia en el stock lo que se cancelo. Si te devuelven la compra pero
+  // no los costos ya pagados (envio, importacion), esa diferencia es perdida
+  // real y tiene que bajar el margen, no evaporarse.
+  const valorCancel = filasCancel.reduce((sum,f)=>{
+    const pr = (inventarioCache||[]).find(x=>x.codigo_producto===f.referencia_id);
+    return sum + (pr ? valStock(pr) : 0);
+  }, 0);
+  const resultadoCancel = ingCancel - valorCancel;
 
   // Margen del mes = ganancia de las ventas MENOS los gastos. Tiene que ser
   // neto: `netoMes` ya descuenta los gastos, asi que si aca fuera bruto el
   // CONTROL nunca cerraria. Es la misma definicion que usa la hoja FLUJO.
-  const ganancias = gananciaVentas - egrGastos;
+  // `resultadoCancel` entra al margen igual que la ganancia de una venta:
+  // una cancelacion es una salida de stock con plata de vuelta.
+  const ganancias = gananciaVentas + resultadoCancel - egrGastos;
 
   // PENDIENTES — créditos sin pagar (todos los meses)
   const pendMes = inventarioCache.filter(p => p.pago_estado === 'PENDIENTE');
@@ -5804,7 +5852,7 @@ async function loadFlujo() {
   // CÁLCULOS — egresos son positivos en BD, se restan
   const totalAntesGanancias = cajaInicio + stockInicio + activoInicio;
   const total = totalAntesGanancias + ganancias;
-  const netoMes = ingVentas - egrCompras - egrCostos - egrGastos - egrInversion;
+  const netoMes = ingVentas + ingCancel - egrCompras - egrCostos - egrGastos - egrInversion;
   // Caja fisica: la plata que hay en la mano, adelantos de reserva incluidos.
   // Son cobros reales aunque el producto no se haya entregado. `cajaInicio`
   // viene sin ellos (el cierre del mes anterior ya los descuenta), por eso se
