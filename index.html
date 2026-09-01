@@ -5495,8 +5495,13 @@ function invActualizarPreview(){
 let fcMesActual = null; // 'YYYY-MM'
 let flujoCache = [];
 
+// Fecha local, no UTC. toISOString() convierte a UTC, y en Peru (UTC-5) eso
+// significa que desde las 19:00 del ultimo dia del mes la app ya creia estar en
+// el mes siguiente: abria en un septiembre vacio en vez de agosto. Ademas no
+// coincidia con mesHoy(), que si usa la fecha local, asi que el tope de
+// navegacion tampoco funcionaba.
 function fcMesStr(date) {
-  return date.toISOString().substring(0,7);
+  return date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0');
 }
 function fcMesLabel(mes) {
   const [y,m] = mes.split('-');
