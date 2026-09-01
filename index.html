@@ -854,6 +854,29 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
 </head>
 <body>
 
+<!-- Puerta de entrada. Viene visible desde el HTML a proposito, no la muestra el
+     JS: si esperara a que el script decida, se alcanzaria a ver el tablero con
+     datos reales antes de saber quien esta del otro lado. Fondo opaco por lo
+     mismo. -->
+<div id="login-gate" style="position:fixed;inset:0;z-index:900;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:16px">
+  <div class="card" style="max-width:360px;width:100%;margin:0">
+    <div class="nav-logo" style="justify-content:center;margin-bottom:8px"><span class="kv-kicks">KICKS</span><span class="kv-vault">VAULT</span></div>
+    <div style="text-align:center;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:24px">Ingresa para continuar</div>
+    <div class="field" style="margin-bottom:14px">
+      <label for="lg-email">Correo</label>
+      <input type="email" id="lg-email" autocomplete="username" placeholder="tucorreo@ejemplo.com"
+        onkeydown="if(event.key==='Enter')document.getElementById('lg-pass').focus()">
+    </div>
+    <div class="field" style="margin-bottom:20px">
+      <label for="lg-pass">Contraseña</label>
+      <input type="password" id="lg-pass" autocomplete="current-password" placeholder="••••••••"
+        onkeydown="if(event.key==='Enter')kvLogin()">
+    </div>
+    <button class="btn btn-primary" id="lg-btn" onclick="kvLogin()" style="width:100%;justify-content:center">Entrar</button>
+    <div id="lg-error" style="display:none;margin-top:14px;font-size:12px;color:var(--red);text-align:center"></div>
+  </div>
+</div>
+
 <!-- Header solo visible en mobile (logo) -->
 <div class="mobile-header">
   <div class="nav-logo"><span class="kv-kicks">KICKS</span><span class="kv-vault">VAULT</span></div>
@@ -893,6 +916,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
     </button>
   </div>
   <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Modo oscuro"></button>
+  <button class="theme-btn" id="logoutBtn" onclick="kvSalir()" title="Cerrar sesión" style="display:none">⏻</button>
 </nav>
 
 <!-- ══════════════════════════════════
@@ -6787,7 +6811,71 @@ async function iepGuardar(){
   finally{setLoading(btn,false);}
 }
 
-init();
+// ══════════════════════════════════════════
+// SESION
+// ══════════════════════════════════════════
+// La app no carga un solo dato sin sesion. Esto por si solo no protege nada
+// —la clave publica sigue en el HTML y cualquiera puede llamar al API por su
+// cuenta—: lo que protege de verdad es el RLS de la base, que solo deja pasar
+// al rol `authenticated`. El login es la mitad que hace que la app siga
+// funcionando una vez cerrada esa puerta.
+let _appIniciada=false;
+
+function lgError(msg){
+  const e=document.getElementById('lg-error');
+  if(!e)return;
+  e.textContent=msg||'';
+  e.style.display=msg?'block':'none';
+}
+
+async function kvLogin(){
+  const email=(document.getElementById('lg-email').value||'').trim();
+  const pass=document.getElementById('lg-pass').value||'';
+  if(!email||!pass){lgError('Escribe tu correo y tu contraseña');return;}
+  const btn=document.getElementById('lg-btn');
+  lgError(''); setLoading(btn,true);
+  const{error}=await db.auth.signInWithPassword({email,password:pass});
+  setLoading(btn,false,'Entrar');
+  if(error){
+    // Supabase responde lo mismo si el correo no existe o si la clave esta mal,
+    // y esta bien que sea asi: decir cual de las dos fallo le confirma a un
+    // desconocido que ese correo tiene cuenta.
+    lgError(/invalid login/i.test(error.message)
+      ? 'Correo o contraseña incorrectos'
+      : error.message);
+    return;
+  }
+  document.getElementById('lg-pass').value='';
+  await kvEntrar();
+}
+
+async function kvSalir(){
+  await db.auth.signOut();
+  location.reload();
+}
+
+async function kvEntrar(){
+  document.getElementById('login-gate').style.display='none';
+  const lb=document.getElementById('logoutBtn');
+  if(lb)lb.style.display='flex';
+  if(_appIniciada)return;   // volver de un signIn no debe recargar todo de nuevo
+  _appIniciada=true;
+  await init();
+}
+
+async function kvArrancar(){
+  const{data:{session}}=await db.auth.getSession();
+  if(session){ await kvEntrar(); return; }
+  const e=document.getElementById('lg-email');
+  if(e)e.focus();
+}
+
+// Si la sesion caduca, o cierras sesion en otra pestaña, vuelve la puerta.
+db.auth.onAuthStateChange(evento=>{
+  if(evento==='SIGNED_OUT') location.reload();
+});
+
+kvArrancar();
 </script>
 
 <!-- ══ INVENTARIO EDIT PANEL ══ -->
