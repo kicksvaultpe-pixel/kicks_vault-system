@@ -2433,6 +2433,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <button class="btn btn-ghost btn-sm rsv-filter-btn" data-estado="COMPLETADA" onclick="setRsvFiltro('COMPLETADA',this)">Completadas</button>
       <button class="btn btn-ghost btn-sm rsv-filter-btn" data-estado="CANCELADA" onclick="setRsvFiltro('CANCELADA',this)">Canceladas</button>
     </div>
+    <button class="btn btn-ghost btn-sm" onclick="rsvLimpiarFiltros()">× Limpiar</button>
   </div>
 
   <div class="table-wrap">
@@ -3375,6 +3376,17 @@ function setRsvFiltro(estado,btn){
 }
 
 function filtrarReservas(){renderReservas();}
+
+// Devuelve la tabla a "todo": vacia el buscador y suelta el filtro de estado.
+// El boton "Todas" queda marcado a mano porque setRsvFiltro() espera el
+// elemento que se clickeo, y aca no hay ninguno.
+function rsvLimpiarFiltros(){
+  const s=document.getElementById('rsv-search'); if(s)s.value='';
+  rsvFiltroEstado='';
+  document.querySelectorAll('.rsv-filter-btn').forEach(b=>
+    b.classList.toggle('active', (b.dataset.estado||'')===''));
+  renderReservas();
+}
 
 // ── PAGINACION DE TABLAS ───────────────────────────────────────
 // Generica: recibe las filas ya armadas y pinta solo las de la pagina, con
