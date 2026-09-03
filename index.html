@@ -3979,7 +3979,7 @@ async function loadInventario(){
   // filterInventario() y no renderInventario(invBaseRows()): respeta los filtros
   // y el orden activos tras editar/vender/reservar, y excluye CANCELADO igual.
   filterInventario();
-  updateStats(invHistorico?'':invMesActual,vendidosMes,vendidosDespues);
+  await updateStats(invHistorico?'':invMesActual,vendidosMes,vendidosDespues);
   fillProductoSelects();
   fillDataLists();
 }
@@ -4190,7 +4190,14 @@ function invPagMove(dir){
   document.querySelector('#view-inventario .table-wrap')?.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
-function updateStats(mes='',vendidosMes=[],vendidosDespues=[]){
+async function updateStats(mes='',vendidosMes=[],vendidosDespues=[]){
+  // Fecha de cierre del mes que se esta viendo, para Por Pagar. `mes` llega
+  // vacio en "Historia": ahi no hay un mes que cerrar, se ve el estado vivo.
+  const hastaDeuda = mes ? (()=>{
+    const[hy,hm]=mes.split('-').map(Number);
+    const f=new Date(hy,hm,0);
+    return f.getFullYear()+'-'+String(f.getMonth()+1).padStart(2,'0')+'-'+String(f.getDate()).padStart(2,'0');
+  })() : null;
   const now=new Date();
   const mesHoy=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
   const mesCompras=mes||mesHoy;
@@ -4330,11 +4337,12 @@ function updateStats(mes='',vendidosMes=[],vendidosDespues=[]){
   Object.keys(acum).forEach(k=>{acum[k][0]=vistos[k].size;});
   const montoMes=Object.values(acum).reduce((s,[,v])=>s+v,0);
   const udsMes=new Set(movsMes.map(f=>f.referencia_id).filter(Boolean)).size;
-  // POR PAGAR: saldo de creditos, no depende del mes. Lo calcula deudaCreditos()
-  // para que este tab y Flujo de Caja muestren exactamente lo mismo.
-  pintarDeuda('st-deu-stock-uds','st-deu-stock-usd','st-deu-stock-val',
+  // POR PAGAR: a la fecha de cierre de `mes`. Lo calcula deudaCreditos() para
+  // que este tab y Flujo de Caja muestren exactamente lo mismo.
+  await pintarDeuda('st-deu-stock-uds','st-deu-stock-usd','st-deu-stock-val',
               'st-deu-pedido-uds','st-deu-pedido-usd','st-deu-pedido-val',
-              'st-deu-total-uds','st-deu-total-usd','st-deu-total-val','st-deu-tc');
+              'st-deu-total-uds','st-deu-total-usd','st-deu-total-val','st-deu-tc',
+              hastaDeuda);
   set('st-mes-zap-uds', acum.ZAP[0]);
   set('st-mes-zap-val', fmt(acum.ZAP[1]));
   set('st-mes-ropa-uds', acum.ROPA[0]);
@@ -4381,24 +4389,65 @@ async function pageAll(build){
 // Pedido (producto ligado a una reserva tipo PEDIDO). precio_compra_soles ya
 // trae el USD convertido a su tipo de cambio, asi que la columna soles suma
 // ambas monedas y es lo que realmente hay que pagar.
-function deudaCreditos(){
-  // Cancelar una compra a credito borra su fila PENDIENTE del flujo (la deuda
-  // se anula), pero cancelarProducto() nunca toca pago_estado del producto: se
-  // queda en 'PENDIENTE' para siempre. Sin este filtro, un producto cancelado
-  // seguia sumando aca como si todavia se debiera.
-  const pend=(inventarioCache||[]).filter(p=>p.pago_estado==='PENDIENTE' && p.estado!=='CANCELADO');
-  // Pedido = el producto ya tiene dueno: esta RESERVADO. Todo lo demas es stock
-  // libre. Antes se miraba el tipo de la reserva (PEDIDO vs STOCK), pero las
-  // reservas se registran como STOCK aunque el producto no este pagado, asi que
-  // ese criterio dejaba la columna Pedido siempre en cero.
-  const pedidoSet=new Set(
-    pend.filter(p=>p.estado==='RESERVADO').map(p=>p.codigo_producto)
-  );
+// Deuda de creditos "como estaba" al cierre del mes que se este viendo, no
+// siempre hoy — era la unica burbuja del sistema que no se movia al cambiar de
+// mes o de tab, aunque caja, stock y margen si lo hacen.
+//
+// El RPC pagar_credito actualiza LA MISMA fila de flujo_caja del producto, no
+// inserta una nueva: le cambia la categoria de PENDIENTE a COMPRA y la fecha a
+// la del pago (verificado con P-01004: una sola fila, categoria COMPRA, con la
+// fecha del pago, mismo id desde su registro original). Por eso alcanza con
+// mirar esa fecha: si el pago quedo despues de `hasta`, en ese momento el
+// credito todavia se debia. Mismo criterio para CANCELACION que usa enStockAl().
+//
+// hasta=null -> hoy, el estado en vivo (para el mes en curso, sin cerrar).
+async function deudaCreditos(hasta){
+  const inv=inventarioCache||[];
+  const creditos=inv.filter(p=>
+    p.tipo_pago==='CREDITO' && p.fecha_compra && (!hasta || p.fecha_compra<=hasta));
+
   const acum=L=>({
     n:L.length,
     usd:  L.reduce((s,p)=>s+(p.moneda==='USD'?parseFloat(p.precio_compra_usd||0):0),0),
     soles:L.reduce((s,p)=>s+parseFloat(p.precio_compra_soles||0),0)
   });
+
+  let pend;
+  if(!hasta){
+    // Vivo: cancelarProducto() nunca toca pago_estado del producto, se queda
+    // en 'PENDIENTE' para siempre — por eso el estado!=='CANCELADO' es
+    // imprescindible, o un producto cancelado sigue sumando como si se debiera.
+    pend=creditos.filter(p=>p.pago_estado==='PENDIENTE' && p.estado!=='CANCELADO');
+  }else{
+    const{data:filas}=await pageAll(()=>db.from('flujo_caja')
+      .select('fecha,tipo,categoria,referencia_id')
+      .or('tipo.eq.COMPRA,categoria.eq.COMPRA,tipo.eq.CANCELACION,categoria.eq.CANCELACION')
+      .not('referencia_id','is',null));
+    const fechaPago={}, fechaCancel={};
+    (filas||[]).forEach(f=>{
+      const c=(f.categoria||f.tipo||'').toUpperCase();
+      if(c==='COMPRA') fechaPago[f.referencia_id]=f.fecha;
+      if(c==='CANCELACION') fechaCancel[f.referencia_id]=f.fecha;
+    });
+    pend=creditos.filter(p=>{
+      if(p.estado==='CANCELADO'){
+        const fc=fechaCancel[p.codigo_producto];
+        return !!fc && fc>hasta;             // se cancelo despues: a esa fecha aun se debia
+      }
+      if(p.pago_estado==='PENDIENTE') return true;   // sigue sin pagarse hoy
+      const fp=fechaPago[p.codigo_producto];
+      return !!fp && fp>hasta;               // se pago despues: a esa fecha aun se debia
+    });
+  }
+
+  // Pedido = el producto ya tiene dueno: esta RESERVADO. Todo lo demas es stock
+  // libre. Antes se miraba el tipo de la reserva (PEDIDO vs STOCK), pero las
+  // reservas se registran como STOCK aunque el producto no este pagado, asi que
+  // ese criterio dejaba la columna Pedido siempre en cero. El estado RESERVADO
+  // es el de HOY, no el de `hasta`: no hay fecha guardada de cuando se
+  // reservo cada producto, asi que el split Stock/Pedido de un mes cerrado es
+  // aproximado — el TOTAL si es exacto, que es lo que cuadra con el flujo.
+  const pedidoSet=new Set(pend.filter(p=>p.estado==='RESERVADO').map(p=>p.codigo_producto));
   const stock =acum(pend.filter(p=>!pedidoSet.has(p.codigo_producto)));
   const pedido=acum(pend.filter(p=> pedidoSet.has(p.codigo_producto)));
   // TC del registro de cada producto (el que se guardo al comprar), no el actual.
@@ -4409,9 +4458,10 @@ function deudaCreditos(){
 }
 
 // Pinta la tabla "Por pagar". La usan Inventario y Flujo de Caja con sus ids,
-// para que el bloque sea identico en los dos.
-function pintarDeuda(sN,sU,sS, pN,pU,pS, tN,tU,tS, tcId){
-  const d=deudaCreditos();
+// para que el bloque sea identico en los dos. `hasta` es la fecha de cierre
+// del mes que se este viendo (null = mes en curso, hoy).
+async function pintarDeuda(sN,sU,sS, pN,pU,pS, tN,tU,tS, tcId, hasta){
+  const d=await deudaCreditos(hasta);
   const put=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
   const nOr=n=>n||'—';
   const uOr=v=>v>0?fmtUsd(v):'—';
@@ -6149,10 +6199,12 @@ async function loadFlujo() {
 
   // Bubble compras
   document.getElementById('fc-compras-mes').textContent   = fmt(egrCompras + egrCostos);
-  // POR PAGAR — mismo bloque y misma funcion que el tab Inventario
-  pintarDeuda('fc-pend-stock-n','fc-pend-stock-u','fc-pend-stock-s',
+  // POR PAGAR — mismo bloque y misma funcion que el tab Inventario. Con la
+  // fecha de cierre del mes que se esta viendo, no siempre "hoy".
+  await pintarDeuda('fc-pend-stock-n','fc-pend-stock-u','fc-pend-stock-s',
               'fc-pend-pedido-n','fc-pend-pedido-u','fc-pend-pedido-s',
-              'fc-pend-total-n','fc-pend-total-u','fc-pend-total','fc-pend-tc');
+              'fc-pend-total-n','fc-pend-total-u','fc-pend-total','fc-pend-tc',
+              fechaFinStr);
 
 
   // ── RENDER TABLA ──
