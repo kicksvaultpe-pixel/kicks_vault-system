@@ -4382,7 +4382,11 @@ async function pageAll(build){
 // trae el USD convertido a su tipo de cambio, asi que la columna soles suma
 // ambas monedas y es lo que realmente hay que pagar.
 function deudaCreditos(){
-  const pend=(inventarioCache||[]).filter(p=>p.pago_estado==='PENDIENTE');
+  // Cancelar una compra a credito borra su fila PENDIENTE del flujo (la deuda
+  // se anula), pero cancelarProducto() nunca toca pago_estado del producto: se
+  // queda en 'PENDIENTE' para siempre. Sin este filtro, un producto cancelado
+  // seguia sumando aca como si todavia se debiera.
+  const pend=(inventarioCache||[]).filter(p=>p.pago_estado==='PENDIENTE' && p.estado!=='CANCELADO');
   // Pedido = el producto ya tiene dueno: esta RESERVADO. Todo lo demas es stock
   // libre. Antes se miraba el tipo de la reserva (PEDIDO vs STOCK), pero las
   // reservas se registran como STOCK aunque el producto no este pagado, asi que
