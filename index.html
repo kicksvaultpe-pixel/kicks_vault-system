@@ -3030,7 +3030,7 @@ function renderOCTab(){
       <td class="td-unit td-trunc" title="${esc(oc.notas||'')}">${esc(oc.notas||'—')}</td>
       <td class="right">${arts.length
         ? `<span class="badge badge-muted" style="cursor:pointer" onclick="ocVerArticulos('${oc.codigo}')">${arts.length}</span>`
-        : '<span class="td-muted">—</span>'}</td>
+        : `<span class="td-muted" style="cursor:pointer" title="Vincular artículos a esta orden" onclick="ocVerArticulos('${oc.codigo}')">— <i style="font-style:normal;opacity:.6">＋</i></span>`}</td>
       <td class="right"><button class="oc-edit-btn" onclick="ocAbrirModal('${oc.codigo}')">Editar</button></td>
     </tr>`;
   });
