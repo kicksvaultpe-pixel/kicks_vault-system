@@ -6303,7 +6303,12 @@ function renderFlujoTabla() {
       const prod=f.referencia_id?inventarioCache.find(p=>p.codigo_producto===f.referencia_id):null;
       desc=prod?buildProdDesc(prod):(cleanDesc(f.descripcion)||'—');
     } else if(accion==='COSTO'){
-      codRef=f.referencia_id||'—';
+      // Mismo patron que COMPRA: el codigo del producto va en CÓD. OP., no en
+      // CÓD. REF. Un costo referencia un solo producto directo (referencia_id),
+      // igual que una compra — no tiene un codigo de operacion propio aparte
+      // del producto, asi que antes esta rama lo dejaba en la columna
+      // equivocada y CÓD. OP. salia vacio para todo costo.
+      codOp=f.referencia_id||'—';
       const prod=f.referencia_id?inventarioCache.find(p=>p.codigo_producto===f.referencia_id):null;
       desc=prod?buildProdDesc(prod):(cleanDesc(f.descripcion)||'—');
     } else if(accion==='INVERSION'){
