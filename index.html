@@ -5493,7 +5493,9 @@ async function registrarCosto(){
   const btn=document.getElementById('btn-costo');
   setLoading(btn,true);
   try{
-    const inserts=costoLista.map(item=>({
+    const codigosCosto=await genCodigosLote('costo',costoLista.length);
+    const inserts=costoLista.map((item,i)=>({
+      codigo_costo:codigosCosto[i],
       codigo_producto:item.codigo,
       concepto:item.concepto.trim(),
       costo_soles:parseFloat(item.soles),
@@ -5882,6 +5884,17 @@ async function loadFlujo() {
   if(_vtCods.length){
     const{data:vtR}=await db.from('ventas').select('codigo_venta,codigo_producto').in('codigo_venta',_vtCods);
     (vtR||[]).forEach(v=>{ window._vtProdMap[v.codigo_venta]=v.codigo_producto; });
+  }
+
+  // Mapa producto+fecha+monto → codigo_costo, para el CÓD. OP. de las filas
+  // COSTO. flujo_caja.referencia_id guarda el producto, no el costo (no se
+  // toca: de eso depende el trigger de borrado), asi que el codigo propio del
+  // costo se resuelve aparte, con la misma clave que ya usa ese trigger.
+  const _csCods=flujoCache.filter(f=>(f.categoria||f.tipo||'').toUpperCase()==='COSTO').map(f=>f.referencia_id).filter(Boolean);
+  window._csCodMap={};
+  if(_csCods.length){
+    const{data:csR}=await db.from('costos').select('codigo_producto,fecha,costo_soles,codigo_costo').in('codigo_producto',_csCods);
+    (csR||[]).forEach(c=>{ if(c.codigo_costo) window._csCodMap[c.codigo_producto+'|'+c.fecha+'|'+c.costo_soles]=c.codigo_costo; });
   }
 
   // Cierre mensual guardado: este mes y el siguiente. El del mes siguiente da
@@ -6303,12 +6316,14 @@ function renderFlujoTabla() {
       const prod=f.referencia_id?inventarioCache.find(p=>p.codigo_producto===f.referencia_id):null;
       desc=prod?buildProdDesc(prod):(cleanDesc(f.descripcion)||'—');
     } else if(accion==='COSTO'){
-      // Mismo patron que COMPRA: el codigo del producto va en CÓD. OP., no en
-      // CÓD. REF. Un costo referencia un solo producto directo (referencia_id),
-      // igual que una compra — no tiene un codigo de operacion propio aparte
-      // del producto, asi que antes esta rama lo dejaba en la columna
-      // equivocada y CÓD. OP. salia vacio para todo costo.
-      codOp=f.referencia_id||'—';
+      // CÓD. REF. es el producto (correcto, no se toca). CÓD. OP. es el codigo
+      // propio del costo (CT-XXXX) — se resuelve aparte en window._csCodMap,
+      // ver mas abajo, porque flujo_caja.referencia_id sigue guardando el
+      // producto, no el costo, y asi se queda: cambiarlo rompería el trigger
+      // de borrado (flujo_borrar_costo, que hace match por producto+monto) y
+      // el historico de filas ya guardadas.
+      codRef=f.referencia_id||'—';
+      codOp=(window._csCodMap&&window._csCodMap[f.referencia_id+'|'+f.fecha+'|'+f.egreso_soles])||'—';
       const prod=f.referencia_id?inventarioCache.find(p=>p.codigo_producto===f.referencia_id):null;
       desc=prod?buildProdDesc(prod):(cleanDesc(f.descripcion)||'—');
     } else if(accion==='INVERSION'){
@@ -6400,6 +6415,7 @@ const COD_TABLA = {
   inversion: ['inversiones',    'codigo_inversion'],
   pago     : ['pagos',          'codigo_pago'],
   oc       : ['ordenes_compra', 'codigo'],
+  costo    : ['costos',         'codigo_costo'],
 };
 
 // Los RPC gen_codigo_* usan una secuencia de Postgres, y una secuencia no se
@@ -6437,6 +6453,19 @@ async function genCodigo(tipo){
   const{data,error}=await db.rpc('gen_codigo_'+tipo);
   if(error)throw new Error('No se pudo generar código: '+error.message);
   return data;
+}
+
+// Para inserts en lote (varios costos de una vez): llamar a genCodigo() una
+// vez por fila daria el mismo codigo repetido, porque la consulta a la tabla
+// no ve las filas que todavia no se insertaron. Se pide el primero de verdad
+// y el resto se incrementa en memoria.
+async function genCodigosLote(tipo, n){
+  const primero = await genCodigo(tipo);
+  const m = primero.match(/^(.*?)(\d+)$/);
+  if(!m) return Array.from({length:n},()=>primero);
+  const [,prefijo,num] = m;
+  const ancho = num.length, base = parseInt(num,10);
+  return Array.from({length:n},(_,i)=>prefijo+String(base+i).padStart(ancho,'0'));
 }
 
 // ── UTILS ──
@@ -6881,8 +6910,9 @@ async function iepGuardar(){
     }
     if(iepCostosNuevos.length){
       const fecha=fechaHoy();
+      const codigosCosto=await genCodigosLote('costo',iepCostosNuevos.length);
       const{error:e3}=await db.from('costos').insert(
-        iepCostosNuevos.map(c=>({codigo_producto:invEditCodigo,concepto:c.concepto,costo_soles:c.costo_soles,fecha}))
+        iepCostosNuevos.map((c,i)=>({codigo_costo:codigosCosto[i],codigo_producto:invEditCodigo,concepto:c.concepto,costo_soles:c.costo_soles,fecha}))
       );
       if(e3)throw e3;
     }
