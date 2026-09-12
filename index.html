@@ -1868,8 +1868,8 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
         <th onclick="sortTable('marca')" style="cursor:pointer">Marca <span id="sort-marca"></span></th>
         <th onclick="sortTable('modelo')" style="cursor:pointer">Modelo <span id="sort-modelo"></span></th>
         <th>Colorway</th>
-        <th>Categoría</th>
         <th onclick="sortTable('talla')" style="cursor:pointer;width:52px;text-align:center">Talla <span id="sort-talla"></span></th>
+        <th>Categoría</th>
         <th class="right" onclick="sortTable('precio_compra_soles')" style="cursor:pointer;width:88px">P. Compra <span id="sort-precio_compra_soles"></span></th>
         <th class="right" style="width:82px">Costos Adic.</th>
         <th class="right" onclick="sortTable('precio_final')" style="cursor:pointer;width:88px">Costo Total <span id="sort-precio_final"></span></th>
@@ -4170,8 +4170,8 @@ function _renderInvPage(){
       <td class="inv-txt">${p.marca||'—'}</td>
       <td class="inv-txt">${p.modelo||'—'}</td>
       <td class="inv-txt">${p.colorway||'—'}</td>
-      <td><span class="${catCls}">${catLabel}</span></td>
       <td class="inv-talla">${p.talla||'—'}</td>
+      <td><span class="${catCls}">${catLabel}</span></td>
       <td class="right">${pcHtml}</td>
       <td class="right">${costoHtml}</td>
       <td class="right">${finalHtml}</td>
