@@ -396,7 +396,13 @@ input[list] { cursor: text; }
 @media(max-width:1100px){.ind-row{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.ind-row{grid-template-columns:1fr}}
 
-.ind-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;position:relative;overflow:hidden}
+/* Mismo lenguaje que .stat-card (radio, sombra, hover-lift) -- el padding
+   queda mas chico a proposito, aca van 5 tarjetas juntas en una fila y una
+   trae una tabla adentro (ver .ind-compras). No es descuido, es densidad. */
+.ind-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 16px;box-shadow:var(--shadow);transition:transform .2s,box-shadow .2s,border-color .2s;position:relative;overflow:hidden}
+@media (hover:hover) and (pointer:fine){
+.ind-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 4px 16px rgba(37,99,235,.1)}
+}
 
 /* Patrimonio */
 .pat-chip{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:7px}
