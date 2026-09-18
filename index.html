@@ -626,15 +626,6 @@ input[list] { cursor: text; }
 .theme-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:none;cursor:pointer;font-size:15px;color:var(--muted2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color .15s,color .15s;margin-left:10px}@media (hover:hover) and (pointer:fine){
 .theme-btn:hover{border-color:var(--accent);color:var(--accent)}}
 
-/* INDICADOR DE MESES DISTINTOS (informativo, no sincroniza nada) */
-.mes-sync-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;font-size:11px;font-family:'Archivo',sans-serif;font-weight:700;letter-spacing:.3px;white-space:nowrap;background:rgba(180,83,9,.1);color:var(--yellow);border:1px solid rgba(180,83,9,.15);margin-left:10px;cursor:help}
-@media(max-width:768px){
-  /* En el bottom-nav no hay espacio para el texto: se achica a un circulo
-     con solo el icono, del mismo tamano que .theme-btn de al lado. */
-  .mes-sync-badge{width:34px;height:34px;padding:0;justify-content:center;border-radius:50%;margin-left:4px}
-  #mes-sync-badge-text{display:none}
-}
-
 /* MISC */
 .empty-state{text-align:center;padding:50px 20px;color:var(--muted2)}
 .empty-icon{font-size:36px;margin-bottom:10px;opacity:.5}
@@ -979,10 +970,6 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <span class="tab-label">OCs</span>
     </button>
   </div>
-  <span id="mes-sync-badge" class="mes-sync-badge" style="display:none" title="">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-    <span id="mes-sync-badge-text">Meses distintos</span>
-  </span>
   <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Modo oscuro"></button>
   <button class="theme-btn" id="logoutBtn" onclick="kvSalir()" title="Cerrar sesión" style="display:none">⏻</button>
 </nav>
@@ -3979,23 +3966,6 @@ async function invMesAnterior(){
 // Mes en curso: no tiene sentido avanzar mas alla, no hay nada que mostrar.
 function mesHoy(){const n=new Date();return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0');}
 
-// Indicador de solo lectura: avisa si Inventario, Ventas y Flujo estan
-// mostrando meses distintos entre si. Cada pestana navega su propio mes de
-// forma independiente (asi funcionaba antes) -- esto no sincroniza nada,
-// solo informa para que no se lea un numero del mes equivocado por error.
-function chequearMesesSync(){
-  const el=document.getElementById('mes-sync-badge');
-  if(!el)return;
-  const partes=[];
-  if(invMesActual)partes.push(['Inventario',invHistorico?'Historia':invMesLabel(invMesActual)]);
-  if(vtMesActual)partes.push(['Ventas',vtHistorico?'Historia':invMesLabel(vtMesActual)]);
-  if(fcMesActual)partes.push(['Flujo',fcMesLabel(fcMesActual)]);
-  const distintos=partes.length>=2&&new Set(partes.map(p=>p[1])).size>1;
-  if(!distintos){el.style.display='none';return;}
-  el.title='Estás viendo meses distintos entre pestañas: '+partes.map(p=>p[0]+' → '+p[1]).join(' · ')+'. Cada pestaña se navega por separado, esto no las sincroniza.';
-  el.style.display='inline-flex';
-}
-
 async function invMesSiguiente(){
   if(!invMesActual) invMesActual=mesHoy();
   if(invMesActual>=mesHoy()) return;
@@ -4073,7 +4043,6 @@ async function loadInventario(){
   await updateStats(invHistorico?'':invMesActual,vendidosMes,vendidosDespues);
   fillProductoSelects();
   fillDataLists();
-  chequearMesesSync();
 }
 
 const noEmoji=s=>s.replace(/^[^A-Za-z0-9À-ɏ]*/,'').trim();
@@ -6314,7 +6283,6 @@ async function loadFlujo() {
 
   // ── RENDER TABLA ──
   renderFlujoTabla();
-  chequearMesesSync();
 }
 
 // Lo abonado a una reserva hasta cierta fecha. Se declara con `function` y no
@@ -6669,7 +6637,6 @@ async function loadVentas(){
   renderPagos(filterPagosLocal());
   updateVentasStats(ventasCache,pagosCache,mes);
   fillPagoCatCombo();
-  chequearMesesSync();
 }
 
 function vtToggleHistorico(){
