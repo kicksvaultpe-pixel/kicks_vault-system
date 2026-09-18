@@ -21,7 +21,7 @@
   --bg:#EEF2F8;--surface:#F5F7FB;--card:#FFFFFF;--border:#D5DFEE;--border2:#C0CEDF;
   --accent:#2563EB;--accent2:var(--neg);--green:#16A34A;--red:#DC2626;--neg:#DC2626;
   --yellow:#B45309;--orange:#C2410C;--purple:#6D28D9;
-  --text:#1A1D2E;--muted:#3D4B6A;--muted2:#8A97B5;--blue:#2563EB;--radius:8px;
+  --text:#1A1D2E;--muted:#3D4B6A;--muted2:#5E6E94;--blue:#2563EB;--radius:8px;
   --ease-out:cubic-bezier(0.23,1,0.32,1); /* skill emil-design-eng: mas potencia que el ease-out por defecto del navegador */
   --shadow:0 2px 8px rgba(37,99,235,.07);
 }
@@ -29,7 +29,7 @@
   --bg:#070B14;--surface:#0A0F1E;--card:#0E1525;--border:rgba(79,134,247,.18);--border2:rgba(79,134,247,.3);
   --accent:#4F86F7;--neg:#F87171;--green:#22C55E;--red:#F87171;
   --yellow:#FBBF24;--orange:#FB923C;--purple:#A78BFA;
-  --text:#EEF2FF;--muted:#7090C0;--muted2:#5A74A8;--blue:#4F86F7;--radius:8px;
+  --text:#EEF2FF;--muted:#7090C0;--muted2:#677FAF;--blue:#4F86F7;--radius:8px;
   --shadow:0 2px 14px rgba(0,0,0,.4);
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -517,11 +517,11 @@ input[list] { cursor: text; }
 .fc-mes-label{font-family:"Archivo Black";font-size:20px;color:var(--text);letter-spacing:.5px}
 .fc-cerrar-btn{margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:7px 14px;
   border-radius:9px;border:1px solid rgba(96,165,250,.28);background:rgba(96,165,250,.10);
-  color:var(--blue);font-family:inherit;font-size:12.5px;font-weight:600;letter-spacing:.3px;
+  color:var(--blue);font-family:inherit;font-size:13px;font-weight:600;letter-spacing:.3px;
   cursor:pointer;transition:background .15s,border-color .15s}@media (hover:hover) and (pointer:fine){
 .fc-cerrar-btn:hover{background:rgba(96,165,250,.18);border-color:rgba(96,165,250,.45)}}
 .fc-cerrar-btn:disabled{opacity:.4;cursor:not-allowed}
-.fc-cerrado-tag{margin-left:auto;padding:7px 14px;border-radius:9px;font-size:12.5px;font-weight:600;
+.fc-cerrado-tag{margin-left:auto;padding:7px 14px;border-radius:9px;font-size:13px;font-weight:600;
   color:var(--green);background:rgba(22,163,74,.10);border:1px solid rgba(22,163,74,.24)}
 
 /* 3 burbujas principales */
@@ -626,6 +626,15 @@ input[list] { cursor: text; }
 .theme-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:none;cursor:pointer;font-size:15px;color:var(--muted2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color .15s,color .15s;margin-left:10px}@media (hover:hover) and (pointer:fine){
 .theme-btn:hover{border-color:var(--accent);color:var(--accent)}}
 
+/* INDICADOR DE MESES DISTINTOS (informativo, no sincroniza nada) */
+.mes-sync-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;font-size:11px;font-family:'Archivo',sans-serif;font-weight:700;letter-spacing:.3px;white-space:nowrap;background:rgba(180,83,9,.1);color:var(--yellow);border:1px solid rgba(180,83,9,.15);margin-left:10px;cursor:help}
+@media(max-width:768px){
+  /* En el bottom-nav no hay espacio para el texto: se achica a un circulo
+     con solo el icono, del mismo tamano que .theme-btn de al lado. */
+  .mes-sync-badge{width:34px;height:34px;padding:0;justify-content:center;border-radius:50%;margin-left:4px}
+  #mes-sync-badge-text{display:none}
+}
+
 /* MISC */
 .empty-state{text-align:center;padding:50px 20px;color:var(--muted2)}
 .empty-icon{font-size:36px;margin-bottom:10px;opacity:.5}
@@ -657,9 +666,9 @@ input[list] { cursor: text; }
 /* ── Inventario Edit Panel ── */
 .btn-edit-inv{background:none;border:1px solid var(--border);color:var(--muted2);width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;justify-content:center;transition:border-color .15s,color .15s,background .15s;padding:0}@media (hover:hover) and (pointer:fine){
 .btn-edit-inv:hover{border-color:var(--accent);color:var(--accent);background:rgba(99,102,241,.08)}}
-#inv-edit-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:none;opacity:0;transition:opacity .2s;pointer-events:none}
+#inv-edit-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:220;display:none;opacity:0;transition:opacity .2s;pointer-events:none}
 #inv-edit-overlay.open{display:block;opacity:1;pointer-events:all}
-#inv-edit-panel{position:fixed;right:0;top:0;bottom:0;width:440px;max-width:100vw;background:var(--card);border-left:1px solid var(--border);z-index:201;overflow-y:auto;padding:24px 24px 40px;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1)}
+#inv-edit-panel{position:fixed;right:0;top:0;bottom:0;width:440px;max-width:100vw;background:var(--card);border-left:1px solid var(--border);z-index:221;overflow-y:auto;padding:24px 24px 40px;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1)}
 #inv-edit-overlay.open #inv-edit-panel{transform:translateX(0)}
 .iep-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}
 .iep-close{background:none;border:1px solid var(--border);color:var(--muted2);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:15px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color .15s,color .15s}@media (hover:hover) and (pointer:fine){
@@ -682,7 +691,7 @@ input[list] { cursor: text; }
 ═══════════════════════════════════════════════════════ */
 .mobile-header{
   display:none;
-  position:sticky;top:0;z-index:201;
+  position:sticky;top:0;z-index:202;
   background:var(--card);
   border-bottom:1px solid var(--border);
   height:48px;align-items:center;padding:0 16px;gap:12px;
@@ -792,7 +801,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
 .cl-search-wrap{position:relative}
 .cl-search-input{width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:9px;padding:10px 14px;color:var(--text);font-family:'Archivo';font-size:12px;outline:none;transition:border .15s,box-shadow .15s}
 .cl-search-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.07)}
-.cl-search-drop{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--card);border:1px solid var(--border2);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.18);z-index:120;display:none;max-height:220px;overflow-y:auto}
+.cl-search-drop{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--card);border:1px solid var(--border2);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.18);z-index:210;display:none;max-height:220px;overflow-y:auto}
 .cl-search-drop.open{display:block}
 .cl-si{padding:9px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .1s}@media (hover:hover) and (pointer:fine){
 .cl-si:hover{background:rgba(37,99,235,.06)}}
@@ -811,16 +820,16 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
 .cl-sel-clear{border:none;background:none;color:var(--muted2);font-size:18px;cursor:pointer;padding:0 4px;line-height:1;flex-shrink:0}@media (hover:hover) and (pointer:fine){
 .cl-sel-clear:hover{color:var(--red)}}
 /* Profile panel */
-.cl-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:250;display:none;opacity:0;transition:opacity .2s;pointer-events:none;backdrop-filter:blur(2px)}
+.cl-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:240;display:none;opacity:0;transition:opacity .2s;pointer-events:none;backdrop-filter:blur(2px)}
 .cl-backdrop.open{display:block;opacity:1;pointer-events:all}
-.cl-panel{position:fixed;top:0;right:0;bottom:0;width:400px;max-width:100vw;background:var(--card);border-left:1px solid var(--border2);z-index:251;display:flex;flex-direction:column;transform:translateX(105%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.cl-panel{position:fixed;top:0;right:0;bottom:0;width:400px;max-width:100vw;background:var(--card);border-left:1px solid var(--border2);z-index:241;display:flex;flex-direction:column;transform:translateX(105%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
 .cl-panel.open{transform:none}
 .cl-panel-head{padding:20px 20px 16px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0}
 .cl-panel-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .cl-panel-code{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--muted2);text-transform:uppercase;font-family:'Archivo'}
 .cl-panel-close{background:none;border:none;color:var(--muted2);font-size:22px;cursor:pointer;line-height:1;padding:2px 4px;transition:color .15s}@media (hover:hover) and (pointer:fine){
 .cl-panel-close:hover{color:var(--text)}}
-.cl-panel-name{font-family:'Archivo Black';font-size:19px;color:var(--text);line-height:1.1;margin-bottom:8px}
+.cl-panel-name{font-family:'Archivo Black';font-size:18px;color:var(--text);line-height:1.1;margin-bottom:8px}
 .cl-panel-body{flex:1;overflow-y:auto;padding:20px}
 .cl-section{margin-bottom:22px}
 .cl-section-lbl{font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:10px;display:flex;align-items:center;gap:8px;font-family:'Archivo'}
@@ -879,16 +888,17 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
 .rv-tipo-btn.stock-act{background:var(--yellow);color:#000;border-color:transparent}
 .rv-tipo-btn.pedido-act{background:var(--purple);color:#fff;border-color:transparent}
 /* ── RESERVAS VIEW ── */
-.rsv-badge-activa{background:rgba(37,99,235,.1);color:var(--accent);border:1px solid rgba(37,99,235,.2);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;letter-spacing:.5px;white-space:nowrap}
-.rsv-badge-completada{background:rgba(22,163,74,.1);color:var(--green);border:1px solid rgba(22,163,74,.2);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;letter-spacing:.5px;white-space:nowrap}
-.rsv-badge-cancelada{background:rgba(220,38,38,.08);color:var(--red);border:1px solid rgba(220,38,38,.2);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;letter-spacing:.5px;white-space:nowrap}
+/* Los badges de estado (activa/completada/cancelada) usaban .rsv-badge-* propios,
+   una receta visual duplicada de .badge+.badge-accent/green/red que ya existe
+   en el resto de la app (mismo color, pero radio 6px en vez de la pildora 20px
+   del sistema real). Unificado -- ver renderReservas() y el detalle de reserva. */
 .rsv-tipo-stock{background:rgba(180,83,9,.12);color:var(--yellow);border:1px solid rgba(180,83,9,.25);border-radius:5px;padding:2px 7px;font-size:10px;font-weight:700;white-space:nowrap}
 .rsv-tipo-pedido{background:rgba(109,40,217,.1);color:var(--purple);border:1px solid rgba(109,40,217,.25);border-radius:5px;padding:2px 7px;font-size:10px;font-weight:700;white-space:nowrap}
 .rsv-filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 /* ── RESERVAS DETAIL PANEL ── */
-#rsv-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:none;opacity:0;transition:opacity .2s;pointer-events:none}
+#rsv-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:230;display:none;opacity:0;transition:opacity .2s;pointer-events:none}
 #rsv-overlay.open{display:block;opacity:1;pointer-events:all}
-#rsv-panel{position:fixed;right:0;top:0;bottom:0;width:460px;max-width:100vw;background:var(--card);border-left:1px solid var(--border);z-index:201;overflow-y:auto;padding:24px 24px 40px;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1)}
+#rsv-panel{position:fixed;right:0;top:0;bottom:0;width:460px;max-width:100vw;background:var(--card);border-left:1px solid var(--border);z-index:231;overflow-y:auto;padding:24px 24px 40px;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1)}
 #rsv-overlay.open #rsv-panel{transform:translateX(0)}
 .rsv-abono-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)}
 .rsv-abono-fecha{font-size:10px;color:var(--muted2);width:54px;flex-shrink:0;font-variant-numeric:tabular-nums}
@@ -969,6 +979,10 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <span class="tab-label">OCs</span>
     </button>
   </div>
+  <span id="mes-sync-badge" class="mes-sync-badge" style="display:none" title="">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <span id="mes-sync-badge-text">Meses distintos</span>
+  </span>
   <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Modo oscuro"></button>
   <button class="theme-btn" id="logoutBtn" onclick="kvSalir()" title="Cerrar sesión" style="display:none">⏻</button>
 </nav>
@@ -3512,9 +3526,9 @@ function renderReservas(){
     const acordado=parseFloat(r.precio_acordado||0);
     const saldo=Math.max(0,acordado-r.total_abonado);
     const estadoBadge=
-      r.estado==='ACTIVA'?`<span class="rsv-badge-activa">ACTIVA</span>`:
-      r.estado==='COMPLETADA'?`<span class="rsv-badge-completada">COMPLETADA</span>`:
-      `<span class="rsv-badge-cancelada">CANCELADA</span>`;
+      r.estado==='ACTIVA'?`<span class="badge badge-accent">ACTIVA</span>`:
+      r.estado==='COMPLETADA'?`<span class="badge badge-green">COMPLETADA</span>`:
+      `<span class="badge badge-red">CANCELADA</span>`;
     const tipoBadge=r.tipo==='STOCK'?`<span class="rsv-tipo-stock">Stock</span>`:`<span class="rsv-tipo-pedido">Pedido</span>`;
     return`<tr onclick="abrirReservaDetalle('${r.codigo_reserva}')" style="cursor:pointer">
       <td><span class="td-code" style="color:var(--muted2)">${fecha}</span></td>
@@ -3547,9 +3561,9 @@ function abrirReservaDetalle(codigo){
   const fecha=r.fecha?r.fecha.slice(8,10)+'/'+r.fecha.slice(5,7)+'/'+r.fecha.slice(2,4):'—';
   document.getElementById('rsv-p-fecha').textContent=fecha;
   document.getElementById('rsv-p-estado-badge').innerHTML=
-    r.estado==='ACTIVA'?`<span class="rsv-badge-activa">Activa</span>`:
-    r.estado==='COMPLETADA'?`<span class="rsv-badge-completada">Completada</span>`:
-    `<span class="rsv-badge-cancelada">Cancelada</span>`;
+    r.estado==='ACTIVA'?`<span class="badge badge-accent">Activa</span>`:
+    r.estado==='COMPLETADA'?`<span class="badge badge-green">Completada</span>`:
+    `<span class="badge badge-red">Cancelada</span>`;
   document.getElementById('rsv-p-tipo-badge').innerHTML=
     r.tipo==='STOCK'?`<span class="rsv-tipo-stock">Stock</span>`:`<span class="rsv-tipo-pedido">Pedido</span>`;
   // Progreso
@@ -3965,6 +3979,23 @@ async function invMesAnterior(){
 // Mes en curso: no tiene sentido avanzar mas alla, no hay nada que mostrar.
 function mesHoy(){const n=new Date();return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0');}
 
+// Indicador de solo lectura: avisa si Inventario, Ventas y Flujo estan
+// mostrando meses distintos entre si. Cada pestana navega su propio mes de
+// forma independiente (asi funcionaba antes) -- esto no sincroniza nada,
+// solo informa para que no se lea un numero del mes equivocado por error.
+function chequearMesesSync(){
+  const el=document.getElementById('mes-sync-badge');
+  if(!el)return;
+  const partes=[];
+  if(invMesActual)partes.push(['Inventario',invHistorico?'Historia':invMesLabel(invMesActual)]);
+  if(vtMesActual)partes.push(['Ventas',vtHistorico?'Historia':invMesLabel(vtMesActual)]);
+  if(fcMesActual)partes.push(['Flujo',fcMesLabel(fcMesActual)]);
+  const distintos=partes.length>=2&&new Set(partes.map(p=>p[1])).size>1;
+  if(!distintos){el.style.display='none';return;}
+  el.title='Estás viendo meses distintos entre pestañas: '+partes.map(p=>p[0]+' → '+p[1]).join(' · ')+'. Cada pestaña se navega por separado, esto no las sincroniza.';
+  el.style.display='inline-flex';
+}
+
 async function invMesSiguiente(){
   if(!invMesActual) invMesActual=mesHoy();
   if(invMesActual>=mesHoy()) return;
@@ -4042,6 +4073,7 @@ async function loadInventario(){
   await updateStats(invHistorico?'':invMesActual,vendidosMes,vendidosDespues);
   fillProductoSelects();
   fillDataLists();
+  chequearMesesSync();
 }
 
 const noEmoji=s=>s.replace(/^[^A-Za-z0-9À-ɏ]*/,'').trim();
@@ -6282,6 +6314,7 @@ async function loadFlujo() {
 
   // ── RENDER TABLA ──
   renderFlujoTabla();
+  chequearMesesSync();
 }
 
 // Lo abonado a una reserva hasta cierta fecha. Se declara con `function` y no
@@ -6636,6 +6669,7 @@ async function loadVentas(){
   renderPagos(filterPagosLocal());
   updateVentasStats(ventasCache,pagosCache,mes);
   fillPagoCatCombo();
+  chequearMesesSync();
 }
 
 function vtToggleHistorico(){
