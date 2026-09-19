@@ -2003,7 +2003,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   <!-- SECCIÓN GASTOS DEL NEGOCIO -->
   <div class="card-label" style="margin-top:28px;margin-bottom:12px">Gastos del Negocio</div>
   <div class="table-toolbar">
-    <input type="text" id="pg-buscar" class="search-box" placeholder="Buscar concepto…" oninput="renderPagos(filterPagosLocal())" style="min-width:180px">
+    <input type="text" id="pg-buscar" class="search-box" placeholder="Buscar concepto…" autocomplete="off" oninput="renderPagos(filterPagosLocal())" style="min-width:180px">
     <div class="combo-wrap" style="min-width:160px">
       <input type="text" id="pg-f-cat" placeholder="Categoría…" autocomplete="off" readonly
         oninput="comboFilter('pg-f-cat','cl-pg-f-cat');renderPagos(filterPagosLocal())"
