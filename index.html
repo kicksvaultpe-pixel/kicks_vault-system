@@ -1019,12 +1019,12 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
           <label>Talla</label>
           <div class="combo-wrap">
             <input type="text" id="cp-talla" placeholder="Talla…" autocomplete="off"
-              oninput="comboFilter('cp-talla','cl-talla')"
-              onfocus="comboOpen('cp-talla','cl-talla')"
-              onblur="comboBlur('cl-talla')"
-              onkeydown="comboKey(event,'cp-talla','cl-talla')">
+              oninput="comboFilter('cp-talla','cl-cp-talla')"
+              onfocus="comboOpen('cp-talla','cl-cp-talla')"
+              onblur="comboBlur('cl-cp-talla')"
+              onkeydown="comboKey(event,'cp-talla','cl-cp-talla')">
             <span class="combo-arrow">▼</span>
-            <div class="combo-list" id="cl-talla"></div>
+            <div class="combo-list" id="cl-cp-talla"></div>
           </div>
         </div>
         <div class="field">
@@ -4022,7 +4022,7 @@ function fillDataLists(){
   comboSetData('cl-marca', marcas);    comboSetData('cl-rv-marca', marcas);
   comboSetData('cl-modelo', modelos);  comboSetData('cl-rv-modelo', modelos);
   comboSetData('cl-colorway', colorways); comboSetData('cl-rv-colorway', colorways);
-  comboSetData('cl-talla', tallas);    comboSetData('cl-rv-talla', tallas);
+  comboSetData('cl-cp-talla', tallas); comboSetData('cl-rv-talla', tallas);
   comboSetData('cl-cs-marca', marcas);
   comboSetData('cl-cs-modelo', modelos);
   comboSetData('cl-cs-colorway', colorways);
