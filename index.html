@@ -593,6 +593,11 @@ input[list] { cursor: text; }
 @media(max-width:650px){.an-row3{grid-template-columns:1fr}}
 .an-panel-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .an-panel-sub{font-size:10px;color:var(--muted2);font-weight:400;text-transform:none;letter-spacing:0}
+.an-panel-hd{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.an-panel-hd .an-panel-title{margin-bottom:0}
+.an-toggle{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:2px}
+.an-toggle-btn{border:none;background:none;padding:4px 10px;font-size:10px;font-weight:700;letter-spacing:.3px;color:var(--muted2);cursor:pointer;border-radius:6px;font-family:'Archivo',sans-serif}
+.an-toggle-btn.active{background:var(--card);color:var(--accent);box-shadow:var(--shadow)}
 .an-legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px}
 .an-legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted2);font-weight:600;cursor:pointer;user-select:none;transition:opacity .15s}
 .an-legend-item.off{opacity:.35}
@@ -2567,15 +2572,15 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   </div>
 
   <!-- 2. Qué se vende -->
-  <div class="an-row2">
-    <div class="ind-card">
-      <div class="an-panel-title">Top Marcas / Modelos <span class="an-panel-sub">— por S/.</span></div>
-      <div id="an-top-marcas"></div>
+  <div class="ind-card" style="margin-bottom:20px">
+    <div class="an-panel-hd">
+      <div class="an-panel-title">Top Productos</div>
+      <div class="an-toggle" id="an-producto-toggle">
+        <button type="button" class="an-toggle-btn active" data-modo="unidades" onclick="anSetProductoModo('unidades')">Unidades</button>
+        <button type="button" class="an-toggle-btn" data-modo="dinero" onclick="anSetProductoModo('dinero')">S/.</button>
+      </div>
     </div>
-    <div class="ind-card">
-      <div class="an-panel-title">Producto Más Vendido <span class="an-panel-sub">— unidades y S/.</span></div>
-      <div id="an-top-producto"></div>
-    </div>
+    <div id="an-top-producto"></div>
   </div>
 
   <!-- 3. Qué no se vende -->
@@ -2595,14 +2600,10 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   </div>
 
   <!-- 4. Cómo y por dónde se vende -->
-  <div class="an-row3">
+  <div class="an-row2">
     <div class="ind-card">
       <div class="an-panel-title">Categorías Más Vendidas</div>
       <div id="an-top-categorias"></div>
-    </div>
-    <div class="ind-card">
-      <div class="an-panel-title">Velocidad por Categoría <span class="an-panel-sub">— prom. 12m</span></div>
-      <div id="an-velocidad"></div>
     </div>
     <div class="ind-card">
       <div class="an-panel-title">Canal Más Usado</div>
@@ -7179,13 +7180,10 @@ async function loadAnalisis(){
   anRenderTendencia();
   anRenderVelocidadMes();
   anRenderClientesMes();
-  anRenderRanking('an-top-marcas', anGroupSum(anVentas,anProductoKey,v=>v.precio_venta_soles), v=>fmt(v));
-  anRenderRanking('an-top-producto', anGroupCountAndSum(anVentas,anProductoKey,v=>v.precio_venta_soles),
-    (v,entry)=>v+(v===1?' ud · S/':' uds · S/')+anFmtCorta(entry[2]));
+  anRenderTopProducto();
   anRenderRanking('an-top-categorias', anGroupCount(anVentas,v=>v.inventario?.categoria), v=>v+(v===1?' venta':' ventas'));
   anRenderCanal();
   anRenderStockParado();
-  anRenderVelocidad();
   anRenderClientes();
   anRenderTopClientes();
 }
@@ -7197,11 +7195,6 @@ function anMesLabelCorta(mesKey){
   return meses[parseInt(m)-1]+' '+y.slice(2);
 }
 function anSumar(arr,f){return arr.reduce((s,x)=>s+parseFloat(f(x)||0),0);}
-function anGroupSum(arr,keyFn,valFn){
-  const m={};
-  arr.forEach(x=>{const k=keyFn(x)||'—'; m[k]=(m[k]||0)+parseFloat(valFn(x)||0);});
-  return Object.entries(m).sort((a,b)=>b[1]-a[1]);
-}
 function anGroupCount(arr,keyFn){
   const m={};
   arr.forEach(x=>{const k=keyFn(x)||'—'; m[k]=(m[k]||0)+1;});
@@ -7222,6 +7215,27 @@ function anGroupCountAndSum(arr,keyFn,valFn){
 // Producto Mas Vendido comparan lo mismo (dinero vs unidades) del mismo
 // nivel de detalle, no una mezcla de marca contra producto especifico.
 const anProductoKey=v=>[v.inventario?.marca,v.inventario?.modelo].filter(Boolean).join(' ')||null;
+
+// "Top Marcas/Modelos" y "Producto Mas Vendido" mostraban casi la misma
+// lista de 8 productos, solo reordenada -- un panel con switch en vez de
+// dos paneles casi iguales uno al lado del otro.
+let anProductoModo='unidades';
+function anSetProductoModo(modo){
+  anProductoModo=modo;
+  document.querySelectorAll('#an-producto-toggle .an-toggle-btn').forEach(b=>b.classList.toggle('active',b.dataset.modo===modo));
+  anRenderTopProducto();
+}
+function anRenderTopProducto(){
+  const datos=anGroupCountAndSum(anVentas,anProductoKey,v=>v.precio_venta_soles); // [key,unidades,soles]
+  if(anProductoModo==='unidades'){
+    anRenderRanking('an-top-producto', datos,
+      (v,entry)=>v+(v===1?' ud · S/':' uds · S/')+anFmtCorta(entry[2]));
+  }else{
+    const porDinero=datos.map(([k,n,suma])=>[k,suma,n]).sort((a,b)=>b[1]-a[1]);
+    anRenderRanking('an-top-producto', porDinero,
+      (v,entry)=>fmt(v)+' · '+entry[2]+(entry[2]===1?' ud':' uds'));
+  }
+}
 
 function anRenderKPIs(){
   const hoy=new Date();
@@ -7414,46 +7428,24 @@ function anRenderCanal(){
   anRenderRanking('an-top-canal',pairs,v=>Math.round(v/total*100)+'% ('+v+')');
 }
 
-function anRenderVelocidad(){
-  const porCat={};
-  anVentas.forEach(v=>{
-    if(!v.inventario?.fecha_compra||!v.fecha)return;
-    const dias=(new Date(v.fecha)-new Date(v.inventario.fecha_compra))/86400000;
-    if(dias<0)return;
-    const cat=v.inventario.categoria||'—';
-    if(!porCat[cat])porCat[cat]={suma:0,n:0};
-    porCat[cat].suma+=dias; porCat[cat].n++;
-  });
-  // De menor a mayor: lo que rota mas rapido primero, es lo mas util para decidir.
-  const pairs=Object.entries(porCat).map(([k,{suma,n}])=>[k,Math.round(suma/n)]).sort((a,b)=>a[1]-b[1]);
-  const el=document.getElementById('an-velocidad');
-  if(!el)return;
-  if(!pairs.length){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted2);font-size:12px">Sin datos en este período</div>';return;}
-  const maxVal=Math.max(...pairs.map(p=>p[1]),1);
-  el.innerHTML=pairs.map(([k,v])=>`
-    <div class="an-rank-row">
-      <span class="an-rank-lbl">${k}</span>
-      <div class="an-rank-bar-wrap"><div class="an-rank-bar-fill" style="width:${Math.max(4,Math.round(v/maxVal*100))}%;background:var(--purple)"></div></div>
-      <span class="an-rank-val">${v} días</span>
-    </div>`).join('');
-}
-
-// Mismo calculo que anRenderVelocidad (dias entre compra y venta) pero
-// agrupado por mes de venta en vez de por categoria -- para ver si el
-// negocio rota el stock mas rapido o mas lento con el tiempo.
+// El promedio por categoria (antes un panel de ranking aparte) ahora se ve
+// en la leyenda del grafico "Velocidad de venta por mes" -- ver
+// anRenderVelocidadLegend() mas abajo.
 // Separado por categoria: la version que mezclaba todo en una sola linea
 // escondia que, por ejemplo, Ropa puede estar empeorando mientras
 // Zapatillas mejora -- promediado junto, eso se cancela y no se ve.
 const AN_CATEGORIAS=['ZAPATILLAS','ROPA','ACCESORIOS','OTROS'];
 const AN_CAT_COLOR={ZAPATILLAS:'var(--accent)',ROPA:'var(--blue)',ACCESORIOS:'var(--purple)',OTROS:'var(--muted2)'};
 const AN_CAT_NOMBRE={ZAPATILLAS:'Zapatillas',ROPA:'Ropa',ACCESORIOS:'Accesorios',OTROS:'Otros'};
-// Estado de la leyenda clickeable: que categorias estan prendidas ahora
-// mismo. Arranca con todas prendidas; se guarda aparte de la data para que
-// clickear la leyenda no tenga que volver a consultar la base.
-let anVelSeries=[],anVelLabels=[],anVelActivas=new Set(AN_CATEGORIAS);
+// Estado de la leyenda clickeable: que series estan prendidas ahora mismo
+// ("TOTAL" es la linea de todas las categorias juntas). Arranca solo con
+// Total prendido -- ver todo primero, agregar categorias con un clic es
+// mas facil de leer que las 5 lineas juntas desde el arranque.
+let anVelSeries=[],anVelLabels=[],anVelActivas=new Set(['TOTAL']);
 
 function anRenderVelocidadMes(){
-  const porCatMes={};
+  const porCatMes={},porCatTotal={},porMesTotal={};
+  let sumaGlobal=0,nGlobal=0;
   anVentas.forEach(v=>{
     if(!v.inventario?.fecha_compra||!v.fecha)return;
     const dias=(new Date(v.fecha)-new Date(v.inventario.fecha_compra))/86400000;
@@ -7464,8 +7456,13 @@ function anRenderVelocidadMes(){
     if(!porCatMes[cat])porCatMes[cat]={};
     if(!porCatMes[cat][mes])porCatMes[cat][mes]={suma:0,n:0};
     porCatMes[cat][mes].suma+=dias; porCatMes[cat][mes].n++;
+    if(!porCatTotal[cat])porCatTotal[cat]={suma:0,n:0};
+    porCatTotal[cat].suma+=dias; porCatTotal[cat].n++;
+    if(!porMesTotal[mes])porMesTotal[mes]={suma:0,n:0};
+    porMesTotal[mes].suma+=dias; porMesTotal[mes].n++;
+    sumaGlobal+=dias; nGlobal++;
   });
-  const mesesSet=new Set();
+  const mesesSet=new Set(Object.keys(porMesTotal));
   Object.values(porCatMes).forEach(porMes=>Object.keys(porMes).forEach(m=>mesesSet.add(m)));
   const meses=[...mesesSet].sort();
   if(!meses.length){
@@ -7474,22 +7471,32 @@ function anRenderVelocidadMes(){
     return;
   }
   anVelLabels=meses.map(anMesLabelCorta);
-  anVelSeries=AN_CATEGORIAS.filter(c=>porCatMes[c]).map(c=>({
+  const serieTotal={
+    key:'TOTAL', name:'Total', color:'var(--text)',
+    avg:nGlobal?Math.round(sumaGlobal/nGlobal):null,
+    values:meses.map(m=>porMesTotal[m]?Math.round(porMesTotal[m].suma/porMesTotal[m].n):null)
+  };
+  const seriesCat=AN_CATEGORIAS.filter(c=>porCatMes[c]).map(c=>({
     key:c, name:AN_CAT_NOMBRE[c], color:AN_CAT_COLOR[c],
+    avg:Math.round(porCatTotal[c].suma/porCatTotal[c].n),
     values:meses.map(m=>porCatMes[c][m]?Math.round(porCatMes[c][m].suma/porCatMes[c][m].n):null)
   }));
+  anVelSeries=[serieTotal,...seriesCat];
   anRenderVelocidadChart();
   anRenderVelocidadLegend();
 }
 function anRenderVelocidadChart(){
   const visibles=anVelSeries.filter(s=>anVelActivas.has(s.key));
-  if(!visibles.length){anEl('an-chart-velocidad','<div style="text-align:center;padding:20px;color:var(--muted2);font-size:12px;width:100%">Ninguna categoría seleccionada</div>');return;}
+  if(!visibles.length){anEl('an-chart-velocidad','<div style="text-align:center;padding:20px;color:var(--muted2);font-size:12px;width:100%">Selecciona al menos una serie</div>');return;}
   anMultiLineChart('an-chart-velocidad', anVelLabels, visibles, {fmtVal:v=>v+' días',valFmt:v=>v+'d'});
 }
+// El promedio de 12 meses (antes un panel de ranking aparte, "Velocidad de
+// Venta por Categoría") ahora vive aca mismo, al lado de cada nombre --
+// mismo dato, sin un panel duplicado para mostrarlo.
 function anRenderVelocidadLegend(){
   anEl('an-chart-velocidad-legend', anVelSeries.map(s=>
     `<div class="an-legend-item${anVelActivas.has(s.key)?'':' off'}" onclick="anToggleVelCat('${s.key}')" title="Clic para mostrar/ocultar">
-      <span class="an-legend-dot" style="background:${s.color}"></span>${s.name}
+      <span class="an-legend-dot" style="background:${s.color}"></span>${s.name}${s.avg!=null?' · '+s.avg+'d prom.':''}
     </div>`).join(''));
 }
 function anToggleVelCat(cat){
