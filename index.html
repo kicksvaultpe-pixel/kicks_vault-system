@@ -2555,20 +2555,24 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <div class="an-linechart" id="an-chart-ventas"></div>
     </div>
     <div class="ind-card">
-      <div class="an-panel-title">Utilidad neta por mes <span class="an-panel-sub">— rojo = mes en pérdida</span></div>
-      <div class="an-linechart" id="an-chart-utilidad"></div>
+      <div class="an-panel-title">Ticket promedio por mes</div>
+      <div class="an-linechart" id="an-chart-ticket"></div>
     </div>
   </div>
   <div class="an-row2">
+    <div class="ind-card">
+      <div class="an-panel-title">Utilidad neta por mes <span class="an-panel-sub">— rojo = mes en pérdida</span></div>
+      <div class="an-linechart" id="an-chart-utilidad"></div>
+    </div>
     <div class="ind-card">
       <div class="an-panel-title">Velocidad de venta por mes, por categoría <span class="an-panel-sub">— menor es mejor</span></div>
       <div class="an-legend" id="an-chart-velocidad-legend"></div>
       <div class="an-linechart" id="an-chart-velocidad"></div>
     </div>
-    <div class="ind-card">
-      <div class="an-panel-title">Clientes nuevos por mes</div>
-      <div class="an-linechart" id="an-chart-clientes"></div>
-    </div>
+  </div>
+  <div class="ind-card" style="margin-bottom:20px">
+    <div class="an-panel-title">Clientes nuevos por mes</div>
+    <div class="an-linechart" id="an-chart-clientes"></div>
   </div>
 
   <!-- 2. Qué se vende -->
@@ -7284,19 +7288,20 @@ function anRenderTendencia(){
   const porMes={};
   anVentas.forEach(v=>{
     const k=anMesKey(v.fecha);
-    if(!porMes[k])porMes[k]={ventas:0,gan:0,gasto:0};
+    if(!porMes[k])porMes[k]={ventas:0,gan:0,gasto:0,n:0};
     porMes[k].ventas+=parseFloat(v.precio_venta_soles||0);
     porMes[k].gan+=parseFloat(v.ganancia||0);
+    porMes[k].n++;
   });
   anPagos.forEach(p=>{
     const k=anMesKey(p.fecha);
-    if(!porMes[k])porMes[k]={ventas:0,gan:0,gasto:0};
+    if(!porMes[k])porMes[k]={ventas:0,gan:0,gasto:0,n:0};
     porMes[k].gasto-=parseFloat(p.monto_soles||0);
   });
   const meses=Object.keys(porMes).sort();
   if(!meses.length){
     const vacio='<div style="text-align:center;padding:20px;color:var(--muted2);font-size:12px;width:100%">Sin ventas en este período</div>';
-    anEl('an-chart-ventas',vacio); anEl('an-chart-utilidad',vacio);
+    anEl('an-chart-ventas',vacio); anEl('an-chart-utilidad',vacio); anEl('an-chart-ticket',vacio);
     return;
   }
   anLineChart('an-chart-ventas',
@@ -7305,6 +7310,9 @@ function anRenderTendencia(){
   anLineChart('an-chart-utilidad',
     meses.map(k=>({label:anMesLabelCorta(k),value:porMes[k].gan-porMes[k].gasto})),
     {color:'var(--muted2)',colorBySign:true,includeZero:true,fmtVal:fmt,valFmt:anFmtCorta});
+  anLineChart('an-chart-ticket',
+    meses.map(k=>({label:anMesLabelCorta(k),value:porMes[k].n?porMes[k].ventas/porMes[k].n:0})),
+    {color:'var(--purple)',fmtVal:fmt,valFmt:anFmtCorta});
 }
 // Version corta para etiquetas dentro del grafico: fmt() de sobra ("S/. 12,430.00")
 // no entra al lado de cada punto -- esto da "12.4k" / "-3.2k" / "480".
