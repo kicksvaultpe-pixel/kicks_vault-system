@@ -594,12 +594,13 @@ input[list] { cursor: text; }
 .an-panel-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .an-panel-sub{font-size:10px;color:var(--muted2);font-weight:400;text-transform:none;letter-spacing:0}
 .an-legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px}
-.an-legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted2);font-weight:600}
+.an-legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted2);font-weight:600;cursor:pointer;user-select:none;transition:opacity .15s}
+.an-legend-item.off{opacity:.35}
 .an-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .an-linechart{height:150px;width:100%}
 .an-linechart svg circle{transition:r .15s}@media (hover:hover) and (pointer:fine){
 .an-linechart svg circle:hover{r:4.5}}
-.an-rank-row{display:grid;grid-template-columns:100px 1fr 84px;gap:10px;align-items:center;padding:6px 0}
+.an-rank-row{display:grid;grid-template-columns:minmax(64px,1.2fr) minmax(40px,1.6fr) auto;gap:10px;align-items:center;padding:6px 0}
 .an-rank-lbl{font-size:12px;color:var(--text);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .an-rank-bar-wrap{height:8px;background:var(--surface);border-radius:4px;overflow:hidden}
 .an-rank-bar-fill{height:100%;background:var(--accent);border-radius:4px;transition:width .6s cubic-bezier(.4,0,.2,1)}
@@ -2566,18 +2567,14 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   </div>
 
   <!-- 2. Qué se vende -->
-  <div class="an-row3">
+  <div class="an-row2">
     <div class="ind-card">
       <div class="an-panel-title">Top Marcas / Modelos <span class="an-panel-sub">— por S/.</span></div>
       <div id="an-top-marcas"></div>
     </div>
     <div class="ind-card">
-      <div class="an-panel-title">Producto Más Vendido <span class="an-panel-sub">— por unidades</span></div>
+      <div class="an-panel-title">Producto Más Vendido <span class="an-panel-sub">— unidades y S/.</span></div>
       <div id="an-top-producto"></div>
-    </div>
-    <div class="ind-card">
-      <div class="an-panel-title">Categorías Más Vendidas</div>
-      <div id="an-top-categorias"></div>
     </div>
   </div>
 
@@ -2598,9 +2595,13 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   </div>
 
   <!-- 4. Cómo y por dónde se vende -->
-  <div class="an-row2">
+  <div class="an-row3">
     <div class="ind-card">
-      <div class="an-panel-title">Velocidad de Venta por Categoría <span class="an-panel-sub">— promedio 12m, menor es mejor</span></div>
+      <div class="an-panel-title">Categorías Más Vendidas</div>
+      <div id="an-top-categorias"></div>
+    </div>
+    <div class="ind-card">
+      <div class="an-panel-title">Velocidad por Categoría <span class="an-panel-sub">— prom. 12m</span></div>
       <div id="an-velocidad"></div>
     </div>
     <div class="ind-card">
@@ -7179,7 +7180,8 @@ async function loadAnalisis(){
   anRenderVelocidadMes();
   anRenderClientesMes();
   anRenderRanking('an-top-marcas', anGroupSum(anVentas,anProductoKey,v=>v.precio_venta_soles), v=>fmt(v));
-  anRenderRanking('an-top-producto', anGroupCount(anVentas,anProductoKey), v=>v+(v===1?' unidad':' unidades'));
+  anRenderRanking('an-top-producto', anGroupCountAndSum(anVentas,anProductoKey,v=>v.precio_venta_soles),
+    (v,entry)=>v+(v===1?' ud · S/':' uds · S/')+anFmtCorta(entry[2]));
   anRenderRanking('an-top-categorias', anGroupCount(anVentas,v=>v.inventario?.categoria), v=>v+(v===1?' venta':' ventas'));
   anRenderCanal();
   anRenderStockParado();
@@ -7204,6 +7206,17 @@ function anGroupCount(arr,keyFn){
   const m={};
   arr.forEach(x=>{const k=keyFn(x)||'—'; m[k]=(m[k]||0)+1;});
   return Object.entries(m).sort((a,b)=>b[1]-a[1]);
+}
+// Cuenta y suma a la vez, para paneles que necesitan ambos (ej. Producto
+// Mas Vendido: unidades para la barra y ordenar, S/. como dato extra).
+function anGroupCountAndSum(arr,keyFn,valFn){
+  const m={};
+  arr.forEach(x=>{
+    const k=keyFn(x); if(!k)return;
+    if(!m[k])m[k]={n:0,suma:0};
+    m[k].n++; m[k].suma+=parseFloat(valFn(x)||0);
+  });
+  return Object.entries(m).map(([k,{n,suma}])=>[k,n,suma]).sort((a,b)=>b[1]-a[1]);
 }
 // "Producto" = marca+modelo, no solo marca -- asi Top Marcas/Modelos y
 // Producto Mas Vendido comparan lo mismo (dinero vs unidades) del mismo
@@ -7332,13 +7345,17 @@ function anLineChart(containerId,points,opts={}){
 // no se dibuja (corte en la linea) en vez de inventar un valor. Sin
 // etiqueta de valor por punto: con 4 lineas x 12 meses se vuelve ilegible,
 // para eso esta el tooltip de cada punto.
+// showLabels se decide afuera (segun cuantas series esten visibles) --
+// aca solo se respeta. Con 3+ series a la vez las etiquetas se saltan aunque
+// se pidan, 12 meses x 3+ lineas ya no se lee ni forzando el tamano de letra.
 function anMultiLineChart(containerId,labels,series,opts={}){
   const el=document.getElementById(containerId);
   if(!el)return;
   series=series.filter(s=>s.values.some(v=>v!=null));
   if(!labels.length||!series.length){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted2);font-size:12px">Sin datos en este período</div>';return;}
+  const showLabels=(opts.showLabels??true)&&series.length<=2;
   const W=Math.max(200,el.clientWidth||400), H=150;
-  const padTop=16,padBottom=20,padX=10;
+  const padTop=showLabels?26:16,padBottom=20,padX=10;
   const allVals=series.flatMap(s=>s.values.filter(v=>v!=null));
   let min=Math.min(...allVals),max=Math.max(...allVals);
   if(min===max){min-=1;max+=1;}
@@ -7347,6 +7364,7 @@ function anMultiLineChart(containerId,labels,series,opts={}){
   const n=labels.length;
   const xAt=i=>padX+(n>1?i*(chartW/(n-1)):chartW/2);
   const yAt=v=>padTop+chartH-((v-min)/range)*chartH;
+  const valFmt=opts.valFmt||opts.fmtVal||(v=>v);
 
   let inner='';
   series.forEach(s=>{
@@ -7363,24 +7381,31 @@ function anMultiLineChart(containerId,labels,series,opts={}){
     s.values.forEach((v,i)=>{
       if(v==null)return;
       inner+=`<circle cx="${xAt(i).toFixed(1)}" cy="${yAt(v).toFixed(1)}" r="2.6" fill="${s.color}"><title>${s.name} — ${labels[i]}: ${opts.fmtVal?opts.fmtVal(v):v}</title></circle>`;
+      if(showLabels)inner+=`<text x="${xAt(i).toFixed(1)}" y="${Math.max(9,yAt(v)-8).toFixed(1)}" font-size="8.5" font-weight="700" fill="${s.color}" text-anchor="middle">${valFmt(v)}</text>`;
     });
   });
   const axisLabels=labels.map((lab,i)=>`<text x="${xAt(i).toFixed(1)}" y="${H-4}" font-size="9" fill="var(--muted2)" text-anchor="middle">${lab}</text>`).join('');
   el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="width:100%;height:${H}px;display:block">${inner}${axisLabels}</svg>`;
 }
 
+// pairs es [clave,valor] normalmente, pero acepta tuplas mas largas
+// [clave,valor,...extra] -- fmtVal recibe (valor, tupla completa) para que
+// un llamador pueda mostrar un dato extra sin cambiar como se ordena/mide la barra.
 function anRenderRanking(containerId,pairs,fmtVal){
   const el=document.getElementById(containerId);
   if(!el)return;
   if(!pairs.length){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted2);font-size:12px">Sin datos en este período</div>';return;}
   const top=pairs.slice(0,8);
   const maxVal=top[0][1]||1;
-  el.innerHTML=top.map(([k,v])=>`
+  el.innerHTML=top.map(entry=>{
+    const[k,v]=entry;
+    return`
     <div class="an-rank-row">
       <span class="an-rank-lbl">${k}</span>
       <div class="an-rank-bar-wrap"><div class="an-rank-bar-fill" style="width:${Math.max(4,Math.round(v/maxVal*100))}%"></div></div>
-      <span class="an-rank-val">${fmtVal(v)}</span>
-    </div>`).join('');
+      <span class="an-rank-val">${fmtVal(v,entry)}</span>
+    </div>`;
+  }).join('');
 }
 
 function anRenderCanal(){
@@ -7422,6 +7447,11 @@ function anRenderVelocidad(){
 const AN_CATEGORIAS=['ZAPATILLAS','ROPA','ACCESORIOS','OTROS'];
 const AN_CAT_COLOR={ZAPATILLAS:'var(--accent)',ROPA:'var(--blue)',ACCESORIOS:'var(--purple)',OTROS:'var(--muted2)'};
 const AN_CAT_NOMBRE={ZAPATILLAS:'Zapatillas',ROPA:'Ropa',ACCESORIOS:'Accesorios',OTROS:'Otros'};
+// Estado de la leyenda clickeable: que categorias estan prendidas ahora
+// mismo. Arranca con todas prendidas; se guarda aparte de la data para que
+// clickear la leyenda no tenga que volver a consultar la base.
+let anVelSeries=[],anVelLabels=[],anVelActivas=new Set(AN_CATEGORIAS);
+
 function anRenderVelocidadMes(){
   const porCatMes={};
   anVentas.forEach(v=>{
@@ -7443,13 +7473,29 @@ function anRenderVelocidadMes(){
     anEl('an-chart-velocidad-legend','');
     return;
   }
-  const series=AN_CATEGORIAS.filter(c=>porCatMes[c]).map(c=>({
-    name:AN_CAT_NOMBRE[c], color:AN_CAT_COLOR[c],
+  anVelLabels=meses.map(anMesLabelCorta);
+  anVelSeries=AN_CATEGORIAS.filter(c=>porCatMes[c]).map(c=>({
+    key:c, name:AN_CAT_NOMBRE[c], color:AN_CAT_COLOR[c],
     values:meses.map(m=>porCatMes[c][m]?Math.round(porCatMes[c][m].suma/porCatMes[c][m].n):null)
   }));
-  anMultiLineChart('an-chart-velocidad', meses.map(anMesLabelCorta), series, {fmtVal:v=>v+' días'});
-  anEl('an-chart-velocidad-legend', series.map(s=>
-    `<div class="an-legend-item"><span class="an-legend-dot" style="background:${s.color}"></span>${s.name}</div>`).join(''));
+  anRenderVelocidadChart();
+  anRenderVelocidadLegend();
+}
+function anRenderVelocidadChart(){
+  const visibles=anVelSeries.filter(s=>anVelActivas.has(s.key));
+  if(!visibles.length){anEl('an-chart-velocidad','<div style="text-align:center;padding:20px;color:var(--muted2);font-size:12px;width:100%">Ninguna categoría seleccionada</div>');return;}
+  anMultiLineChart('an-chart-velocidad', anVelLabels, visibles, {fmtVal:v=>v+' días',valFmt:v=>v+'d'});
+}
+function anRenderVelocidadLegend(){
+  anEl('an-chart-velocidad-legend', anVelSeries.map(s=>
+    `<div class="an-legend-item${anVelActivas.has(s.key)?'':' off'}" onclick="anToggleVelCat('${s.key}')" title="Clic para mostrar/ocultar">
+      <span class="an-legend-dot" style="background:${s.color}"></span>${s.name}
+    </div>`).join(''));
+}
+function anToggleVelCat(cat){
+  if(anVelActivas.has(cat))anVelActivas.delete(cat); else anVelActivas.add(cat);
+  anRenderVelocidadChart();
+  anRenderVelocidadLegend();
 }
 
 function anRenderStockParado(){
