@@ -590,7 +590,7 @@ input[list] { cursor: text; }
 @media(max-width:900px){.an-row2{grid-template-columns:1fr}}
 .an-panel-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .an-panel-sub{font-size:10px;color:var(--muted2);font-weight:400;text-transform:none;letter-spacing:0}
-.an-linechart{height:140px;width:100%}
+.an-linechart{height:150px;width:100%}
 .an-linechart svg circle{transition:r .15s}@media (hover:hover) and (pointer:fine){
 .an-linechart svg circle:hover{r:4.5}}
 .an-rank-row{display:grid;grid-template-columns:100px 1fr 84px;gap:10px;align-items:center;padding:6px 0}
@@ -2537,13 +2537,25 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   </div>
 
   <!-- Evolución en el tiempo -->
-  <div class="ind-card" style="margin-bottom:14px">
-    <div class="an-panel-title">Ventas por mes</div>
-    <div class="an-linechart" id="an-chart-ventas"></div>
+  <div class="an-row2">
+    <div class="ind-card">
+      <div class="an-panel-title">Ventas por mes</div>
+      <div class="an-linechart" id="an-chart-ventas"></div>
+    </div>
+    <div class="ind-card">
+      <div class="an-panel-title">Utilidad neta por mes <span class="an-panel-sub">— rojo = mes en pérdida</span></div>
+      <div class="an-linechart" id="an-chart-utilidad"></div>
+    </div>
   </div>
-  <div class="ind-card" style="margin-bottom:20px">
-    <div class="an-panel-title">Utilidad neta por mes <span class="an-panel-sub">— puntos rojos = mes en pérdida</span></div>
-    <div class="an-linechart" id="an-chart-utilidad"></div>
+  <div class="an-row2">
+    <div class="ind-card">
+      <div class="an-panel-title">Velocidad de venta por mes <span class="an-panel-sub">— menor es mejor</span></div>
+      <div class="an-linechart" id="an-chart-velocidad"></div>
+    </div>
+    <div class="ind-card">
+      <div class="an-panel-title">Clientes nuevos por mes</div>
+      <div class="an-linechart" id="an-chart-clientes"></div>
+    </div>
   </div>
 
   <!-- Qué se vende -->
@@ -2566,18 +2578,18 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
     </div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Producto</th><th>Categoría</th><th class="right">Días parado</th><th class="right">Capital</th></tr></thead>
+        <thead><tr><th>Producto</th><th>Colorway</th><th>Categoría</th><th class="right">Días parado</th><th class="right">Capital</th></tr></thead>
         <tbody id="an-stock-parado-body">
-          <tr class="loading-row"><td colspan="4"><div class="spinner"></div></td></tr>
+          <tr class="loading-row"><td colspan="5"><div class="spinner"></div></td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
-  <!-- Cómo y qué tan rápido se vende -->
+  <!-- Cómo y por dónde se vende -->
   <div class="an-row2">
     <div class="ind-card">
-      <div class="an-panel-title">Velocidad de Venta <span class="an-panel-sub">— menor es mejor</span></div>
+      <div class="an-panel-title">Velocidad de Venta por Categoría <span class="an-panel-sub">— menor es mejor</span></div>
       <div id="an-velocidad"></div>
     </div>
     <div class="ind-card">
@@ -2587,7 +2599,7 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   </div>
 
   <!-- Clientes -->
-  <div class="stats-row stats3">
+  <div class="stats-row stats3" style="margin-bottom:14px">
     <div class="stat-card">
       <div class="stat-label">Clientes Nuevos Este Mes</div>
       <div class="stat-val" id="an-cl-nuevos" style="color:var(--accent)">—</div>
@@ -2600,6 +2612,10 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <div class="stat-label">% que Repite Compra</div>
       <div class="stat-val" id="an-cl-recurrencia" style="color:var(--green)">—</div>
     </div>
+  </div>
+  <div class="ind-card">
+    <div class="an-panel-title">Top Clientes <span class="an-panel-sub">— por total comprado, 12 meses</span></div>
+    <div id="an-top-clientes"></div>
   </div>
 </div>
 
@@ -7123,20 +7139,20 @@ async function kvArrancar(){
 // Todo el tab se arma en el navegador a partir de datos ya cargados una
 // vez (ultimos 12 meses) -- no hay libreria de graficos, las barras son
 // simples divs con height/width en %, mismo criterio que .pat-bar-wrap.
-let anVentas=[],anPagos=[],anInvVivo=[],anClientes=[];
+let anVentas=[],anPagos=[],anInvVivo=[],anClientes=[],anDesdeStr='';
 
 async function loadAnalisis(){
   const hoy=new Date();
   const desde=new Date(hoy.getFullYear(),hoy.getMonth()-11,1);
-  const desdeStr=desde.getFullYear()+'-'+String(desde.getMonth()+1).padStart(2,'0')+'-01';
+  anDesdeStr=desde.getFullYear()+'-'+String(desde.getMonth()+1).padStart(2,'0')+'-01';
 
   const buildV=()=>db.from('ventas')
-    .select('*,inventario(marca,modelo,categoria,fecha_compra)')
-    .gte('fecha',desdeStr)
+    .select('*,inventario(marca,modelo,categoria,fecha_compra),clientes(nombre,apellido)')
+    .gte('fecha',anDesdeStr)
     .order('fecha',{ascending:true});
-  const buildP=()=>db.from('pagos').select('fecha,monto_soles').gte('fecha',desdeStr);
+  const buildP=()=>db.from('pagos').select('fecha,monto_soles').gte('fecha',anDesdeStr);
   const buildInvVivo=()=>db.from('inventario')
-    .select('marca,modelo,categoria,fecha_compra,precio_final,estado')
+    .select('marca,modelo,colorway,categoria,fecha_compra,precio_final,estado')
     .eq('estado','DISPONIBLE');
   const buildCl=()=>db.from('clientes').select('id_cliente,fecha_registro');
 
@@ -7149,12 +7165,15 @@ async function loadAnalisis(){
 
   anRenderKPIs();
   anRenderTendencia();
+  anRenderVelocidadMes();
+  anRenderClientesMes();
   anRenderRanking('an-top-marcas', anGroupSum(anVentas,v=>v.inventario?.marca,v=>v.precio_venta_soles), v=>fmt(v));
   anRenderRanking('an-top-categorias', anGroupCount(anVentas,v=>v.inventario?.categoria), v=>v+(v===1?' venta':' ventas'));
   anRenderCanal();
   anRenderStockParado();
   anRenderVelocidad();
   anRenderClientes();
+  anRenderTopClientes();
 }
 
 const anMesKey=fecha=>fecha.slice(0,7);
@@ -7233,10 +7252,17 @@ function anRenderTendencia(){
   }
   anLineChart('an-chart-ventas',
     meses.map(k=>({label:anMesLabelCorta(k),value:porMes[k].ventas})),
-    {color:'var(--accent)',fmtVal:fmt});
+    {color:'var(--accent)',fmtVal:fmt,valFmt:anFmtCorta});
   anLineChart('an-chart-utilidad',
     meses.map(k=>({label:anMesLabelCorta(k),value:porMes[k].gan-porMes[k].gasto})),
-    {color:'var(--muted2)',colorBySign:true,includeZero:true,fmtVal:fmt});
+    {color:'var(--muted2)',colorBySign:true,includeZero:true,fmtVal:fmt,valFmt:anFmtCorta});
+}
+// Version corta para etiquetas dentro del grafico: fmt() de sobra ("S/. 12,430.00")
+// no entra al lado de cada punto -- esto da "12.4k" / "-3.2k" / "480".
+function anFmtCorta(n){
+  const abs=Math.abs(n), signo=n<0?'-':'';
+  if(abs>=1000)return signo+(abs/1000).toFixed(1)+'k';
+  return signo+Math.round(abs);
 }
 function anEl(id,html){const el=document.getElementById(id);if(el)el.innerHTML=html;}
 
@@ -7249,8 +7275,10 @@ function anLineChart(containerId,points,opts={}){
   const el=document.getElementById(containerId);
   if(!el)return;
   if(!points.length){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted2);font-size:12px">Sin datos en este período</div>';return;}
-  const W=Math.max(200,el.clientWidth||400), H=140;
-  const padTop=16,padBottom=20,padX=10;
+  const W=Math.max(200,el.clientWidth||400), H=150;
+  // padTop mas grande que el grafico anterior: deja sitio para la etiqueta
+  // de valor arriba de cada punto sin que la del mes mas alto se corte.
+  const padTop=26,padBottom=20,padX=10;
   const values=points.map(p=>p.value);
   let min=Math.min(...values),max=Math.max(...values);
   if(opts.includeZero){min=Math.min(min,0);max=Math.max(max,0);}
@@ -7267,17 +7295,19 @@ function anLineChart(containerId,points,opts={}){
   const zeroLine=opts.includeZero
     ?`<line x1="${padX}" y1="${yAt(0).toFixed(1)}" x2="${W-padX}" y2="${yAt(0).toFixed(1)}" stroke="var(--border2)" stroke-width="1" stroke-dasharray="3,3"/>`
     :'';
+  const valFmt=opts.valFmt||opts.fmtVal||(v=>v);
   const dots=pts.map(([x,y],i)=>{
     const v=points[i].value;
     const c=opts.colorBySign?(v>=0?'var(--green)':'var(--red)'):color;
     return`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="${c}"><title>${points[i].label}: ${opts.fmtVal?opts.fmtVal(v):v}</title></circle>`;
   }).join('');
-  const labels=points.map((p,i)=>`<text x="${xAt(i).toFixed(1)}" y="${H-4}" font-size="9" fill="var(--muted2)" text-anchor="middle">${p.label}</text>`).join('');
+  const valLabels=pts.map(([x,y],i)=>`<text x="${x.toFixed(1)}" y="${Math.max(9,y-8).toFixed(1)}" font-size="8.5" font-weight="700" fill="var(--text)" text-anchor="middle">${valFmt(points[i].value)}</text>`).join('');
+  const axisLabels=points.map((p,i)=>`<text x="${xAt(i).toFixed(1)}" y="${H-4}" font-size="9" fill="var(--muted2)" text-anchor="middle">${p.label}</text>`).join('');
   el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="width:100%;height:${H}px;display:block">
     ${zeroLine}
     <path d="${areaD}" fill="${color}" fill-opacity=".08" stroke="none"/>
     <path d="${pathD}" fill="none" stroke="${color}" stroke-width="2"/>
-    ${dots}${labels}
+    ${dots}${valLabels}${axisLabels}
   </svg>`;
 }
 
@@ -7325,6 +7355,26 @@ function anRenderVelocidad(){
     </div>`).join('');
 }
 
+// Mismo calculo que anRenderVelocidad (dias entre compra y venta) pero
+// agrupado por mes de venta en vez de por categoria -- para ver si el
+// negocio rota el stock mas rapido o mas lento con el tiempo.
+function anRenderVelocidadMes(){
+  const porMes={};
+  anVentas.forEach(v=>{
+    if(!v.inventario?.fecha_compra||!v.fecha)return;
+    const dias=(new Date(v.fecha)-new Date(v.inventario.fecha_compra))/86400000;
+    if(dias<0)return;
+    const k=anMesKey(v.fecha);
+    if(!porMes[k])porMes[k]={suma:0,n:0};
+    porMes[k].suma+=dias; porMes[k].n++;
+  });
+  const meses=Object.keys(porMes).sort();
+  if(!meses.length){anEl('an-chart-velocidad','<div style="text-align:center;padding:20px;color:var(--muted2);font-size:12px;width:100%">Sin datos en este período</div>');return;}
+  anLineChart('an-chart-velocidad',
+    meses.map(k=>({label:anMesLabelCorta(k),value:Math.round(porMes[k].suma/porMes[k].n)})),
+    {color:'var(--purple)',fmtVal:v=>v+' días',valFmt:v=>v+'d'});
+}
+
 function anRenderStockParado(){
   const hoy=new Date();
   const UMBRAL_DIAS=45;
@@ -7339,12 +7389,13 @@ function anRenderStockParado(){
   if(capEl)capEl.textContent=fmt(capitalTotal);
   if(!tbody)return;
   if(!parados.length){
-    tbody.innerHTML=`<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--muted2)">Nada parado más de ${UMBRAL_DIAS} días 🎉</td></tr>`;
+    tbody.innerHTML=`<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--muted2)">Nada parado más de ${UMBRAL_DIAS} días 🎉</td></tr>`;
     return;
   }
   tbody.innerHTML=parados.slice(0,12).map(p=>`
     <tr>
       <td class="td-main td-trunc">${[p.marca,p.modelo].filter(Boolean).join(' ')||'—'}</td>
+      <td class="td-trunc">${p.colorway||'—'}</td>
       <td>${p.categoria||'—'}</td>
       <td class="right" style="color:${p.dias>90?'var(--red)':'var(--yellow)'};font-weight:700">${p.dias} días</td>
       <td class="right">${fmt(p.precio_final)}</td>
@@ -7366,6 +7417,37 @@ function anRenderClientes(){
   s('an-cl-nuevos',nuevos);
   s('an-cl-activos',totalConVenta);
   s('an-cl-recurrencia',pct+'%');
+}
+
+function anRenderClientesMes(){
+  const porMes={};
+  anClientes.forEach(c=>{
+    if(!c.fecha_registro||c.fecha_registro<anDesdeStr)return; // mismos 12 meses que el resto del tab
+    const k=anMesKey(c.fecha_registro);
+    porMes[k]=(porMes[k]||0)+1;
+  });
+  const meses=Object.keys(porMes).sort();
+  if(!meses.length){anEl('an-chart-clientes','<div style="text-align:center;padding:20px;color:var(--muted2);font-size:12px;width:100%">Sin datos en este período</div>');return;}
+  anLineChart('an-chart-clientes',
+    meses.map(k=>({label:anMesLabelCorta(k),value:porMes[k]})),
+    {color:'var(--accent)',fmtVal:v=>v+(v===1?' cliente nuevo':' clientes nuevos'),valFmt:v=>String(v)});
+}
+
+// Ranking por total comprado -- une las ventas del mismo id_cliente aunque
+// el nombre venga repetido en cada fila (viene del join, no de un group by
+// en la base).
+function anRenderTopClientes(){
+  const porCliente={};
+  anVentas.forEach(v=>{
+    if(!v.id_cliente)return;
+    if(!porCliente[v.id_cliente]){
+      const nombre=[v.clientes?.nombre,v.clientes?.apellido].filter(Boolean).join(' ')||'—';
+      porCliente[v.id_cliente]={nombre,total:0};
+    }
+    porCliente[v.id_cliente].total+=parseFloat(v.precio_venta_soles||0);
+  });
+  const pairs=Object.values(porCliente).map(c=>[c.nombre,c.total]).sort((a,b)=>b[1]-a[1]);
+  anRenderRanking('an-top-clientes',pairs,v=>fmt(v));
 }
 
 // Si la sesion caduca, o cierras sesion en otra pestaña, vuelve la puerta.
