@@ -2589,9 +2589,15 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
       <div class="an-panel-title" style="margin-bottom:0">Stock Parado <span class="an-panel-sub">— disponible hace 45+ días</span></div>
       <div class="an-stock-cap">Capital inmovilizado: <b id="an-stock-parado-capital">—</b></div>
     </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Producto</th><th>Colorway</th><th>Categoría</th><th class="right">Días parado</th><th class="right">Capital</th></tr></thead>
+    <div class="table-wrap" style="overflow-x:hidden">
+      <table style="table-layout:fixed;width:100%">
+        <thead><tr>
+          <th>Producto</th>
+          <th style="width:22%">Colorway</th>
+          <th style="width:17%">Categoría</th>
+          <th class="right" style="width:17%">Días parado</th>
+          <th class="right" style="width:17%">Capital</th>
+        </tr></thead>
         <tbody id="an-stock-parado-body">
           <tr class="loading-row"><td colspan="5"><div class="spinner"></div></td></tr>
         </tbody>
