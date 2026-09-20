@@ -582,6 +582,30 @@ input[list] { cursor: text; }
 .fc-accion-INVERSION{background:rgba(37,99,235,.08);color:var(--blue);border:1px solid rgba(37,99,235,.18)}
 
 
+/* ANÁLISIS */
+.an-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+@media(max-width:1100px){.an-kpi-row{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.an-kpi-row{grid-template-columns:1fr}}
+.an-row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+@media(max-width:900px){.an-row2{grid-template-columns:1fr}}
+.an-panel-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.an-panel-sub{font-size:10px;color:var(--muted2);font-weight:400;text-transform:none;letter-spacing:0}
+.an-barchart{display:flex;align-items:flex-end;gap:6px;height:140px;padding:22px 4px 0}
+.an-bc-col{flex:1;display:flex;flex-direction:column;align-items:center;height:100%;min-width:0}
+.an-bc-bar-wrap{flex:1;display:flex;align-items:flex-end;width:100%;justify-content:center;position:relative}
+.an-bc-bar{width:70%;max-width:34px;background:var(--accent);border-radius:4px 4px 0 0;transition:height .6s cubic-bezier(.4,0,.2,1);min-height:3px;position:relative}
+.an-bc-bar-neg{background:var(--red)}
+.an-bc-val{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:700;color:var(--muted2);white-space:nowrap}
+.an-bc-lbl{font-size:9px;color:var(--muted2);margin-top:6px;letter-spacing:.3px;text-transform:uppercase;white-space:nowrap}
+.an-rank-row{display:grid;grid-template-columns:100px 1fr 84px;gap:10px;align-items:center;padding:6px 0}
+.an-rank-lbl{font-size:12px;color:var(--text);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.an-rank-bar-wrap{height:8px;background:var(--surface);border-radius:4px;overflow:hidden}
+.an-rank-bar-fill{height:100%;background:var(--accent);border-radius:4px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.an-rank-val{font-size:11px;font-weight:700;color:var(--muted2);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.an-stock-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.an-stock-cap{font-size:11px;color:var(--muted2)}
+.an-stock-cap b{color:var(--red);font-family:'Archivo Black'}
+
 /* DARK MODE TOGGLE */
 .theme-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:none;cursor:pointer;font-size:15px;color:var(--muted2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color .15s,color .15s;margin-left:10px}@media (hover:hover) and (pointer:fine){
 .theme-btn:hover{border-color:var(--accent);color:var(--accent)}}
@@ -927,6 +951,10 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
     <button class="nav-tab" onclick="showView('oc',this)">
       <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
       <span class="tab-label">OCs</span>
+    </button>
+    <button class="nav-tab" onclick="showView('analisis',this)">
+      <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18.7 8 13 13.7l-4-4L3 16"/></svg>
+      <span class="tab-label">Análisis</span>
     </button>
   </div>
   <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Modo oscuro"></button>
@@ -2475,6 +2503,110 @@ tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
   </div>
 </div>
 
+<!-- ══════════════════════════════════
+     ANÁLISIS
+══════════════════════════════════ -->
+<div id="view-analisis" class="view">
+  <div class="page-hd">
+    <div class="page-title"><div class="dot"></div> Análisis</div>
+    <div class="page-sub">Cómo va el negocio en el tiempo, últimos 12 meses</div>
+  </div>
+
+  <!-- KPIs del mes vs mes anterior -->
+  <div class="an-kpi-row">
+    <div class="ind-card">
+      <div class="sim-chip"><div class="sim-chip-dot" style="background:var(--accent)"></div>Ventas del Mes</div>
+      <div class="sim-num" style="color:var(--accent)" id="an-kpi-ventas-num">—</div>
+      <div class="sim-lbl">Total vendido</div>
+      <div class="sim-trend" id="an-kpi-ventas-trend">—</div>
+    </div>
+    <div class="ind-card">
+      <div class="sim-chip"><div class="sim-chip-dot dot-green"></div>Utilidad Neta</div>
+      <div class="sim-num" style="color:var(--green)" id="an-kpi-utilidad-num">—</div>
+      <div class="sim-lbl">Ganancia − gastos</div>
+      <div class="sim-trend" id="an-kpi-utilidad-trend">—</div>
+    </div>
+    <div class="ind-card">
+      <div class="sim-chip"><div class="sim-chip-dot dot-purple"></div>Ticket Promedio</div>
+      <div class="sim-num" style="color:var(--purple)" id="an-kpi-ticket-num">—</div>
+      <div class="sim-lbl">Por venta</div>
+      <div class="sim-trend" id="an-kpi-ticket-trend">—</div>
+    </div>
+    <div class="ind-card">
+      <div class="sim-chip"><div class="sim-chip-dot dot-accent"></div>ROI Promedio</div>
+      <div class="sim-num" id="an-kpi-roi-num">—</div>
+      <div class="sim-lbl">Rentabilidad por venta</div>
+      <div class="sim-trend" id="an-kpi-roi-trend">—</div>
+    </div>
+  </div>
+
+  <!-- Evolución en el tiempo -->
+  <div class="ind-card" style="margin-bottom:14px">
+    <div class="an-panel-title">Ventas por mes</div>
+    <div class="an-barchart" id="an-chart-ventas"></div>
+  </div>
+  <div class="ind-card" style="margin-bottom:20px">
+    <div class="an-panel-title">Utilidad neta por mes <span class="an-panel-sub">— rojo = mes en pérdida</span></div>
+    <div class="an-barchart" id="an-chart-utilidad"></div>
+  </div>
+
+  <!-- Qué se vende -->
+  <div class="an-row2">
+    <div class="ind-card">
+      <div class="an-panel-title">Top Marcas / Modelos</div>
+      <div id="an-top-marcas"></div>
+    </div>
+    <div class="ind-card">
+      <div class="an-panel-title">Categorías Más Vendidas</div>
+      <div id="an-top-categorias"></div>
+    </div>
+  </div>
+
+  <!-- Qué no se vende -->
+  <div class="ind-card" style="margin-bottom:20px">
+    <div class="an-stock-hd">
+      <div class="an-panel-title" style="margin-bottom:0">Stock Parado <span class="an-panel-sub">— disponible hace 45+ días</span></div>
+      <div class="an-stock-cap">Capital inmovilizado: <b id="an-stock-parado-capital">—</b></div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Producto</th><th>Categoría</th><th class="right">Días parado</th><th class="right">Capital</th></tr></thead>
+        <tbody id="an-stock-parado-body">
+          <tr class="loading-row"><td colspan="4"><div class="spinner"></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Cómo y qué tan rápido se vende -->
+  <div class="an-row2">
+    <div class="ind-card">
+      <div class="an-panel-title">Velocidad de Venta <span class="an-panel-sub">— menor es mejor</span></div>
+      <div id="an-velocidad"></div>
+    </div>
+    <div class="ind-card">
+      <div class="an-panel-title">Canal Más Usado</div>
+      <div id="an-top-canal"></div>
+    </div>
+  </div>
+
+  <!-- Clientes -->
+  <div class="stats-row stats3">
+    <div class="stat-card">
+      <div class="stat-label">Clientes Nuevos Este Mes</div>
+      <div class="stat-val" id="an-cl-nuevos" style="color:var(--accent)">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Clientes con Compra (12m)</div>
+      <div class="stat-val" id="an-cl-activos">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">% que Repite Compra</div>
+      <div class="stat-val" id="an-cl-recurrencia" style="color:var(--green)">—</div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL PAGAR CRÉDITO -->
 <div class="modal-overlay" id="modal-pagar">
   <div class="modal">
@@ -3842,6 +3974,7 @@ function showView(n,btn){
   if(n==='ventas') loadVentas();
   if(n==='oc') renderOCTab();
   if(n==='reservas') loadReservas();
+  if(n==='analisis') loadAnalisis();
 }
 
 // Que input de fecha le toca a cada form del tab Registro.
@@ -6988,6 +7121,225 @@ async function kvArrancar(){
   if(session){ await kvEntrar(); return; }
   const e=document.getElementById('lg-email');
   if(e)e.focus();
+}
+
+// ── ANÁLISIS ──────────────────────────────────────────────────
+// Todo el tab se arma en el navegador a partir de datos ya cargados una
+// vez (ultimos 12 meses) -- no hay libreria de graficos, las barras son
+// simples divs con height/width en %, mismo criterio que .pat-bar-wrap.
+let anVentas=[],anPagos=[],anInvVivo=[],anClientes=[];
+
+async function loadAnalisis(){
+  const hoy=new Date();
+  const desde=new Date(hoy.getFullYear(),hoy.getMonth()-11,1);
+  const desdeStr=desde.getFullYear()+'-'+String(desde.getMonth()+1).padStart(2,'0')+'-01';
+
+  const buildV=()=>db.from('ventas')
+    .select('*,inventario(marca,modelo,categoria,fecha_compra)')
+    .gte('fecha',desdeStr)
+    .order('fecha',{ascending:true});
+  const buildP=()=>db.from('pagos').select('fecha,monto_soles').gte('fecha',desdeStr);
+  const buildInvVivo=()=>db.from('inventario')
+    .select('marca,modelo,categoria,fecha_compra,precio_final,estado')
+    .eq('estado','DISPONIBLE');
+  const buildCl=()=>db.from('clientes').select('id_cliente,fecha_registro');
+
+  const[{data:ventas,error},{data:pagos},{data:invVivo},{data:clientes}]=await Promise.all([
+    pageAll(buildV),pageAll(buildP),pageAll(buildInvVivo),pageAll(buildCl)
+  ]);
+  if(error){toast('Error cargando análisis: '+error.message,'err');return;}
+
+  anVentas=ventas||[]; anPagos=pagos||[]; anInvVivo=invVivo||[]; anClientes=clientes||[];
+
+  anRenderKPIs();
+  anRenderTendencia();
+  anRenderRanking('an-top-marcas', anGroupSum(anVentas,v=>v.inventario?.marca,v=>v.precio_venta_soles), v=>fmt(v));
+  anRenderRanking('an-top-categorias', anGroupCount(anVentas,v=>v.inventario?.categoria), v=>v+(v===1?' venta':' ventas'));
+  anRenderCanal();
+  anRenderStockParado();
+  anRenderVelocidad();
+  anRenderClientes();
+}
+
+const anMesKey=fecha=>fecha.slice(0,7);
+function anMesLabelCorta(mesKey){
+  const meses=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const[y,m]=mesKey.split('-');
+  return meses[parseInt(m)-1]+' '+y.slice(2);
+}
+function anSumar(arr,f){return arr.reduce((s,x)=>s+parseFloat(f(x)||0),0);}
+function anGroupSum(arr,keyFn,valFn){
+  const m={};
+  arr.forEach(x=>{const k=keyFn(x)||'—'; m[k]=(m[k]||0)+parseFloat(valFn(x)||0);});
+  return Object.entries(m).sort((a,b)=>b[1]-a[1]);
+}
+function anGroupCount(arr,keyFn){
+  const m={};
+  arr.forEach(x=>{const k=keyFn(x)||'—'; m[k]=(m[k]||0)+1;});
+  return Object.entries(m).sort((a,b)=>b[1]-a[1]);
+}
+
+function anRenderKPIs(){
+  const hoy=new Date();
+  const mesActual=hoy.getFullYear()+'-'+String(hoy.getMonth()+1).padStart(2,'0');
+  const mesAntD=new Date(hoy.getFullYear(),hoy.getMonth()-1,1);
+  const mesAnt=mesAntD.getFullYear()+'-'+String(mesAntD.getMonth()+1).padStart(2,'0');
+
+  const vAct=anVentas.filter(v=>anMesKey(v.fecha)===mesActual);
+  const vAnt=anVentas.filter(v=>anMesKey(v.fecha)===mesAnt);
+  const pAct=anPagos.filter(p=>anMesKey(p.fecha)===mesActual);
+  const pAnt=anPagos.filter(p=>anMesKey(p.fecha)===mesAnt);
+
+  const ventasAct=anSumar(vAct,v=>v.precio_venta_soles), ventasAnt=anSumar(vAnt,v=>v.precio_venta_soles);
+  const ganAct=anSumar(vAct,v=>v.ganancia), ganAnt=anSumar(vAnt,v=>v.ganancia);
+  // pagos se guardan en negativo (igual criterio que updateVentasStats en Ventas)
+  const gastoAct=-anSumar(pAct,p=>p.monto_soles), gastoAnt=-anSumar(pAnt,p=>p.monto_soles);
+  const utilAct=ganAct-gastoAct, utilAnt=ganAnt-gastoAnt;
+  const ticketAct=vAct.length?ventasAct/vAct.length:0, ticketAnt=vAnt.length?ventasAnt/vAnt.length:0;
+  const roiAct=vAct.length?anSumar(vAct,v=>v.rentabilidad)/vAct.length:0;
+  const roiAnt=vAnt.length?anSumar(vAnt,v=>v.rentabilidad)/vAnt.length:0;
+
+  anSetKPI('an-kpi-ventas',fmt(ventasAct),ventasAct,ventasAnt);
+  anSetKPI('an-kpi-utilidad',fmt(utilAct),utilAct,utilAnt);
+  anSetKPI('an-kpi-ticket',fmt(ticketAct),ticketAct,ticketAnt);
+  anSetKPI('an-kpi-roi',(roiAct*100).toFixed(0)+'%',roiAct,roiAnt);
+}
+function anSetKPI(prefix,valTxt,actual,anterior){
+  const numEl=document.getElementById(prefix+'-num');
+  const trendEl=document.getElementById(prefix+'-trend');
+  if(numEl)numEl.textContent=valTxt;
+  if(!trendEl)return;
+  if(!actual&&!anterior){trendEl.textContent='Sin datos aún';trendEl.className='sim-trend';return;}
+  const delta=anterior?((actual-anterior)/Math.abs(anterior))*100:100;
+  const sube=delta>=0;
+  trendEl.textContent=(sube?'▲ ':'▼ ')+Math.abs(delta).toFixed(0)+'% vs mes anterior';
+  trendEl.className='sim-trend '+(sube?'trend-up':'trend-down');
+}
+
+function anRenderTendencia(){
+  const porMes={};
+  anVentas.forEach(v=>{
+    const k=anMesKey(v.fecha);
+    if(!porMes[k])porMes[k]={ventas:0,gan:0,gasto:0};
+    porMes[k].ventas+=parseFloat(v.precio_venta_soles||0);
+    porMes[k].gan+=parseFloat(v.ganancia||0);
+  });
+  anPagos.forEach(p=>{
+    const k=anMesKey(p.fecha);
+    if(!porMes[k])porMes[k]={ventas:0,gan:0,gasto:0};
+    porMes[k].gasto-=parseFloat(p.monto_soles||0);
+  });
+  const meses=Object.keys(porMes).sort();
+  const barsV=document.getElementById('an-chart-ventas');
+  const barsU=document.getElementById('an-chart-utilidad');
+  if(!meses.length){
+    const vacio='<div style="text-align:center;padding:20px;color:var(--muted2);font-size:12px;width:100%">Sin ventas en este período</div>';
+    if(barsV)barsV.innerHTML=vacio;
+    if(barsU)barsU.innerHTML=vacio;
+    return;
+  }
+  const maxVenta=Math.max(1,...meses.map(k=>porMes[k].ventas));
+  if(barsV)barsV.innerHTML=meses.map(k=>{
+    const val=porMes[k].ventas;
+    const h=Math.max(3,Math.round(val/maxVenta*100));
+    return`<div class="an-bc-col"><div class="an-bc-bar-wrap"><div class="an-bc-bar" style="height:${h}%" title="${anMesLabelCorta(k)}: ${fmt(val)}"><span class="an-bc-val">${Math.round(val/1000)}k</span></div></div><div class="an-bc-lbl">${anMesLabelCorta(k)}</div></div>`;
+  }).join('');
+
+  const utils=meses.map(k=>porMes[k].gan-porMes[k].gasto);
+  const maxUtilAbs=Math.max(1,...utils.map(u=>Math.abs(u)));
+  if(barsU)barsU.innerHTML=meses.map((k,i)=>{
+    const u=utils[i];
+    const h=Math.max(3,Math.round(Math.abs(u)/maxUtilAbs*100));
+    const cls=u>=0?'an-bc-bar':'an-bc-bar an-bc-bar-neg';
+    return`<div class="an-bc-col"><div class="an-bc-bar-wrap"><div class="${cls}" style="height:${h}%" title="${anMesLabelCorta(k)}: ${fmt(u)}"><span class="an-bc-val">${u>=0?'':'-'}${Math.round(Math.abs(u)/1000)}k</span></div></div><div class="an-bc-lbl">${anMesLabelCorta(k)}</div></div>`;
+  }).join('');
+}
+
+function anRenderRanking(containerId,pairs,fmtVal){
+  const el=document.getElementById(containerId);
+  if(!el)return;
+  if(!pairs.length){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted2);font-size:12px">Sin datos en este período</div>';return;}
+  const top=pairs.slice(0,8);
+  const maxVal=top[0][1]||1;
+  el.innerHTML=top.map(([k,v])=>`
+    <div class="an-rank-row">
+      <span class="an-rank-lbl">${k}</span>
+      <div class="an-rank-bar-wrap"><div class="an-rank-bar-fill" style="width:${Math.max(4,Math.round(v/maxVal*100))}%"></div></div>
+      <span class="an-rank-val">${fmtVal(v)}</span>
+    </div>`).join('');
+}
+
+function anRenderCanal(){
+  const pairs=anGroupCount(anVentas,v=>v.canal);
+  const total=anVentas.length||1;
+  anRenderRanking('an-top-canal',pairs,v=>Math.round(v/total*100)+'% ('+v+')');
+}
+
+function anRenderVelocidad(){
+  const porCat={};
+  anVentas.forEach(v=>{
+    if(!v.inventario?.fecha_compra||!v.fecha)return;
+    const dias=(new Date(v.fecha)-new Date(v.inventario.fecha_compra))/86400000;
+    if(dias<0)return;
+    const cat=v.inventario.categoria||'—';
+    if(!porCat[cat])porCat[cat]={suma:0,n:0};
+    porCat[cat].suma+=dias; porCat[cat].n++;
+  });
+  // De menor a mayor: lo que rota mas rapido primero, es lo mas util para decidir.
+  const pairs=Object.entries(porCat).map(([k,{suma,n}])=>[k,Math.round(suma/n)]).sort((a,b)=>a[1]-b[1]);
+  const el=document.getElementById('an-velocidad');
+  if(!el)return;
+  if(!pairs.length){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted2);font-size:12px">Sin datos en este período</div>';return;}
+  const maxVal=Math.max(...pairs.map(p=>p[1]),1);
+  el.innerHTML=pairs.map(([k,v])=>`
+    <div class="an-rank-row">
+      <span class="an-rank-lbl">${k}</span>
+      <div class="an-rank-bar-wrap"><div class="an-rank-bar-fill" style="width:${Math.max(4,Math.round(v/maxVal*100))}%;background:var(--purple)"></div></div>
+      <span class="an-rank-val">${v} días</span>
+    </div>`).join('');
+}
+
+function anRenderStockParado(){
+  const hoy=new Date();
+  const UMBRAL_DIAS=45;
+  const parados=anInvVivo.map(p=>{
+    if(!p.fecha_compra)return null;
+    const dias=Math.floor((hoy-new Date(p.fecha_compra))/86400000);
+    return{...p,dias};
+  }).filter(p=>p&&p.dias>=UMBRAL_DIAS).sort((a,b)=>b.dias-a.dias);
+  const tbody=document.getElementById('an-stock-parado-body');
+  const capEl=document.getElementById('an-stock-parado-capital');
+  const capitalTotal=anSumar(parados,p=>p.precio_final);
+  if(capEl)capEl.textContent=fmt(capitalTotal);
+  if(!tbody)return;
+  if(!parados.length){
+    tbody.innerHTML=`<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--muted2)">Nada parado más de ${UMBRAL_DIAS} días 🎉</td></tr>`;
+    return;
+  }
+  tbody.innerHTML=parados.slice(0,12).map(p=>`
+    <tr>
+      <td class="td-main td-trunc">${[p.marca,p.modelo].filter(Boolean).join(' ')||'—'}</td>
+      <td>${p.categoria||'—'}</td>
+      <td class="right" style="color:${p.dias>90?'var(--red)':'var(--yellow)'};font-weight:700">${p.dias} días</td>
+      <td class="right">${fmt(p.precio_final)}</td>
+    </tr>`).join('');
+}
+
+function anRenderClientes(){
+  const hoy=new Date();
+  const mesActual=hoy.getFullYear()+'-'+String(hoy.getMonth()+1).padStart(2,'0');
+  const nuevos=anClientes.filter(c=>c.fecha_registro&&c.fecha_registro.slice(0,7)===mesActual).length;
+
+  const porCliente={};
+  anVentas.forEach(v=>{if(v.id_cliente)porCliente[v.id_cliente]=(porCliente[v.id_cliente]||0)+1;});
+  const totalConVenta=Object.keys(porCliente).length;
+  const recurrentes=Object.values(porCliente).filter(n=>n>1).length;
+  const pct=totalConVenta?Math.round(recurrentes/totalConVenta*100):0;
+
+  const s=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val;};
+  s('an-cl-nuevos',nuevos);
+  s('an-cl-activos',totalConVenta);
+  s('an-cl-recurrencia',pct+'%');
 }
 
 // Si la sesion caduca, o cierras sesion en otra pestaña, vuelve la puerta.
