@@ -773,8 +773,8 @@ input[list] { cursor: text; }
 .table-wrap{scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
 @media(max-width:768px){#toast{bottom:calc(72px + env(safe-area-inset-bottom,0px) + 12px)}}
 tbody tr{cursor:pointer;user-select:none}
-tbody tr.row-selected>td{background:rgba(37,99,235,.07)!important;outline:1px solid rgba(37,99,235,.18)}
-tbody tr.row-selected:hover>td{background:rgba(37,99,235,.11)!important}
+tbody td.cell-selected{background:rgba(37,99,235,.1)!important;outline:1.5px solid rgba(37,99,235,.35);outline-offset:-1.5px}
+tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
 
 /* ── CRM CLIENTES ── */
 .cl-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
@@ -6894,41 +6894,66 @@ function fillPagoCatCombo(){
   comboSetData('cl-pg-f-cat',cats);
 }
 
-// ── SELECCIÓN DE FILAS + CTRL+C ──
-let _selRows=new Set(),_selLast=null;
+// ── SELECCIÓN DE CASILLAS + CTRL+C ──
+// Antes seleccionaba la fila entera; ahora selecciona casillas sueltas,
+// como una hoja de calculo. Clic = una casilla. Shift+clic = rango de
+// casillas DENTRO de la misma fila (cruzar de fila no arma una diagonal
+// rara, simplemente selecciona solo la casilla nueva). Ctrl+clic = agrega
+// o quita casillas sueltas, esten donde esten.
+let _selCells=new Set(),_selLast=null;
 
-function _clearSel(){_selRows.forEach(r=>r.classList.remove('row-selected'));_selRows.clear();_selLast=null;}
+function _clearSel(){_selCells.forEach(c=>c.classList.remove('cell-selected'));_selCells.clear();_selLast=null;}
 
 function initRowSel(tbodyId){
   const tb=document.getElementById(tbodyId);
   if(!tb||tb._selInit)return;
   tb._selInit=true;
   tb.addEventListener('click',function(e){
-    const row=e.target.closest('tr');
-    if(!row||['BUTTON','A','INPUT','SELECT'].includes(e.target.tagName))return;
-    if(e.shiftKey&&_selLast&&tb.contains(_selLast)){
-      const all=[...tb.querySelectorAll('tr')];
-      const a=all.indexOf(_selLast),b=all.indexOf(row);
+    const cell=e.target.closest('td');
+    if(!cell||['BUTTON','A','INPUT','SELECT'].includes(e.target.tagName))return;
+    const row=cell.closest('tr');
+    if(!row)return;
+    if(e.shiftKey&&_selLast&&tb.contains(_selLast)&&_selLast.closest('tr')===row){
+      const cellsInRow=[...row.querySelectorAll('td')];
+      const a=cellsInRow.indexOf(_selLast),b=cellsInRow.indexOf(cell);
       const[lo,hi]=[Math.min(a,b),Math.max(a,b)];
-      if(!e.ctrlKey&&!e.metaKey){_selRows.forEach(r=>r.classList.remove('row-selected'));_selRows.clear();}
-      all.slice(lo,hi+1).forEach(r=>{_selRows.add(r);r.classList.add('row-selected');});
+      if(!e.ctrlKey&&!e.metaKey){_selCells.forEach(c=>c.classList.remove('cell-selected'));_selCells.clear();}
+      cellsInRow.slice(lo,hi+1).forEach(c=>{_selCells.add(c);c.classList.add('cell-selected');});
     }else if(e.ctrlKey||e.metaKey){
-      if(_selRows.has(row)){_selRows.delete(row);row.classList.remove('row-selected');}
-      else{_selRows.add(row);row.classList.add('row-selected');}
+      if(_selCells.has(cell)){_selCells.delete(cell);cell.classList.remove('cell-selected');}
+      else{_selCells.add(cell);cell.classList.add('cell-selected');}
     }else{
-      _selRows.forEach(r=>r.classList.remove('row-selected'));_selRows.clear();
-      _selRows.add(row);row.classList.add('row-selected');
+      _selCells.forEach(c=>c.classList.remove('cell-selected'));_selCells.clear();
+      _selCells.add(cell);cell.classList.add('cell-selected');
     }
-    _selLast=row;
+    _selLast=cell;
   });
 }
 
 document.addEventListener('keydown',function(e){
-  if((e.ctrlKey||e.metaKey)&&e.key==='c'&&_selRows.size>0){
+  if((e.ctrlKey||e.metaKey)&&e.key==='c'&&_selCells.size>0){
     if(document.activeElement&&['INPUT','TEXTAREA'].includes(document.activeElement.tagName))return;
     e.preventDefault();
-    const tsv=[..._selRows].map(row=>[...row.querySelectorAll('td')].map(td=>td.innerText.trim().replace(/\s+/g,' ')).join('\t')).join('\n');
-    navigator.clipboard.writeText(tsv).then(()=>toast('✓ '+_selRows.size+' fila'+(+_selRows.size!==1?'s':'')+' copiada'+(+_selRows.size!==1?'s':''),'ok'));
+    // Agrupa por fila y ordena todo segun su posicion real en la tabla,
+    // asi copiar casillas sueltas en cualquier orden de clic pega en el
+    // mismo orden en que se ven, no en el orden en que se clickearon.
+    const porFila=new Map();
+    [..._selCells].forEach(c=>{
+      const row=c.closest('tr');
+      if(!porFila.has(row))porFila.set(row,[]);
+      porFila.get(row).push(c);
+    });
+    const filas=[...porFila.keys()].sort((a,b)=>{
+      const all=[...a.closest('tbody').querySelectorAll('tr')];
+      return all.indexOf(a)-all.indexOf(b);
+    });
+    const tsv=filas.map(row=>{
+      const tds=[...row.querySelectorAll('td')];
+      return porFila.get(row)
+        .sort((a,b)=>tds.indexOf(a)-tds.indexOf(b))
+        .map(td=>td.innerText.trim().replace(/\s+/g,' ')).join('\t');
+    }).join('\n');
+    navigator.clipboard.writeText(tsv).then(()=>toast('✓ '+_selCells.size+' casilla'+(_selCells.size!==1?'s':'')+' copiada'+(_selCells.size!==1?'s':''),'ok'));
   }
 });
 
