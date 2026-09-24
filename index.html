@@ -613,6 +613,16 @@ input[list] { cursor: text; }
 .an-stock-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
 .an-stock-cap{font-size:11px;color:var(--muted2)}
 .an-stock-cap b{color:var(--red);font-family:'Archivo Black'}
+/* Stock Parado y Duplicados: table-layout:fixed las hace encajar exactas
+   en desktop (por eso overflow-x:hidden, sin scrollbar de sobra). En
+   celular esas mismas columnas fijas en % se aprietan hasta ilegibles --
+   aca se revierte a ancho natural + scroll horizontal, igual que el resto
+   de tablas de la app en movil. */
+@media(max-width:768px){
+  .an-wide-table{overflow-x:auto!important}
+  .an-wide-table table{table-layout:auto!important;min-width:640px}
+  .an-wide-table th,.an-wide-table td{width:auto!important}
+}
 
 /* DARK MODE TOGGLE */
 .theme-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:none;cursor:pointer;font-size:15px;color:var(--muted2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color .15s,color .15s;margin-left:10px}@media (hover:hover) and (pointer:fine){
@@ -2607,7 +2617,7 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
       <div class="an-panel-title" style="margin-bottom:0">Stock Parado <span class="an-panel-sub">— disponible hace 45+ días</span></div>
       <div class="an-stock-cap">Capital inmovilizado: <b id="an-stock-parado-capital">—</b></div>
     </div>
-    <div class="table-wrap" style="overflow-x:hidden">
+    <div class="table-wrap an-wide-table" style="overflow-x:hidden">
       <table style="table-layout:fixed;width:100%">
         <thead><tr>
           <th style="width:11%">Código</th>
@@ -2640,7 +2650,7 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
         <div class="an-stock-cap">Capital en duplicados: <b id="an-duplicados-capital">—</b></div>
       </div>
     </div>
-    <div class="table-wrap" style="overflow-x:hidden">
+    <div class="table-wrap an-wide-table" style="overflow-x:hidden">
       <table style="table-layout:fixed;width:100%">
         <thead><tr>
           <th style="width:26%">Producto</th>
@@ -7301,6 +7311,7 @@ let anProductoModo='unidades';
 function anSetProductoModo(modo){
   anProductoModo=modo;
   document.querySelectorAll('#an-producto-toggle .an-toggle-btn').forEach(b=>b.classList.toggle('active',b.dataset.modo===modo));
+  if(_pagAn['an-top-producto'])_pagAn['an-top-producto'].page=0; // cambia el orden, vuelve a la pagina 1
   anRenderTopProducto();
 }
 function anRenderTopProducto(){
@@ -7487,13 +7498,14 @@ function anMultiLineChart(containerId,labels,series,opts={}){
 // pairs es [clave,valor] normalmente, pero acepta tuplas mas largas
 // [clave,valor,...extra] -- fmtVal recibe (valor, tupla completa) para que
 // un llamador pueda mostrar un dato extra sin cambiar como se ordena/mide la barra.
+// pairs YA viene ordenado de mayor a menor (asi lo arman anGroupSum/Count).
+// El maxVal para el ancho de las barras se saca del total, no de la pagina
+// actual -- si no, la pagina 2 reescala contra su propio maximo local y las
+// barras mienten (un valor chico se veria "grande" solo por estar solo).
 function anRenderRanking(containerId,pairs,fmtVal){
-  const el=document.getElementById(containerId);
-  if(!el)return;
-  if(!pairs.length){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted2);font-size:12px">Sin datos en este período</div>';return;}
-  const top=pairs.slice(0,8);
-  const maxVal=top[0][1]||1;
-  el.innerHTML=top.map(entry=>{
+  const vacio='<div style="text-align:center;padding:20px;color:var(--muted2);font-size:12px">Sin datos en este período</div>';
+  const maxVal=pairs[0]?.[1]||1;
+  const filas=pairs.map(entry=>{
     const[k,v]=entry;
     return`
     <div class="an-rank-row">
@@ -7501,7 +7513,45 @@ function anRenderRanking(containerId,pairs,fmtVal){
       <div class="an-rank-bar-wrap"><div class="an-rank-bar-fill" style="width:${Math.max(4,Math.round(v/maxVal*100))}%"></div></div>
       <span class="an-rank-val">${fmtVal(v,entry)}</span>
     </div>`;
-  }).join('');
+  });
+  anPagRender(containerId, filas, containerId, vacio);
+}
+
+// Paginacion para paneles de ranking armados con divs, no tablas -- por eso
+// no reusa pagRender/pagMove (esos arman una fila de tabla para los
+// controles). Mismo criterio: 8 por pagina, mismas clases
+// .pag-bar/.pag-ctrl/.fc-nav-btn ya existentes.
+const _pagAn={};
+function anPagRender(key,rows,containerId,vacio){
+  const el=document.getElementById(containerId);
+  if(!el)return;
+  const st=_pagAn[key]||(_pagAn[key]={page:0});
+  st.rows=rows; st.container=containerId; st.vacio=vacio;
+  const PAGE=8;
+  const total=rows.length;
+  const pages=Math.max(1,Math.ceil(total/PAGE));
+  if(st.page>=pages)st.page=pages-1;
+  if(st.page<0)st.page=0;
+  if(!total){el.innerHTML=vacio;return;}
+  const ini=st.page*PAGE, fin=Math.min(ini+PAGE,total);
+  let html=rows.slice(ini,fin).join('');
+  if(total>PAGE){
+    html+=`<div class="pag-bar">
+      <span class="pag-info">${ini+1}–${fin} de ${total}</span>
+      <div class="pag-ctrl">
+        <button class="fc-nav-btn" ${st.page===0?'disabled':''} onclick="anPagMove('${key}',-1)">‹</button>
+        <span class="pag-page">Pág ${st.page+1} / ${pages}</span>
+        <button class="fc-nav-btn" ${st.page>=pages-1?'disabled':''} onclick="anPagMove('${key}',1)">›</button>
+      </div>
+    </div>`;
+  }
+  el.innerHTML=html;
+}
+function anPagMove(key,dir){
+  const st=_pagAn[key];
+  if(!st)return;
+  st.page+=dir;
+  anPagRender(key, st.rows, st.container, st.vacio);
 }
 
 function anRenderCanal(){
