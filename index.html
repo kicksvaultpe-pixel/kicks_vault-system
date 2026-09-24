@@ -2520,7 +2520,8 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
     <div class="page-sub">Cómo va el negocio en el tiempo, últimos 12 meses</div>
   </div>
 
-  <!-- KPIs del mes vs mes anterior -->
+  <!-- 1. Resumen del mes -->
+  <div class="card-label">Resumen del Mes</div>
   <div class="an-kpi-row">
     <div class="ind-card">
       <div class="sim-chip"><div class="sim-chip-dot" style="background:var(--accent)"></div>Ventas del Mes</div>
@@ -2548,7 +2549,8 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
     </div>
   </div>
 
-  <!-- 1. Evolución en el tiempo -->
+  <!-- 2. Evolución en el tiempo -->
+  <div class="card-label" style="margin-top:8px">Evolución en el Tiempo — 12 Meses</div>
   <div class="an-row2">
     <div class="ind-card">
       <div class="an-panel-title">Ventas por mes</div>
@@ -2565,17 +2567,18 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
       <div class="an-linechart" id="an-chart-utilidad"></div>
     </div>
     <div class="ind-card">
-      <div class="an-panel-title">Velocidad de venta por mes, por categoría <span class="an-panel-sub">— menor es mejor</span></div>
-      <div class="an-legend" id="an-chart-velocidad-legend"></div>
-      <div class="an-linechart" id="an-chart-velocidad"></div>
+      <div class="an-panel-title">Clientes nuevos por mes</div>
+      <div class="an-linechart" id="an-chart-clientes"></div>
     </div>
   </div>
   <div class="ind-card" style="margin-bottom:20px">
-    <div class="an-panel-title">Clientes nuevos por mes</div>
-    <div class="an-linechart" id="an-chart-clientes"></div>
+    <div class="an-panel-title">Velocidad de Venta por Categoría <span class="an-panel-sub">— evolución mensual, menor es mejor</span></div>
+    <div class="an-legend" id="an-chart-velocidad-legend"></div>
+    <div class="an-linechart" id="an-chart-velocidad"></div>
   </div>
 
-  <!-- 2. Qué se vende -->
+  <!-- 3. Qué y cómo se vende -->
+  <div class="card-label" style="margin-top:8px">Qué y Cómo Se Vende</div>
   <div class="ind-card" style="margin-bottom:20px">
     <div class="an-panel-hd">
       <div class="an-panel-title">Top Productos</div>
@@ -2586,8 +2589,19 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
     </div>
     <div id="an-top-producto"></div>
   </div>
+  <div class="an-row2">
+    <div class="ind-card">
+      <div class="an-panel-title">Categorías Más Vendidas</div>
+      <div id="an-top-categorias"></div>
+    </div>
+    <div class="ind-card">
+      <div class="an-panel-title">Canal Más Usado</div>
+      <div id="an-top-canal"></div>
+    </div>
+  </div>
 
-  <!-- 3. Qué no se vende -->
+  <!-- 4. Qué no se vende -->
+  <div class="card-label" style="margin-top:8px">Qué No Se Vende</div>
   <div class="ind-card" style="margin-bottom:20px">
     <div class="an-stock-hd">
       <div class="an-panel-title" style="margin-bottom:0">Stock Parado <span class="an-panel-sub">— disponible hace 45+ días</span></div>
@@ -2614,7 +2628,17 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
   <div class="ind-card" style="margin-bottom:20px">
     <div class="an-stock-hd">
       <div class="an-panel-title" style="margin-bottom:0">Productos Duplicados <span class="an-panel-sub">— mismo producto y talla, 2+ unidades — sin Accesorios</span></div>
-      <div class="an-stock-cap">Capital en duplicados: <b id="an-duplicados-capital">—</b></div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <div class="combo-wrap" style="min-width:150px">
+          <input type="text" id="an-dup-cat" placeholder="Categoría…" autocomplete="off" readonly
+            onfocus="comboOpen('an-dup-cat','cl-an-dup-cat')"
+            onblur="comboBlurStrict('an-dup-cat','cl-an-dup-cat')"
+            onkeydown="comboKey(event,'an-dup-cat','cl-an-dup-cat')">
+          <span class="combo-arrow">▼</span>
+          <div class="combo-list" id="cl-an-dup-cat"></div>
+        </div>
+        <div class="an-stock-cap">Capital en duplicados: <b id="an-duplicados-capital">—</b></div>
+      </div>
     </div>
     <div class="table-wrap" style="overflow-x:hidden">
       <table style="table-layout:fixed;width:100%">
@@ -2633,19 +2657,8 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
     </div>
   </div>
 
-  <!-- 4. Cómo y por dónde se vende -->
-  <div class="an-row2">
-    <div class="ind-card">
-      <div class="an-panel-title">Categorías Más Vendidas</div>
-      <div id="an-top-categorias"></div>
-    </div>
-    <div class="ind-card">
-      <div class="an-panel-title">Canal Más Usado</div>
-      <div id="an-top-canal"></div>
-    </div>
-  </div>
-
   <!-- 5. Clientes -->
+  <div class="card-label" style="margin-top:8px">Clientes</div>
   <div class="stats-row stats3" style="margin-bottom:14px">
     <div class="stat-card">
       <div class="stat-label">Clientes Nuevos Este Mes</div>
@@ -2938,6 +2951,7 @@ function comboPick(inputId, listId, val) {
   if (inputId === 'clf-tipo') filterClientes();
   if (inputId === 'oc-f-estado' || inputId === 'oc-f-tipo') renderOCTab();
   if (inputId === 'fc-accion') renderFlujoTabla();
+  if (inputId === 'an-dup-cat') anRenderDuplicados();
   if (inputId === 'cp-moneda') toggleMoneda();
   if (inputId === 'rv-producto') onPickRvProducto();
   if (inputId === 'cs-oc-select') csOCChange();
@@ -7214,6 +7228,7 @@ async function kvArrancar(){
 let anVentas=[],anPagos=[],anInvVivo=[],anClientes=[],anDesdeStr='';
 
 async function loadAnalisis(){
+  comboSetData('cl-an-dup-cat', ['— Todas —','👟 ZAPATILLAS','👕 ROPA','📦 OTROS']);
   const hoy=new Date();
   const desde=new Date(hoy.getFullYear(),hoy.getMonth()-11,1);
   anDesdeStr=desde.getFullYear()+'-'+String(desde.getMonth()+1).padStart(2,'0')+'-01';
@@ -7607,24 +7622,21 @@ function anRenderStockParado(){
 // siendo stock propio). Sin Accesorios: ahi tener varias unidades iguales
 // es normal (llaveros, medias), no un duplicado a revisar.
 function anRenderDuplicados(){
+  const filtroCat=noEmoji(document.getElementById('an-dup-cat')?.value||'').toUpperCase();
   const grupos={};
   anInvVivo.forEach(p=>{
-    if((p.categoria||'').toUpperCase()==='ACCESORIOS')return;
+    const cat=(p.categoria||'').toUpperCase();
+    if(cat==='ACCESORIOS')return;
+    if(filtroCat&&cat!==filtroCat)return;
     const k=[p.marca,p.modelo,p.colorway,p.talla].filter(Boolean).join(' | ');
     if(!k)return;
     if(!grupos[k])grupos[k]={marca:p.marca,modelo:p.modelo,colorway:p.colorway,talla:p.talla,categoria:p.categoria,items:[]};
     grupos[k].items.push(p);
   });
   const dup=Object.values(grupos).filter(g=>g.items.length>=2).sort((a,b)=>b.items.length-a.items.length);
-  const tbody=document.getElementById('an-duplicados-body');
   const capEl=document.getElementById('an-duplicados-capital');
   if(capEl)capEl.textContent=fmt(anSumar(dup.flatMap(g=>g.items),p=>p.precio_final));
-  if(!tbody)return;
-  if(!dup.length){
-    tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted2)">Sin duplicados por ahora 🎉</td></tr>';
-    return;
-  }
-  tbody.innerHTML=dup.slice(0,15).map(g=>`
+  const filas=dup.map(g=>`
     <tr>
       <td class="td-main td-trunc">${[g.marca,g.modelo].filter(Boolean).join(' ')||'—'}</td>
       <td style="text-align:center">${g.talla||'—'}</td>
@@ -7632,7 +7644,9 @@ function anRenderDuplicados(){
       <td>${g.categoria||'—'}</td>
       <td class="right" style="font-weight:700;color:var(--accent)">${g.items.length}</td>
       <td class="td-trunc" style="font-size:10px;color:var(--muted2)">${g.items.map(p=>p.codigo_producto).join(', ')}</td>
-    </tr>`).join('');
+    </tr>`);
+  pagRender('an-duplicados', filas, 'an-duplicados-body', 6,
+    '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted2)">Sin duplicados en esta categoría 🎉</td></tr>');
 }
 
 function anRenderClientes(){
