@@ -3643,7 +3643,7 @@ function renderReservas(){
       r.estado==='COMPLETADA'?`<span class="badge badge-green">COMPLETADA</span>`:
       `<span class="badge badge-red">CANCELADA</span>`;
     const tipoBadge=r.tipo==='STOCK'?`<span class="rsv-tipo-stock">Stock</span>`:`<span class="rsv-tipo-pedido">Pedido</span>`;
-    return`<tr onclick="abrirReservaDetalle('${r.codigo_reserva}')" style="cursor:pointer">
+    return`<tr class="${r.estado==='COMPLETADA'?'row-dim':''}" onclick="abrirReservaDetalle('${r.codigo_reserva}')" style="cursor:pointer">
       <td><span class="td-code" style="color:var(--muted2)">${fecha}</span></td>
       <td><span class="td-code" style="color:var(--accent)">${r.codigo_reserva}</span></td>
       <td>${tipoBadge}</td>
