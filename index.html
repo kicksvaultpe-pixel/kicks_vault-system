@@ -2596,14 +2596,38 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
     <div class="table-wrap" style="overflow-x:hidden">
       <table style="table-layout:fixed;width:100%">
         <thead><tr>
-          <th>Producto</th>
-          <th style="width:22%">Colorway</th>
-          <th style="width:17%">Categoría</th>
-          <th class="right" style="width:17%">Días parado</th>
-          <th class="right" style="width:17%">Capital</th>
+          <th style="width:11%">Código</th>
+          <th style="width:24%">Producto</th>
+          <th style="width:8%;text-align:center">Talla</th>
+          <th style="width:16%">Colorway</th>
+          <th style="width:12%">Categoría</th>
+          <th class="right" style="width:14%">Días parado</th>
+          <th class="right" style="width:15%">Capital</th>
         </tr></thead>
         <tbody id="an-stock-parado-body">
-          <tr class="loading-row"><td colspan="5"><div class="spinner"></div></td></tr>
+          <tr class="loading-row"><td colspan="7"><div class="spinner"></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="ind-card" style="margin-bottom:20px">
+    <div class="an-stock-hd">
+      <div class="an-panel-title" style="margin-bottom:0">Productos Duplicados <span class="an-panel-sub">— mismo producto y talla, 2+ unidades — sin Accesorios</span></div>
+      <div class="an-stock-cap">Capital en duplicados: <b id="an-duplicados-capital">—</b></div>
+    </div>
+    <div class="table-wrap" style="overflow-x:hidden">
+      <table style="table-layout:fixed;width:100%">
+        <thead><tr>
+          <th style="width:26%">Producto</th>
+          <th style="width:8%;text-align:center">Talla</th>
+          <th style="width:17%">Colorway</th>
+          <th style="width:13%">Categoría</th>
+          <th class="right" style="width:9%">Unidades</th>
+          <th style="width:27%">Códigos</th>
+        </tr></thead>
+        <tbody id="an-duplicados-body">
+          <tr class="loading-row"><td colspan="6"><div class="spinner"></div></td></tr>
         </tbody>
       </table>
     </div>
@@ -7199,9 +7223,12 @@ async function loadAnalisis(){
     .gte('fecha',anDesdeStr)
     .order('fecha',{ascending:true});
   const buildP=()=>db.from('pagos').select('fecha,monto_soles').gte('fecha',anDesdeStr);
+  // DISPONIBLE+RESERVADO (todo lo que sigue siendo stock propio, no vendido
+  // ni cancelado) -- Stock Parado filtra a solo DISPONIBLE mas abajo,
+  // Duplicados usa las dos: una reserva activa tambien cuenta como bulto.
   const buildInvVivo=()=>db.from('inventario')
-    .select('marca,modelo,colorway,categoria,fecha_compra,precio_final,estado')
-    .eq('estado','DISPONIBLE');
+    .select('codigo_producto,marca,modelo,colorway,talla,categoria,fecha_compra,precio_final,estado')
+    .in('estado',['DISPONIBLE','RESERVADO']);
   const buildCl=()=>db.from('clientes').select('id_cliente,fecha_registro');
 
   const[{data:ventas,error},{data:pagos},{data:invVivo},{data:clientes}]=await Promise.all([
@@ -7219,6 +7246,7 @@ async function loadAnalisis(){
   anRenderRanking('an-top-categorias', anGroupCount(anVentas,v=>v.inventario?.categoria), v=>v+(v===1?' venta':' ventas'));
   anRenderCanal();
   anRenderStockParado();
+  anRenderDuplicados();
   anRenderClientes();
   anRenderTopClientes();
 }
@@ -7547,7 +7575,8 @@ function anToggleVelCat(cat){
 function anRenderStockParado(){
   const hoy=new Date();
   const UMBRAL_DIAS=45;
-  const parados=anInvVivo.map(p=>{
+  // Solo DISPONIBLE: un RESERVADO ya tiene comprador, no esta "parado".
+  const parados=anInvVivo.filter(p=>p.estado==='DISPONIBLE').map(p=>{
     if(!p.fecha_compra)return null;
     const dias=Math.floor((hoy-new Date(p.fecha_compra))/86400000);
     return{...p,dias};
@@ -7558,16 +7587,51 @@ function anRenderStockParado(){
   if(capEl)capEl.textContent=fmt(capitalTotal);
   if(!tbody)return;
   if(!parados.length){
-    tbody.innerHTML=`<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--muted2)">Nada parado más de ${UMBRAL_DIAS} días 🎉</td></tr>`;
+    tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted2)">Nada parado más de ${UMBRAL_DIAS} días 🎉</td></tr>`;
     return;
   }
   tbody.innerHTML=parados.slice(0,12).map(p=>`
     <tr>
+      <td class="td-code">${p.codigo_producto||'—'}</td>
       <td class="td-main td-trunc">${[p.marca,p.modelo].filter(Boolean).join(' ')||'—'}</td>
+      <td style="text-align:center">${p.talla||'—'}</td>
       <td class="td-trunc">${p.colorway||'—'}</td>
       <td>${p.categoria||'—'}</td>
       <td class="right" style="color:${p.dias>90?'var(--red)':'var(--yellow)'};font-weight:700">${p.dias} días</td>
       <td class="right">${fmt(p.precio_final)}</td>
+    </tr>`).join('');
+}
+
+// Mismo producto+talla (marca+modelo+colorway+talla exactos) con 2 o mas
+// unidades sin vender -- incluye DISPONIBLE y RESERVADO (las dos siguen
+// siendo stock propio). Sin Accesorios: ahi tener varias unidades iguales
+// es normal (llaveros, medias), no un duplicado a revisar.
+function anRenderDuplicados(){
+  const grupos={};
+  anInvVivo.forEach(p=>{
+    if((p.categoria||'').toUpperCase()==='ACCESORIOS')return;
+    const k=[p.marca,p.modelo,p.colorway,p.talla].filter(Boolean).join(' | ');
+    if(!k)return;
+    if(!grupos[k])grupos[k]={marca:p.marca,modelo:p.modelo,colorway:p.colorway,talla:p.talla,categoria:p.categoria,items:[]};
+    grupos[k].items.push(p);
+  });
+  const dup=Object.values(grupos).filter(g=>g.items.length>=2).sort((a,b)=>b.items.length-a.items.length);
+  const tbody=document.getElementById('an-duplicados-body');
+  const capEl=document.getElementById('an-duplicados-capital');
+  if(capEl)capEl.textContent=fmt(anSumar(dup.flatMap(g=>g.items),p=>p.precio_final));
+  if(!tbody)return;
+  if(!dup.length){
+    tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted2)">Sin duplicados por ahora 🎉</td></tr>';
+    return;
+  }
+  tbody.innerHTML=dup.slice(0,15).map(g=>`
+    <tr>
+      <td class="td-main td-trunc">${[g.marca,g.modelo].filter(Boolean).join(' ')||'—'}</td>
+      <td style="text-align:center">${g.talla||'—'}</td>
+      <td class="td-trunc">${g.colorway||'—'}</td>
+      <td>${g.categoria||'—'}</td>
+      <td class="right" style="font-weight:700;color:var(--accent)">${g.items.length}</td>
+      <td class="td-trunc" style="font-size:10px;color:var(--muted2)">${g.items.map(p=>p.codigo_producto).join(', ')}</td>
     </tr>`).join('');
 }
 
