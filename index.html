@@ -1823,6 +1823,21 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
         <span class="sg-mn-tot red" id="st-mes-val">—</span>
       </div>
       <div class="sg-divider"></div>
+      <!-- Mismo criterio que "Por pagar" mas abajo: Pedido = producto con
+           estado RESERVADO hoy (ya tiene dueño), Stock = todo lo demas. -->
+      <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px">Por tipo</div>
+      <div class="sc-grid g3">
+        <span></span>
+        <span class="sg-h">Uds.</span>
+        <span class="sg-h">Monto S/.</span>
+        <span class="sg-mc">📦 Stock</span>
+        <span class="sg-mn" id="st-mes-stock-uds">—</span>
+        <span class="sg-mn accent" id="st-mes-stock-val">—</span>
+        <span class="sg-mc">🚚 Pedido</span>
+        <span class="sg-mn" id="st-mes-pedido-uds">—</span>
+        <span class="sg-mn accent" id="st-mes-pedido-val">—</span>
+      </div>
+      <div class="sg-divider"></div>
       <!-- POR PAGAR: saldo de creditos, no depende del mes. Mismo bloque que en Flujo de Caja -->
       <div title="Saldo de todas las compras a crédito sin pagar, de cualquier mes">
         <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--orange,#f59e0b);margin-bottom:6px">Por pagar</div>
@@ -4564,13 +4579,22 @@ async function updateStats(mes='',vendidosMes=[],vendidosDespues=[]){
   });
   const acum={ZAP:[0,0],ROPA:[0,0],ACC:[0,0],OTR:[0,0]};
   const vistos={ZAP:new Set(),ROPA:new Set(),ACC:new Set(),OTR:new Set()};
+  // Mismo criterio que "Por pagar": Pedido = el producto esta RESERVADO
+  // hoy (ya tiene dueno), Stock = todo lo demas. Es el estado de HOY, no
+  // el de ese momento del mes -- misma aproximacion que ya se usaba abajo.
+  const acumTipo={STOCK:[0,0],PEDIDO:[0,0]};
+  const vistosTipo={STOCK:new Set(),PEDIDO:new Set()};
   movsMes.forEach(f=>{
     const p=invPorCod.get(f.referencia_id);
     const k=!p?'OTR':esZap(p)?'ZAP':esRopa(p)?'ROPA':esAcc(p)?'ACC':'OTR';
     acum[k][1]+=parseFloat(f.egreso_soles||0);
     if(f.referencia_id) vistos[k].add(f.referencia_id);   // uds = productos distintos
+    const kt=p?.estado==='RESERVADO'?'PEDIDO':'STOCK';
+    acumTipo[kt][1]+=parseFloat(f.egreso_soles||0);
+    if(f.referencia_id) vistosTipo[kt].add(f.referencia_id);
   });
   Object.keys(acum).forEach(k=>{acum[k][0]=vistos[k].size;});
+  Object.keys(acumTipo).forEach(k=>{acumTipo[k][0]=vistosTipo[k].size;});
   const montoMes=Object.values(acum).reduce((s,[,v])=>s+v,0);
   const udsMes=new Set(movsMes.map(f=>f.referencia_id).filter(Boolean)).size;
   // POR PAGAR: a la fecha de cierre de `mes`. Lo calcula deudaCreditos() para
@@ -4589,6 +4613,10 @@ async function updateStats(mes='',vendidosMes=[],vendidosDespues=[]){
   set('st-mes-otr-val', fmt(acum.OTR[1]));
   set('st-mes-uds-total', udsMes);
   set('st-mes-val', fmt(montoMes));
+  set('st-mes-stock-uds', acumTipo.STOCK[0]);
+  set('st-mes-stock-val', fmt(acumTipo.STOCK[1]));
+  set('st-mes-pedido-uds', acumTipo.PEDIDO[0]);
+  set('st-mes-pedido-val', fmt(acumTipo.PEDIDO[1]));
 }
 function set(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
 
