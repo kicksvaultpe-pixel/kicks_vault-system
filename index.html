@@ -4579,9 +4579,13 @@ async function updateStats(mes='',vendidosMes=[],vendidosDespues=[]){
   });
   const acum={ZAP:[0,0],ROPA:[0,0],ACC:[0,0],OTR:[0,0]};
   const vistos={ZAP:new Set(),ROPA:new Set(),ACC:new Set(),OTR:new Set()};
-  // Mismo criterio que "Por pagar": Pedido = el producto esta RESERVADO
-  // hoy (ya tiene dueno), Stock = todo lo demas. Es el estado de HOY, no
-  // el de ese momento del mes -- misma aproximacion que ya se usaba abajo.
+  // Pedido = el producto ESTUVO vinculado alguna vez a una reserva tipo
+  // PEDIDO, sin importar si ya se vendio despues (el estado actual ya no
+  // sirve para esto: un pedido vendido pasa a VENDIDO y se perdia). No usa
+  // reservasCache porque puede estar vacio si nunca visitaste el tab
+  // Reservas en esta sesion -- consulta directa y liviana, solo 2 columnas.
+  const{data:pedidoRows}=await db.from('reservas').select('codigo_producto').eq('tipo','PEDIDO').not('codigo_producto','is',null);
+  const pedidoCods=new Set((pedidoRows||[]).map(r=>r.codigo_producto));
   const acumTipo={STOCK:[0,0],PEDIDO:[0,0]};
   const vistosTipo={STOCK:new Set(),PEDIDO:new Set()};
   movsMes.forEach(f=>{
@@ -4589,7 +4593,7 @@ async function updateStats(mes='',vendidosMes=[],vendidosDespues=[]){
     const k=!p?'OTR':esZap(p)?'ZAP':esRopa(p)?'ROPA':esAcc(p)?'ACC':'OTR';
     acum[k][1]+=parseFloat(f.egreso_soles||0);
     if(f.referencia_id) vistos[k].add(f.referencia_id);   // uds = productos distintos
-    const kt=p?.estado==='RESERVADO'?'PEDIDO':'STOCK';
+    const kt=pedidoCods.has(f.referencia_id)?'PEDIDO':'STOCK';
     acumTipo[kt][1]+=parseFloat(f.egreso_soles||0);
     if(f.referencia_id) vistosTipo[kt].add(f.referencia_id);
   });
