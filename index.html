@@ -1451,6 +1451,20 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
           <input type="date" id="rv-fecha">
         </div>
 
+        <!-- Canal -->
+        <div class="field">
+          <label>Canal</label>
+          <div class="combo-wrap">
+            <input type="text" id="rv-canal" placeholder="Canal…" autocomplete="off" readonly
+              oninput="comboFilter('rv-canal','cl-rv-canal')"
+              onfocus="comboOpen('rv-canal','cl-rv-canal')"
+              onblur="comboBlurStrict('rv-canal','cl-rv-canal')"
+              onkeydown="comboKey(event,'rv-canal','cl-rv-canal')">
+            <span class="combo-arrow">▼</span>
+            <div class="combo-list" id="cl-rv-canal"></div>
+          </div>
+        </div>
+
         <!-- Notas -->
         <div class="field span2">
           <label>Notas <span style="font-size:9px;font-weight:400;opacity:.6">(opcional)</span></label>
@@ -3908,7 +3922,7 @@ async function confirmarCompletarReserva(){
     const{error:eV}=await db.from('ventas').insert({
       codigo_venta:cv,codigo_producto:r.codigo_producto,
       precio_venta_soles:precioFinal,
-      canal:'PRESENCIAL',
+      canal:r.canal||'PRESENCIAL',
       comprador:r.nombre_cliente||null,
       id_cliente:r.id_cliente||null,
       ganancia:g,rentabilidad:rt,fecha,
@@ -4283,6 +4297,7 @@ function fillDataLists(){
   comboSetData('cl-cp-moneda', ['💵 USD','🪙 SOLES']);
   comboSetData('cl-cp-oc-tipo', ['✈️ IMPORTACIÓN','🏪 LOCAL']);
   comboSetData('cl-vt-canal', ['📸 INSTAGRAM','💬 WHATSAPP','👥 FACEBOOK','🏪 PRESENCIAL','🔹 OTRO']);
+  comboSetData('cl-rv-canal', ['📸 INSTAGRAM','💬 WHATSAPP','👥 FACEBOOK','🏪 PRESENCIAL','🔹 OTRO']);
   comboSetData('cl-vt-medio-pago', ['💵 EFECTIVO','🏦 TRANSFERENCIA','💳 TARJETA','💜 YAPE','💙 PLIN']);
   comboSetData('cl-pg-cat', ['🏪 OPERATIVO','👤 PERSONAL','📦 IMPORTACIÓN','📣 MARKETING']);
   comboSetData('cl-inv-a-tipo', ['🏠 HIPOTECA','🚗 VEHICULO','🖥 EQUIPO','📂 OTRO']);
@@ -5562,6 +5577,7 @@ async function registrarReserva(){
   const nombreCliente=cl?[cl.nombre,cl.apellido].filter(Boolean).join(' ')||null:null;
   const adelanto=parseFloat(document.getElementById('rv-adelanto').value)||0;
   const notas=document.getElementById('rv-notas').value.trim()||null;
+  const canal=noEmoji(document.getElementById('rv-canal').value)||null;
   const btn=document.getElementById('btn-reserva');setLoading(btn,true);
   try{
     const codigoReserva=await genCodigoReserva();
@@ -5571,7 +5587,7 @@ async function registrarReserva(){
       id_cliente:clId||null,nombre_cliente:nombreCliente,
       codigo_producto:codProd,
       marca,modelo,colorway,talla,
-      precio_acordado:precio,fecha,notas
+      precio_acordado:precio,fecha,notas,canal
     });
     if(error){console.error('reservas insert error',error);throw error;}
     if(codProd){
@@ -5595,7 +5611,7 @@ async function registrarReserva(){
       if(fcErr)console.warn('flujo_caja reserva insert error',fcErr);
     }
     toast(`✓ ${codigoReserva} — Reserva registrada`,'ok');
-    ['rv-precio','rv-adelanto','rv-notas','rv-marca','rv-modelo','rv-colorway'].forEach(id=>{
+    ['rv-precio','rv-adelanto','rv-notas','rv-marca','rv-modelo','rv-colorway','rv-canal'].forEach(id=>{
       const el=document.getElementById(id);if(el)el.value='';
     });
     const elRvP=document.getElementById('rv-producto');if(elRvP)elRvP.value='';
