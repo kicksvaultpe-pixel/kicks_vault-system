@@ -2027,7 +2027,7 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
       <div class="sc-grid g2" style="row-gap:10px;margin-top:8px">
         <span class="sg-mc">N° Ventas</span>
         <span class="sg-mn accent" id="vt-n">—</span>
-        <span class="sg-mc">ROI Prom.</span>
+        <span class="sg-mc">ROI Pond.</span>
         <span class="sg-mn green" id="vt-margen">—</span>
       </div>
     </div>
@@ -2581,9 +2581,9 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
       <div class="sim-trend" id="an-kpi-ticket-trend">—</div>
     </div>
     <div class="ind-card">
-      <div class="sim-chip"><div class="sim-chip-dot dot-accent"></div>ROI Promedio</div>
+      <div class="sim-chip"><div class="sim-chip-dot dot-accent"></div>ROI Ponderado</div>
       <div class="sim-num" id="an-kpi-roi-num">—</div>
-      <div class="sim-lbl">Rentabilidad por venta</div>
+      <div class="sim-lbl">Ganancia / costo total</div>
       <div class="sim-trend" id="an-kpi-roi-trend">—</div>
     </div>
   </div>
@@ -6936,8 +6936,11 @@ function updateVentasStats(rows,pagos,mes){
   const n=rows.length;
   const rev=rows.reduce((s,v)=>s+parseFloat(v.precio_venta_soles||0),0);
   const gan=rows.reduce((s,v)=>s+parseFloat(v.ganancia||0),0);
-  const avgRoi=n>0?rows.reduce((s,v)=>s+parseFloat(v.rentabilidad||0),0)/n:0;
   const costo=rev-gan;
+  // Ponderado por costo (ganancia total / costo total), no promedio simple
+  // de cada ROI% -- asi una venta chica con % alto ya no infla el numero
+  // por encima de lo que en verdad rindio el capital invertido.
+  const roiPond=costo>0?gan/costo:0;
   // Los gastos se guardan en negativo. Se niega el monto en vez de usar abs()
   // para que un ajuste positivo (p.ej. un trade que devuelve plata) RESTE del
   // total en lugar de sumarse como si fuera un gasto mas.
@@ -6949,7 +6952,7 @@ function updateVentasStats(rows,pagos,mes){
   s('vt-rev',fmt(rev));
   s('vt-sub-mes',lbl);
   s('vt-gan',fmt(gan));
-  s('vt-margen',(avgRoi*100).toFixed(0)+'% ROI promedio');
+  s('vt-margen',(roiPond*100).toFixed(0)+'% ROI ponderado');
   s('vt-costo',fmt(costo));
   s('vt-pagos-stat',fmt(pagosTotal));
   s('vt-n',n+' ud'+(n!==1?'s':''));
@@ -7408,8 +7411,11 @@ function anRenderKPIs(){
   const gastoAct=-anSumar(pAct,p=>p.monto_soles), gastoAnt=-anSumar(pAnt,p=>p.monto_soles);
   const utilAct=ganAct-gastoAct, utilAnt=ganAnt-gastoAnt;
   const ticketAct=vAct.length?ventasAct/vAct.length:0, ticketAnt=vAnt.length?ventasAnt/vAnt.length:0;
-  const roiAct=vAct.length?anSumar(vAct,v=>v.rentabilidad)/vAct.length:0;
-  const roiAnt=vAnt.length?anSumar(vAnt,v=>v.rentabilidad)/vAnt.length:0;
+  // Ponderado por costo (ganancia/costo total), no promedio simple de cada
+  // ROI% -- mismo criterio que updateVentasStats en Ventas.
+  const costoAct=ventasAct-ganAct, costoAnt=ventasAnt-ganAnt;
+  const roiAct=costoAct>0?ganAct/costoAct:0;
+  const roiAnt=costoAnt>0?ganAnt/costoAnt:0;
 
   anSetKPI('an-kpi-ventas',fmt(ventasAct),ventasAct,ventasAnt);
   anSetKPI('an-kpi-utilidad',fmt(utilAct),utilAct,utilAnt);
