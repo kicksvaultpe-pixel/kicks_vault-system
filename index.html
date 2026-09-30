@@ -3910,6 +3910,14 @@ async function confirmarCompletarReserva(){
   if(!r||!r.codigo_producto)return;
   const precioFinal=parseFloat(document.getElementById('mcrv-precio').value)||0;
   if(!precioFinal){toast('Ingresa el precio final de venta','warn');return;}
+  const prodChk=inventarioCache.find(p=>p.codigo_producto===r.codigo_producto);
+  // Mismo resguardo que registrarVenta(): completar la reserva tambien crea
+  // una fila en ventas, mismo riesgo de ganancia mal calculada si el credito
+  // sigue pendiente.
+  if(prodChk&&prodChk.tipo_pago==='CREDITO'&&prodChk.pago_estado==='PENDIENTE'){
+    toast('⚠ Este producto tiene el crédito pendiente de pago — paga el crédito antes de completar la venta, o la ganancia va a quedar mal calculada','err');
+    return;
+  }
   const btn=document.getElementById('btn-mcrv-confirm');
   setLoading(btn,true);
   try{
@@ -5514,6 +5522,15 @@ async function registrarVenta(){
   const precio=parseFloat(document.getElementById('vt-precio').value)||0;
   if(!precio){toast('Ingresa el precio de venta','warn');return;}
   const prod=vtProdSelected;
+  // Vender con el credito todavia pendiente deja la ganancia mal calculada:
+  // pagar_credito() sobreescribe precio_compra_soles/precio_final con el
+  // monto REAL pagado (puede diferir del estimado al comprar), pero la venta
+  // ya quedo grabada con el costo viejo. Paso real con P-01020, S/ 265.20 de
+  // diferencia. Paga el credito primero, o la ganancia no va a cuadrar.
+  if(prod.tipo_pago==='CREDITO'&&prod.pago_estado==='PENDIENTE'){
+    toast('⚠ Este producto tiene el crédito pendiente de pago — paga el crédito antes de venderlo, o la ganancia va a quedar mal calculada','err');
+    return;
+  }
   const btn=document.getElementById('btn-venta');setLoading(btn,true);
   try{
     const cv=await genCodigo('venta');
