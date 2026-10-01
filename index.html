@@ -2042,6 +2042,10 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
         <span class="sg-mn accent" id="vt-n">—</span>
         <span class="sg-mc">ROI Bruto</span>
         <span class="sg-mn green" id="vt-margen">—</span>
+        <span class="sg-mc">ROI Neto</span>
+        <span class="sg-mn" id="vt-roi-neto-side">—</span>
+        <span class="sg-mc">Margen Neto</span>
+        <span class="sg-mn" id="vt-margen-neto-side">—</span>
       </div>
     </div>
   </div>
@@ -6988,6 +6992,8 @@ function updateVentasStats(rows,pagos,mes){
   setPct('vt-roi-bruto',roiBruto);
   setPct('vt-roi-neto',roiNeto);
   setPct('vt-margen-neto',margenNeto);
+  setPct('vt-roi-neto-side',roiNeto);
+  setPct('vt-margen-neto-side',margenNeto);
 }
 
 function renderPagos(rows){
