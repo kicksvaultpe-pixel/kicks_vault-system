@@ -2004,9 +2004,9 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
     <div class="stat-card sc-resultado">
       <div class="sc-chip">Resultado</div>
       <div class="sc-grid g2">
-        <span class="sg-mc">Precio de Venta</span>
+        <span class="sg-mc">Ventas Totales</span>
         <span class="sg-mn accent" id="vt-rev">—</span>
-        <span class="sg-mc">− Precio Compra</span>
+        <span class="sg-mc">− Costo Total</span>
         <span class="sg-mn" id="vt-costo">—</span>
       </div>
       <div class="sg-divider"></div>
@@ -2021,13 +2021,22 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
         <span class="sg-mc-tot">Utilidad Neta</span>
         <span class="sg-mn-tot" id="vt-utilidad">—</span>
       </div>
+      <div class="sg-divider"></div>
+      <div class="sc-grid g2">
+        <span class="sg-mc" title="Ganancia Bruta / Costo Total — sin contar gastos del negocio">ROI Bruto</span>
+        <span class="sg-mn" id="vt-roi-bruto">—</span>
+        <span class="sg-mc" title="Utilidad Neta / Costo Total — ya con gastos del negocio restados">ROI Neto</span>
+        <span class="sg-mn" id="vt-roi-neto">—</span>
+        <span class="sg-mc" title="Utilidad Neta / Ventas Totales">Margen Neto</span>
+        <span class="sg-mn" id="vt-margen-neto">—</span>
+      </div>
     </div>
     <div class="stat-card sc-stats-vt">
       <div class="sc-chip" id="vt-sub-mes">Este Mes</div>
       <div class="sc-grid g2" style="row-gap:10px;margin-top:8px">
         <span class="sg-mc">N° Ventas</span>
         <span class="sg-mn accent" id="vt-n">—</span>
-        <span class="sg-mc">ROI Pond.</span>
+        <span class="sg-mc">ROI Bruto</span>
         <span class="sg-mn green" id="vt-margen">—</span>
       </div>
     </div>
@@ -2581,7 +2590,7 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
       <div class="sim-trend" id="an-kpi-ticket-trend">—</div>
     </div>
     <div class="ind-card">
-      <div class="sim-chip"><div class="sim-chip-dot dot-accent"></div>ROI Ponderado</div>
+      <div class="sim-chip"><div class="sim-chip-dot dot-accent"></div>ROI Bruto</div>
       <div class="sim-num" id="an-kpi-roi-num">—</div>
       <div class="sim-lbl">Ganancia / costo total</div>
       <div class="sim-trend" id="an-kpi-roi-trend">—</div>
@@ -6937,22 +6946,27 @@ function updateVentasStats(rows,pagos,mes){
   const rev=rows.reduce((s,v)=>s+parseFloat(v.precio_venta_soles||0),0);
   const gan=rows.reduce((s,v)=>s+parseFloat(v.ganancia||0),0);
   const costo=rev-gan;
-  // Ponderado por costo (ganancia total / costo total), no promedio simple
-  // de cada ROI% -- asi una venta chica con % alto ya no infla el numero
-  // por encima de lo que en verdad rindio el capital invertido.
-  const roiPond=costo>0?gan/costo:0;
+  // ROI Bruto: ponderado por costo (ganancia total / costo total), no promedio
+  // simple de cada ROI% -- asi una venta chica con % alto ya no infla el
+  // numero por encima de lo que en verdad rindio el capital invertido. No
+  // descuenta gastos del negocio, por eso es "bruto".
+  const roiBruto=costo>0?gan/costo:0;
   // Los gastos se guardan en negativo. Se niega el monto en vez de usar abs()
   // para que un ajuste positivo (p.ej. un trade que devuelve plata) RESTE del
   // total en lugar de sumarse como si fuera un gasto mas.
   const pagosTotal=(pagos||[]).reduce((s,p)=>s-parseFloat(p.monto_soles||0),0);
   const utilidad=gan-pagosTotal;
+  // ROI Neto y Margen Neto: mismas razones que el ROI Bruto, pero sobre la
+  // Utilidad Neta (ya con gastos del negocio restados).
+  const roiNeto=costo>0?utilidad/costo:0;
+  const margenNeto=rev>0?utilidad/rev:0;
   const lbl=mes?new Date(mes+'-15').toLocaleDateString('es-PE',{month:'long',year:'numeric'}):'Historia';
   const s=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val;};
   // Fila 1
   s('vt-rev',fmt(rev));
   s('vt-sub-mes',lbl);
   s('vt-gan',fmt(gan));
-  s('vt-margen',(roiPond*100).toFixed(0)+'% ROI ponderado');
+  s('vt-margen',(roiBruto*100).toFixed(0)+'% ROI Bruto');
   s('vt-costo',fmt(costo));
   s('vt-pagos-stat',fmt(pagosTotal));
   s('vt-n',n+' ud'+(n!==1?'s':''));
@@ -6961,6 +6975,15 @@ function updateVentasStats(rows,pagos,mes){
     utilEl.textContent=(utilidad>=0?'+ ':'-')+fmt(Math.abs(utilidad));
     utilEl.className='sg-mn-tot '+(utilidad>=0?'green':'red');
   }
+  const setPct=(id,val)=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    el.textContent=(val*100).toFixed(1)+'%';
+    el.className='sg-mn '+(val>=0?'green':'red');
+  };
+  setPct('vt-roi-bruto',roiBruto);
+  setPct('vt-roi-neto',roiNeto);
+  setPct('vt-margen-neto',margenNeto);
 }
 
 function renderPagos(rows){
@@ -7075,7 +7098,7 @@ document.addEventListener('keydown',function(e){
 
 // ── EXPORT CSV ──
 function exportInventarioCSV(){
-  const h=['Fecha','Código','Marca','Modelo','Colorway','Talla','Categoría','Estado','P.Compra S/.','Costos S/.','Costo Total S/.','P.Venta Sug.','Margen %','Tipo Pago'];
+  const h=['Fecha','Código','Marca','Modelo','Colorway','Talla','Categoría','Estado','P.Compra S/.','Costos S/.','Costo Total S/.','P.Venta Sug.','ROI Estimado %','Tipo Pago'];
   const r=inventarioCache.map(p=>{
     const pF=parseFloat(p.precio_final||p.precio_compra_soles||0);
     const pV=parseFloat(p.precio_venta_sugerido||0);
