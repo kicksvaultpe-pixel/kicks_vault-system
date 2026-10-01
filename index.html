@@ -616,6 +616,12 @@ input[list] { cursor: text; }
 .an-toggle{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:2px}
 .an-toggle-btn{border:none;background:none;padding:4px 10px;font-size:10px;font-weight:700;letter-spacing:.3px;color:var(--muted2);cursor:pointer;border-radius:6px;font-family:'Archivo',sans-serif}
 .an-toggle-btn.active{background:var(--card);color:var(--accent);box-shadow:var(--shadow)}
+.an-filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+.an-filter-btn{border:1px solid var(--border2);background:var(--surface);color:var(--muted2);font-family:'Archivo',sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.2px;padding:5px 12px;border-radius:20px;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+.an-filter-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+@media (hover:hover) and (pointer:fine){.an-filter-btn:not(.active):hover{border-color:var(--accent);color:var(--text)}}
+.an-hist-bar{transition:opacity .15s}
+.an-hist-bar:hover{opacity:.85}
 .an-legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px}
 .an-legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted2);font-weight:600;cursor:pointer;user-select:none;transition:opacity .15s}
 .an-legend-item.off{opacity:.35}
@@ -2732,16 +2738,20 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
     <b id="an-capital-total" style="font-size:16px">—</b>
   </div>
 
-  <div class="an-row2">
-    <div class="ind-card">
-      <div class="an-panel-title">Capital Inmovilizado — Por Categoría</div>
-      <div id="an-capital-categoria"></div>
+  <div class="ind-card" style="margin-bottom:20px">
+    <div class="an-panel-title">Capital Inmovilizado por Antigüedad <span class="an-panel-sub">— todo tu stock, no solo el 90+</span></div>
+    <div class="an-filter-row" id="an-capital-filtro"></div>
+    <div class="an-legend">
+      <div class="an-legend-item" style="cursor:default"><span class="an-legend-dot" style="background:var(--accent)"></span>Aún no es Capital Inmovilizado (&lt; 90 días)</div>
+      <div class="an-legend-item" style="cursor:default"><span class="an-legend-dot" style="background:var(--red)"></span>Ya es Capital Inmovilizado (90+ días)</div>
     </div>
-    <div class="ind-card">
-      <div class="an-panel-title">Capital Inmovilizado — Por Marca</div>
-      <div class="an-note">Rotación estimada = capital parado de esa marca ÷ tu ritmo real de venta de esa marca en los últimos 12 meses. Es una proyección si todo sigue igual, no una promesa de venta.</div>
-      <div id="an-capital-marca"></div>
-    </div>
+    <div class="an-linechart" id="an-chart-capital" style="height:220px"></div>
+  </div>
+
+  <div class="ind-card" style="margin-bottom:20px">
+    <div class="an-panel-title">Capital Inmovilizado — Por Marca</div>
+    <div class="an-note">Rotación estimada = capital parado de esa marca ÷ tu ritmo real de venta de esa marca en los últimos 12 meses. Es una proyección si todo sigue igual, no una promesa de venta.</div>
+    <div id="an-capital-marca"></div>
   </div>
 
   <div class="ind-card" style="margin-bottom:20px">
@@ -7502,6 +7512,7 @@ async function loadAnalisis(){
   anRenderStockParado();
   anRenderDuplicados();
   anRenderCapitalInmovilizado();
+  anRenderCapitalHistograma();
   anRenderClientes();
   anRenderTopClientes();
   anRenderReservas();
@@ -7998,6 +8009,80 @@ function anRenderDuplicados(){
 // Estado compartido con anRenderUrgente() -- evita recalcular lo mismo dos veces.
 let _anCapitalTotal=0, _anCapitalMarcas=[];
 
+// Histograma por antiguedad: a diferencia de anRenderCapitalInmovilizado
+// (que solo mira 90+ dias), este usa TODO el stock -- por eso se calcula
+// aparte en vez de reusar la variable "stock" de ahi abajo.
+let anCapitalFiltro='TODAS';
+function anSetCapitalFiltro(val){
+  anCapitalFiltro=val;
+  anRenderCapitalHistograma();
+}
+function anRenderCapitalHistograma(){
+  const filtroEl=document.getElementById('an-capital-filtro');
+  if(filtroEl){
+    const opciones=[['TODAS','Todas'],...AN_CATEGORIAS.map(c=>[c,AN_CAT_NOMBRE[c]])];
+    filtroEl.innerHTML=opciones.map(([val,nombre])=>
+      `<button type="button" class="an-filter-btn${anCapitalFiltro===val?' active':''}" onclick="anSetCapitalFiltro('${val}')">${nombre}</button>`
+    ).join('');
+  }
+
+  const hoy=new Date();
+  const items=anInvVivo.filter(p=>p.fecha_compra&&(anCapitalFiltro==='TODAS'||(p.categoria||'').toUpperCase()===anCapitalFiltro))
+    .map(p=>({...p,dias:Math.floor((hoy-new Date(p.fecha_compra))/86400000)}));
+
+  const BUCKETS=[
+    {label:'< 90',dias:'0-90 días',critico:false},
+    {label:'90-180',dias:'90-180 días',critico:true},
+    {label:'180-365',dias:'180-365 días',critico:true},
+    {label:'365+',dias:'365+ días',critico:true},
+  ];
+  BUCKETS.forEach(b=>{b.n=0;b.capital=0;});
+  items.forEach(p=>{
+    const d=p.dias;
+    const b=d<90?BUCKETS[0]:d<180?BUCKETS[1]:d<365?BUCKETS[2]:BUCKETS[3];
+    b.n++; b.capital+=parseFloat(p.precio_final||0);
+  });
+
+  const total=BUCKETS.reduce((s,b)=>s+b.capital,0);
+  const el=document.getElementById('an-chart-capital');
+  if(!el)return;
+  if(!total){
+    el.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--muted2);font-size:12px">Sin stock en este filtro</div>';
+    return;
+  }
+
+  const W=Math.max(300,el.clientWidth||600),H=220;
+  const padL=50,padR=12,padT=30,padB=34;
+  const chartW=W-padL-padR,chartH=H-padT-padB;
+  const n=BUCKETS.length,bandW=chartW/n,barW=Math.min(60,bandW*0.5);
+  const peak=BUCKETS.reduce((a,b)=>b.capital>a.capital?b:a);
+  const maxVal=Math.max(1000,Math.ceil(peak.capital/10000)*10000);
+  const yAt=v=>padT+chartH-(v/maxVal)*chartH;
+  const xAt=i=>padL+bandW*i+bandW/2;
+  const step=maxVal/4;
+
+  let svg=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="width:100%;height:${H}px;display:block">`;
+  [0,1,2,3,4].forEach(k=>{
+    const v=Math.round(step*k),y=yAt(v);
+    svg+=`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="var(--border)" stroke-width="1"/>`;
+    svg+=`<text x="${padL-8}" y="${y+3}" text-anchor="end" font-size="9" fill="var(--muted2)">${v===0?'0':(v/1000)+'k'}</text>`;
+  });
+  const threshX=padL+bandW*1;
+  svg+=`<line x1="${threshX}" y1="${padT-8}" x2="${threshX}" y2="${padT+chartH}" stroke="var(--red)" stroke-width="1.5" stroke-dasharray="4,4" opacity=".6"/>`;
+  svg+=`<text x="${threshX+5}" y="${padT-12}" font-size="9" font-weight="700" fill="var(--red)">Capital Inmovilizado →</text>`;
+
+  const peakIdx=BUCKETS.indexOf(peak);
+  BUCKETS.forEach((b,i)=>{
+    const x=xAt(i)-barW/2,y=yAt(b.capital),h=padT+chartH-y;
+    const color=b.critico?'var(--red)':'var(--accent)';
+    svg+=`<rect class="an-hist-bar" x="${x}" y="${y}" width="${barW}" height="${Math.max(h,1)}" rx="4" fill="${color}"><title>${b.dias}: ${fmt(b.capital)} · ${b.n} productos · ${(b.capital/total*100).toFixed(1)}%</title></rect>`;
+    if(i===peakIdx&&b.capital>0) svg+=`<text x="${xAt(i)}" y="${y-8}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--text)">${fmt(b.capital)}</text>`;
+    svg+=`<text x="${xAt(i)}" y="${padT+chartH+16}" text-anchor="middle" font-size="9.5" fill="${i===peakIdx?'var(--text)':'var(--muted2)'}" font-weight="${i===peakIdx?'700':'400'}">${b.label}</text>`;
+  });
+  svg+=`</svg>`;
+  el.innerHTML=svg;
+}
+
 function anRenderCapitalInmovilizado(){
   const hoy=new Date();
   const stock=anInvVivo.map(p=>{
@@ -8009,13 +8094,6 @@ function anRenderCapitalInmovilizado(){
   _anCapitalTotal=anSumar(stock,p=>p.precio_final);
   const capEl=document.getElementById('an-capital-total');
   if(capEl)capEl.textContent=fmt(_anCapitalTotal);
-
-  const porCat={};
-  stock.forEach(p=>{
-    const k=p.categoria||'OTROS';
-    porCat[k]=(porCat[k]||0)+parseFloat(p.precio_final||0);
-  });
-  anRenderRanking('an-capital-categoria', Object.entries(porCat).sort((a,b)=>b[1]-a[1]), v=>fmt(v));
 
   const porMarca={};
   stock.forEach(p=>{
