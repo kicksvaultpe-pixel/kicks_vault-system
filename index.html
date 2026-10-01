@@ -8072,7 +8072,7 @@ function anRenderCapitalHistograma(){
   }
 
   const W=Math.max(300,el.clientWidth||600),H=220;
-  const padL=50,padR=12,padT=30,padB=34;
+  const padL=50,padR=12,padT=40,padB=34;
   const chartW=W-padL-padR,chartH=H-padT-padB;
   const n=BUCKETS.length,bandW=chartW/n,barW=Math.min(60,bandW*0.5);
   const peak=BUCKETS.reduce((a,b)=>b.capital>a.capital?b:a);
@@ -8096,7 +8096,9 @@ function anRenderCapitalHistograma(){
     const x=xAt(i)-barW/2,y=yAt(b.capital),h=padT+chartH-y;
     const color=b.critico?'var(--red)':'var(--accent)';
     svg+=`<rect class="an-hist-bar" x="${x}" y="${y}" width="${barW}" height="${Math.max(h,1)}" rx="4" fill="${color}"><title>${b.dias}: ${fmt(b.capital)} · ${b.n} productos · ${(b.capital/total*100).toFixed(1)}%</title></rect>`;
-    if(i===peakIdx&&b.capital>0) svg+=`<text x="${xAt(i)}" y="${y-8}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--text)">${fmt(b.capital)}</text>`;
+    // Monto en cada columna, no solo en la mas alta -- el pico se destaca en
+    // negrita/mas grande, el resto queda legible pero mas discreto.
+    svg+=`<text x="${xAt(i)}" y="${Math.max(y-8,12)}" text-anchor="middle" font-size="${i===peakIdx?11:9.5}" font-weight="${i===peakIdx?'700':'600'}" fill="${i===peakIdx?'var(--text)':'var(--muted2)'}">${fmt(b.capital)}</text>`;
     svg+=`<text x="${xAt(i)}" y="${padT+chartH+16}" text-anchor="middle" font-size="9.5" fill="${i===peakIdx?'var(--text)':'var(--muted2)'}" font-weight="${i===peakIdx?'700':'400'}">${b.label}</text>`;
   });
   svg+=`</svg>`;
