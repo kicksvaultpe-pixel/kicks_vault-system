@@ -88,6 +88,7 @@ nav{position:sticky;top:0;z-index:200;background:var(--card);border-bottom:1px s
 .page-title .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
 .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:16px;box-shadow:var(--shadow);transition:box-shadow .2s}
 .card-label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:16px;display:flex;align-items:center;gap:8px;padding-left:10px;border-left:3px solid var(--accent)}.card-label::after{content:"";flex:1;height:1px;background:var(--border);opacity:.5}
+.card-label-major{font-size:13px;color:var(--text);border-left-width:4px;margin-top:4px}
 
 /* TIPO SELECTOR */
 .tipo-selector{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:24px;padding:6px;background:var(--surface);border-radius:12px;border:1px solid var(--border)}
@@ -451,8 +452,10 @@ input[list] { cursor: text; }
 .dot-accent{background:var(--accent);box-shadow:0 0 5px var(--accent)}
 .dot-red{background:var(--red)}
 .dot-purple{background:var(--purple)}
+.dot-orange{background:var(--orange)}
 .sim-num{font-family:"Archivo Black";font-size:15px;line-height:1;letter-spacing:-1px;margin-bottom:3px;font-variant-numeric:tabular-nums}
 .sim-lbl{font-size:11px;color:var(--muted2);letter-spacing:.2px}
+.sim-desc{font-size:9px;color:var(--muted2);opacity:.75;letter-spacing:.2px;margin-top:2px;line-height:1.3}
 .sim-trend{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;margin-top:6px;padding:2px 8px;border-radius:20px}
 .trend-up{background:rgba(22,163,74,.1);color:var(--green)}
 .trend-down{background:rgba(220,38,38,.1);color:var(--red)}
@@ -587,6 +590,18 @@ input[list] { cursor: text; }
 .an-kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
 @media(max-width:1100px){.an-kpi-row{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.an-kpi-row{grid-template-columns:1fr}}
+/* El dato principal del tab no puede pesar menos que un stat-val secundario */
+.an-kpi-row .sim-num{font-size:19px}
+.an-note{font-size:10.5px;color:var(--muted2);line-height:1.4;margin:-4px 0 12px}
+.an-urgente-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-bottom:20px}
+.an-urgente-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;border-left-width:4px;border-left-style:solid}
+.an-urgente-card.tono-red{border-left-color:var(--red)}
+.an-urgente-card.tono-yellow{border-left-color:var(--yellow)}
+.an-urgente-card.tono-green{border-left-color:var(--green)}
+.an-urgente-titulo{font-weight:700;font-size:13px;color:var(--text);margin-bottom:4px}
+.an-urgente-texto{font-size:11.5px;color:var(--muted2);line-height:1.4;margin-bottom:8px}
+.an-urgente-accion{font-size:11px;color:var(--text);font-weight:600;line-height:1.4}
+.an-urgente-ok{grid-column:1/-1;padding:18px;text-align:center;color:var(--green);font-size:13px;font-weight:600;border:1px dashed var(--border2);border-radius:12px}
 .an-row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
 @media(max-width:900px){.an-row2{grid-template-columns:1fr}}
 .an-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px}
@@ -615,7 +630,7 @@ input[list] { cursor: text; }
 .an-rank-val{font-size:11px;font-weight:700;color:var(--muted2);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .an-stock-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
 .an-stock-cap{font-size:11px;color:var(--muted2)}
-.an-stock-cap b{color:var(--red);font-family:'Archivo Black'}
+.an-stock-cap b{color:var(--text);font-family:'Archivo Black'}
 /* Stock Parado y Duplicados: table-layout:fixed las hace encajar exactas
    en desktop (por eso overflow-x:hidden, sin scrollbar de sobra). En
    celular esas mismas columnas fijas en % se aprietan hasta ilegibles --
@@ -2597,6 +2612,12 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
     <div class="page-sub">Cómo va el negocio en el tiempo, últimos 12 meses</div>
   </div>
 
+  <!-- 0. Lo más urgente -->
+  <div class="card-label card-label-major">Lo Más Urgente Este Mes</div>
+  <div class="an-urgente-row" id="an-urgente-row">
+    <div class="loading-row" style="padding:20px;text-align:center"><div class="spinner"></div></div>
+  </div>
+
   <!-- 1. Resumen del mes -->
   <div class="card-label">Resumen del Mes</div>
   <div class="an-kpi-row">
@@ -2609,7 +2630,7 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
     <div class="ind-card">
       <div class="sim-chip"><div class="sim-chip-dot dot-green"></div>Utilidad Neta</div>
       <div class="sim-num" style="color:var(--green)" id="an-kpi-utilidad-num">—</div>
-      <div class="sim-lbl">Ganancia − gastos</div>
+      <div class="sim-lbl">Ganancia Bruta − Gastos del Negocio</div>
       <div class="sim-trend" id="an-kpi-utilidad-trend">—</div>
     </div>
     <div class="ind-card">
@@ -2620,25 +2641,41 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
     </div>
     <div class="ind-card">
       <div class="sim-chip"><div class="sim-chip-dot dot-accent"></div>ROI Bruto</div>
-      <div class="sim-num" id="an-kpi-roi-num">—</div>
-      <div class="sim-lbl">Ganancia Bruta / Costo Total</div>
+      <div class="sim-num" style="color:var(--accent)" id="an-kpi-roi-num">—</div>
+      <div class="sim-lbl">Por cada sol invertido en stock, esto es ganancia antes de gastos del negocio</div>
+      <div class="sim-desc">Ganancia Bruta ÷ Costo Total</div>
       <div class="sim-trend" id="an-kpi-roi-trend">—</div>
     </div>
     <div class="ind-card">
-      <div class="sim-chip"><div class="sim-chip-dot dot-accent"></div>ROI Neto</div>
-      <div class="sim-num" id="an-kpi-roi-neto-num">—</div>
-      <div class="sim-lbl">Utilidad Neta / Costo Total</div>
+      <div class="sim-chip"><div class="sim-chip-dot dot-orange"></div>ROI Neto</div>
+      <div class="sim-num" style="color:var(--orange)" id="an-kpi-roi-neto-num">—</div>
+      <div class="sim-lbl">Por cada sol invertido en stock, esto queda después de gastos del negocio</div>
+      <div class="sim-desc">Utilidad Neta ÷ Costo Total</div>
       <div class="sim-trend" id="an-kpi-roi-neto-trend">—</div>
     </div>
     <div class="ind-card">
       <div class="sim-chip"><div class="sim-chip-dot dot-green"></div>Margen Neto</div>
-      <div class="sim-num" id="an-kpi-margen-num">—</div>
-      <div class="sim-lbl">Utilidad Neta / Ventas Totales</div>
+      <div class="sim-num" style="color:var(--green)" id="an-kpi-margen-num">—</div>
+      <div class="sim-lbl">De cada sol que vendes, esto termina siendo ganancia real</div>
+      <div class="sim-desc">Utilidad Neta ÷ Ventas Totales</div>
       <div class="sim-trend" id="an-kpi-margen-trend">—</div>
     </div>
   </div>
 
-  <!-- 2. Evolución en el tiempo -->
+  <!-- 2. Gastos del Negocio -->
+  <div class="card-label" style="margin-top:8px">Gastos del Negocio</div>
+  <div class="an-row2">
+    <div class="ind-card">
+      <div class="an-panel-title">Gastos por mes</div>
+      <div class="an-linechart" id="an-chart-gastos"></div>
+    </div>
+    <div class="ind-card">
+      <div class="an-panel-title">Gastos por Categoría</div>
+      <div id="an-gastos-categoria"></div>
+    </div>
+  </div>
+
+  <!-- 3. Evolución en el tiempo -->
   <div class="card-label" style="margin-top:8px">Evolución en el Tiempo — 12 Meses</div>
   <div class="an-row2">
     <div class="ind-card">
@@ -2650,7 +2687,7 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
       <div class="an-linechart" id="an-chart-ticket"></div>
     </div>
   </div>
-  <div class="an-row2">
+  <div class="an-row2" style="margin-bottom:20px">
     <div class="ind-card">
       <div class="an-panel-title">Utilidad neta por mes <span class="an-panel-sub">— rojo = mes en pérdida</span></div>
       <div class="an-linechart" id="an-chart-utilidad"></div>
@@ -2658,24 +2695,6 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
     <div class="ind-card">
       <div class="an-panel-title">Clientes nuevos por mes</div>
       <div class="an-linechart" id="an-chart-clientes"></div>
-    </div>
-  </div>
-  <div class="ind-card" style="margin-bottom:20px">
-    <div class="an-panel-title">Velocidad de Venta por Categoría <span class="an-panel-sub">— evolución mensual, menor es mejor</span></div>
-    <div class="an-legend" id="an-chart-velocidad-legend"></div>
-    <div class="an-linechart" id="an-chart-velocidad"></div>
-  </div>
-
-  <!-- 3. Gastos del Negocio -->
-  <div class="card-label" style="margin-top:8px">Gastos del Negocio</div>
-  <div class="an-row2">
-    <div class="ind-card">
-      <div class="an-panel-title">Gastos por mes</div>
-      <div class="an-linechart" id="an-chart-gastos"></div>
-    </div>
-    <div class="ind-card">
-      <div class="an-panel-title">Gastos por Categoría</div>
-      <div id="an-gastos-categoria"></div>
     </div>
   </div>
 
@@ -2693,12 +2712,12 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
   </div>
   <div class="an-row3">
     <div class="ind-card">
-      <div class="an-panel-title">Categorías Más Vendidas</div>
-      <div id="an-top-categorias"></div>
+      <div class="an-panel-title">Top Marcas <span class="an-panel-sub">— ventas y ROI Bruto</span></div>
+      <div id="an-top-marcas"></div>
     </div>
     <div class="ind-card">
-      <div class="an-panel-title">Top Marcas <span class="an-panel-sub">— ventas y ROI</span></div>
-      <div id="an-top-marcas"></div>
+      <div class="an-panel-title">Categorías Más Vendidas</div>
+      <div id="an-top-categorias"></div>
     </div>
     <div class="ind-card">
       <div class="an-panel-title">Canal Más Usado</div>
@@ -2707,11 +2726,35 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
   </div>
 
   <!-- 5. Qué no se vende -->
-  <div class="card-label" style="margin-top:8px">Qué No Se Vende</div>
+  <div class="card-label card-label-major" style="margin-top:8px">Qué No Se Vende</div>
+  <div class="an-stock-cap" style="font-size:13px;margin-bottom:14px">
+    Capital Inmovilizado <span class="an-panel-sub">— 90+ días sin venderse, la parte más antigua de tu stock parado</span>:
+    <b id="an-capital-total" style="font-size:16px">—</b>
+  </div>
+
+  <div class="an-row2">
+    <div class="ind-card">
+      <div class="an-panel-title">Capital Inmovilizado — Por Categoría</div>
+      <div id="an-capital-categoria"></div>
+    </div>
+    <div class="ind-card">
+      <div class="an-panel-title">Capital Inmovilizado — Por Marca</div>
+      <div class="an-note">Rotación estimada = capital parado de esa marca ÷ tu ritmo real de venta de esa marca en los últimos 12 meses. Es una proyección si todo sigue igual, no una promesa de venta.</div>
+      <div id="an-capital-marca"></div>
+    </div>
+  </div>
+
+  <div class="ind-card" style="margin-bottom:20px">
+    <div class="an-panel-title">Velocidad de Venta por Categoría <span class="an-panel-sub">— días entre la compra y la venta, menor es mejor</span></div>
+    <div class="an-note">Cuánto tiempo, en promedio, se queda un producto en tu inventario desde que lo compras hasta que lo vendes. Es el ritmo que alimenta la "rotación estimada" de arriba.</div>
+    <div class="an-legend" id="an-chart-velocidad-legend"></div>
+    <div class="an-linechart" id="an-chart-velocidad"></div>
+  </div>
+
   <div class="ind-card" style="margin-bottom:20px">
     <div class="an-stock-hd">
-      <div class="an-panel-title" style="margin-bottom:0">Stock Parado <span class="an-panel-sub">— disponible hace 45+ días</span></div>
-      <div class="an-stock-cap">Capital inmovilizado: <b id="an-stock-parado-capital">—</b></div>
+      <div class="an-panel-title" style="margin-bottom:0">Stock Parado <span class="an-panel-sub">— disponible hace 45+ días (incluye lo que todavía no llega a 90 días de Capital Inmovilizado)</span></div>
+      <div class="an-stock-cap">Capital en stock parado: <b id="an-stock-parado-capital">—</b></div>
     </div>
     <div class="table-wrap an-wide-table" style="overflow-x:hidden">
       <table style="table-layout:fixed;width:100%">
@@ -2729,6 +2772,7 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
         </tbody>
       </table>
     </div>
+    <div class="an-note" style="margin:10px 0 0">🟡 45-90 días · 🔴 90+ días (ya cuenta como Capital Inmovilizado, revisar con prioridad)</div>
   </div>
 
   <div class="ind-card" style="margin-bottom:20px">
@@ -2746,6 +2790,7 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
         <div class="an-stock-cap">Capital en duplicados: <b id="an-duplicados-capital">—</b></div>
       </div>
     </div>
+    <div class="an-note">Tener el mismo producto y talla repetido no es malo si se vende rápido. Si lleva tiempo sin moverse, es plata duplicada que quizá no necesitabas volver a comprar.</div>
     <div class="table-wrap an-wide-table" style="overflow-x:hidden">
       <table style="table-layout:fixed;width:100%">
         <thead><tr>
@@ -2763,26 +2808,10 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
     </div>
   </div>
 
-  <div class="ind-card" style="margin-bottom:20px">
-    <div class="an-stock-hd">
-      <div class="an-panel-title" style="margin-bottom:0">Capital Inmovilizado <span class="an-panel-sub">— 90+ días sin venderse</span></div>
-      <div class="an-stock-cap">Total parado: <b id="an-capital-total">—</b></div>
-    </div>
-    <div class="an-row2" style="margin-bottom:0;margin-top:12px">
-      <div>
-        <div class="an-panel-title" style="font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:1px">Por Categoría</div>
-        <div id="an-capital-categoria"></div>
-      </div>
-      <div>
-        <div class="an-panel-title" style="font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:1px">Por Marca <span class="an-panel-sub">— rojo = 12+ meses para liquidar al ritmo actual</span></div>
-        <div id="an-capital-marca"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 6. Reservas -->
-  <div class="card-label" style="margin-top:8px">Reservas</div>
-  <div class="stats-row an-rsv-stats" style="margin-bottom:20px">
+  <!-- 6. Clientes y Reservas -->
+  <div class="card-label" style="margin-top:8px">Clientes y Reservas</div>
+  <div class="an-panel-title" style="margin-bottom:10px">Reservas <span class="an-panel-sub">— compromisos en curso</span></div>
+  <div class="stats-row an-rsv-stats" style="margin-bottom:6px">
     <div class="stat-card">
       <div class="stat-label">Completadas</div>
       <div class="stat-val" id="an-rsv-completadas" style="color:var(--green)">—</div>
@@ -2800,9 +2829,9 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
       <div class="stat-val" id="an-rsv-tasa">—</div>
     </div>
   </div>
+  <div class="an-note" style="margin-bottom:16px">No incluye las reservas Activas — compara solo Completadas vs. Canceladas, las que ya se cerraron.</div>
 
-  <!-- 7. Clientes -->
-  <div class="card-label" style="margin-top:8px">Clientes</div>
+  <div class="an-panel-title" style="margin-bottom:10px">Clientes <span class="an-panel-sub">— relación ya concretada</span></div>
   <div class="stats-row stats3" style="margin-bottom:14px">
     <div class="stat-card">
       <div class="stat-label">Clientes Nuevos Este Mes</div>
@@ -2813,7 +2842,7 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
       <div class="stat-val" id="an-cl-activos">—</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">% que Repite Compra</div>
+      <div class="stat-label">% que Repite Compra (12m)</div>
       <div class="stat-val" id="an-cl-recurrencia" style="color:var(--green)">—</div>
     </div>
   </div>
@@ -7476,6 +7505,7 @@ async function loadAnalisis(){
   anRenderClientes();
   anRenderTopClientes();
   anRenderReservas();
+  anRenderUrgente(); // al final: usa _anCapitalMarcas/_anCapitalTotal ya calculados arriba
 }
 
 const anMesKey=fecha=>fecha.slice(0,7);
@@ -7558,16 +7588,25 @@ function anRenderKPIs(){
   anSetKPI('an-kpi-ventas',fmt(ventasAct),ventasAct,ventasAnt);
   anSetKPI('an-kpi-utilidad',fmt(utilAct),utilAct,utilAnt);
   anSetKPI('an-kpi-ticket',fmt(ticketAct),ticketAct,ticketAnt);
-  anSetKPI('an-kpi-roi',(roiAct*100).toFixed(0)+'%',roiAct,roiAnt);
-  anSetKPI('an-kpi-roi-neto',(roiNetoAct*100).toFixed(0)+'%',roiNetoAct,roiNetoAnt);
-  anSetKPI('an-kpi-margen',(margenAct*100).toFixed(0)+'%',margenAct,margenAnt);
+  // enPuntos=true: estos 3 ya son %, as a diferencia relativa confunde con
+  // puntos porcentuales (40%->44% se veria "+10%" en vez de "+4 pts").
+  anSetKPI('an-kpi-roi',(roiAct*100).toFixed(0)+'%',roiAct,roiAnt,true);
+  anSetKPI('an-kpi-roi-neto',(roiNetoAct*100).toFixed(0)+'%',roiNetoAct,roiNetoAnt,true);
+  anSetKPI('an-kpi-margen',(margenAct*100).toFixed(0)+'%',margenAct,margenAnt,true);
 }
-function anSetKPI(prefix,valTxt,actual,anterior){
+function anSetKPI(prefix,valTxt,actual,anterior,enPuntos){
   const numEl=document.getElementById(prefix+'-num');
   const trendEl=document.getElementById(prefix+'-trend');
   if(numEl)numEl.textContent=valTxt;
   if(!trendEl)return;
   if(!actual&&!anterior){trendEl.textContent='Sin datos aún';trendEl.className='sim-trend';return;}
+  if(enPuntos){
+    const deltaPts=(actual-anterior)*100;
+    const sube=deltaPts>=0;
+    trendEl.textContent=(sube?'▲ ':'▼ ')+Math.abs(deltaPts).toFixed(1)+' pts vs mes anterior';
+    trendEl.className='sim-trend '+(sube?'trend-up':'trend-down');
+    return;
+  }
   const delta=anterior?((actual-anterior)/Math.abs(anterior))*100:100;
   const sube=delta>=0;
   trendEl.textContent=(sube?'▲ ':'▼ ')+Math.abs(delta).toFixed(0)+'% vs mes anterior';
@@ -7641,7 +7680,7 @@ function anRenderMarcas(){
     <div class="an-rank-row">
       <span class="an-rank-lbl">${marca}</span>
       <div class="an-rank-bar-wrap"><div class="an-rank-bar-fill" style="width:${Math.max(4,Math.round(d.ventas/maxVal*100))}%"></div></div>
-      <span class="an-rank-val">${fmt(d.ventas)} · ROI ${roi}%</span>
+      <span class="an-rank-val">${fmt(d.ventas)} · ROI Bruto ${roi}%</span>
     </div>`;
   });
   anPagRender('an-top-marcas', rows, 'an-top-marcas', vacio);
@@ -7956,6 +7995,9 @@ function anRenderDuplicados(){
 // marca. El "meses para liquidar" por marca es lo que de verdad distingue
 // un stock viejo que ya se esta vendiendo despacio (preocupante) de uno que
 // ya casi se liquida solo -- capital y dias solos no alcanzan para verlo.
+// Estado compartido con anRenderUrgente() -- evita recalcular lo mismo dos veces.
+let _anCapitalTotal=0, _anCapitalMarcas=[];
+
 function anRenderCapitalInmovilizado(){
   const hoy=new Date();
   const stock=anInvVivo.map(p=>{
@@ -7964,9 +8006,9 @@ function anRenderCapitalInmovilizado(){
     return{...p,dias};
   }).filter(p=>p&&p.dias>=90);
 
-  const capTotal=anSumar(stock,p=>p.precio_final);
+  _anCapitalTotal=anSumar(stock,p=>p.precio_final);
   const capEl=document.getElementById('an-capital-total');
-  if(capEl)capEl.textContent=fmt(capTotal);
+  if(capEl)capEl.textContent=fmt(_anCapitalTotal);
 
   const porCat={};
   stock.forEach(p=>{
@@ -7988,21 +8030,105 @@ function anRenderCapitalInmovilizado(){
   });
   const mesesCubiertos=new Set(anVentas.map(v=>anMesKey(v.fecha))).size||1;
 
-  const filasMarca=Object.entries(porMarca).map(([marca,d])=>{
+  // sinVentas (gris, "no hay con que proyectar") y alerta (rojo, "ritmo lento
+  // confirmado") son casos distintos -- antes se pintaban igual de rojo, y
+  // eso fue justo lo que confundio: un "sin ventas" no es lo mismo que un
+  // "12+ meses al ritmo real".
+  _anCapitalMarcas=Object.entries(porMarca).map(([marca,d])=>{
     const ritmoMes=(ventasPorMarca[marca]||0)/mesesCubiertos;
-    const meses=ritmoMes>0?Math.round(d.n/ritmoMes*10)/10:null;
-    return{marca,capital:d.capital,diasProm:Math.round(d.diasSum/d.n),meses,alerta:meses==null||meses>12};
+    const sinVentas=ritmoMes<=0;
+    const meses=sinVentas?null:Math.round(d.n/ritmoMes*10)/10;
+    return{marca,capital:d.capital,diasProm:Math.round(d.diasSum/d.n),meses,sinVentas,alerta:!sinVentas&&meses>12};
   }).sort((a,b)=>b.capital-a.capital);
 
   const vacioMarca='<div style="text-align:center;padding:20px;color:var(--muted2);font-size:12px">Nada parado más de 90 días 🎉</div>';
-  const maxCap=filasMarca[0]?.capital||1;
-  const rowsMarca=filasMarca.map(f=>`
+  const maxCap=_anCapitalMarcas[0]?.capital||1;
+  const rowsMarca=_anCapitalMarcas.map(f=>{
+    const texto=f.sinVentas?'sin ventas en 12m':`rotación estimada: ${f.meses}m`;
+    const tono=f.alerta?'color:var(--red)':f.sinVentas?'color:var(--muted2)':'';
+    const barra=f.alerta?';background:var(--red)':f.sinVentas?';background:var(--muted2)':'';
+    return`
     <div class="an-rank-row">
       <span class="an-rank-lbl">${f.marca}</span>
-      <div class="an-rank-bar-wrap"><div class="an-rank-bar-fill" style="width:${Math.max(4,Math.round(f.capital/maxCap*100))}%${f.alerta?';background:var(--red)':''}"></div></div>
-      <span class="an-rank-val" style="${f.alerta?'color:var(--red)':''}">${fmt(f.capital)} · ${f.meses!=null?f.meses+'m para liquidar':'sin ventas'}</span>
-    </div>`);
+      <div class="an-rank-bar-wrap"><div class="an-rank-bar-fill" style="width:${Math.max(4,Math.round(f.capital/maxCap*100))}%${barra}"></div></div>
+      <span class="an-rank-val" style="${tono}">${fmt(f.capital)} · ${texto}</span>
+    </div>`;
+  });
   anPagRender('an-capital-marca', rowsMarca, 'an-capital-marca', vacioMarca);
+}
+
+// "Lo Mas Urgente Este Mes" -- traduce los paneles de abajo en 2-4 tarjetas
+// de hallazgo+accion, para no tener que leer las 6 secciones y sacar la
+// conclusion uno mismo cada vez. Reusa _anCapitalMarcas/_anCapitalTotal que
+// ya calculo anRenderCapitalInmovilizado() (debe correr antes, ver loadAnalisis).
+function anRenderUrgente(){
+  const hoy=new Date();
+  const mesActual=hoy.getFullYear()+'-'+String(hoy.getMonth()+1).padStart(2,'0');
+  const mesAntD=new Date(hoy.getFullYear(),hoy.getMonth()-1,1);
+  const mesAnt=mesAntD.getFullYear()+'-'+String(mesAntD.getMonth()+1).padStart(2,'0');
+  const vAct=anVentas.filter(v=>anMesKey(v.fecha)===mesActual);
+  const vAnt=anVentas.filter(v=>anMesKey(v.fecha)===mesAnt);
+  const pAct=anPagos.filter(p=>anMesKey(p.fecha)===mesActual);
+  const pAnt=anPagos.filter(p=>anMesKey(p.fecha)===mesAnt);
+  const ventasAct=anSumar(vAct,v=>v.precio_venta_soles);
+  const ganAct=anSumar(vAct,v=>v.ganancia), ganAnt=anSumar(vAnt,v=>v.ganancia);
+  const gastoAct=-anSumar(pAct,p=>p.monto_soles), gastoAnt=-anSumar(pAnt,p=>p.monto_soles);
+  const utilAct=ganAct-gastoAct, utilAnt=ganAnt-gastoAnt;
+
+  const insights=[];
+
+  // 1. Marca con peor rotacion confirmada (no solo "sin ventas") y capital relevante
+  const peorMarca=_anCapitalMarcas.filter(f=>f.alerta).sort((a,b)=>b.capital-a.capital)[0];
+  if(peorMarca&&peorMarca.capital>=500){
+    insights.push({tono:'red',titulo:peorMarca.marca,
+      texto:`${fmt(peorMarca.capital)} parados, rotación estimada de ${peorMarca.meses} meses al ritmo de venta actual.`,
+      accion:'Evaluar pausar compras nuevas de esta marca hasta liquidar lo que ya tienes.'});
+  }
+
+  // 2. Utilidad Neta cayendo fuerte vs mes anterior
+  if(utilAnt>0&&utilAct<utilAnt*0.8){
+    const caida=Math.round((1-utilAct/utilAnt)*100);
+    insights.push({tono:'yellow',titulo:'Utilidad Neta bajó '+caida+'%',
+      texto:`De ${fmt(utilAnt)} el mes pasado a ${fmt(utilAct)} este mes.`,
+      accion:'Revisar si bajaron las ventas o subieron los gastos este mes.'});
+  }
+
+  // 3. Capital inmovilizado alto frente a lo que vendes en un mes
+  if(ventasAct>0&&_anCapitalTotal>ventasAct*2){
+    insights.push({tono:'red',titulo:'Capital inmovilizado alto',
+      texto:`${fmt(_anCapitalTotal)} parados hace 90+ días — más de 2 meses de tus ventas actuales.`,
+      accion:'Revisar "Capital Inmovilizado" más abajo para priorizar qué liquidar primero.'});
+  }
+
+  // 4. Categoria de gasto que subio fuerte vs mes anterior
+  const porCatAct={},porCatAnt={};
+  pAct.forEach(p=>{const k=p.categoria||'OTRO';porCatAct[k]=(porCatAct[k]||0)-parseFloat(p.monto_soles||0);});
+  pAnt.forEach(p=>{const k=p.categoria||'OTRO';porCatAnt[k]=(porCatAnt[k]||0)-parseFloat(p.monto_soles||0);});
+  let peorGasto=null;
+  Object.keys(porCatAct).forEach(k=>{
+    const act=porCatAct[k],ant=porCatAnt[k]||0;
+    if(ant>0&&act>ant*1.3&&act-ant>=100&&(!peorGasto||act-ant>peorGasto.delta))peorGasto={cat:k,act,ant,delta:act-ant};
+  });
+  if(peorGasto){
+    insights.push({tono:'yellow',titulo:'Gasto en '+peorGasto.cat+' subió',
+      texto:`${fmt(peorGasto.ant)} → ${fmt(peorGasto.act)} este mes.`,
+      accion:'Revisar si es un gasto puntual o se va a repetir el próximo mes.'});
+  }
+
+  const el=document.getElementById('an-urgente-row');
+  if(!el)return;
+  if(!insights.length){
+    el.innerHTML='<div class="an-urgente-ok">✓ Nada urgente este mes — igual vale la pena revisar el detalle de abajo.</div>';
+    return;
+  }
+  const orden={red:0,yellow:1,green:2};
+  insights.sort((a,b)=>orden[a.tono]-orden[b.tono]);
+  el.innerHTML=insights.slice(0,4).map(i=>`
+    <div class="an-urgente-card tono-${i.tono}">
+      <div class="an-urgente-titulo">${i.titulo}</div>
+      <div class="an-urgente-texto">${i.texto}</div>
+      <div class="an-urgente-accion">→ ${i.accion}</div>
+    </div>`).join('');
 }
 
 function anRenderClientes(){
