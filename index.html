@@ -223,6 +223,7 @@ tbody tr.row-dim{opacity:.45}
 .sg-mn.accent{color:var(--accent)}.sg-mn.green{color:var(--green)}.sg-mn.red{color:var(--red)}
 .sg-mn-tot{font-family:"Archivo Black";font-size:17px;color:var(--text);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 .sg-mn-tot.red{color:var(--red)}.sg-mn-tot.green{color:var(--green)}.sg-mn-tot.accent{color:var(--accent)}
+.sg-roi-desc{grid-column:1/-1;font-size:10px;color:var(--muted2);margin:-3px 0 2px}
 /* Inv stat card variants */
 .sc-chip{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:7px}
 .sc-chip::before{content:'';width:7px;height:7px;border-radius:50%;flex-shrink:0;background:var(--muted2)}
@@ -2023,12 +2024,15 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
       </div>
       <div class="sg-divider"></div>
       <div class="sc-grid g2">
-        <span class="sg-mc" title="Ganancia Bruta / Costo Total — sin contar gastos del negocio">ROI Bruto</span>
+        <span class="sg-mc">ROI Bruto</span>
         <span class="sg-mn" id="vt-roi-bruto">—</span>
-        <span class="sg-mc" title="Utilidad Neta / Costo Total — ya con gastos del negocio restados">ROI Neto</span>
+        <span class="sg-roi-desc">Ganancia Bruta ÷ Costo Total — sin contar gastos del negocio</span>
+        <span class="sg-mc">ROI Neto</span>
         <span class="sg-mn" id="vt-roi-neto">—</span>
-        <span class="sg-mc" title="Utilidad Neta / Ventas Totales">Margen Neto</span>
+        <span class="sg-roi-desc">Utilidad Neta ÷ Costo Total — ya con gastos del negocio restados</span>
+        <span class="sg-mc">Margen Neto</span>
         <span class="sg-mn" id="vt-margen-neto">—</span>
+        <span class="sg-roi-desc">Utilidad Neta ÷ Ventas Totales</span>
       </div>
     </div>
     <div class="stat-card sc-stats-vt">
@@ -6966,7 +6970,7 @@ function updateVentasStats(rows,pagos,mes){
   s('vt-rev',fmt(rev));
   s('vt-sub-mes',lbl);
   s('vt-gan',fmt(gan));
-  s('vt-margen',(roiBruto*100).toFixed(0)+'% ROI Bruto');
+  s('vt-margen',(roiBruto*100).toFixed(1)+'%');
   s('vt-costo',fmt(costo));
   s('vt-pagos-stat',fmt(pagosTotal));
   s('vt-n',n+' ud'+(n!==1?'s':''));
