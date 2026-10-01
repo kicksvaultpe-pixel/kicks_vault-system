@@ -705,9 +705,10 @@ input[list] { cursor: text; }
     padding:6px 0 0;padding-bottom:env(safe-area-inset-bottom,8px);
     justify-content:space-around;
     background:var(--card);
+    transition:padding-bottom .25s ease;
   }
   nav .nav-logo,nav .nav-divider{display:none}
-  nav .nav-tabs{width:100%;justify-content:space-around;overflow:visible}
+  nav .nav-tabs{width:100%;justify-content:space-around;overflow:visible;transition:row-gap .25s ease}
   .nav-tab{
     flex:1;flex-direction:column;align-items:center;justify-content:center;
     gap:3px;padding:4px 2px 4px;font-size:8px;letter-spacing:.3px;
@@ -719,6 +720,23 @@ input[list] { cursor: text; }
   }
   .nav-tab.active .tab-icon{transform:translateY(-2px);color:var(--accent)}
   .tab-icon{display:block;flex-shrink:0}
+
+  /* Manija para expandir la barra y ver los 8 tabs comodos, con texto */
+  .nav-expand-handle{
+    display:flex;align-items:center;justify-content:center;
+    position:absolute;top:-16px;left:50%;transform:translateX(-50%);
+    width:44px;height:18px;border-radius:10px 10px 0 0;
+    background:var(--card);border:1px solid var(--border);border-bottom:none;
+    color:var(--muted2);font-size:11px;cursor:pointer;touch-action:manipulation;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .nav-expand-handle span{transition:transform .25s ease}
+  nav.nav-expanded .nav-expand-handle span{transform:rotate(180deg)}
+  nav.nav-expanded .nav-tabs{flex-wrap:wrap;row-gap:6px}
+  nav.nav-expanded .nav-tab{flex:0 0 25%;padding:6px 2px}
+  nav.nav-expanded .tab-label{display:block!important;font-size:9px}
+  nav.nav-expanded .tab-icon svg{width:22px;height:22px}
+  nav.nav-expanded{padding-bottom:calc(env(safe-area-inset-bottom,8px) + 6px)}
 
   /* Espacio para bottom nav + top header */
   .view{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px));padding-top:16px}
@@ -940,6 +958,9 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
 </div>
 
 <nav>
+  <button type="button" class="nav-expand-handle" id="navExpandHandle" onclick="toggleNavExpand()" aria-label="Expandir menú" title="Expandir menú">
+    <span id="navExpandChevron">⌃</span>
+  </button>
   <div class="nav-logo"><span class="kv-kicks">KICKS</span><span class="kv-vault">VAULT</span></div>
   <div class="nav-divider"></div>
   <div class="nav-tabs">
@@ -4091,11 +4112,24 @@ document.addEventListener('mousedown',function(e){
   }
 });
 
+function toggleNavExpand(){
+  const nav=document.querySelector('nav');
+  const expanded=nav.classList.toggle('nav-expanded');
+  const chev=document.getElementById('navExpandChevron');
+  if(chev)chev.textContent=expanded?'⌄':'⌃';
+}
+
 function showView(n,btn){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
   document.getElementById('view-'+n).classList.add('active');
   if(btn)btn.classList.add('active');
+  const nav=document.querySelector('nav');
+  if(nav&&nav.classList.contains('nav-expanded')){
+    nav.classList.remove('nav-expanded');
+    const chev=document.getElementById('navExpandChevron');
+    if(chev)chev.textContent='⌃';
+  }
   _clearSel();
   if(n==='inventario') loadInventario();
   if(n==='flujo') loadFlujo();
