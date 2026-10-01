@@ -2516,6 +2516,10 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
       <span class="combo-arrow">▼</span>
       <div class="combo-list" id="cl-oc-f-tipo"></div>
     </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn btn-ghost btn-sm oc-filter-btn" data-f="" onclick="setOcFiltroActivo('',this)">Todas</button>
+      <button class="btn btn-ghost btn-sm oc-filter-btn active" data-f="activas" onclick="setOcFiltroActivo('activas',this)">Activas</button>
+    </div>
     <input type="text" id="oc-buscar" class="search-box" placeholder="Buscar orden, producto, tienda, tracking…"
       oninput="renderOCTab()" style="flex:1;min-width:180px">
     <button onclick="ocLimpiarFiltros()" style="flex-shrink:0;padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--muted2);font-size:11px;cursor:pointer;white-space:nowrap;font-family:inherit">× Limpiar</button>
@@ -2576,8 +2580,8 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
   <div class="table-toolbar" style="flex-wrap:wrap;gap:8px;margin-bottom:12px">
     <input type="text" id="rsv-search" class="search-box" placeholder="RSV-001, C-005, marca, modelo, IVT-..." oninput="filtrarReservas()" style="flex:1;min-width:180px">
     <div style="display:flex;gap:6px;flex-wrap:wrap">
-      <button class="btn btn-ghost btn-sm rsv-filter-btn active" data-estado="" onclick="setRsvFiltro('',this)">Todas</button>
-      <button class="btn btn-ghost btn-sm rsv-filter-btn" data-estado="ACTIVA" onclick="setRsvFiltro('ACTIVA',this)">Activas</button>
+      <button class="btn btn-ghost btn-sm rsv-filter-btn" data-estado="" onclick="setRsvFiltro('',this)">Todas</button>
+      <button class="btn btn-ghost btn-sm rsv-filter-btn active" data-estado="ACTIVA" onclick="setRsvFiltro('ACTIVA',this)">Activas</button>
       <button class="btn btn-ghost btn-sm rsv-filter-btn" data-estado="COMPLETADA" onclick="setRsvFiltro('COMPLETADA',this)">Completadas</button>
       <button class="btn btn-ghost btn-sm rsv-filter-btn" data-estado="CANCELADA" onclick="setRsvFiltro('CANCELADA',this)">Canceladas</button>
     </div>
@@ -3188,6 +3192,16 @@ async function loadOCs(){
 const OC_CERRADAS = ['ENTREGADO EN PERU','CANCELADO'];
 const ocAbierta = oc => !OC_CERRADAS.includes(oc.estado);
 
+// Filtro rapido Todas/Activas, igual criterio que Reservas: arranca en
+// Activas para no tapar la tabla con ordenes ya entregadas o canceladas.
+let ocFiltroActivo='activas';
+function setOcFiltroActivo(val,btn){
+  ocFiltroActivo=val;
+  document.querySelectorAll('.oc-filter-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  renderOCTab();
+}
+
 // El valor de una OC es lo que suman sus articulos. `valor_usd` es un campo
 // que se escribe a mano en el modal y que el formulario de compra nunca llena,
 // asi que las ordenes creadas al registrar una compra salian con la columna
@@ -3320,6 +3334,9 @@ function ocLimpiarFiltros(){
   ['oc-f-estado','oc-f-tipo','oc-buscar'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
+  ocFiltroActivo='activas';
+  document.querySelectorAll('.oc-filter-btn').forEach(b=>
+    b.classList.toggle('active', b.dataset.f==='activas'));
   renderOCTab();
 }
 
@@ -3370,6 +3387,7 @@ function renderOCTab(){
   put('oc-st-total-usd', enCalle.length?fmtUsd(usd(enCalle)):'—');
 
   let ocs=(ocCache||[]).slice();
+  if(ocFiltroActivo==='activas') ocs=ocs.filter(ocAbierta);
   if(estadoF) ocs=ocs.filter(o=>o.estado===estadoF);
   if(tipoF)   ocs=ocs.filter(o=>o.tipo===tipoF);
   // Busca por varias palabras: "amiri ups" trae lo que cumpla las dos, en
@@ -3742,7 +3760,7 @@ async function loadTCGlobal(){
 //  RESERVAS
 // ══════════════════════════════════════════
 let reservasCache=[];
-let rsvFiltroEstado='';
+let rsvFiltroEstado='ACTIVA';
 let rsvCodigoActivo=null;
 
 async function loadReservas(){
@@ -3779,14 +3797,15 @@ function setRsvFiltro(estado,btn){
 
 function filtrarReservas(){renderReservas();}
 
-// Devuelve la tabla a "todo": vacia el buscador y suelta el filtro de estado.
-// El boton "Todas" queda marcado a mano porque setRsvFiltro() espera el
-// elemento que se clickeo, y aca no hay ninguno.
+// Devuelve la tabla al estado por defecto: vacia el buscador y vuelve a
+// Activas (no a Todas -- esa es la vista de arranque del tab). El boton
+// queda marcado a mano porque setRsvFiltro() espera el elemento que se
+// clickeo, y aca no hay ninguno.
 function rsvLimpiarFiltros(){
   const s=document.getElementById('rsv-search'); if(s)s.value='';
-  rsvFiltroEstado='';
+  rsvFiltroEstado='ACTIVA';
   document.querySelectorAll('.rsv-filter-btn').forEach(b=>
-    b.classList.toggle('active', (b.dataset.estado||'')===''));
+    b.classList.toggle('active', (b.dataset.estado||'')==='ACTIVA'));
   renderReservas();
 }
 
