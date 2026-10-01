@@ -584,7 +584,7 @@ input[list] { cursor: text; }
 
 
 /* ANÁLISIS */
-.an-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.an-kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
 @media(max-width:1100px){.an-kpi-row{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.an-kpi-row{grid-template-columns:1fr}}
 .an-row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
@@ -592,6 +592,8 @@ input[list] { cursor: text; }
 .an-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px}
 @media(max-width:1100px){.an-row3{grid-template-columns:1fr 1fr}}
 @media(max-width:650px){.an-row3{grid-template-columns:1fr}}
+.an-rsv-stats{grid-template-columns:repeat(2,1fr)}
+@media(min-width:700px){.an-rsv-stats{grid-template-columns:repeat(4,1fr)}}
 .an-panel-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .an-panel-sub{font-size:10px;color:var(--muted2);font-weight:400;text-transform:none;letter-spacing:0}
 .an-panel-hd{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px}
@@ -2619,8 +2621,20 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
     <div class="ind-card">
       <div class="sim-chip"><div class="sim-chip-dot dot-accent"></div>ROI Bruto</div>
       <div class="sim-num" id="an-kpi-roi-num">—</div>
-      <div class="sim-lbl">Ganancia / costo total</div>
+      <div class="sim-lbl">Ganancia Bruta / Costo Total</div>
       <div class="sim-trend" id="an-kpi-roi-trend">—</div>
+    </div>
+    <div class="ind-card">
+      <div class="sim-chip"><div class="sim-chip-dot dot-accent"></div>ROI Neto</div>
+      <div class="sim-num" id="an-kpi-roi-neto-num">—</div>
+      <div class="sim-lbl">Utilidad Neta / Costo Total</div>
+      <div class="sim-trend" id="an-kpi-roi-neto-trend">—</div>
+    </div>
+    <div class="ind-card">
+      <div class="sim-chip"><div class="sim-chip-dot dot-green"></div>Margen Neto</div>
+      <div class="sim-num" id="an-kpi-margen-num">—</div>
+      <div class="sim-lbl">Utilidad Neta / Ventas Totales</div>
+      <div class="sim-trend" id="an-kpi-margen-trend">—</div>
     </div>
   </div>
 
@@ -2652,7 +2666,20 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
     <div class="an-linechart" id="an-chart-velocidad"></div>
   </div>
 
-  <!-- 3. Qué y cómo se vende -->
+  <!-- 3. Gastos del Negocio -->
+  <div class="card-label" style="margin-top:8px">Gastos del Negocio</div>
+  <div class="an-row2">
+    <div class="ind-card">
+      <div class="an-panel-title">Gastos por mes</div>
+      <div class="an-linechart" id="an-chart-gastos"></div>
+    </div>
+    <div class="ind-card">
+      <div class="an-panel-title">Gastos por Categoría</div>
+      <div id="an-gastos-categoria"></div>
+    </div>
+  </div>
+
+  <!-- 4. Qué y cómo se vende -->
   <div class="card-label" style="margin-top:8px">Qué y Cómo Se Vende</div>
   <div class="ind-card" style="margin-bottom:20px">
     <div class="an-panel-hd">
@@ -2664,10 +2691,14 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
     </div>
     <div id="an-top-producto"></div>
   </div>
-  <div class="an-row2">
+  <div class="an-row3">
     <div class="ind-card">
       <div class="an-panel-title">Categorías Más Vendidas</div>
       <div id="an-top-categorias"></div>
+    </div>
+    <div class="ind-card">
+      <div class="an-panel-title">Top Marcas <span class="an-panel-sub">— ventas y ROI</span></div>
+      <div id="an-top-marcas"></div>
     </div>
     <div class="ind-card">
       <div class="an-panel-title">Canal Más Usado</div>
@@ -2675,7 +2706,7 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
     </div>
   </div>
 
-  <!-- 4. Qué no se vende -->
+  <!-- 5. Qué no se vende -->
   <div class="card-label" style="margin-top:8px">Qué No Se Vende</div>
   <div class="ind-card" style="margin-bottom:20px">
     <div class="an-stock-hd">
@@ -2732,7 +2763,45 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
     </div>
   </div>
 
-  <!-- 5. Clientes -->
+  <div class="ind-card" style="margin-bottom:20px">
+    <div class="an-stock-hd">
+      <div class="an-panel-title" style="margin-bottom:0">Capital Inmovilizado <span class="an-panel-sub">— 90+ días sin venderse</span></div>
+      <div class="an-stock-cap">Total parado: <b id="an-capital-total">—</b></div>
+    </div>
+    <div class="an-row2" style="margin-bottom:0;margin-top:12px">
+      <div>
+        <div class="an-panel-title" style="font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:1px">Por Categoría</div>
+        <div id="an-capital-categoria"></div>
+      </div>
+      <div>
+        <div class="an-panel-title" style="font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:1px">Por Marca <span class="an-panel-sub">— rojo = 12+ meses para liquidar al ritmo actual</span></div>
+        <div id="an-capital-marca"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Reservas -->
+  <div class="card-label" style="margin-top:8px">Reservas</div>
+  <div class="stats-row an-rsv-stats" style="margin-bottom:20px">
+    <div class="stat-card">
+      <div class="stat-label">Completadas</div>
+      <div class="stat-val" id="an-rsv-completadas" style="color:var(--green)">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Canceladas</div>
+      <div class="stat-val" id="an-rsv-canceladas" style="color:var(--red)">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Activas</div>
+      <div class="stat-val" id="an-rsv-activas" style="color:var(--accent)">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Tasa de Completado</div>
+      <div class="stat-val" id="an-rsv-tasa">—</div>
+    </div>
+  </div>
+
+  <!-- 7. Clientes -->
   <div class="card-label" style="margin-top:8px">Clientes</div>
   <div class="stats-row stats3" style="margin-bottom:14px">
     <div class="stat-card">
@@ -7363,7 +7432,7 @@ async function kvArrancar(){
 // Todo el tab se arma en el navegador a partir de datos ya cargados una
 // vez (ultimos 12 meses) -- no hay libreria de graficos, las barras son
 // simples divs con height/width en %, mismo criterio que .pat-bar-wrap.
-let anVentas=[],anPagos=[],anInvVivo=[],anClientes=[],anDesdeStr='';
+let anVentas=[],anPagos=[],anInvVivo=[],anClientes=[],anReservas=[],anDesdeStr='';
 
 async function loadAnalisis(){
   comboSetData('cl-an-dup-cat', ['— Todas —','👟 ZAPATILLAS','👕 ROPA','📦 OTROS']);
@@ -7375,7 +7444,7 @@ async function loadAnalisis(){
     .select('*,inventario(marca,modelo,categoria,fecha_compra),clientes(nombre,apellido)')
     .gte('fecha',anDesdeStr)
     .order('fecha',{ascending:true});
-  const buildP=()=>db.from('pagos').select('fecha,monto_soles').gte('fecha',anDesdeStr);
+  const buildP=()=>db.from('pagos').select('fecha,monto_soles,categoria').gte('fecha',anDesdeStr);
   // DISPONIBLE+RESERVADO (todo lo que sigue siendo stock propio, no vendido
   // ni cancelado) -- Stock Parado filtra a solo DISPONIBLE mas abajo,
   // Duplicados usa las dos: una reserva activa tambien cuenta como bulto.
@@ -7383,13 +7452,14 @@ async function loadAnalisis(){
     .select('codigo_producto,marca,modelo,colorway,talla,categoria,fecha_compra,precio_final,estado')
     .in('estado',['DISPONIBLE','RESERVADO']);
   const buildCl=()=>db.from('clientes').select('id_cliente,fecha_registro');
+  const buildRsv=()=>db.from('reservas').select('estado,fecha').gte('fecha',anDesdeStr);
 
-  const[{data:ventas,error},{data:pagos},{data:invVivo},{data:clientes}]=await Promise.all([
-    pageAll(buildV),pageAll(buildP),pageAll(buildInvVivo),pageAll(buildCl)
+  const[{data:ventas,error},{data:pagos},{data:invVivo},{data:clientes},{data:reservas}]=await Promise.all([
+    pageAll(buildV),pageAll(buildP),pageAll(buildInvVivo),pageAll(buildCl),pageAll(buildRsv)
   ]);
   if(error){toast('Error cargando análisis: '+error.message,'err');return;}
 
-  anVentas=ventas||[]; anPagos=pagos||[]; anInvVivo=invVivo||[]; anClientes=clientes||[];
+  anVentas=ventas||[]; anPagos=pagos||[]; anInvVivo=invVivo||[]; anClientes=clientes||[]; anReservas=reservas||[];
 
   anRenderKPIs();
   anRenderTendencia();
@@ -7398,10 +7468,14 @@ async function loadAnalisis(){
   anRenderTopProducto();
   anRenderRanking('an-top-categorias', anGroupCount(anVentas,v=>v.inventario?.categoria), v=>v+(v===1?' venta':' ventas'));
   anRenderCanal();
+  anRenderMarcas();
+  anRenderGastos();
   anRenderStockParado();
   anRenderDuplicados();
+  anRenderCapitalInmovilizado();
   anRenderClientes();
   anRenderTopClientes();
+  anRenderReservas();
 }
 
 const anMesKey=fecha=>fecha.slice(0,7);
@@ -7476,11 +7550,17 @@ function anRenderKPIs(){
   const costoAct=ventasAct-ganAct, costoAnt=ventasAnt-ganAnt;
   const roiAct=costoAct>0?ganAct/costoAct:0;
   const roiAnt=costoAnt>0?ganAnt/costoAnt:0;
+  // Mismos denominadores que ROI Bruto, pero con Utilidad Neta (ya con
+  // gastos restados) -- ver vt-roi-neto-side en Resultados, misma formula.
+  const roiNetoAct=costoAct>0?utilAct/costoAct:0, roiNetoAnt=costoAnt>0?utilAnt/costoAnt:0;
+  const margenAct=ventasAct>0?utilAct/ventasAct:0, margenAnt=ventasAnt>0?utilAnt/ventasAnt:0;
 
   anSetKPI('an-kpi-ventas',fmt(ventasAct),ventasAct,ventasAnt);
   anSetKPI('an-kpi-utilidad',fmt(utilAct),utilAct,utilAnt);
   anSetKPI('an-kpi-ticket',fmt(ticketAct),ticketAct,ticketAnt);
   anSetKPI('an-kpi-roi',(roiAct*100).toFixed(0)+'%',roiAct,roiAnt);
+  anSetKPI('an-kpi-roi-neto',(roiNetoAct*100).toFixed(0)+'%',roiNetoAct,roiNetoAnt);
+  anSetKPI('an-kpi-margen',(margenAct*100).toFixed(0)+'%',margenAct,margenAnt);
 }
 function anSetKPI(prefix,valTxt,actual,anterior){
   const numEl=document.getElementById(prefix+'-num');
@@ -7511,7 +7591,7 @@ function anRenderTendencia(){
   const meses=Object.keys(porMes).sort();
   if(!meses.length){
     const vacio='<div style="text-align:center;padding:20px;color:var(--muted2);font-size:12px;width:100%">Sin ventas en este período</div>';
-    anEl('an-chart-ventas',vacio); anEl('an-chart-utilidad',vacio); anEl('an-chart-ticket',vacio);
+    anEl('an-chart-ventas',vacio); anEl('an-chart-utilidad',vacio); anEl('an-chart-ticket',vacio); anEl('an-chart-gastos',vacio);
     return;
   }
   anLineChart('an-chart-ventas',
@@ -7523,6 +7603,48 @@ function anRenderTendencia(){
   anLineChart('an-chart-ticket',
     meses.map(k=>({label:anMesLabelCorta(k),value:porMes[k].n?porMes[k].ventas/porMes[k].n:0})),
     {color:'var(--purple)',fmtVal:fmt,valFmt:anFmtCorta});
+  anLineChart('an-chart-gastos',
+    meses.map(k=>({label:anMesLabelCorta(k),value:porMes[k].gasto})),
+    {color:'var(--red)',fmtVal:fmt,valFmt:anFmtCorta});
+}
+
+function anRenderGastos(){
+  const porCat={};
+  anPagos.forEach(p=>{
+    const k=p.categoria||'OTRO';
+    porCat[k]=(porCat[k]||0)-parseFloat(p.monto_soles||0);
+  });
+  const pairs=Object.entries(porCat).sort((a,b)=>b[1]-a[1]);
+  anRenderRanking('an-gastos-categoria',pairs,v=>fmt(v));
+}
+
+// Ventas por marca -- Top Productos ya existe a nivel producto, Categorias
+// Mas Vendidas a nivel categoria, pero no habia nada a nivel marca. Entra
+// ROI aca (ganancia/costo) porque es el mismo dato que se cruza a mano
+// contra Capital Inmovilizado por marca mas abajo.
+function anRenderMarcas(){
+  const porMarca={};
+  anVentas.forEach(v=>{
+    const k=v.inventario?.marca; if(!k)return;
+    if(!porMarca[k])porMarca[k]={ventas:0,gan:0,n:0};
+    porMarca[k].ventas+=parseFloat(v.precio_venta_soles||0);
+    porMarca[k].gan+=parseFloat(v.ganancia||0);
+    porMarca[k].n++;
+  });
+  const filas=Object.entries(porMarca).sort((a,b)=>b[1].ventas-a[1].ventas);
+  const vacio='<div style="text-align:center;padding:20px;color:var(--muted2);font-size:12px">Sin ventas en este período</div>';
+  const maxVal=filas[0]?.[1].ventas||1;
+  const rows=filas.map(([marca,d])=>{
+    const costo=d.ventas-d.gan;
+    const roi=costo>0?Math.round(d.gan/costo*100):0;
+    return`
+    <div class="an-rank-row">
+      <span class="an-rank-lbl">${marca}</span>
+      <div class="an-rank-bar-wrap"><div class="an-rank-bar-fill" style="width:${Math.max(4,Math.round(d.ventas/maxVal*100))}%"></div></div>
+      <span class="an-rank-val">${fmt(d.ventas)} · ROI ${roi}%</span>
+    </div>`;
+  });
+  anPagRender('an-top-marcas', rows, 'an-top-marcas', vacio);
 }
 // Version corta para etiquetas dentro del grafico: fmt() de sobra ("S/. 12,430.00")
 // no entra al lado de cada punto -- esto da "12.4k" / "-3.2k" / "480".
@@ -7830,6 +7952,59 @@ function anRenderDuplicados(){
     '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted2)">Sin duplicados en esta categoría 🎉</td></tr>');
 }
 
+// Capital inmovilizado: 90+ dias sin venderse, cruzado con categoria y con
+// marca. El "meses para liquidar" por marca es lo que de verdad distingue
+// un stock viejo que ya se esta vendiendo despacio (preocupante) de uno que
+// ya casi se liquida solo -- capital y dias solos no alcanzan para verlo.
+function anRenderCapitalInmovilizado(){
+  const hoy=new Date();
+  const stock=anInvVivo.map(p=>{
+    if(!p.fecha_compra)return null;
+    const dias=Math.floor((hoy-new Date(p.fecha_compra))/86400000);
+    return{...p,dias};
+  }).filter(p=>p&&p.dias>=90);
+
+  const capTotal=anSumar(stock,p=>p.precio_final);
+  const capEl=document.getElementById('an-capital-total');
+  if(capEl)capEl.textContent=fmt(capTotal);
+
+  const porCat={};
+  stock.forEach(p=>{
+    const k=p.categoria||'OTROS';
+    porCat[k]=(porCat[k]||0)+parseFloat(p.precio_final||0);
+  });
+  anRenderRanking('an-capital-categoria', Object.entries(porCat).sort((a,b)=>b[1]-a[1]), v=>fmt(v));
+
+  const porMarca={};
+  stock.forEach(p=>{
+    const k=p.marca||'SIN MARCA';
+    if(!porMarca[k])porMarca[k]={n:0,capital:0,diasSum:0};
+    porMarca[k].n++; porMarca[k].capital+=parseFloat(p.precio_final||0); porMarca[k].diasSum+=p.dias;
+  });
+  const ventasPorMarca={};
+  anVentas.forEach(v=>{
+    const k=v.inventario?.marca||'SIN MARCA';
+    ventasPorMarca[k]=(ventasPorMarca[k]||0)+1;
+  });
+  const mesesCubiertos=new Set(anVentas.map(v=>anMesKey(v.fecha))).size||1;
+
+  const filasMarca=Object.entries(porMarca).map(([marca,d])=>{
+    const ritmoMes=(ventasPorMarca[marca]||0)/mesesCubiertos;
+    const meses=ritmoMes>0?Math.round(d.n/ritmoMes*10)/10:null;
+    return{marca,capital:d.capital,diasProm:Math.round(d.diasSum/d.n),meses,alerta:meses==null||meses>12};
+  }).sort((a,b)=>b.capital-a.capital);
+
+  const vacioMarca='<div style="text-align:center;padding:20px;color:var(--muted2);font-size:12px">Nada parado más de 90 días 🎉</div>';
+  const maxCap=filasMarca[0]?.capital||1;
+  const rowsMarca=filasMarca.map(f=>`
+    <div class="an-rank-row">
+      <span class="an-rank-lbl">${f.marca}</span>
+      <div class="an-rank-bar-wrap"><div class="an-rank-bar-fill" style="width:${Math.max(4,Math.round(f.capital/maxCap*100))}%${f.alerta?';background:var(--red)':''}"></div></div>
+      <span class="an-rank-val" style="${f.alerta?'color:var(--red)':''}">${fmt(f.capital)} · ${f.meses!=null?f.meses+'m para liquidar':'sin ventas'}</span>
+    </div>`);
+  anPagRender('an-capital-marca', rowsMarca, 'an-capital-marca', vacioMarca);
+}
+
 function anRenderClientes(){
   const hoy=new Date();
   const mesActual=hoy.getFullYear()+'-'+String(hoy.getMonth()+1).padStart(2,'0');
@@ -7876,6 +8051,17 @@ function anRenderTopClientes(){
   });
   const pairs=Object.values(porCliente).map(c=>[c.nombre,c.total]).sort((a,b)=>b[1]-a[1]);
   anRenderRanking('an-top-clientes',pairs,v=>fmt(v));
+}
+
+function anRenderReservas(){
+  const n=k=>anReservas.filter(r=>r.estado===k).length;
+  const completadas=n('COMPLETADA'), canceladas=n('CANCELADA'), activas=n('ACTIVA');
+  const totalCerradas=completadas+canceladas;
+  const s=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val;};
+  s('an-rsv-completadas',completadas);
+  s('an-rsv-canceladas',canceladas);
+  s('an-rsv-activas',activas);
+  s('an-rsv-tasa',totalCerradas?Math.round(completadas/totalCerradas*100)+'%':'—');
 }
 
 // Si la sesion caduca, o cierras sesion en otra pestaña, vuelve la puerta.
