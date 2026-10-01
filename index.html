@@ -8044,7 +8044,7 @@ function anRenderCapitalInmovilizado(){
   const vacioMarca='<div style="text-align:center;padding:20px;color:var(--muted2);font-size:12px">Nada parado más de 90 días 🎉</div>';
   const maxCap=_anCapitalMarcas[0]?.capital||1;
   const rowsMarca=_anCapitalMarcas.map(f=>{
-    const texto=f.sinVentas?'sin ventas en 12m':`rotación estimada: ${f.meses}m`;
+    const texto=f.sinVentas?'sin ventas de esta marca en 12m':`${f.meses}m vendiendo esta marca al ritmo actual`;
     const tono=f.alerta?'color:var(--red)':f.sinVentas?'color:var(--muted2)':'';
     const barra=f.alerta?';background:var(--red)':f.sinVentas?';background:var(--muted2)':'';
     return`
