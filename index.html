@@ -692,6 +692,7 @@ input[list] { cursor: text; }
 .mobile-header .nav-logo{font-family:'Archivo Black';font-size:13px;letter-spacing:5px;display:flex;align-items:center}
 .tab-icon{display:none;transition:transform .2s,opacity .2s}
 .tab-label{transition:color .2s}
+.nav-expand-handle{display:none}
 
 @media(max-width:768px){
   /* Mostrar header de logo arriba */
@@ -702,15 +703,15 @@ input[list] { cursor: text; }
     position:fixed;top:auto;bottom:0;left:0;right:0;
     border-top:1px solid var(--border);border-bottom:none;
     height:auto;min-height:58px;
-    padding:6px 0 0;padding-bottom:env(safe-area-inset-bottom,8px);
-    justify-content:space-around;
+    flex-direction:column;align-items:stretch;
+    padding:0;padding-bottom:env(safe-area-inset-bottom,8px);
     background:var(--card);
     transition:padding-bottom .25s ease;
   }
   nav .nav-logo,nav .nav-divider{display:none}
   /* Tema/logout viven en el mobile-header de arriba, no en la barra de tabs */
   nav>#themeBtn,nav>#logoutBtn{display:none!important}
-  nav .nav-tabs{width:100%;justify-content:space-around;overflow:visible;transition:row-gap .25s ease}
+  nav .nav-tabs{width:100%;justify-content:space-around;overflow:visible;transition:row-gap .25s ease;padding-top:4px}
   .nav-tab{
     flex:1;flex-direction:column;align-items:center;justify-content:center;
     gap:3px;padding:4px 2px 4px;font-size:8px;letter-spacing:.3px;
@@ -724,26 +725,25 @@ input[list] { cursor: text; }
   .nav-tab.active .tab-icon{transform:translateY(-2px);color:var(--accent)}
   .tab-icon{display:block;flex-shrink:0}
 
-  /* Manija para expandir la barra y ver los 8 tabs comodos, con texto */
+  /* Fila fija arriba de los tabs para expandir la barra y ver los 8 comodos */
   .nav-expand-handle{
-    display:flex;align-items:center;justify-content:center;
-    position:absolute;top:-16px;left:50%;transform:translateX(-50%);
-    width:44px;height:18px;border-radius:10px 10px 0 0;
-    background:var(--card);border:1px solid var(--border);border-bottom:none;
-    color:var(--muted2);font-size:11px;cursor:pointer;touch-action:manipulation;
-    -webkit-tap-highlight-color:transparent;
+    display:flex!important;align-items:center;justify-content:center;gap:5px;
+    width:100%;padding:5px 0;margin:0;order:-1;
+    background:none;border:none;border-bottom:1px solid var(--border);
+    color:var(--muted2);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+    cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;
     user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
   }
-  .nav-expand-handle span{transition:transform .25s ease}
-  nav.nav-expanded .nav-expand-handle span{transform:rotate(180deg)}
+  #navExpandChevron{display:inline-block;transition:transform .25s ease}
+  nav.nav-expanded #navExpandChevron{transform:rotate(180deg)}
   nav.nav-expanded .nav-tabs{flex-wrap:wrap;row-gap:6px}
   nav.nav-expanded .nav-tab{flex:0 0 25%;padding:6px 2px}
   nav.nav-expanded .tab-label{display:block!important;font-size:9px}
   nav.nav-expanded .tab-icon svg{width:22px;height:22px}
   nav.nav-expanded{padding-bottom:calc(env(safe-area-inset-bottom,8px) + 6px)}
 
-  /* Espacio para bottom nav + top header */
-  .view{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px));padding-top:16px}
+  /* Espacio para bottom nav (manija + tabs) + top header */
+  .view{padding-bottom:calc(94px + env(safe-area-inset-bottom,0px));padding-top:16px}
 
   /* Formularios más compactos */
   .card{padding:16px 14px}
@@ -804,7 +804,7 @@ input[list] { cursor: text; }
 .modal-overlay.open{animation:modalIn .2s cubic-bezier(.34,1.56,.64,1)}
 @keyframes modalIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
 .table-wrap{scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
-@media(max-width:768px){#toast{bottom:calc(72px + env(safe-area-inset-bottom,0px) + 12px)}}
+@media(max-width:768px){#toast{bottom:calc(94px + env(safe-area-inset-bottom,0px) + 12px)}}
 tbody tr{cursor:pointer;user-select:none}
 tbody td.cell-selected{background:rgba(37,99,235,.1)!important;outline:1.5px solid rgba(37,99,235,.35);outline-offset:-1.5px}
 tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
@@ -965,8 +965,8 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
 </div>
 
 <nav>
-  <button type="button" class="nav-expand-handle" id="navExpandHandle" onclick="toggleNavExpand()" aria-label="Expandir menú" title="Expandir menú">
-    <span id="navExpandChevron">⌃</span>
+  <button type="button" class="nav-expand-handle" id="navExpandHandle" onclick="toggleNavExpand()" aria-label="Ver todos los menús">
+    <span id="navExpandChevron">⌃</span><span>Más opciones</span>
   </button>
   <div class="nav-logo"><span class="kv-kicks">KICKS</span><span class="kv-vault">VAULT</span></div>
   <div class="nav-divider"></div>
