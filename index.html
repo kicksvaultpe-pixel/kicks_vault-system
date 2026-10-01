@@ -708,11 +708,14 @@ input[list] { cursor: text; }
     transition:padding-bottom .25s ease;
   }
   nav .nav-logo,nav .nav-divider{display:none}
+  /* Tema/logout viven en el mobile-header de arriba, no en la barra de tabs */
+  nav>#themeBtn,nav>#logoutBtn{display:none!important}
   nav .nav-tabs{width:100%;justify-content:space-around;overflow:visible;transition:row-gap .25s ease}
   .nav-tab{
     flex:1;flex-direction:column;align-items:center;justify-content:center;
     gap:3px;padding:4px 2px 4px;font-size:8px;letter-spacing:.3px;
     display:flex;min-width:0;
+    user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
   }
   .nav-tab::after{
     bottom:auto;top:0;left:8px;right:8px;
@@ -729,6 +732,7 @@ input[list] { cursor: text; }
     background:var(--card);border:1px solid var(--border);border-bottom:none;
     color:var(--muted2);font-size:11px;cursor:pointer;touch-action:manipulation;
     -webkit-tap-highlight-color:transparent;
+    user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
   }
   .nav-expand-handle span{transition:transform .25s ease}
   nav.nav-expanded .nav-expand-handle span{transform:rotate(180deg)}
@@ -955,6 +959,9 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
 <!-- Header solo visible en mobile (logo) -->
 <div class="mobile-header">
   <div class="nav-logo"><span class="kv-kicks">KICKS</span><span class="kv-vault">VAULT</span></div>
+  <div style="flex:1"></div>
+  <button class="theme-btn theme-toggle-btn" id="themeBtnMobile" onclick="toggleTheme()" title="Modo oscuro"></button>
+  <button class="theme-btn logout-btn" id="logoutBtnMobile" onclick="kvSalir()" title="Cerrar sesión" style="display:none">⏻</button>
 </div>
 
 <nav>
@@ -997,8 +1004,8 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
       <span class="tab-label">Análisis</span>
     </button>
   </div>
-  <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Modo oscuro"></button>
-  <button class="theme-btn" id="logoutBtn" onclick="kvSalir()" title="Cerrar sesión" style="display:none">⏻</button>
+  <button class="theme-btn theme-toggle-btn" id="themeBtn" onclick="toggleTheme()" title="Modo oscuro"></button>
+  <button class="theme-btn logout-btn" id="logoutBtn" onclick="kvSalir()" title="Cerrar sesión" style="display:none">⏻</button>
 </nav>
 
 <!-- ══════════════════════════════════
@@ -4081,9 +4088,8 @@ function toggleTheme(){
   updateThemeBtn();
 }
 function updateThemeBtn(){
-  const btn=document.getElementById('themeBtn');
   const isDark=document.documentElement.getAttribute('data-theme')==='dark';
-  if(btn)btn.textContent=isDark?'☾':'☀';
+  document.querySelectorAll('.theme-toggle-btn').forEach(btn=>btn.textContent=isDark?'☾':'☀');
   // El tema se guarda en localStorage y se puede forzar sin importar el SO, asi
   // que las dos etiquetas <meta theme-color media="prefers-color-scheme:..">
   // no alcanzan solas -- si el celular esta en claro y el usuario forzo oscuro
@@ -7340,8 +7346,7 @@ async function kvSalir(){
 
 async function kvEntrar(){
   document.getElementById('login-gate').style.display='none';
-  const lb=document.getElementById('logoutBtn');
-  if(lb)lb.style.display='flex';
+  document.querySelectorAll('.logout-btn').forEach(lb=>lb.style.display='flex');
   if(_appIniciada)return;   // volver de un signIn no debe recargar todo de nuevo
   _appIniciada=true;
   await init();
