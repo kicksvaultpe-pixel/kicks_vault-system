@@ -826,6 +826,19 @@ input[list] { cursor: text; }
   .stats-row { grid-template-columns: 1fr !important; }
   /* Quitar min-width inline de los cols internos de stat cards */
   .sg-h, .sg-mn, .sg-mn-tot { min-width: 0 !important; }
+
+  /* OCs: barra de pago multiple -- texto arriba, botones abajo y a lo
+     ancho, mas facil de tocar que dos botones chicos lado a lado */
+  .oc-pago-bar{flex-direction:column;align-items:stretch}
+  .oc-pago-bar>div{flex-direction:column}
+  .oc-pago-bar .btn{width:100%}
+
+  /* Modal Pago Multiple: los 2 stats pueden apretarse en pantallas angostas */
+  .ocpm-stats{flex-wrap:wrap;gap:12px}
+
+  /* Analisis: pills de filtro del histograma de Capital Inmovilizado --
+     mismo criterio que .oc-chk-pago, area de toque mas generosa */
+  .an-filter-btn{padding:7px 14px}
 }
 
 @media(max-width:400px){
@@ -951,6 +964,15 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
 .rsv-tipo-pedido{background:rgba(109,40,217,.1);color:var(--purple);border:1px solid rgba(109,40,217,.25);border-radius:5px;padding:2px 7px;font-size:10px;font-weight:700;white-space:nowrap}
 .rsv-filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 .oc-filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.oc-filter-btn-pago.active{background:var(--orange);color:#fff;border-color:var(--orange)}
+.oc-pill-group{display:flex;gap:6px;flex-wrap:wrap}
+.oc-filtros-divider{width:1px;align-self:stretch;background:var(--border);margin:2px 2px}
+@media(max-width:900px){.oc-filtros-divider{display:none}}
+.oc-chk-pago{cursor:pointer;accent-color:var(--orange)}
+/* pointer:coarse = dedo, no mouse -- un checkbox nativo de 13px es facil de
+   fallar con el dedo aunque la pantalla sea grande (tablet), por eso esto
+   se activa por tipo de puntero y no por ancho de ventana. */
+@media(pointer:coarse){.oc-chk-pago{width:22px;height:22px}}
 /* ── RESERVAS DETAIL PANEL ── */
 #rsv-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:230;display:none;opacity:0;transition:opacity .2s;pointer-events:none}
 #rsv-overlay.open{display:block;opacity:1;pointer-events:all}
@@ -2515,33 +2537,36 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
     </div>
   </div>
 
-  <div class="table-toolbar" style="margin-bottom:12px">
-    <div class="combo-wrap" style="min-width:160px">
-      <input type="text" id="oc-f-estado" placeholder="Estado…" autocomplete="off" readonly
-        oninput="comboFilter('oc-f-estado','cl-oc-f-estado');renderOCTab()"
-        onfocus="comboOpen('oc-f-estado','cl-oc-f-estado')"
-        onblur="comboBlur('cl-oc-f-estado')"
-        onkeydown="comboKey(event,'oc-f-estado','cl-oc-f-estado')">
-      <span class="combo-arrow">▼</span>
-      <div class="combo-list" id="cl-oc-f-estado"></div>
+  <div class="oc-filtros" style="margin-bottom:12px">
+    <div class="table-toolbar" style="margin-bottom:8px">
+      <div class="oc-pill-group" id="oc-pill-estado">
+        <button class="btn btn-ghost btn-sm oc-filter-btn" data-f="" onclick="setOcFiltroEstado('',this)">Todas</button>
+        <button class="btn btn-ghost btn-sm oc-filter-btn active" data-f="ACTIVAS" onclick="setOcFiltroEstado('ACTIVAS',this)">Activas</button>
+        <button class="btn btn-ghost btn-sm oc-filter-btn" data-f="ENTREGADAS" onclick="setOcFiltroEstado('ENTREGADAS',this)">Entregadas</button>
+        <button class="btn btn-ghost btn-sm oc-filter-btn" data-f="CANCELADAS" onclick="setOcFiltroEstado('CANCELADAS',this)">Canceladas</button>
+      </div>
+      <div class="oc-filtros-divider"></div>
+      <div class="oc-pill-group" id="oc-pill-pago">
+        <button class="btn btn-ghost btn-sm oc-filter-btn oc-filter-btn-pago active" data-f="" onclick="setOcFiltroPago('',this)">Todas</button>
+        <button class="btn btn-ghost btn-sm oc-filter-btn oc-filter-btn-pago" data-f="PENDIENTE" onclick="setOcFiltroPago('PENDIENTE',this)">⏳ Pendientes de pago</button>
+      </div>
+      <div class="oc-filtros-divider"></div>
+      <div class="combo-wrap" style="min-width:150px">
+        <input type="text" id="oc-f-tipo" placeholder="Tipo…" autocomplete="off" readonly
+          oninput="comboFilter('oc-f-tipo','cl-oc-f-tipo');renderOCTab()"
+          onfocus="comboOpen('oc-f-tipo','cl-oc-f-tipo')"
+          onblur="comboBlur('cl-oc-f-tipo')"
+          onkeydown="comboKey(event,'oc-f-tipo','cl-oc-f-tipo')">
+        <span class="combo-arrow">▼</span>
+        <div class="combo-list" id="cl-oc-f-tipo"></div>
+      </div>
     </div>
-    <div class="combo-wrap" style="min-width:150px">
-      <input type="text" id="oc-f-tipo" placeholder="Tipo…" autocomplete="off" readonly
-        oninput="comboFilter('oc-f-tipo','cl-oc-f-tipo');renderOCTab()"
-        onfocus="comboOpen('oc-f-tipo','cl-oc-f-tipo')"
-        onblur="comboBlur('cl-oc-f-tipo')"
-        onkeydown="comboKey(event,'oc-f-tipo','cl-oc-f-tipo')">
-      <span class="combo-arrow">▼</span>
-      <div class="combo-list" id="cl-oc-f-tipo"></div>
+    <div class="table-toolbar">
+      <input type="text" id="oc-buscar" class="search-box" placeholder="Buscar orden, producto, tienda, tracking…"
+        oninput="renderOCTab()" style="flex:1;min-width:180px">
+      <button onclick="ocLimpiarFiltros()" style="flex-shrink:0;padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--muted2);font-size:11px;cursor:pointer;white-space:nowrap;font-family:inherit">× Limpiar</button>
+      <button class="btn" onclick="ocAbrirModal()" style="flex-shrink:0;background:var(--accent);color:#fff;border:none;padding:7px 14px;font-size:12px">✦ Nueva OC</button>
     </div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap">
-      <button class="btn btn-ghost btn-sm oc-filter-btn" data-f="" onclick="setOcFiltroActivo('',this)">Todas</button>
-      <button class="btn btn-ghost btn-sm oc-filter-btn active" data-f="activas" onclick="setOcFiltroActivo('activas',this)">Activas</button>
-    </div>
-    <input type="text" id="oc-buscar" class="search-box" placeholder="Buscar orden, producto, tienda, tracking…"
-      oninput="renderOCTab()" style="flex:1;min-width:180px">
-    <button onclick="ocLimpiarFiltros()" style="flex-shrink:0;padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--muted2);font-size:11px;cursor:pointer;white-space:nowrap;font-family:inherit">× Limpiar</button>
-    <button class="btn" onclick="ocAbrirModal()" style="flex-shrink:0;background:var(--accent);color:#fff;border:none;padding:7px 14px;font-size:12px">✦ Nueva OC</button>
   </div>
 
   <!-- Barra de pago multiple -- solo aparece con 1+ OC marcada -->
@@ -2557,7 +2582,7 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
     <table style="min-width:1400px">
       <thead>
         <tr>
-          <th style="width:30px"><input type="checkbox" id="oc-pago-sel-all" onchange="ocToggleSelAll(this.checked)" title="Seleccionar todas las que tienen crédito pendiente"></th>
+          <th style="width:30px"><input type="checkbox" class="oc-chk-pago" id="oc-pago-sel-all" onchange="ocToggleSelAll(this.checked)" title="Seleccionar todas las que tienen crédito pendiente"></th>
           <th style="width:70px">Código</th>
           <th style="width:74px">Fecha</th>
           <th style="min-width:170px">Descripción</th>
@@ -3164,7 +3189,7 @@ function comboPick(inputId, listId, val) {
   if (inputId === 'vt-cl-input') onPickVtCliente();
   if (inputId === 'vt-f-canal') loadVentas();
   if (inputId === 'clf-tipo') filterClientes();
-  if (inputId === 'oc-f-estado' || inputId === 'oc-f-tipo') renderOCTab();
+  if (inputId === 'oc-f-tipo') renderOCTab();
   if (inputId === 'fc-accion') renderFlujoTabla();
   if (inputId === 'an-dup-cat') anRenderDuplicados();
   if (inputId === 'cp-moneda') toggleMoneda();
@@ -3220,12 +3245,24 @@ async function loadOCs(){
 const OC_CERRADAS = ['ENTREGADO EN PERU','CANCELADO'];
 const ocAbierta = oc => !OC_CERRADAS.includes(oc.estado);
 
-// Filtro rapido Todas/Activas, igual criterio que Reservas: arranca en
-// Activas para no tapar la tabla con ordenes ya entregadas o canceladas.
-let ocFiltroActivo='activas';
-function setOcFiltroActivo(val,btn){
-  ocFiltroActivo=val;
-  document.querySelectorAll('.oc-filter-btn').forEach(b=>b.classList.remove('active'));
+// Filtro de estado -- reemplaza al combo "Estado..." (5 etapas sueltas) y al
+// viejo toggle Todas/Activas por un solo grupo de 4 pills. Arranca en
+// Activas, igual criterio que Reservas, para no tapar la tabla con ordenes
+// ya entregadas o canceladas.
+let ocFiltroEstado='ACTIVAS';
+function setOcFiltroEstado(val,btn){
+  ocFiltroEstado=val;
+  document.querySelectorAll('#oc-pill-estado .oc-filter-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  renderOCTab();
+}
+
+// Filtro de pago -- independiente del de estado (una OC puede estar
+// "Entregada" y seguir debiendo, o "En camino" y ya pagada).
+let ocFiltroPago='';
+function setOcFiltroPago(val,btn){
+  ocFiltroPago=val;
+  document.querySelectorAll('#oc-pill-pago .oc-filter-btn').forEach(b=>b.classList.remove('active'));
   if(btn)btn.classList.add('active');
   renderOCTab();
 }
@@ -3518,12 +3555,15 @@ function csProdChange(){
 
 // ── OC TAB ──
 function ocLimpiarFiltros(){
-  ['oc-f-estado','oc-f-tipo','oc-buscar'].forEach(id=>{
+  ['oc-f-tipo','oc-buscar'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
-  ocFiltroActivo='activas';
-  document.querySelectorAll('.oc-filter-btn').forEach(b=>
-    b.classList.toggle('active', b.dataset.f==='activas'));
+  ocFiltroEstado='ACTIVAS';
+  ocFiltroPago='';
+  document.querySelectorAll('#oc-pill-estado .oc-filter-btn').forEach(b=>
+    b.classList.toggle('active', b.dataset.f==='ACTIVAS'));
+  document.querySelectorAll('#oc-pill-pago .oc-filter-btn').forEach(b=>
+    b.classList.toggle('active', b.dataset.f===''));
   renderOCTab();
 }
 
@@ -3553,7 +3593,6 @@ const OC_BADGE = {
 
 function renderOCTab(){
   const s=id=>document.getElementById(id);
-  const estadoF=noEmoji((s('oc-f-estado')||{}).value||'');
   const tipoF  =noEmoji((s('oc-f-tipo')||{}).value||'');
   const q=((s('oc-buscar')||{}).value||'').toLowerCase().trim();
 
@@ -3574,8 +3613,10 @@ function renderOCTab(){
   put('oc-st-total-usd', enCalle.length?fmtUsd(usd(enCalle)):'—');
 
   let ocs=(ocCache||[]).slice();
-  if(ocFiltroActivo==='activas') ocs=ocs.filter(ocAbierta);
-  if(estadoF) ocs=ocs.filter(o=>o.estado===estadoF);
+  if(ocFiltroEstado==='ACTIVAS')         ocs=ocs.filter(ocAbierta);
+  else if(ocFiltroEstado==='ENTREGADAS') ocs=ocs.filter(o=>o.estado==='ENTREGADO EN PERU');
+  else if(ocFiltroEstado==='CANCELADAS') ocs=ocs.filter(o=>o.estado==='CANCELADO');
+  if(ocFiltroPago==='PENDIENTE') ocs=ocs.filter(o=>ocPendienteUsd(o)>0);
   if(tipoF)   ocs=ocs.filter(o=>o.tipo===tipoF);
   // Busca por varias palabras: "amiri ups" trae lo que cumpla las dos, en
   // cualquier campo. Antes exigia que la frase completa estuviera en un solo
@@ -3611,7 +3652,7 @@ function renderOCTab(){
     const uni=v=>v?`<span class="td-unit">${esc(v)}</span>`:'<span class="td-muted">—</span>';
     return `<tr class="${cerrado?'row-dim':''}">
       <td style="text-align:center">${pendUsd>0
-        ?`<input type="checkbox" ${ocPagoSel.has(oc.codigo)?'checked':''} onchange="ocToggleSelPago('${oc.codigo}',this.checked)" title="Pendiente: ${fmtUsd(pendUsd)}">`
+        ?`<input type="checkbox" class="oc-chk-pago" ${ocPagoSel.has(oc.codigo)?'checked':''} onchange="ocToggleSelPago('${oc.codigo}',this.checked)" title="Pendiente: ${fmtUsd(pendUsd)}">`
         :'<span class="td-muted">—</span>'}</td>
       <td><span class="td-code oc-cod" style="color:var(--accent)"
             title="Ver los productos de esta orden"
@@ -4678,7 +4719,6 @@ function fillDataLists(){
   comboSetData('cl-vt-f-canal', ['— Todos —','📸 INSTAGRAM','💬 WHATSAPP','👥 FACEBOOK','🏪 PRESENCIAL','🔹 OTRO']);
   comboSetData('cl-clf-tipo', ['— Todos —','👤 REGULAR','⭐ VIP','📦 MAYORISTA']);
   const OC_OPC=['🛒 COMPRADO','✈️ EN CAMINO USA','📦 ENTREGADO EN USA','✅ ENTREGADO EN PERU','❌ CANCELADO'];
-  comboSetData('cl-oc-f-estado', ['— Todos —', ...OC_OPC]);
   comboSetData('cl-ocm-estado', OC_OPC);
   comboSetData('cl-ocm-tipo',   ['✈️ IMPORTACIÓN','🏪 LOCAL']);
   comboSetData('cl-ocm-qc',     ['Por enviar','Enviado a QC','GOAT','No aplica']);
