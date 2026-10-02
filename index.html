@@ -3449,9 +3449,11 @@ function renderOCTab(){
         return `<span title="${tip}">${fmtUsd(val.usd)}${val.calc&&val.sinUsd?'<span class="oc-mas"> *</span>':''}</span>`;
       })()}</td>
       <td class="td-unit td-trunc" title="${esc(oc.notas||'')}">${esc(oc.notas||'—')}</td>
-      <td class="right">${arts.length
-        ? `<span class="badge badge-muted" style="cursor:pointer" onclick="ocVerArticulos('${oc.codigo}')">${arts.length}</span>`
-        : `<span class="td-muted" style="cursor:pointer" title="Vincular artículos a esta orden" onclick="ocVerArticulos('${oc.codigo}')">— <i style="font-style:normal;opacity:.6">＋</i></span>`}</td>
+      <td class="right" style="cursor:pointer;padding:0" onclick="ocVerArticulos('${oc.codigo}')" title="Ver artículos de esta orden">
+        <div style="padding:10px 14px">${arts.length
+          ? `<span class="badge badge-muted">${arts.length}</span>`
+          : `<span class="td-muted">— <i style="font-style:normal;opacity:.6">＋</i></span>`}</div>
+      </td>
       <td class="right"><button class="oc-edit-btn" onclick="ocAbrirModal('${oc.codigo}')">Editar</button></td>
     </tr>`;
   });
