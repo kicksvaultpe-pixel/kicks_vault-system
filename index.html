@@ -3489,22 +3489,34 @@ function ocPintarArticulos(){
   cuerpo.innerHTML = arts.length
     ? `<table class="oc-arts-tabla"><thead><tr>
          <th style="width:88px">Código</th><th>Producto</th><th style="width:66px">Talla</th>
+         <th class="right" style="width:92px">Pendiente</th>
          <th style="width:52px">Pago</th><th style="width:126px">Estado</th>
-         <th style="width:46px"></th></tr></thead><tbody>`
-      + arts.map(p=>`<tr>
+         <th style="width:46px"></th></tr></thead><tbody id="oc-arts-tbody">`
+      + arts.map(p=>{
+          // Lo que todavia se debe: el estimado al comprar, no precio_final
+          // (que ya puede traer costos extra sumados) -- mismo criterio que
+          // usa Flujo de Caja para esta misma deuda.
+          const pend = p.pago_estado==='PENDIENTE'
+            ? (p.moneda==='USD' ? fmtUsdAmt(p.precio_compra_usd) : fmt(p.precio_compra_soles||0))
+            : null;
+          return`<tr>
           <td><span class="td-code">${p.codigo_producto}</span></td>
           <td class="td-main oc-arts-nom" title="${esc(nom(p))}">${esc(nom(p))}</td>
           <td class="td-unit">${esc(p.talla||'—')}</td>
+          <td class="td-amt right">${pend?pend:'<span class="td-muted">—</span>'}</td>
           <td>${p.pago_estado==='PENDIENTE'
             ? '<span class="td-pend" title="Comprado a crédito, aún sin pagar">⏳</span>'
             : '<span class="td-muted">—</span>'}</td>
           <td><span class="badge badge-muted">${p.estado}</span></td>
           <td class="right"><button class="oc-quitar" title="Quitar de esta orden"
               onclick="ocQuitarArticulo('${p.codigo_producto}')">×</button></td>
-        </tr>`).join('') + '</tbody></table>'
+        </tr>`;}).join('') + '</tbody></table>'
     : '<div style="text-align:center;padding:22px;color:var(--muted2);font-size:12px">'
       +'Todavía no hay productos en esta orden.<br>'
       +'<span style="font-size:11px">Se registran cuando la compra llega a Perú.</span></div>';
+  // El tbody se recrea entero arriba, asi que initRowSel se reengancha cada
+  // vez (ya se cuida de no duplicar listeners si el nodo fuera el mismo).
+  if(arts.length) initRowSel('oc-arts-tbody');
 
   // buscador de productos sueltos
   const q=(document.getElementById('oc-arts-buscar')?.value||'').toLowerCase().trim();
