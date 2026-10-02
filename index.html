@@ -7289,7 +7289,31 @@ document.addEventListener('keydown',function(e){
         .sort((a,b)=>tds.indexOf(a)-tds.indexOf(b))
         .map(td=>td.innerText.trim().replace(/\s+/g,' ')).join('\t');
     }).join('\n');
-    navigator.clipboard.writeText(tsv).then(()=>toast('✓ '+_selCells.size+' casilla'+(_selCells.size!==1?'s':'')+' copiada'+(_selCells.size!==1?'s':''),'ok'));
+    const n=_selCells.size;
+    const avisar=()=>toast('✓ '+n+' casilla'+(n!==1?'s':'')+' copiada'+(n!==1?'s':''),'ok');
+    // navigator.clipboard.writeText() puede fallar sin avisar -- sin
+    // contexto seguro (http plano), sin permiso, o el navegador lo bloquea
+    // sin mas. Antes eso se traducia en "no pasa nada" al apretar Ctrl+C,
+    // sin error ni confirmacion. Si falla, se cae a un <textarea> oculto +
+    // execCommand('copy'), que todavia funciona en esos casos; y si ni eso
+    // se puede, por lo menos avisa que fallo en vez de quedarse mudo.
+    const copiarConFallback=()=>{
+      try{
+        const ta=document.createElement('textarea');
+        ta.value=tsv; ta.style.position='fixed'; ta.style.opacity='0';
+        document.body.appendChild(ta); ta.focus(); ta.select();
+        const ok=document.execCommand('copy');
+        document.body.removeChild(ta);
+        if(ok) avisar(); else toast('⚠ No se pudo copiar al portapapeles','err');
+      }catch(err){
+        toast('⚠ No se pudo copiar al portapapeles','err');
+      }
+    };
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(tsv).then(avisar).catch(copiarConFallback);
+    }else{
+      copiarConFallback();
+    }
   }
 });
 
