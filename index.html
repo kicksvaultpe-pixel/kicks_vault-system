@@ -7232,12 +7232,29 @@ function initRowSel(tbodyId){
     if(!cell||['BUTTON','A','INPUT','SELECT'].includes(e.target.tagName))return;
     const row=cell.closest('tr');
     if(!row)return;
-    if(e.shiftKey&&_selLast&&tb.contains(_selLast)&&_selLast.closest('tr')===row){
-      const cellsInRow=[...row.querySelectorAll('td')];
-      const a=cellsInRow.indexOf(_selLast),b=cellsInRow.indexOf(cell);
-      const[lo,hi]=[Math.min(a,b),Math.max(a,b)];
-      if(!e.ctrlKey&&!e.metaKey){_selCells.forEach(c=>c.classList.remove('cell-selected'));_selCells.clear();}
-      cellsInRow.slice(lo,hi+1).forEach(c=>{_selCells.add(c);c.classList.add('cell-selected');});
+    if(e.shiftKey&&_selLast&&tb.contains(_selLast)){
+      // Rango rectangular entre la celda ancla (_selLast) y la clickeada,
+      // como en una hoja de calculo: todas las filas Y columnas entre
+      // ambas, no solo la fila donde se hizo shift+click.
+      const filas=[...tb.querySelectorAll('tr')].filter(r=>!r.classList.contains('pag-row'));
+      const lastRow=_selLast.closest('tr');
+      const riA=filas.indexOf(lastRow), riB=filas.indexOf(row);
+      if(riA===-1||riB===-1){
+        // La celda ancla ya no esta en esta tabla (se repagino/redibujo):
+        // no hay rango valido que trazar, se trata como un click simple.
+        _selCells.forEach(c=>c.classList.remove('cell-selected'));_selCells.clear();
+        _selCells.add(cell);cell.classList.add('cell-selected');
+      }else{
+        const[rLo,rHi]=[Math.min(riA,riB),Math.max(riA,riB)];
+        const ciA=[...lastRow.querySelectorAll('td')].indexOf(_selLast);
+        const ciB=[...row.querySelectorAll('td')].indexOf(cell);
+        const[cLo,cHi]=[Math.min(ciA,ciB),Math.max(ciA,ciB)];
+        if(!e.ctrlKey&&!e.metaKey){_selCells.forEach(c=>c.classList.remove('cell-selected'));_selCells.clear();}
+        for(let ri=rLo;ri<=rHi;ri++){
+          [...filas[ri].querySelectorAll('td')].slice(cLo,cHi+1)
+            .forEach(c=>{_selCells.add(c);c.classList.add('cell-selected');});
+        }
+      }
     }else if(e.ctrlKey||e.metaKey){
       if(_selCells.has(cell)){_selCells.delete(cell);cell.classList.remove('cell-selected');}
       else{_selCells.add(cell);cell.classList.add('cell-selected');}
