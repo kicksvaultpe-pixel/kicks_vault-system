@@ -168,6 +168,11 @@ button:active,[role="button"]:active{
 .btn-sm{padding:7px 14px;font-size:11px}
 .btn-pay{background:rgba(194,65,12,.1);border:1px solid rgba(194,65,12,.3);color:var(--orange);padding:4px 11px;font-size:10px;font-weight:700;letter-spacing:.5px;border-radius:6px;cursor:pointer;transition:background .2s,color .2s,border-color .2s,box-shadow .2s;white-space:nowrap}@media (hover:hover) and (pointer:fine){
 .btn-pay:hover{background:var(--orange);color:#fff;border-color:var(--orange);box-shadow:0 2px 12px rgba(194,65,12,.3)}}
+/* Mismo lenguaje visual que .btn-pay (Inventario) para "falta pagar",
+   pero como pastilla fija en vez de boton -- en Reservas lo que falta
+   es el saldo del cliente, no hay una accion de un click que cobrarlo. */
+.rsv-saldo-pend{display:inline-flex;align-items:center;gap:4px;background:rgba(194,65,12,.1);border:1px solid rgba(194,65,12,.3);color:var(--orange);padding:3px 9px;border-radius:6px;font-weight:700;font-size:11px;white-space:nowrap}
+.rsv-saldo-ok{color:var(--green);font-weight:700}
 .btn-cancel{background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.2);color:var(--red);padding:4px 10px;font-size:10px;font-weight:700;border-radius:6px;cursor:pointer;transition:background .2s,color .2s,box-shadow .2s;white-space:nowrap}@media (hover:hover) and (pointer:fine){
 .btn-cancel:hover{background:var(--red);color:#fff;box-shadow:0 2px 12px rgba(220,38,38,.3)}}
 
@@ -3908,7 +3913,9 @@ function renderReservas(){
       <td class="td-trunc" style="font-size:11px;color:var(--text)">${productoFull}</td>
       <td class="right td-amt">${fmt(acordado)}</td>
       <td class="right td-amt" style="color:var(--green)">${fmt(r.total_abonado)}</td>
-      <td class="right td-amt" style="${saldo<=0?'color:var(--green)':'color:var(--accent)'}">${fmt(saldo)}</td>
+      <td class="right td-amt">${saldo<=0
+        ?`<span class="rsv-saldo-ok">✓ ${fmt(saldo)}</span>`
+        :`<span class="rsv-saldo-pend">⏳ ${fmt(saldo)}</span>`}</td>
       <td>${estadoBadge}</td>
       <td style="text-align:center"><button class="btn-edit-inv" onclick="event.stopPropagation();abrirReservaDetalle('${r.codigo_reserva}')" title="Ver detalle">›</button></td>
     </tr>`;
