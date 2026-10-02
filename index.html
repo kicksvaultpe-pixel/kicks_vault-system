@@ -3499,7 +3499,7 @@ function ocPintarArticulos(){
           // (que ya puede traer costos extra sumados) -- mismo criterio que
           // usa Flujo de Caja para esta misma deuda.
           const pend = p.pago_estado==='PENDIENTE'
-            ? (p.moneda==='USD' ? fmtUsdAmt(p.precio_compra_usd) : fmt(p.precio_compra_soles||0))
+            ? (p.moneda==='USD' ? fmtUsd(p.precio_compra_usd) : fmt(p.precio_compra_soles||0))
             : null;
           return`<tr>
           <td><span class="td-code">${p.codigo_producto}</span></td>
