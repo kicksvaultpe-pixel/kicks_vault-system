@@ -178,6 +178,18 @@ button:active,[role="button"]:active{
 
 /* TABLE */
 .table-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.oc-pago-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:rgba(194,65,12,.08);border:1px solid rgba(194,65,12,.25);border-radius:10px;padding:10px 16px;margin-bottom:14px;font-size:12px;color:var(--text)}
+.oc-pago-bar b{color:var(--orange);font-family:'Archivo Black'}
+.ocpm-row{display:grid;grid-template-columns:1fr auto auto;gap:14px;align-items:baseline;padding:8px 4px;border-bottom:1px solid var(--border);font-size:12px}
+.ocpm-row:last-child{border-bottom:none}
+.ocpm-row-cod{font-family:'Archivo Black';color:var(--accent);display:flex;flex-direction:column;gap:1px}
+.ocpm-row-desc{font-family:'Archivo';font-weight:400;color:var(--muted2);font-size:10.5px}
+.ocpm-row-usd{color:var(--muted2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ocpm-row-soles{font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ocpm-stats{display:flex;gap:20px;background:var(--surface);border-radius:10px;padding:10px 16px;margin-bottom:12px}
+.ocpm-stat{flex:1}
+.ocpm-stat .l{font-size:10px;color:var(--muted2);letter-spacing:.3px;text-transform:uppercase}
+.ocpm-stat .v{font-family:'Archivo Black';font-size:15px;color:var(--text);margin-top:2px}
 .search-box{flex:1;min-width:160px;background:var(--bg);border:1px solid var(--border2);border-radius:9px;padding:10px 14px;color:var(--text);font-family:'Archivo';font-size:12px;outline:none}
 .search-box:focus{border-color:var(--accent)}
 .filter-select{background:var(--surface);border:1px solid var(--border2);border-radius:9px;padding:10px 14px;color:var(--text);font-family:'Archivo';font-size:12px;outline:none;cursor:pointer;transition:border .15s}
@@ -2532,10 +2544,20 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
     <button class="btn" onclick="ocAbrirModal()" style="flex-shrink:0;background:var(--accent);color:#fff;border:none;padding:7px 14px;font-size:12px">✦ Nueva OC</button>
   </div>
 
+  <!-- Barra de pago multiple -- solo aparece con 1+ OC marcada -->
+  <div id="oc-pago-bar" class="oc-pago-bar" style="display:none">
+    <span id="oc-pago-bar-text">—</span>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-sm" style="background:var(--orange);color:#fff;border:none" onclick="ocAbrirPagoMultiple()">Pagar seleccionadas</button>
+      <button class="btn btn-ghost btn-sm" onclick="ocLimpiarSelPago()">Cancelar selección</button>
+    </div>
+  </div>
+
   <div class="table-wrap">
     <table style="min-width:1400px">
       <thead>
         <tr>
+          <th style="width:30px"><input type="checkbox" id="oc-pago-sel-all" onchange="ocToggleSelAll(this.checked)" title="Seleccionar todas las que tienen crédito pendiente"></th>
           <th style="width:70px">Código</th>
           <th style="width:74px">Fecha</th>
           <th style="min-width:170px">Descripción</th>
@@ -2553,7 +2575,7 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
         </tr>
       </thead>
       <tbody id="oc-tbody">
-        <tr class="loading-row"><td colspan="14"><div class="spinner"></div></td></tr>
+        <tr class="loading-row"><td colspan="15"><div class="spinner"></div></td></tr>
       </tbody>
     </table>
   </div>
@@ -3226,6 +3248,165 @@ function ocValorUsd(oc, arts){
     : {usd:parseFloat(oc.valor_usd||0), calc:false, sinUsd:0, n:items.length};
 }
 
+// Cuanto debe TODAVIA esta OC en dolares -- solo productos a credito, en USD,
+// sin pagar. Es la base del pago multiple: una OC sin nada aca no tiene
+// sentido marcarla para pagar.
+function ocPendienteUsd(oc){
+  return (inventarioCache||[])
+    .filter(p=>p.orden_compra===oc.codigo && p.pago_estado==='PENDIENTE' && p.moneda==='USD')
+    .reduce((t,p)=>t+parseFloat(p.precio_compra_usd||0),0);
+}
+
+// ════════════════════════════════════════════════════════════
+// PAGO MULTIPLE DE OCS
+// Pagas varias ordenes con una sola transferencia en soles; el sistema
+// reparte ese monto entre los productos pendientes proporcional a su
+// USD, con el tipo de cambio quedando implicito (monto_soles/total_usd)
+// en vez de tener que calcularlo a mano por orden.
+// ════════════════════════════════════════════════════════════
+let ocPagoSel=new Set();
+let _ocsVisibles=[]; // ultimo resultado filtrado de renderOCTab() -- "seleccionar todas" opera sobre esto, no sobre ocCache entero
+
+function ocToggleSelPago(codigo,checked){
+  if(checked)ocPagoSel.add(codigo); else ocPagoSel.delete(codigo);
+  ocRenderBarraPago();
+}
+function ocToggleSelAll(checked){
+  if(checked){
+    // Solo lo que esta filtrado/visible ahora mismo, no ocCache entero --
+    // si hay un filtro o busqueda activa, "todas" tiene que respetarlo.
+    _ocsVisibles.forEach(oc=>{ if(ocPendienteUsd(oc)>0) ocPagoSel.add(oc.codigo); });
+  }else{
+    ocPagoSel.clear();
+  }
+  renderOCTab();
+}
+function ocLimpiarSelPago(){
+  ocPagoSel.clear();
+  renderOCTab();
+}
+function ocRenderBarraPago(){
+  const bar=document.getElementById('oc-pago-bar');
+  const selAll=document.getElementById('oc-pago-sel-all');
+  if(!bar)return;
+  // Checkbox de cabecera: refleja los 3 estados contra lo VISIBLE ahora
+  // mismo (filtro/busqueda aplicados), no contra ocCache entero.
+  if(selAll){
+    const pendientesVisibles=_ocsVisibles.filter(oc=>ocPendienteUsd(oc)>0);
+    const marcadasVisibles=pendientesVisibles.filter(oc=>ocPagoSel.has(oc.codigo));
+    selAll.checked=pendientesVisibles.length>0 && marcadasVisibles.length===pendientesVisibles.length;
+    selAll.indeterminate=marcadasVisibles.length>0 && marcadasVisibles.length<pendientesVisibles.length;
+  }
+  const ocs=[...ocPagoSel].map(cod=>(ocCache||[]).find(o=>o.codigo===cod)).filter(Boolean);
+  if(!ocs.length){
+    bar.style.display='none';
+    return;
+  }
+  const totalUsd=ocs.reduce((s,oc)=>s+ocPendienteUsd(oc),0);
+  bar.style.display='flex';
+  document.getElementById('oc-pago-bar-text').innerHTML=
+    `<b>${ocs.length}</b> orden${ocs.length!==1?'es':''} seleccionada${ocs.length!==1?'s':''} · <b>${fmtUsd(totalUsd)}</b> pendiente`;
+}
+
+// Reparte montoSolesTotal entre items (cada uno con su propio peso en USD)
+// de forma proporcional, y ajusta el redondeo para que la suma final cierre
+// EXACTO contra montoSolesTotal -- metodo del mayor residuo (el mismo que se
+// usa para repartir una cuenta o prorratear impuestos): redondea todo hacia
+// abajo primero, y los centavos que faltan se los da a quienes mas perdieron
+// al redondear, de a uno, hasta que no sobra ni falta nada.
+function ocProrratear(items,montoSolesTotal){
+  const totalUsd=items.reduce((s,i)=>s+i.usd,0);
+  if(totalUsd<=0)return items.map(i=>({...i,soles:0}));
+  const centTotal=Math.round(montoSolesTotal*100);
+  const conRaw=items.map(i=>{
+    const rawCent=i.usd/totalUsd*centTotal;
+    const floorCent=Math.floor(rawCent);
+    return{...i,floorCent,frac:rawCent-floorCent};
+  });
+  const sumFloor=conRaw.reduce((s,i)=>s+i.floorCent,0);
+  let resto=centTotal-sumFloor; // centavos que faltan repartir (siempre >=0 aca)
+  const orden=[...conRaw].sort((a,b)=>b.frac-a.frac);
+  for(let i=0;i<resto && i<orden.length;i++) orden[i].floorCent+=1;
+  return conRaw.map(i=>({...i,soles:Math.round(i.floorCent)/100}));
+}
+
+// Productos a credito en USD, sin pagar, de las OCs dadas -- la lista plana
+// sobre la que corre ocProrratear(). Plana a proposito: prorratear en un
+// solo paso sobre todos los productos juntos evita que un prorrateo por OC
+// y otro despues por producto dentro de cada OC descuadren entre si.
+function ocProductosPendientesDe(codigosOC){
+  const set=new Set(codigosOC);
+  return (inventarioCache||[])
+    .filter(p=>set.has(p.orden_compra) && p.pago_estado==='PENDIENTE' && p.moneda==='USD' && parseFloat(p.precio_compra_usd||0)>0)
+    .map(p=>({
+      codigo:p.codigo_producto, oc:p.orden_compra,
+      usd:parseFloat(p.precio_compra_usd||0),
+      nombre:[p.marca,p.modelo,p.colorway].filter(Boolean).join(' ')||p.codigo_producto,
+    }));
+}
+
+let _ocPagoPreview=[];
+function ocAbrirPagoMultiple(){
+  if(!ocPagoSel.size)return;
+  document.getElementById('ocpm-fecha').value=fechaHoy();
+  document.getElementById('ocpm-monto').value='';
+  ocPagoMultipleRecalcular();
+  document.getElementById('modal-oc-pago-multiple')?.classList.add('open');
+}
+function ocCerrarPagoMultiple(){
+  document.getElementById('modal-oc-pago-multiple')?.classList.remove('open');
+}
+function ocPagoMultipleRecalcular(){
+  const productos=ocProductosPendientesDe([...ocPagoSel]);
+  const totalUsd=productos.reduce((s,p)=>s+p.usd,0);
+  const montoSoles=parseFloat(document.getElementById('ocpm-monto').value)||0;
+  _ocPagoPreview=ocProrratear(productos,montoSoles);
+  const tc=totalUsd>0?montoSoles/totalUsd:0;
+
+  document.getElementById('ocpm-total-usd').textContent=fmtUsd(totalUsd);
+  document.getElementById('ocpm-tc').textContent=tc>0?tc.toFixed(4):'—';
+
+  // Agrupa el preview por OC para que se revise como "esta orden recibe tanto",
+  // aunque el prorrateo real ya corrio a nivel producto (ver ocProrratear).
+  const porOc=new Map();
+  _ocPagoPreview.forEach(p=>{
+    if(!porOc.has(p.oc))porOc.set(p.oc,{usd:0,soles:0,n:0});
+    const d=porOc.get(p.oc); d.usd+=p.usd; d.soles+=p.soles; d.n++;
+  });
+  const filas=[...ocPagoSel].map(cod=>{
+    const oc=(ocCache||[]).find(o=>o.codigo===cod);
+    const d=porOc.get(cod)||{usd:0,soles:0,n:0};
+    return`<div class="ocpm-row">
+      <span class="ocpm-row-cod">${cod}<span class="ocpm-row-desc">${esc(oc?.descripcion||oc?.nombre||'')}</span></span>
+      <span class="ocpm-row-usd">${fmtUsd(d.usd)}</span>
+      <span class="ocpm-row-soles">${d.n?fmt(d.soles):'—'}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('ocpm-preview').innerHTML=filas||'<div style="padding:10px;color:var(--muted2);font-size:12px">Nada pendiente en las OCs seleccionadas.</div>';
+}
+async function ocConfirmarPagoMultiple(){
+  const fecha=document.getElementById('ocpm-fecha').value;
+  const montoSoles=parseFloat(document.getElementById('ocpm-monto').value)||0;
+  if(!fecha){toast('Ingresa la fecha de pago','warn');return;}
+  if(!montoSoles){toast('Ingresa el monto pagado','warn');return;}
+  if(!_ocPagoPreview.length){toast('No hay productos pendientes para pagar en lo seleccionado','warn');return;}
+  const btn=document.getElementById('ocpm-btn-confirmar');
+  setLoading(btn,true);
+  let ok=0,fail=0;
+  for(const item of _ocPagoPreview){
+    const{error}=await db.rpc('pagar_credito',{p_codigo:item.codigo,p_monto_soles:item.soles,p_fecha:fecha});
+    if(error){fail++;console.error('pagar_credito',item.codigo,error);} else ok++;
+  }
+  setLoading(btn,false,'✓ Confirmar Pago');
+  if(fail) toast(`⚠ ${ok} producto${ok!==1?'s':''} pagados, ${fail} fallaron — revisa la consola`,'warn');
+  else toast(`✓ ${ok} producto${ok!==1?'s':''} pagados · ${fmt(montoSoles)} total`,'ok');
+  ocCerrarPagoMultiple();
+  ocPagoSel.clear();
+  await loadInventario();
+  await loadOCs();
+  await loadFlujo(); // de una, aunque no estes parado en ese tab -- ver nota al usuario
+}
+
 function renderOCSelectExistente(){
   const et = oc => `${oc.codigo}${oc.descripcion||oc.nombre?' · '+(oc.descripcion||oc.nombre):''} — ${oc.tipo}`;
   // Compra a credito: solo las ordenes todavia abiertas.
@@ -3413,10 +3594,12 @@ function renderOCTab(){
     });
   }
   ocs.sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||'')||(b.codigo||'').localeCompare(a.codigo||''));
+  _ocsVisibles=ocs;
 
   const _filasOcs=ocs.map(oc=>{
     const arts=inventarioCache.filter(x=>x.orden_compra===oc.codigo);
     const val=ocValorUsd(oc,arts);
+    const pendUsd=ocPendienteUsd(oc);
     const [cls,txt]=OC_BADGE[oc.estado]||['badge-muted',oc.estado||'—'];
     const cerrado=!ocAbierta(oc);
     // El tracking puede traer varios numeros separados por " / ": se muestra el
@@ -3427,6 +3610,9 @@ function renderOCTab(){
       : '<span class="td-muted">—</span>';
     const uni=v=>v?`<span class="td-unit">${esc(v)}</span>`:'<span class="td-muted">—</span>';
     return `<tr class="${cerrado?'row-dim':''}">
+      <td style="text-align:center">${pendUsd>0
+        ?`<input type="checkbox" ${ocPagoSel.has(oc.codigo)?'checked':''} onchange="ocToggleSelPago('${oc.codigo}',this.checked)" title="Pendiente: ${fmtUsd(pendUsd)}">`
+        :'<span class="td-muted">—</span>'}</td>
       <td><span class="td-code oc-cod" style="color:var(--accent)"
             title="Ver los productos de esta orden"
             onclick="ocVerArticulos('${oc.codigo}')">${oc.codigo}</span></td>
@@ -3462,8 +3648,9 @@ function renderOCTab(){
       <td class="right"><button class="oc-edit-btn" onclick="ocAbrirModal('${oc.codigo}')">Editar</button></td>
     </tr>`;
   });
-  pagRender('ocs', _filasOcs, 'oc-tbody', 14,
-    '<tr><td colspan="14" style="text-align:center;padding:32px;color:var(--muted2)">Sin órdenes de compra</td></tr>');
+  pagRender('ocs', _filasOcs, 'oc-tbody', 15,
+    '<tr><td colspan="15" style="text-align:center;padding:32px;color:var(--muted2)">Sin órdenes de compra</td></tr>');
+  ocRenderBarraPago();
 }
 
 // Los articulos de una OC salen del inventario: un producto apunta a su orden
@@ -8692,6 +8879,47 @@ kvArrancar();
       <button class="btn" id="oc-arts-add" onclick="ocAgregarArticulos()" disabled
         style="flex:1;background:var(--accent);color:#fff;border:none">Selecciona productos para agregar</button>
       <button class="btn btn-ghost" onclick="ocCerrarArticulos()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PAGO MULTIPLE DE OCS -->
+<div class="modal-overlay" id="modal-oc-pago-multiple">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-title">
+      <span>Pago Múltiple de OCs</span>
+      <button class="modal-close" onclick="ocCerrarPagoMultiple()">&times;</button>
+    </div>
+
+    <div class="form-grid g2" style="margin-bottom:14px">
+      <div class="field">
+        <label>Fecha de pago</label>
+        <input type="date" id="ocpm-fecha">
+      </div>
+      <div class="field">
+        <label>Monto pagado S/.</label>
+        <input type="number" id="ocpm-monto" placeholder="0.00" step="0.01" oninput="ocPagoMultipleRecalcular()">
+      </div>
+    </div>
+
+    <div class="ocpm-stats">
+      <div class="ocpm-stat">
+        <div class="l">Total USD pendiente</div>
+        <div class="v" id="ocpm-total-usd">—</div>
+      </div>
+      <div class="ocpm-stat">
+        <div class="l">Tipo de cambio efectivo</div>
+        <div class="v" id="ocpm-tc">—</div>
+      </div>
+    </div>
+
+    <div class="card-label" style="margin-bottom:6px">Reparto por orden</div>
+    <div id="ocpm-preview" style="max-height:260px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;padding:4px 10px;margin-bottom:16px"></div>
+
+    <div style="display:flex;gap:8px">
+      <button class="btn" id="ocpm-btn-confirmar" onclick="ocConfirmarPagoMultiple()"
+        style="flex:1;background:var(--orange);color:#fff;border:none">✓ Confirmar Pago</button>
+      <button class="btn btn-ghost" onclick="ocCerrarPagoMultiple()">Cancelar</button>
     </div>
   </div>
 </div>
