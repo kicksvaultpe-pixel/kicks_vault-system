@@ -4434,15 +4434,25 @@ async function loadReservas(){
   if(error){toast('Error cargando reservas: '+error.message,'err');return;}
   reservasCache=(data||[]).map(r=>({
     ...r,
-    total_abonado:(r.abonos||[]).reduce((s,a)=>s+parseFloat(a.monto||0),0)
+      // A centimos: es plata, y la suma cruda de floats dejaba restos de
+      // 1e-14 que hacian que la misma reserva fuera 'pendiente' en la tabla
+      // y 'pagada' en el modal.
+      total_abonado:Math.round((r.abonos||[]).reduce((s,a)=>s+parseFloat(a.monto||0),0)*100)/100
   }));
   renderReservas();
   updateRsvStats();
 }
 
+// Un solo criterio de "ya esta pagada" para toda la app. Antes habia tres
+// (saldo<=0, saldo>0.01 y nS>0.01) sobre valores sin redondear.
+const rsvSaldo=(acordado,abonado)=>Math.max(0,Math.round(((+acordado||0)-(+abonado||0))*100)/100);
+const rsvPagada=saldo=>saldo<=0;
+
 function updateRsvStats(){
   const activas=reservasCache.filter(r=>r.estado==='ACTIVA');
-  const totalSaldo=activas.reduce((s,r)=>s+(parseFloat(r.precio_acordado||0)-r.total_abonado),0);
+  // Con Math.max por reserva: sin eso, una sobrepagada restaba del total y
+  // escondia la deuda de las demas.
+  const totalSaldo=activas.reduce((s,r)=>s+rsvSaldo(r.precio_acordado,r.total_abonado),0);
   const pedidos=activas.filter(r=>r.tipo==='PEDIDO').length;
   const elA=document.getElementById('rsv-stat-activas');
   const elS=document.getElementById('rsv-stat-saldo');
@@ -4544,7 +4554,7 @@ function renderReservas(){
     const productoNombre=partes||'—';
     const productoFull=r.talla?`${productoNombre} <span style="color:var(--muted2)">(${r.talla})</span>`:productoNombre;
     const acordado=parseFloat(r.precio_acordado||0);
-    const saldo=Math.max(0,acordado-r.total_abonado);
+    const saldo=rsvSaldo(acordado,r.total_abonado);
     const estadoBadge=
       r.estado==='ACTIVA'?`<span class="badge badge-accent">ACTIVA</span>`:
       r.estado==='COMPLETADA'?`<span class="badge badge-green">COMPLETADA</span>`:
@@ -4560,7 +4570,7 @@ function renderReservas(){
       <td class="td-trunc" data-role="meta2" style="color:var(--text)">${productoFull}</td>
       <td class="right td-amt" data-role="amount">${fmt(acordado)}</td>
       <td class="right td-amt" data-role="hide-m">${fmt(r.total_abonado)}</td>
-      <td class="right td-amt" data-role="badge2">${saldo<=0
+      <td class="right td-amt" data-role="badge2">${rsvPagada(saldo)
         ?`<span class="rsv-saldo-ok">✓ ${fmt(saldo)}</span>`
         :`<span class="rsv-saldo-pend">⏳ ${fmt(saldo)}</span>`}</td>
       <td data-role="badge">${estadoBadge}</td>
@@ -4591,15 +4601,15 @@ function abrirReservaDetalle(codigo){
   // Progreso
   const acordado=parseFloat(r.precio_acordado||0);
   const abonado=r.total_abonado;
-  const saldo=Math.max(0,acordado-abonado);
+  const saldo=rsvSaldo(acordado,abonado);
   const pct=acordado>0?Math.min(100,Math.round(abonado/acordado*100)):0;
   const barEl=document.getElementById('rsv-p-bar');
   barEl.style.width=pct+'%';
-  barEl.className='rsv-progress-bar'+(saldo<=0?' done':'');
+  barEl.className='rsv-progress-bar'+(rsvPagada(saldo)?' done':'');
   document.getElementById('rsv-p-abonado').textContent=fmt(abonado);
   document.getElementById('rsv-p-acordado').textContent=fmt(acordado);
   document.getElementById('rsv-p-saldo').textContent=fmt(saldo);
-  document.getElementById('rsv-p-saldo').className='rsv-saldo-val'+(saldo<=0?' pagado':'');
+  document.getElementById('rsv-p-saldo').className='rsv-saldo-val'+(rsvPagada(saldo)?' pagado':'');
   // Abonos
   const abonos=[...(r.abonos||[])].sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
   const listEl=document.getElementById('rsv-p-abonos-list');
@@ -4682,7 +4692,7 @@ function abrirModalCompletarRsv(){
   if(!r)return;
   if(!r.codigo_producto){toast('Vincula primero un producto del inventario','warn');return;}
   const acordado=parseFloat(r.precio_acordado||0);
-  const saldo=Math.max(0,acordado-r.total_abonado);
+  const saldo=rsvSaldo(acordado,r.total_abonado);
   const partes=[r.marca,r.modelo,r.colorway].filter(Boolean).join(' ');
   const prod=r.talla?`${partes} (${r.talla})`:partes||r.codigo_producto;
   document.getElementById('mcrv-summary').innerHTML=`
@@ -4714,7 +4724,7 @@ function abrirModalCompletarRsv(){
         </div>
         <div style="display:flex;justify-content:space-between">
           <span style="color:var(--muted2)">Saldo pendiente</span>
-          <span class="td-amt" id="mcrv-saldo-val" style="color:${saldo>0.01?'var(--accent)':'var(--green)'}">${fmt(saldo)}</span>
+          <span class="td-amt" id="mcrv-saldo-val" style="color:${rsvPagada(saldo)?'var(--green)':'var(--accent)'}">${fmt(saldo)}</span>
         </div>
       </div>
     </div>`;
@@ -4724,9 +4734,9 @@ function abrirModalCompletarRsv(){
   precioEl.oninput=function(){
     const nP=parseFloat(this.value)||0;
     const ab=parseFloat(this.dataset.abonado)||0;
-    const nS=Math.max(0,nP-ab);
+    const nS=rsvSaldo(nP,ab);
     const el=document.getElementById('mcrv-saldo-val');
-    if(el){el.textContent=fmt(nS);el.style.color=nS>0.01?'var(--accent)':'var(--green)';}
+    if(el){el.textContent=fmt(nS);el.style.color=rsvPagada(nS)?'var(--green)':'var(--accent)';}
   };
   document.getElementById('modal-completar-rsv').classList.add('open');
   setTimeout(()=>precioEl.focus(),120);
@@ -4769,17 +4779,27 @@ async function confirmarCompletarReserva(){
       comentarios:`Reserva ${r.codigo_reserva}`
     });
     if(eV){console.error('ventas insert error',eV);throw eV;}
-    const saldo=Math.max(0,precioFinal-r.total_abonado);
-    if(saldo>0.01){
+    const saldo=rsvSaldo(precioFinal,r.total_abonado);
+    if(!rsvPagada(saldo)){
       const{error:aE}=await db.from('abonos').insert({
         codigo_reserva:rsvCodigoActivo,monto:saldo,fecha,
         es_pago_final:true,notas:'Pago final — '+cv
       });
       if(aE)console.warn('abono final error',aE);
     }
-    await db.from('inventario').update({estado:'VENDIDO'}).eq('codigo_producto',r.codigo_producto);
-    await db.from('reservas').update({estado:'COMPLETADA'}).eq('codigo_reserva',rsvCodigoActivo);
-    toast(`✓ ${cv} generada — Reserva completada`,'ok');
+    // La venta YA se inserto. Si alguno de estos dos update falla, hay que
+    // decirlo: con la reserva todavia ACTIVA, un segundo "Completar venta"
+    // inserta una venta duplicada.
+    const{error:iE}=await db.from('inventario').update({estado:'VENDIDO'}).eq('codigo_producto',r.codigo_producto);
+    const{error:rE2}=await db.from('reservas').update({estado:'COMPLETADA'}).eq('codigo_reserva',rsvCodigoActivo);
+    if(iE||rE2){
+      toast(`⚠ ${cv} se registro, pero la reserva quedo a medias: `+
+            ((iE?'el producto sigue RESERVADO. ':'')+(rE2?'la reserva sigue ACTIVA. ':''))+
+            'NO vuelvas a completarla o se duplica la venta — corregi el estado a mano.','err',9000);
+      console.error('completar reserva',{inventario:iE,reserva:rE2});
+    }else{
+      toast(`✓ ${cv} generada — Reserva completada`,'ok');
+    }
     cerrarModalCompletarRsv();
     cerrarReservaDetalle();
     await Promise.all([loadReservas(),loadInventario()]);
@@ -4827,10 +4847,17 @@ async function confirmarCancelarReserva(){
   try{
     const{error:rE}=await db.from('reservas').update({estado:'CANCELADA'}).eq('codigo_reserva',rsvCodigoActivo);
     if(rE)throw rE;
+    let iE=null;
     if(r.codigo_producto){
-      await db.from('inventario').update({estado:'DISPONIBLE'}).eq('codigo_producto',r.codigo_producto);
+      ({error:iE}=await db.from('inventario').update({estado:'DISPONIBLE'}).eq('codigo_producto',r.codigo_producto));
     }
-    toast('✓ Reserva cancelada','ok');
+    if(iE){
+      toast(`⚠ Reserva cancelada, pero ${r.codigo_producto} quedo en RESERVADO. `+
+            'Ponelo DISPONIBLE desde el panel de edicion o no vas a poder venderlo.','err',9000);
+      console.error('cancelar reserva: update inventario',iE);
+    }else{
+      toast('✓ Reserva cancelada','ok');
+    }
     cerrarModalCancelarRsv();
     cerrarReservaDetalle();
     await Promise.all([loadReservas(), r.codigo_producto?loadInventario():Promise.resolve()]);
@@ -6468,8 +6495,16 @@ async function registrarVenta(){
       fecha:document.getElementById('vt-fecha').value||fechaHoy()
     });
     if(error)throw error;
-    await db.from('inventario').update({estado:'VENDIDO'}).eq('codigo_producto',codProd);
-    toast(`✓ ${cv} — Ganancia: ${fmt(g)}`,'ok');
+    // Si esto falla el producto sigue DISPONIBLE y vuelve al combo de venta:
+    // se puede vender dos veces sin ninguna senal.
+    const{error:iE}=await db.from('inventario').update({estado:'VENDIDO'}).eq('codigo_producto',codProd);
+    if(iE){
+      toast(`⚠ ${cv} se registro, pero ${codProd} sigue como DISPONIBLE. `+
+            'Cambiale el estado a mano antes de volver a venderlo.','err',9000);
+      console.error('venta: update inventario',iE);
+    }else{
+      toast(`✓ ${cv} — Ganancia: ${fmt(g)}`,'ok');
+    }
     document.getElementById('vt-precio').value='';
     document.getElementById('vt-producto').value='';
     document.getElementById('vt-comentarios').value='';
@@ -6660,9 +6695,9 @@ function csRenderLista(){
     <div class="cs-item">
       <div class="cs-item-info">
         <strong>${item.codigo}</strong>
-        <span> — ${item.nombre} (${item.talla})</span>
+        <span> — ${esc(item.nombre)} (${esc(item.talla)})</span>
       </div>
-      <input type="text" id="cs-concepto-${i}" value="${item.concepto}"
+      <input type="text" id="cs-concepto-${i}" value="${esc(item.concepto)}"
         placeholder="Concepto..."
         oninput="csConceptoChange(${i}, this.value)">
       <input type="number" id="cs-soles-${i}" value="${item.soles}"
@@ -6782,7 +6817,7 @@ function renderActivosList(){
         </div>
         <div style="font-size:11px;color:var(--muted2);margin-top:3px">${nCuotas} cuota${nCuotas!==1?'s':''} · Capital total: <span style="color:var(--accent)">${fmt(totalCapital)}</span> · Intereses: <span style="color:var(--red)">${fmt(totalInteres)}</span></div>
       </div>
-      <button onclick="eliminarActivo('${a.id}','${a.nombre}')" style="background:none;border:1px solid var(--field-border);border-radius:var(--radius-sm);padding:4px 8px;color:var(--muted2);cursor:pointer;font-size:11px">✕</button>
+      <button onclick="eliminarActivo('${esc(a.id)}','${esc(a.nombre)}')" style="background:none;border:1px solid var(--field-border);border-radius:var(--radius-sm);padding:4px 8px;color:var(--muted2);cursor:pointer;font-size:11px">✕</button>
     </div>`;
   }).join('');
 }
@@ -7379,8 +7414,11 @@ async function loadFlujo() {
   // Control
   const ctrlEl    = document.getElementById('fc-control');
   const ctrlBadge = document.getElementById('fc-control-badge');
-  const cuadra    = Math.abs(control) < 1;
-  ctrlEl.textContent  = cuadra ? '✓ S/. 0.00' : '✗ ' + fmt(Math.abs(control));
+  // 0.01 y no 1: `control` ya viene redondeado a centimos unas lineas
+  // arriba, asi que una tolerancia de un sol entero tapaba descuadres
+  // reales de hasta S/ 0.99 -- justo el tamano de un costo olvidado.
+  const cuadra    = Math.abs(control) < 0.01;
+  ctrlEl.textContent  = cuadra ? '✓ ' + fmt(0) : '✗ ' + fmt(Math.abs(control));
   ctrlEl.className    = 'fc-bot-val ' + (cuadra ? 'green' : 'red');
   ctrlBadge.style.display = cuadra ? 'inline-flex' : 'none';
   ctrlBadge.className = 'fc-ctrl-badge ' + (cuadra ? 'ok' : 'err');
@@ -7699,10 +7737,12 @@ function fmtFecha(f){
 function fmtUsd(v){return'$ '+parseFloat(v||0).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function setLoading(btn,on,label){btn.disabled=on;btn.innerHTML=on?'<div class="spinner"></div> Guardando...':(label||'');}
 let toastTimer;
-function toast(msg,type='ok'){
+function toast(msg,type='ok',ms){
   const el=document.getElementById('toast');
   el.textContent=msg;el.className=`show ${type}`;
-  clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.className='',3500);
+  // Duracion configurable: un aviso de "la venta puede haber quedado
+  // duplicada" no se lee en 3.5 segundos.
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.className='',ms||3500);
 }
 
 // ── VENTAS / INGRESOS ──
@@ -8169,7 +8209,9 @@ async function iepGuardar(){
     const pv=parseFloat(document.getElementById('iep-precio-venta').value||0);
     const activos=iepCostosOrig.filter(c=>!iepCostosEliminar.includes(c.id));
     const tc=[...activos,...iepCostosNuevos].reduce((s,c)=>s+parseFloat(c.costo_soles||0),0);
-    const precioFinal=pc+tc;
+    // A centimos, igual que registrarCosto: la suma cruda daba
+    // 890.3000000000001 y ese valor entra al stock y a la ganancia.
+    const precioFinal=Math.round((pc+tc)*100)/100;
     // pago_estado debe seguir a tipo_pago: si pasa a CONTADO queda PAGADO;
     // si pasa a CREDITO conserva el estado previo (o arranca PENDIENTE).
     const tipoPago=iepValor('iep-pago')||null;
