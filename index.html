@@ -299,7 +299,6 @@ nav.kv-tabbar{
 .field textarea{resize:vertical;min-height:88px}
 .field input::placeholder,.field textarea::placeholder{color:var(--placeholder);font-weight:400}
 /* iOS no hace zoom al enfocar si la fuente es >= 16px */
-@media(pointer:coarse){.field input,.field select,.field textarea,.search-box,.filter-select,.combo-wrap input{font-size:16px}}
 
 /* PRECIO PREVIEW */
 .precio-preview{background:var(--tile);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:12px 14px;display:none;gap:20px;margin-top:8px;flex-wrap:wrap}
@@ -332,11 +331,18 @@ tbody tr.row-rsv td:first-child{box-shadow:inset 3px 0 0 var(--reserve)}
 button:active,[role="button"]:active{
   transform:scale(0.97);transition:transform 120ms var(--ease-out)
 }
-.btn-primary{background:var(--accent);color:var(--on-accent)}.btn-primary:hover:not(:disabled){filter:brightness(1.07);transform:translateY(-1px)}
-.btn-green{background:var(--green);color:var(--on-positive)}.btn-green:hover:not(:disabled){filter:brightness(1.05);transform:translateY(-1px)}
-.btn-yellow{background:var(--yellow);color:var(--on-warning)}.btn-yellow:hover:not(:disabled){filter:brightness(1.05)}
-.btn-orange{background:var(--accent2);color:var(--on-negative)}.btn-orange:hover:not(:disabled){filter:brightness(1.1)}
-.btn-purple{background:var(--purple);color:var(--on-reserve)}.btn-purple:hover:not(:disabled){filter:brightness(1.1)}
+.btn-primary{background:var(--accent);color:var(--on-accent)}
+.btn-green{background:var(--green);color:var(--on-positive)}
+.btn-yellow{background:var(--yellow);color:var(--on-warning)}
+.btn-orange{background:var(--accent2);color:var(--on-negative)}
+.btn-purple{background:var(--purple);color:var(--on-reserve)}
+@media (hover:hover) and (pointer:fine){
+  .btn-primary:hover:not(:disabled){filter:brightness(1.07);transform:translateY(-1px)}
+  .btn-green:hover:not(:disabled){filter:brightness(1.05);transform:translateY(-1px)}
+  .btn-yellow:hover:not(:disabled){filter:brightness(1.05)}
+  .btn-orange:hover:not(:disabled){filter:brightness(1.1)}
+  .btn-purple:hover:not(:disabled){filter:brightness(1.1)}
+}
 .btn-ghost{background:var(--tile);border:1px solid var(--field-border);color:var(--text-secondary)}@media (hover:hover) and (pointer:fine){.btn-ghost:hover{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink)}}
 .btn-sm{min-height:36px;padding:0 14px;font-size:13px;border-radius:var(--radius-sm)}
 .btn-pay{background:var(--warning-soft);border:1px solid color-mix(in srgb,var(--warning) 45%,transparent);color:var(--orange);padding:4px 11px;font-size:11px;font-weight:700;letter-spacing:.5px;border-radius:var(--radius-sm);cursor:pointer;transition:background .2s,color .2s,border-color .2s,box-shadow .2s;white-space:nowrap}@media (hover:hover) and (pointer:fine){
@@ -383,7 +389,7 @@ th{position:sticky;top:0;z-index:2;
 th[onclick]:hover{color:var(--accent-ink);cursor:pointer}}
 td{padding:12px 14px;border-top:1px solid var(--separator);vertical-align:middle;white-space:nowrap;color:var(--text-secondary);font-size:14px;line-height:20px;font-family:inherit}
 tbody tr:first-child td{border-top:0}
-tbody tr:hover td{background:var(--accent-soft)}
+@media (hover:hover) and (pointer:fine){tbody tr:hover td{background:var(--accent-soft)}}
 /* Pendiente de pago: franja lateral en vez de tinte + opacidad en toda la fila */
 tbody tr.row-pend td:first-child{box-shadow:inset 3px 0 0 var(--warning)}
 tbody tr.row-dim{opacity:.5}
@@ -503,7 +509,6 @@ td.right{font-weight:600;color:var(--text)}
 .sv-trio-lbl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted2)}
 .sv-trio-val{font-family:var(--font-sans);font-weight:800;font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap;line-height:1.1;color:var(--text)}
 /* Tab Ingresos */
-.sc-stats-vt .sc-chip::before{background:var(--muted2)}
 .stat-val{font-family:var(--font-sans);font-weight:800;font-size:24px;line-height:28px;letter-spacing:-.015em;margin-top:4px;font-variant-numeric:tabular-nums}
 .stat-sub{font-size:13px;line-height:18px;color:var(--text-tertiary);margin-top:2px}
 .page-hd{margin-bottom:20px}
@@ -531,10 +536,11 @@ td.right{font-weight:600;color:var(--text)}
 
 /* DATALIST native dropdown styling */
 /* calendar picker visible */
-input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(55%) sepia(0%) saturate(0%) brightness(90%);
-  cursor: pointer;
-}
+input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6;cursor:pointer}
+@media (hover:hover) and (pointer:fine){input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}}
+:root:not([data-theme="dark"]) input[type="date"]::-webkit-calendar-picker-indicator{filter:none}
+[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightness(1.6)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightness(1.6)}}
 
 
 
@@ -558,7 +564,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   pointer-events: all; color: var(--muted2); font-size: 10px;
   cursor: pointer; padding: 4px; user-select: none; transition: color .15s;
 }
-.combo-arrow:hover { color: var(--text); }
+@media (hover:hover) and (pointer:fine){.combo-arrow:hover{color:var(--text)}}
 .combo-list {
   position: absolute; top: calc(100% + 4px); left: 0; right: 0;
   border: 1px solid var(--glass-border); border-radius: var(--radius-md);
@@ -572,18 +578,27 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   border-radius: var(--radius-sm); color: var(--text);
   transition: background .1s;
 }
-.combo-opt:hover, .combo-opt.focused { background: var(--accent-soft); color: var(--accent-ink); }
+.combo-opt.focused{background:var(--accent-soft);color:var(--accent-ink)}
+@media (hover:hover) and (pointer:fine){.combo-opt:hover{background:var(--accent-soft);color:var(--accent-ink)}}
 .combo-opt mark { background: none; color: var(--accent-ink); font-weight: 700; }
 
-/* Select consistent style */
+/* Select: el chevron va como data-URI con el color EXACTO de
+   --text-tertiary en cada tema. Antes era un fill='#888888' fijo que no
+   igualaba al token en ninguno de los dos, asi que la flecha se veia ajena.
+   Hacen falta 3 reglas (bare / data-theme / prefers-color-scheme) porque un
+   data-URI no puede leer una variable CSS. */
 .field select {
   appearance: none;
   -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23888888' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%2356668c' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
   padding-right: 32px !important;
   cursor: pointer;
+}
+[data-theme="dark"] .field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%237b92c0' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%237b92c0' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
 }
 
 
@@ -608,7 +623,7 @@ input[list] { cursor: text; }
 /* OC TOGGLE */
 .oc-toggle{background:var(--card);border:1px solid var(--border2);border-radius:var(--radius-pill);padding:6px 14px;font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--muted2);cursor:pointer;transition:background .15s,border-color .15s,color .15s}
 .oc-toggle.active{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 55%,transparent);color:var(--accent)}
-.oc-toggle:hover:not(.active){border-color:var(--accent);color:var(--text)}
+@media (hover:hover) and (pointer:fine){.oc-toggle:hover:not(.active){border-color:var(--accent);color:var(--text)}}
 
 
 /* ── INDICADORES ── */
@@ -870,7 +885,7 @@ input[list] { cursor: text; }
 .an-filter-btn.active{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 @media (hover:hover) and (pointer:fine){.an-filter-btn:not(.active):hover{border-color:var(--accent);color:var(--accent-ink)}}
 .an-hist-bar{transition:opacity .15s}
-.an-hist-bar:hover{opacity:.85}
+@media (hover:hover) and (pointer:fine){.an-hist-bar:hover{opacity:.85}}
 .an-legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px}
 .an-legend-item{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--text-tertiary);font-weight:600;cursor:pointer;user-select:none;transition:opacity .15s}
 .an-legend-item.off{opacity:.35}
@@ -1018,15 +1033,8 @@ input[list] { cursor: text; }
     border:1px solid var(--glass-border);box-shadow:var(--shadow-float)}
   .kv-submit-bar .btn{width:100%}
 
-  /* Tabla — scroll táctil suave */
-  .table-wrap,.fc-tabla-wrap{-webkit-overflow-scrolling:touch}
   .table-toolbar{gap:6px}
-  .search-box{font-size:13px}
 
-  /* Modal full-width en mobile */
-  .modal{max-width:calc(100vw - 24px)}
-  /* Fix iOS zoom on input focus */
-  input, select, textarea, .filter-select { font-size: 16px !important; }
   /* Toolbar en mobile: scroll horizontal para no aplastar combos */
   .table-toolbar { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; }
   .table-toolbar .search-box { flex-shrink: 0; }
@@ -1056,7 +1064,7 @@ input[list] { cursor: text; }
 @media(max-width:400px){
   .kv-tab{padding:6px 4px}
   .kv-tab svg{width:21px;height:21px}
-  .tipo-btn{padding:6px 7px;font-size:11px}
+  .tipo-btn{padding:0 6px}
   .card{padding:12px 10px}
 }
 
@@ -1064,7 +1072,7 @@ input[list] { cursor: text; }
    VISUAL REFINEMENTS
 ═══════════════════════════════════════════════════════ */
 .field input:focus,.field select:focus,.field textarea:focus,.search-box:focus,.filter-select:focus,.combo-wrap input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
-.btn:active:not(:disabled){transform:translateY(0) scale(.97)!important;transition:transform .08s}
+.btn:active:not(:disabled){transform:translateY(0) scale(.97)!important;transition:transform 120ms var(--ease-out)}
 .modal-overlay.open{animation:modalIn .2s cubic-bezier(.34,1.56,.64,1)}
 @keyframes modalIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
 .table-wrap,.fc-tabla-wrap{scrollbar-width:thin;scrollbar-color:var(--field-border) transparent}
@@ -1153,8 +1161,6 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
   /* Touch targets adecuados */
   .btn-sm{min-height:40px;padding:9px 16px}
   .btn-pay,.btn-cancel{min-height:36px;padding:7px 13px;font-size:11px}
-  /* Tipo selector más legible */
-  .tipo-btn{padding:9px 12px;font-size:11px}
   /* Las 3 hojas laterales suben desde abajo, mismo patron */
   #inv-edit-panel,#rsv-panel,.cl-panel{
     top:auto;left:0;right:0;bottom:0;width:100%;max-height:92dvh;
@@ -1163,7 +1169,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
   #inv-edit-overlay.open #inv-edit-panel,#rsv-overlay.open #rsv-panel{transform:translateY(0)}
   .cl-panel.open{transform:translateY(0)}
   .iep-section .form-grid.g2>.field{grid-column:span 12}
-  .btn-edit-inv{width:36px;height:36px;font-size:15px}
+  .btn-edit-inv{font-size:15px}
   .rsv-filter-btn{min-height:36px}
   /* Modal: hoja inferior en vez de caja centrada */
   .modal-overlay{align-items:flex-end;padding:0}
