@@ -1,0 +1,12 @@
+# Vercel sirve como estatico TODO lo que suba, asi que lo que no es la app no
+# tiene que llegar al deploy. Sin este archivo quedaban publicos en la URL:
+#   /database/supabase-setup.sql     -> esquema completo y politicas RLS
+#   /database/seed-data.sql          -> precios de compra reales
+#   /*.sql                           -> consultas de analisis del negocio
+#   /design/                         -> el design system y los mockups
+# La app es un solo archivo (index.html), no necesita nada mas.
+
+*.sql
+database/
+design/
+README.md
