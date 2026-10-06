@@ -1093,6 +1093,17 @@ input[list] { cursor: text; }
   z-index:calc(var(--z-sheet) + 1);overflow-y:auto;overscroll-behavior:contain;padding:24px 24px 40px;
   border-radius:var(--radius-xl);box-shadow:var(--shadow-sheet);transform:translateX(calc(100% + 12px));transition:transform .25s cubic-bezier(.4,0,.2,1)}
 #inv-edit-overlay.open #inv-edit-panel{transform:translateX(0)}
+/* El panel de Reservas es gemelo del de Inventario y va declarado junto a
+   el a proposito: estaba mas abajo en el archivo, despues del bloque de
+   movil, y con la misma especificidad ganaba el ultimo. Resultado: en el
+   telefono entraba desde la derecha como una ventana de escritorio
+   mientras los otros dos subian desde abajo. */
+#rsv-overlay{position:fixed;inset:0;z-index:var(--z-sheet);display:none;opacity:0;transition:opacity .2s;pointer-events:none}
+#rsv-overlay.open{display:block;opacity:1;pointer-events:all}
+#rsv-panel{position:fixed;right:12px;top:12px;bottom:12px;width:min(var(--sheet-w),calc(100vw - 24px));
+  z-index:calc(var(--z-sheet) + 1);overflow-y:auto;overscroll-behavior:contain;padding:24px 24px 40px;
+  border-radius:var(--radius-xl);box-shadow:var(--shadow-sheet);transform:translateX(calc(100% + 12px));transition:transform .25s cubic-bezier(.4,0,.2,1)}
+#rsv-overlay.open #rsv-panel{transform:translateX(0)}
 .iep-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:12px}
 /* La pareja etiqueta + titulo del encabezado de una hoja. Los tres paneles
    (Inventario, Reservas, Clientes) la repetian con estilos inline, cada uno
@@ -1131,7 +1142,11 @@ input[list] { cursor: text; }
   border-bottom:1px solid var(--glass-border);
 }
 .mobile-header .nav-logo{font-family:var(--font-brand);font-size:13px;letter-spacing:5px;display:flex;align-items:center}
+/* display:none por defecto; cada barra enciende los suyos. Sin esto, los
+   iconos que la barra de movil clona desde la de escritorio llegan con
+   class="tab-icon" y quedan apagados. */
 .tab-icon{display:none}
+.kv-tab .tab-icon{display:block}
 .tab-label{transition:color .2s}
 
 @media(max-width:767px){
@@ -1393,12 +1408,6 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
    se activa por tipo de puntero y no por ancho de ventana. */
 @media(pointer:coarse){.oc-chk-pago{width:22px;height:22px}}
 /* ── RESERVAS DETAIL PANEL ── */
-#rsv-overlay{position:fixed;inset:0;z-index:var(--z-sheet);display:none;opacity:0;transition:opacity .2s;pointer-events:none}
-#rsv-overlay.open{display:block;opacity:1;pointer-events:all}
-#rsv-panel{position:fixed;right:12px;top:12px;bottom:12px;width:min(var(--sheet-w),calc(100vw - 24px));
-  z-index:calc(var(--z-sheet) + 1);overflow-y:auto;overscroll-behavior:contain;padding:24px 24px 40px;
-  border-radius:var(--radius-xl);box-shadow:var(--shadow-sheet);transform:translateX(calc(100% + 12px));transition:transform .25s cubic-bezier(.4,0,.2,1)}
-#rsv-overlay.open #rsv-panel{transform:translateX(0)}
 .rsv-abono-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--separator)}
 .rsv-abono-fecha{font-size:13px;line-height:18px;font-weight:500;color:var(--muted2);min-width:66px;flex-shrink:0;font-variant-numeric:tabular-nums}
 .rsv-abono-nota{flex:1;font-size:12px;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
