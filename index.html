@@ -150,7 +150,12 @@ button,a,[role="button"],input,select,textarea{touch-action:manipulation}
   /* 44x44 es el minimo recomendado para un dedo (skill ui-ux-pro-max). Estos
      quedaban en 28-34px -- bien con mouse, chicos para tocar. El icono
      adentro no cambia de tamano, solo crece el area alrededor. */
-  .theme-btn,.fc-nav-btn,.iep-close,.btn-edit-inv{width:44px!important;height:44px!important}
+  .theme-btn,.fc-nav-btn,.iep-close{width:44px!important;height:44px!important}
+  /* El boton de la celda NO crece a 44: eso haria la fila 16px mas alta
+     que en las tablas que no tienen boton. Crece solo su area tocable,
+     con un pseudo-elemento invisible. */
+  .btn-edit-inv{position:relative}
+  .btn-edit-inv::after{content:"";position:absolute;inset:-8px}
 }
 /* Ninguna transicion/animacion del archivo respetaba esto (0 usos antes).
    No se apagan del todo -- eso dejaria botones y modales saltando de un
@@ -423,7 +428,10 @@ th{position:sticky;top:0;z-index:2;
   background:var(--glass-strong);-webkit-backdrop-filter:blur(var(--blur-bar));backdrop-filter:blur(var(--blur-bar));
   padding:8px 8px;text-align:left;font-size:11px;line-height:14px;font-family:inherit;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary);white-space:nowrap;border-bottom:1px solid var(--separator)}@media (hover:hover) and (pointer:fine){
 th[onclick]:hover{color:var(--accent-ink);cursor:pointer}}
-td{padding:8px 8px;border-top:1px solid var(--separator);vertical-align:middle;white-space:nowrap;color:var(--text-secondary);font-size:13px;line-height:18px;font-weight:500;font-family:inherit}
+/* height en un td funciona como ALTO MINIMO: asi todas las filas miden lo
+   mismo tengan o no un boton de accion adentro. Antes las de Clientes,
+   Reservas e Inventario median 60px por el boton y las demas 34. */
+td{height:44px;padding:8px 8px;border-top:1px solid var(--separator);vertical-align:middle;white-space:nowrap;color:var(--text-secondary);font-size:13px;line-height:18px;font-weight:500;font-family:inherit}
 tbody tr:first-child td{border-top:0}
 @media (hover:hover) and (pointer:fine){tbody tr:hover td{background:var(--accent-soft)}}
 /* Pendiente de pago: franja lateral en vez de tinte + opacidad en toda la fila */
@@ -438,7 +446,10 @@ thead .kv-sticky-col{z-index:3}
 .td-unit,.inv-talla{font-size:13px;line-height:18px;font-weight:500;color:var(--text-tertiary);font-family:inherit}
 .right{text-align:right}
 td.right{font-weight:600;color:var(--text)}
-.td-trunc{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Sin recorte: la tabla scrollea en horizontal, asi que cortar el nombre
+   no hace que entre nada y solo esconde el dato. Se deja la clase porque
+   la usa el marcado, pero ya no recorta. */
+.td-trunc{white-space:nowrap}
 /* Prioridad de columnas: p3 se oculta < 1280, p2 se oculta < 1100 */
 /* Prioridad de columnas: solo en la banda de escritorio angosto. En movil
    se muestran TODAS, igual que en la web -- la tabla scrollea en
@@ -468,7 +479,6 @@ td.right{font-weight:600;color:var(--text)}
      selector anterior (".fc-tabla table") no existia, asi que la tabla
      de Flujo se quedaba en sus 820px sobre una pantalla de 375. */
   .table-wrap table,.fc-tabla{min-width:0!important}
-  .td-trunc{max-width:150px}
   /* La columna que identifica la fila queda fija mientras el resto scrollea.
      NO se puede usar :first-child: en Inventario, Reservas y Ventas la
      columna 1 es Fecha con data-p="2", que aca esta oculta, asi que la
@@ -1324,7 +1334,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
   #inv-edit-overlay.open #inv-edit-panel,#rsv-overlay.open #rsv-panel{transform:translateY(0)}
   .cl-panel.open{transform:translateY(0)}
   .iep-section .form-grid.g2>.field{grid-column:span 12}
-  .btn-edit-inv{font-size:15px}
+  .btn-edit-inv{font-size:15px;width:28px;height:28px}
   .rsv-filter-btn{min-height:36px}
   /* Modal: hoja inferior en vez de caja centrada */
   .modal-overlay{align-items:flex-end;padding:0}
