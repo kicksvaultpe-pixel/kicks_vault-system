@@ -611,6 +611,28 @@ input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6;cursor:pointer}
 }
 .combo-list.open,.cl-search-drop.open { display: block; }
 /* Sin lineas divisorias entre opciones: el resaltado del foco ya separa */
+/* Opcion de ENTIDAD (producto, cliente, OC): tres zonas.
+     codigo        nombre                      dato de apoyo
+     azul 13/600   texto 14/500, se recorta    gris 13/500, derecha
+   El codigo va en ancho fijo y tabular para que los codigos queden en
+   columna y el ojo los encuentre sin leer la linea entera.
+   Las listas de enumeracion (categoria, canal, moneda) siguen como estaban:
+   una sola zona, sin jerarquia -- ahi no hay codigo que destacar. */
+.combo-opt-ent{display:flex;align-items:center;gap:10px}
+.combo-cod{flex:none;min-width:72px;font-size:13px;line-height:18px;font-weight:600;
+  color:var(--accent-ink);font-variant-numeric:tabular-nums}
+.combo-nom{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-size:14px;line-height:20px;font-weight:500;color:inherit}
+.combo-extra{flex:none;font-size:13px;line-height:18px;font-weight:500;color:var(--text-tertiary);
+  text-align:right;white-space:nowrap}
+.combo-opt.focused .combo-cod,.combo-opt.focused .combo-extra{color:inherit}
+@media (hover:hover) and (pointer:fine){
+  .combo-opt:hover .combo-cod,.combo-opt:hover .combo-extra{color:inherit}
+}
+/* Estado vacio y aviso de "hay mas": antes la lista se cerraba sin decir
+   nada cuando no habia coincidencias. */
+.combo-vacio{padding:12px;text-align:center;font-size:13px;line-height:18px;
+  font-weight:500;color:var(--text-tertiary)}
 .combo-opt,.cl-si,.cl-si-empty,.cl-si-new {
   padding: 10px 12px; font-size: 14px; line-height: 20px; cursor: pointer;
   border-radius: var(--radius-sm); color: var(--text);
@@ -3443,23 +3465,64 @@ function comboFilter(inputId, listId) {
   comboRender(inputId, listId, val);
 }
 
+const COMBO_MAX = 60;           // cuantas opciones se pintan de una
+let _comboVista = {};           // listId -> opciones que se estan mostrando
+
+// Normaliza una opcion: string suelto o {cod,nom,extra,v}
+function comboOpc(i){
+  return (i && typeof i === 'object')
+    ? {cod:i.cod||'', nom:i.nom||'', extra:i.extra||'', v:i.v!=null?i.v:(i.nom||'')}
+    : {cod:'', nom:String(i), extra:'', v:String(i)};
+}
+function comboResaltar(txt, val){
+  if(!txt) return '';
+  const esc = t => t.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  if(!val) return esc(txt);
+  const re = new RegExp('('+val.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+  return esc(txt).replace(re, '<mark>$1</mark>');
+}
+
 function comboRender(inputId, listId, val) {
   const list = document.getElementById(listId);
   if (!list) return;
-  const items = COMBO_DATA[listId] || [];
-  const filtered = val
-    ? items.filter(i => i.toUpperCase().includes(val))
+  const items = (COMBO_DATA[listId] || []).map(comboOpc);
+  // Busqueda por terminos sueltos: "nike 9us" encuentra lo que tenga los dos,
+  // en el orden que sea. Antes era una sola subcadena literal.
+  const terms = (val||'').toUpperCase().split(/\s+/).filter(Boolean);
+  const filtered = terms.length
+    ? items.filter(o => {
+        const txt = (o.cod+' '+o.nom+' '+o.extra+' '+o.v).toUpperCase();
+        return terms.every(t => txt.includes(t));
+      })
     : items;
-  if (!filtered.length) { list.classList.remove('open'); return; }
-  list.innerHTML = filtered.map(i => {
-    const hl = val
-      ? i.replace(new RegExp(val.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'), m => `<mark>${m}</mark>`)
-      : i;
-    return `<div class="combo-opt" onclick="comboPick('${inputId}','${listId}','${i.replace(/'/g,"\'")}')">${hl}</div>`;
-  }).join('');
+  _comboVista[listId] = filtered;
+
+  if (!filtered.length) {
+    // Antes la lista se cerraba sin avisar, y se leia como que la app se
+    // colgo. Ahora dice que no hay nada.
+    list.innerHTML = '<div class="combo-vacio">Sin resultados</div>';
+    list.classList.add('open');
+    return;
+  }
+
+  const visibles = filtered.slice(0, COMBO_MAX);
+  // El valor NO va dentro del onclick: se pasa el indice y se busca en
+  // memoria. Asi un nombre con apostrofe o comillas no rompe nada.
+  list.innerHTML = visibles.map((o,idx) => {
+    const cuerpo = o.cod
+      ? `<span class="combo-cod">${comboResaltar(o.cod,val)}</span>`
+       +`<span class="combo-nom">${comboResaltar(o.nom,val)}</span>`
+       +(o.extra?`<span class="combo-extra">${comboResaltar(o.extra,val)}</span>`:'')
+      : comboResaltar(o.nom,val);
+    return `<div class="combo-opt${o.cod?' combo-opt-ent':''}" data-i="${idx}" `
+         + `onclick="comboPickIdx('${inputId}','${listId}',${idx})">${cuerpo}</div>`;
+  }).join('')
+  + (filtered.length>COMBO_MAX
+      ? `<div class="combo-vacio">y ${filtered.length-COMBO_MAX} m\u00e1s \u2014 segu\u00ed escribiendo para acotar</div>`
+      : '');
   list.classList.add('open');
-  // Combos dentro de .table-toolbar tienen overflow-x:auto en móvil que clipa el dropdown.
-  // Usamos position:fixed calculado desde el viewport para escapar ese clip.
+  // Combos dentro de .table-toolbar tienen overflow-x:auto en movil que clipa
+  // el dropdown. Usamos position:fixed calculado desde el viewport.
   const inp2 = document.getElementById(inputId);
   if (inp2 && inp2.closest('.table-toolbar')) {
     const r = inp2.getBoundingClientRect();
@@ -3471,7 +3534,6 @@ function comboRender(inputId, listId, val) {
     list.style.maxHeight = Math.min(220, Math.max(80, window.innerHeight - r.bottom - 8)) + 'px';
     list.style.zIndex = '9999';
   } else {
-    // Fuera de toolbar: resetear a posición relativa normal
     list.style.position = '';
     list.style.top = '';
     list.style.left = '';
@@ -3480,6 +3542,14 @@ function comboRender(inputId, listId, val) {
     list.style.maxHeight = '';
     list.style.zIndex = '';
   }
+}
+
+// Elige por indice sobre lo que se esta mostrando, y delega en comboPick para
+// no duplicar los efectos que cada campo dispara al elegir.
+function comboPickIdx(inputId, listId, idx){
+  const o = (_comboVista[listId]||[])[idx];
+  if (!o) return;
+  comboPick(inputId, listId, o.v);
 }
 
 function comboPick(inputId, listId, val) {
@@ -3522,7 +3592,7 @@ function comboKey(e, inputId, listId) {
     if (prev) { prev.classList.add('focused'); prev.scrollIntoView({block:'nearest'}); }
   } else if (e.key === 'Enter' && focused) {
     e.preventDefault();
-    comboPick(inputId, listId, focused.textContent.trim());
+    comboPickIdx(inputId, listId, +focused.dataset.i);
   } else if (e.key === 'Escape') {
     list.classList.remove('open');
   }
@@ -3750,14 +3820,18 @@ async function ocConfirmarPagoMultiple(){
 }
 
 function renderOCSelectExistente(){
-  const et = oc => `${oc.codigo}${oc.descripcion||oc.nombre?' · '+(oc.descripcion||oc.nombre):''} — ${oc.tipo}`;
+  const etV = oc => `${oc.codigo}${oc.descripcion||oc.nombre?' · '+(oc.descripcion||oc.nombre):''} — ${oc.tipo}`;
+  const et = oc => ({cod:oc.codigo, nom:oc.descripcion||oc.nombre||'', extra:oc.tipo||'', v:etV(oc)});
   // Compra a credito: solo las ordenes todavia abiertas.
   // Antes filtraba por estado==='PENDIENTE', que dejo de existir cuando los
   // estados pasaron al pipeline, asi que el combo quedaba vacio y no se podia
   // enganchar ningun producto a su orden.
   comboSetData('cl-oc-sel', ocCache.filter(ocAbierta).map(et));
   // Costos: todas, con una marca en las ya cerradas.
-  comboSetData('cl-cs-oc-sel', ocCache.map(oc=>et(oc)+(ocAbierta(oc)?'':' ✓')));
+  comboSetData('cl-cs-oc-sel', ocCache.map(oc=>{
+    const o=et(oc);
+    return ocAbierta(oc)?o:{...o, extra:(o.extra?o.extra+' ':'')+'✓', v:o.v+' ✓'};
+  }));
 }
 
 function ocSetMode(modo){
@@ -5636,7 +5710,13 @@ function filterInventario(){
 // ── SELECTS ──
 function fillProductoSelects(){
   const disp=inventarioCache.filter(p=>p.estado==='DISPONIBLE');
-  const label=p=>{const n=[p.marca,p.modelo,p.colorway].filter(Boolean).join(' ');return`${p.codigo_producto} · ${n} (${p.talla||'—'})`;};
+  // Tres zonas: codigo, nombre y talla. `v` es el texto que se escribe en el
+  // campo y es el MISMO de antes, asi que nada de lo que se guarda cambia.
+  const label=p=>{
+    const n=[p.marca,p.modelo,p.colorway].filter(Boolean).join(' ');
+    return {cod:p.codigo_producto, nom:n, extra:p.talla||'—',
+            v:`${p.codigo_producto} · ${n} (${p.talla||'—'})`};
+  };
   comboSetData('cl-vt-prod', disp.map(label));
   comboSetData('cl-rv-prod', disp.map(label));
   // Vincular pedido: solo DISPONIBLE (incluye créditos pendientes de pago)
@@ -5677,7 +5757,8 @@ function fillClienteCombos(){
   const sorted=[...clientesCache].sort((a,b)=>a.id_cliente-b.id_cliente);
   const items=sorted.map(c=>{
     const nombre=[c.nombre,c.apellido].filter(Boolean).join(' ');
-    return `${clCodigo(c.id_cliente)} · ${nombre}`;
+    const cod=clCodigo(c.id_cliente);
+    return {cod, nom:nombre, extra:c.talla_frecuente||'', v:`${cod} · ${nombre}`};
   });
   comboSetData('cl-vt-cl', items);
 }
