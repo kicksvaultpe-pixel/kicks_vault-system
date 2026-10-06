@@ -283,7 +283,7 @@ nav.kv-tabbar{
 /* Rejilla de 12 columnas: g2/g3/g4 son cuantas columnas quiere cada form, y
    span2/span3 cuanto ocupa un campo dentro de ellas. En movil todo a 1. */
 .form-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}
-.form-grid>.field,.form-grid>.field.span2,.form-grid>.field.span3{grid-column:span 12}
+.form-grid>*{grid-column:span 12}
 @media(min-width:768px){
   .form-grid.g2>.field{grid-column:span 6}
   .form-grid.g3>.field{grid-column:span 4}
@@ -386,14 +386,16 @@ button:active,[role="button"]:active{
   border-radius:var(--radius-lg);
   max-height:calc(100dvh - var(--topbar-h) - 190px);
 }
-table{width:100%;border-collapse:separate;border-spacing:0;font-size:14px;font-family:inherit}
-.table-wrap table{min-width:1200px}
+table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;font-family:inherit}
+/* min-width:100% en vez de 1200px fijo: la tabla ocupa el ancho disponible
+   y solo scrollea si el contenido de verdad no entra. */
+.table-wrap table{min-width:100%}
 thead tr:first-child td{border-top:none}
 th{position:sticky;top:0;z-index:2;
   background:var(--glass-strong);-webkit-backdrop-filter:blur(var(--blur-bar));backdrop-filter:blur(var(--blur-bar));
-  padding:12px 14px;text-align:left;font-size:11px;line-height:14px;font-family:inherit;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary);white-space:nowrap;border-bottom:1px solid var(--separator)}@media (hover:hover) and (pointer:fine){
+  padding:9px 10px;text-align:left;font-size:11px;line-height:14px;font-family:inherit;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary);white-space:nowrap;border-bottom:1px solid var(--separator)}@media (hover:hover) and (pointer:fine){
 th[onclick]:hover{color:var(--accent-ink);cursor:pointer}}
-td{padding:12px 14px;border-top:1px solid var(--separator);vertical-align:middle;white-space:nowrap;color:var(--text-secondary);font-size:14px;line-height:20px;font-family:inherit}
+td{padding:9px 10px;border-top:1px solid var(--separator);vertical-align:middle;white-space:nowrap;color:var(--text-secondary);font-size:13px;line-height:18px;font-weight:500;font-family:inherit}
 tbody tr:first-child td{border-top:0}
 @media (hover:hover) and (pointer:fine){tbody tr:hover td{background:var(--accent-soft)}}
 /* Pendiente de pago: franja lateral en vez de tinte + opacidad en toda la fila */
@@ -402,13 +404,13 @@ tbody tr.row-dim{opacity:.5}
 /* Primera columna fija al hacer scroll horizontal (se activa con la clase) */
 .kv-sticky-col{position:sticky;left:0;z-index:1;background:var(--glass-strong)}
 thead .kv-sticky-col{z-index:3}
-.td-main{font-size:14px;line-height:20px;font-weight:600;color:var(--text);font-family:inherit}
-.td-code{font-size:14px;line-height:20px;font-weight:600;color:var(--accent-ink);font-family:inherit;font-variant-numeric:tabular-nums}
-.td-amt{font-size:14px;font-weight:600;color:var(--text);text-align:right;font-family:inherit;font-variant-numeric:tabular-nums}
-.td-unit{font-size:13px;color:var(--text-tertiary);font-family:inherit}
+.td-main{font-size:13px;line-height:18px;font-weight:600;color:var(--text);font-family:inherit}
+.td-code{font-size:13px;line-height:18px;font-weight:600;color:var(--accent-ink);font-family:inherit;font-variant-numeric:tabular-nums}
+.td-amt{font-size:13px;line-height:18px;font-weight:600;color:var(--text);text-align:right;font-family:inherit;font-variant-numeric:tabular-nums}
+.td-unit{font-size:13px;line-height:18px;font-weight:500;color:var(--text-tertiary);font-family:inherit}
 .right{text-align:right}
 td.right{font-weight:600;color:var(--text)}
-.td-trunc{max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.td-trunc{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* Prioridad de columnas: p3 se oculta < 1280, p2 se oculta < 1100 */
 @media(max-width:1279px){.table-wrap [data-p="3"],.fc-tabla-wrap [data-p="3"]{display:none}}
 @media(max-width:1099px){.table-wrap [data-p="2"],.fc-tabla-wrap [data-p="2"]{display:none}}
@@ -525,7 +527,7 @@ td.right{font-weight:600;color:var(--text)}
 /* Valor Stock 3-KPI strip: Total | Disponible | Reservado */
 .sv-trio{display:flex;background:var(--surface);border-radius:var(--radius-sm);border:1px solid var(--field-border);overflow:hidden}
 .sv-trio-sep{width:1px;background:var(--separator);flex-shrink:0}
-.sv-trio-item{flex:1;padding:10px 6px;display:flex;flex-direction:column;gap:3px;align-items:center;text-align:center}
+.sv-trio-item{flex:1;min-width:0;padding:10px 6px;display:flex;flex-direction:column;gap:3px;align-items:center;text-align:center}
 .sv-trio-lbl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted2)}
 .sv-trio-val{font-family:var(--font-sans);font-weight:600;font-size:14px;line-height:20px;font-variant-numeric:tabular-nums;color:var(--text);overflow:hidden;text-overflow:ellipsis}
 /* Tab Ingresos */
@@ -570,6 +572,13 @@ input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6;cursor:pointer}
    porque .card crea contexto de apilamiento (tiene backdrop-filter) y ahi el
    z-index del menu solo ordena dentro de la tarjeta. */
 .field:focus-within,.combo-wrap:focus-within,.cl-search-wrap:focus-within{z-index:var(--z-dropdown)}
+/* Y la tarjeta entera se eleva sobre las siguientes: cada .card es su propio
+   contexto de apilamiento (tiene backdrop-filter), asi que el menu no puede
+   salir de ella por mas z-index que se le ponga adentro. */
+.card:has(.combo-list.open),
+.card:has(.cl-search-drop.open),
+.form-panel:has(.combo-list.open),
+.form-panel:has(.cl-search-drop.open){position:relative;z-index:var(--z-dropdown)}
 .combo-wrap input {
   width: 100%;
   background: var(--field);
@@ -966,11 +975,11 @@ input[list] { cursor: text; }
   display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:var(--radius-pill);
   font-family:var(--font-sans);font-size:12px;line-height:16px;font-weight:600;white-space:nowrap;
   background:transparent;color:var(--text-secondary);border:1px solid var(--separator)}
-.inv-fecha{font-size:14px;line-height:20px;font-weight:600;color:var(--muted2);font-family:inherit;font-variant-numeric:tabular-nums}
-.inv-cod{font-size:14px;line-height:20px;font-weight:600;color:var(--accent-ink);font-family:inherit;font-variant-numeric:tabular-nums}
-.inv-txt{font-size:14px;line-height:20px;font-weight:500;color:var(--text);font-family:inherit}
-.inv-talla{font-size:14px;line-height:20px;font-weight:600;color:var(--text);font-family:inherit;text-align:center}
-.inv-monto{font-size:14px;line-height:20px;font-weight:600;font-family:inherit;font-variant-numeric:tabular-nums}
+.inv-fecha{font-size:13px;line-height:18px;font-weight:600;color:var(--muted2);font-family:inherit;font-variant-numeric:tabular-nums}
+.inv-cod{font-size:13px;line-height:18px;font-weight:600;color:var(--accent-ink);font-family:inherit;font-variant-numeric:tabular-nums}
+.inv-txt{font-size:13px;line-height:18px;font-weight:500;color:var(--text);font-family:inherit}
+.inv-talla{font-size:13px;line-height:18px;font-weight:600;color:var(--text);font-family:inherit;text-align:center}
+.inv-monto{font-size:13px;line-height:18px;font-weight:600;font-family:inherit;font-variant-numeric:tabular-nums}
 .inv-monto.accent{color:var(--accent)}
 .inv-monto.orange{color:var(--orange)}
 .inv-monto.purple{color:var(--purple)}
@@ -1115,7 +1124,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
   border:1px solid var(--separator);border-radius:var(--radius-md);box-shadow:var(--shadow-float);
   z-index:var(--z-dropdown);display:none;max-height:min(320px,50dvh);overflow-y:auto;overscroll-behavior:contain;padding:4px}
 .cl-search-drop.open{display:block}
-.cl-si{padding:9px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .1s}@media (hover:hover) and (pointer:fine){
+.cl-si{padding:10px 12px;border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .1s}@media (hover:hover) and (pointer:fine){
 .cl-si:hover{background:var(--accent-soft)}}
 .cl-si-code{font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.5px;flex-shrink:0;font-family:var(--font-sans)}
 .cl-si-name{font-size:12px;color:var(--text);flex:1;font-family:var(--font-sans)}
@@ -1629,7 +1638,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
           </div>
         </div>
         <!-- Preview precios -->
-        <div id="vt-info" style="display:none;grid-column:span 2">
+        <div id="vt-info" style="display:none">
           <div class="precio-preview show">
             <div class="pp-item"><div class="pp-label">Costo Total S/.</div><div class="pp-val" id="vt-precio-final" style="color:var(--red)">—</div></div>
             <div class="pp-item"><div class="pp-label">Sugerido S/.</div><div class="pp-val" id="vt-precio-sug" style="color:var(--accent)">—</div></div>
@@ -1726,7 +1735,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
         </div>
 
         <!-- PEDIDO: campos de producto -->
-        <div id="rv-pedido-wrap" style="display:none;grid-column:span 2">
+        <div id="rv-pedido-wrap" style="display:none">
           <div class="form-grid g2" style="gap:12px">
             <div class="field">
               <label>Marca *</label>
@@ -5881,11 +5890,15 @@ function onPickVtCliente(){
 function clSearch(ctx){
   const q=document.getElementById(`${ctx}-cl-input`).value.toLowerCase().trim();
   const drop=document.getElementById(`${ctx}-cl-drop`);
-  if(!q){drop.classList.remove('open');return;}
-  const matches=clientesCache.filter(c=>{
-    const txt=[c.nombre,c.apellido,c.instagram,c.telefono,clCodigo(c.id_cliente)].filter(Boolean).join(' ').toLowerCase();
-    return txt.includes(q);
-  }).slice(0,7);
+  // Sin texto se muestran los ultimos clientes, no una lista vacia: asi se
+  // comporta igual que los combos de Registro, que abren con todo al tocarlos.
+  const matches=(q
+    ? clientesCache.filter(c=>{
+        const txt=[c.nombre,c.apellido,c.instagram,c.telefono,clCodigo(c.id_cliente)].filter(Boolean).join(' ').toLowerCase();
+        return txt.includes(q);
+      })
+    : clientesCache.slice()
+  ).slice(0,7);
   const items=matches.map(c=>{
     const nombre=[c.nombre,c.apellido].filter(Boolean).join(' ');
     return`<div class="cl-si" onmousedown="clSelect('${ctx}',${c.id_cliente})">
@@ -5894,7 +5907,7 @@ function clSearch(ctx){
       ${c.talla_frecuente?`<span class="cl-si-talla">${c.talla_frecuente}</span>`:''}
     </div>`;
   }).join('');
-  drop.innerHTML=(matches.length?items:`<div class="cl-si-empty">Sin resultados para "${q}"</div>`)+
+  drop.innerHTML=(matches.length?items:`<div class="cl-si-empty">${q?`Sin resultados para "${q}"`:'Todavia no hay clientes'}</div>`)+
     `<div class="cl-si-new" onmousedown="abrirClRapido('${ctx}')">＋ Nuevo cliente</div>`;
   drop.classList.add('open');
 }
