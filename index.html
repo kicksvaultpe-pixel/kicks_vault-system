@@ -156,20 +156,90 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-sans);min-hei
 ::-webkit-scrollbar-thumb:hover{background:var(--muted2)}}
 
 /* NAV */
-nav{position:sticky;top:0;z-index:200;background:var(--card);border-bottom:1px solid var(--border);height:52px;display:flex;align-items:center;padding:0 16px;gap:0}
+/* ---------- Navegacion v2: topbar flotante (PC/tablet) + tab bar de 5
+   con "+" central y menu de secciones desde el titulo (movil) ---------- */
+.kv-only-m{display:none}
 .nav-logo{font-family:var(--font-brand);font-size:14px;letter-spacing:5px;white-space:nowrap;display:flex;align-items:center;flex-shrink:0}
 .nav-logo .kv-kicks{color:var(--text)}
-.nav-logo .kv-vault{color:var(--accent)}
-.nav-divider{width:1px;height:20px;background:var(--border2);margin:0 24px;flex-shrink:0}
-.nav-tabs{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;flex:1}
+.nav-logo .kv-vault{color:var(--accent-ink)}
+
+/* Barra superior flotante, >=768px */
+nav.kv-topbar{
+  position:sticky;top:12px;z-index:var(--z-topbar);
+  max-width:var(--content-max);margin:12px auto 0;width:calc(100% - 48px);
+  height:var(--topbar-h);padding:0 10px 0 20px;
+  display:flex;align-items:center;gap:16px;border-radius:var(--radius-pill);
+  border:1px solid var(--glass-border);box-shadow:var(--shadow-float);
+}
+.nav-tabs{flex:1;min-width:0;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;
+  -webkit-mask-image:linear-gradient(90deg,#000 92%,transparent);mask-image:linear-gradient(90deg,#000 92%,transparent)}
 .nav-tabs::-webkit-scrollbar{display:none}
-.nav-tab{padding:6px 16px;border:none;background:none;color:var(--muted2);font-family:'Archivo';font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border-radius:0;white-space:nowrap;transition:color .2s;position:relative}
-.nav-tab::after{content:'';position:absolute;bottom:-1px;left:16px;right:16px;height:2px;background:var(--accent);border-radius:2px 2px 0 0;transform:scaleX(0);transition:transform .25s cubic-bezier(.4,0,.2,1);transform-origin:center}
-.nav-tab.active{color:var(--text)}.nav-tab.active::after{transform:scaleX(1)}
-.nav-tab:not(.active):hover{color:var(--text)}
+.nav-tab{
+  flex:none;height:40px;padding:0 14px;border:0;background:none;border-radius:var(--radius-pill);
+  font-family:var(--font-sans);font-size:14px;font-weight:600;letter-spacing:0;text-transform:none;
+  color:var(--text-secondary);cursor:pointer;white-space:nowrap;
+  display:inline-flex;align-items:center;gap:6px;transition:background .2s,color .2s;
+}
+.nav-tab .tab-icon{display:none}
+@media(hover:hover) and (pointer:fine){.nav-tab:not(.active):hover{color:var(--text);background:var(--tile)}}
+.nav-tab.active{color:var(--on-accent);background:var(--accent)}
+.nav-tab::after{display:none}
+
+/* Tab bar flotante de 5 espacios con "+" central, <768px.
+   Inventario · Reservas · [+ Registro] · Flujo · Resultados. El resto
+   de secciones (Clientes, OCs, Analisis) se abre desde el titulo. */
+nav.kv-tabbar{
+  position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));
+  z-index:var(--z-topbar);height:calc(var(--tabbar-h) + 4px);border-radius:var(--radius-pill);
+  display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;padding:0 6px;
+  border:1px solid var(--glass-border);box-shadow:var(--shadow-float);
+}
+.kv-tab{
+  justify-self:center;min-width:var(--tap-min);height:52px;padding:6px 10px;border:0;background:none;border-radius:var(--radius-pill);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  font-family:var(--font-sans);font-size:11px;line-height:13px;font-weight:600;color:var(--text-secondary);cursor:pointer;
+}
+.kv-tab svg{width:22px;height:22px}
+.kv-tab.active{color:var(--accent-ink);background:var(--accent-soft);font-weight:700}
+.kv-tab-add{
+  justify-self:center;width:56px;height:56px;border-radius:var(--radius-pill);border:0;
+  background:var(--accent);color:var(--on-accent);box-shadow:0 6px 16px color-mix(in srgb,var(--accent) 35%,transparent);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+}
+.kv-tab-add svg{width:26px;height:26px}
+
+/* Menu de secciones, se abre al tocar el titulo de la pagina (movil) */
+.kv-title-btn{border:0;background:none;padding:0;display:inline-flex;align-items:center;gap:6px;cursor:pointer;color:var(--text);font:inherit}
+.kv-title-btn .kv-chevron{width:28px;height:28px;border-radius:var(--radius-pill);background:var(--tile);border:1px solid var(--glass-border);
+  display:flex;align-items:center;justify-content:center;transition:transform .2s;flex-shrink:0}
+.kv-title-btn .kv-chevron svg{width:16px;height:16px}
+.kv-title-btn[aria-expanded="true"] .kv-chevron{transform:rotate(180deg)}
+.kv-section-menu{
+  display:none;position:fixed;top:calc(48px + 8px + env(safe-area-inset-top,0px));left:16px;right:16px;
+  max-width:340px;z-index:var(--z-dropdown);padding:6px;border-radius:var(--radius-lg);
+  background:var(--glass-strong);-webkit-backdrop-filter:blur(var(--blur-bar)) saturate(180%);backdrop-filter:blur(var(--blur-bar)) saturate(180%);
+  border:1px solid var(--glass-border);box-shadow:var(--shadow-float);
+}
+.kv-section-menu.open{display:block}
+.kv-section-item{width:100%;min-height:48px;border:0;background:none;border-radius:16px;padding:6px 10px;
+  display:flex;align-items:center;gap:12px;font-family:var(--font-sans);font-size:15px;font-weight:600;color:var(--text);cursor:pointer;text-align:left}
+.kv-section-item .kv-ico{width:32px;height:32px;border-radius:10px;background:var(--tile);display:flex;align-items:center;justify-content:center;flex:none}
+.kv-section-item .kv-ico svg{width:18px;height:18px}
+.kv-section-item.active{background:var(--accent-soft);color:var(--accent-ink)}
+@media(hover:hover) and (pointer:fine){.kv-section-item:not(.active):hover{background:var(--tile)}}
+@media(min-width:768px){
+  nav.kv-tabbar{display:none}
+  .kv-title-btn{pointer-events:none}
+  .kv-title-btn .kv-chevron{display:none}
+}
+@media(max-width:767px){
+  nav.kv-topbar{display:none}
+  .kv-only-m{display:flex}
+}
 
 /* LAYOUT */
-.view{display:none;padding:20px;max-width:1600px;margin:0 auto}@media(max-width:600px){.view{padding:12px}}
+/* max-width y padding alineados con .kv-topbar (content-max + 24px de aire) */
+.view{display:none;padding:20px 24px;max-width:var(--content-max);margin:0 auto}@media(max-width:600px){.view{padding:12px}}
 .view.active{display:block;animation:fadeIn .25s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .page-title{font-family:var(--font-sans);font-weight:800;font-size:28px;line-height:34px;letter-spacing:-.015em;margin-bottom:24px;display:flex;align-items:center;gap:10px;color:var(--text)}
@@ -801,70 +871,28 @@ input[list] { cursor: text; }
 .iep-total-val{font-size:15px;color:var(--accent);font-variant-numeric:tabular-nums;font-family:var(--font-sans);font-weight:800}
 
 /* ═══════════════════════════════════════════════════════
-   MOBILE BOTTOM NAV
+   HEADER MOVIL (logo + tema). La barra de tabs vive en
+   nav.kv-tabbar, mas arriba en la seccion de Navegacion v2.
 ═══════════════════════════════════════════════════════ */
 .mobile-header{
   display:none;
   position:sticky;top:0;z-index:202;
-  background:var(--card);
-  border-bottom:1px solid var(--border);
   height:48px;align-items:center;padding:0 16px;gap:12px;
+  background:var(--glass-strong);
+  -webkit-backdrop-filter:blur(var(--blur-bar)) saturate(180%);
+          backdrop-filter:blur(var(--blur-bar)) saturate(180%);
+  border-bottom:1px solid var(--glass-border);
 }
 .mobile-header .nav-logo{font-family:var(--font-brand);font-size:13px;letter-spacing:5px;display:flex;align-items:center}
-.tab-icon{display:none;transition:transform .2s,opacity .2s}
+.tab-icon{display:none}
 .tab-label{transition:color .2s}
-.nav-expand-handle{display:none}
 
 @media(max-width:768px){
   /* Mostrar header de logo arriba */
   .mobile-header{display:flex}
 
-  /* Mover tabs al fondo */
-  nav{
-    position:fixed;top:auto;bottom:0;left:0;right:0;
-    border-top:1px solid var(--border);border-bottom:none;
-    height:auto;min-height:58px;
-    flex-direction:column;align-items:stretch;
-    padding:0;padding-bottom:env(safe-area-inset-bottom,8px);
-    background:var(--card);
-    transition:padding-bottom .25s ease;
-  }
-  nav .nav-logo,nav .nav-divider{display:none}
-  /* Tema/logout viven en el mobile-header de arriba, no en la barra de tabs */
-  nav>#themeBtn,nav>#logoutBtn{display:none!important}
-  nav .nav-tabs{width:100%;justify-content:space-around;overflow:visible;transition:row-gap .25s ease;padding-top:4px}
-  .nav-tab{
-    flex:1;flex-direction:column;align-items:center;justify-content:center;
-    gap:3px;padding:4px 2px 4px;font-size:11px;letter-spacing:.3px;
-    display:flex;min-width:0;
-    user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
-  }
-  .nav-tab::after{
-    bottom:auto;top:0;left:8px;right:8px;
-    border-radius:0 0 3px 3px;height:2px;
-  }
-  .nav-tab.active .tab-icon{transform:translateY(-2px);color:var(--accent)}
-  .tab-icon{display:block;flex-shrink:0}
-
-  /* Fila fija arriba de los tabs para expandir la barra y ver los 8 comodos */
-  .nav-expand-handle{
-    display:flex!important;align-items:center;justify-content:center;gap:5px;
-    width:100%;padding:5px 0;margin:0;order:-1;
-    background:none;border:none;border-bottom:1px solid var(--border);
-    color:var(--muted2);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
-    cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;
-    user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
-  }
-  #navExpandChevron{display:inline-block;transition:transform .25s ease}
-  nav.nav-expanded #navExpandChevron{transform:rotate(180deg)}
-  nav.nav-expanded .nav-tabs{flex-wrap:wrap;row-gap:6px}
-  nav.nav-expanded .nav-tab{flex:0 0 25%;padding:6px 2px}
-  nav.nav-expanded .tab-label{display:block!important;font-size:11px}
-  nav.nav-expanded .tab-icon svg{width:22px;height:22px}
-  nav.nav-expanded{padding-bottom:calc(env(safe-area-inset-bottom,8px) + 6px)}
-
-  /* Espacio para bottom nav (manija + tabs) + top header */
-  .view{padding-bottom:calc(94px + env(safe-area-inset-bottom,0px));padding-top:16px}
+  /* La tabbar flota sobre el contenido: reservar tabbar-h + 40 + safe area */
+  .view{padding-bottom:calc(var(--tabbar-h) + 40px + env(safe-area-inset-bottom,0px));padding-top:16px}
 
   /* Formularios más compactos */
   .card{padding:16px 14px}
@@ -923,8 +951,8 @@ input[list] { cursor: text; }
 }
 
 @media(max-width:400px){
-  .tab-label{display:none}
-  .tab-icon svg{width:22px;height:22px}
+  .kv-tab{padding:6px 4px}
+  .kv-tab svg{width:21px;height:21px}
   .tipo-btn{padding:6px 7px;font-size:11px}
   .card{padding:12px 10px}
   .form-grid.g2, .form-grid.g3 { grid-template-columns: 1fr !important; }
@@ -1108,42 +1136,40 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
   <button class="theme-btn logout-btn" id="logoutBtnMobile" onclick="kvSalir()" title="Cerrar sesión" style="display:none">⏻</button>
 </div>
 
-<nav>
-  <button type="button" class="nav-expand-handle" id="navExpandHandle" onclick="toggleNavExpand()" aria-label="Ver todos los menús">
-    <span id="navExpandChevron">⌃</span><span>Más opciones</span>
-  </button>
+<!-- Barra superior flotante (>=768px). Los SVG viven aqui una sola vez:
+     el menu de secciones movil los clona desde estos botones. -->
+<nav class="kv-topbar kv-glass-strong">
   <div class="nav-logo"><span class="kv-kicks">KICKS</span><span class="kv-vault">VAULT</span></div>
-  <div class="nav-divider"></div>
   <div class="nav-tabs">
-    <button class="nav-tab active" onclick="showView('registro',this)">
+    <button class="nav-tab active" data-sec="registro" onclick="showView('registro')">
       <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5"/><path d="M17.5 3.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 7.5-7.5z"/></svg>
       <span class="tab-label">Registro</span>
     </button>
-    <button class="nav-tab" onclick="showView('inventario',this)">
+    <button class="nav-tab" data-sec="inventario" onclick="showView('inventario')">
       <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="6" height="6" rx="1"/><rect x="9" y="3" width="6" height="6" rx="1"/><rect x="16" y="3" width="6" height="6" rx="1"/><rect x="2" y="12" width="6" height="6" rx="1"/><rect x="9" y="12" width="6" height="6" rx="1"/><rect x="16" y="12" width="6" height="6" rx="1"/></svg>
       <span class="tab-label">Inventario</span>
     </button>
-    <button class="nav-tab" onclick="showView('reservas',this)">
+    <button class="nav-tab" data-sec="reservas" onclick="showView('reservas')">
       <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
       <span class="tab-label">Reservas</span>
     </button>
-    <button class="nav-tab" onclick="showView('ventas',this)">
+    <button class="nav-tab" data-sec="ventas" onclick="showView('ventas')">
       <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
       <span class="tab-label">Resultados</span>
     </button>
-    <button class="nav-tab" onclick="showView('clientes',this)">
+    <button class="nav-tab" data-sec="clientes" onclick="showView('clientes')">
       <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       <span class="tab-label">Clientes</span>
     </button>
-    <button class="nav-tab" onclick="showView('flujo',this)">
+    <button class="nav-tab" data-sec="flujo" onclick="showView('flujo')">
       <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
       <span class="tab-label">Flujo</span>
     </button>
-    <button class="nav-tab" onclick="showView('oc',this)">
+    <button class="nav-tab" data-sec="oc" onclick="showView('oc')">
       <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
       <span class="tab-label">OCs</span>
     </button>
-    <button class="nav-tab" onclick="showView('analisis',this)">
+    <button class="nav-tab" data-sec="analisis" onclick="showView('analisis')">
       <svg class="tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18.7 8 13 13.7l-4-4L3 16"/></svg>
       <span class="tab-label">Análisis</span>
     </button>
@@ -1152,13 +1178,40 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
   <button class="theme-btn logout-btn" id="logoutBtn" onclick="kvSalir()" title="Cerrar sesión" style="display:none">⏻</button>
 </nav>
 
+<!-- Tab bar flotante movil (<768px): 5 espacios con "+" central.
+     Clientes, OCs y Analisis se abren desde el titulo de la pagina. -->
+<nav class="kv-tabbar kv-glass-strong">
+  <button class="kv-tab" data-sec="inventario" onclick="showView('inventario')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="6" height="6" rx="1"/><rect x="9" y="3" width="6" height="6" rx="1"/><rect x="16" y="3" width="6" height="6" rx="1"/><rect x="2" y="12" width="6" height="6" rx="1"/><rect x="9" y="12" width="6" height="6" rx="1"/><rect x="16" y="12" width="6" height="6" rx="1"/></svg>
+    <span>Inventario</span>
+  </button>
+  <button class="kv-tab" data-sec="reservas" onclick="showView('reservas')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    <span>Reservas</span>
+  </button>
+  <button class="kv-tab-add" data-sec="registro" onclick="showView('registro')" aria-label="Registrar movimiento">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </button>
+  <button class="kv-tab" data-sec="flujo" onclick="showView('flujo')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
+    <span>Flujo</span>
+  </button>
+  <button class="kv-tab" data-sec="ventas" onclick="showView('ventas')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+    <span>Resultados</span>
+  </button>
+</nav>
+
+<!-- Menu de secciones movil: se llena desde los botones de .kv-topbar -->
+<div class="kv-section-menu" id="kvSectionMenu" role="menu" aria-label="Secciones"></div>
+
 <!-- ══════════════════════════════════
      REGISTRO
 ══════════════════════════════════ -->
 <div id="view-registro" class="view active">
 <div class="page-hd-row">
   <div class="page-hd">
-    <div class="page-title"><div class="dot"></div> Registro</div>
+    <div class="page-title"><button type="button" class="kv-title-btn" onclick="kvToggleSectionMenu(this)" aria-haspopup="menu" aria-expanded="false"><span>Registro</span><span class="kv-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></button></div>
     <div class="page-sub">Compras, ventas, reservas, pagos y costos operativos</div>
   </div>
   <div class="tc-widget">
@@ -1888,7 +1941,7 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
      INVENTARIO
 ══════════════════════════════════ -->
 <div id="view-inventario" class="view">
-  <div class="page-title"><div class="dot"></div> Inventario</div>
+  <div class="page-title"><button type="button" class="kv-title-btn" onclick="kvToggleSectionMenu(this)" aria-haspopup="menu" aria-expanded="false"><span>Inventario</span><span class="kv-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></button></div>
 
   <!-- Navegación de mes para stats -->
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
@@ -2158,7 +2211,7 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
 <!-- Placeholders -->
 <div id="view-ventas" class="view">
   <div class="page-hd">
-    <div class="page-title"><div class="dot"></div> Resultados</div>
+    <div class="page-title"><button type="button" class="kv-title-btn" onclick="kvToggleSectionMenu(this)" aria-haspopup="menu" aria-expanded="false"><span>Resultados</span><span class="kv-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></button></div>
     <div class="page-sub">Ventas del mes, gastos del negocio y utilidad neta</div>
   </div>
 
@@ -2288,7 +2341,7 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
 </div>
 <div id="view-flujo" class="view">
   <div class="page-hd">
-    <div class="page-title"><div class="dot"></div> Flujo de Caja</div>
+    <div class="page-title"><button type="button" class="kv-title-btn" onclick="kvToggleSectionMenu(this)" aria-haspopup="menu" aria-expanded="false"><span>Flujo de Caja</span><span class="kv-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></button></div>
     <div class="page-sub">Balance mensual de ingresos, egresos y caja disponible</div>
   </div>
 
@@ -2528,7 +2581,7 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
 </div>
 <div id="view-clientes" class="view">
   <div class="page-hd">
-    <div class="page-title"><div class="dot"></div> Clientes</div>
+    <div class="page-title"><button type="button" class="kv-title-btn" onclick="kvToggleSectionMenu(this)" aria-haspopup="menu" aria-expanded="false"><span>Clientes</span><span class="kv-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></button></div>
     <div class="page-sub">Directorio de clientes y su historial de compras</div>
   </div>
 
@@ -2591,7 +2644,7 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
 ══════════════════════════════════ -->
 <div id="view-oc" class="view">
   <div class="page-hd">
-    <div class="page-title"><div class="dot"></div> Órdenes de Compra</div>
+    <div class="page-title"><button type="button" class="kv-title-btn" onclick="kvToggleSectionMenu(this)" aria-haspopup="menu" aria-expanded="false"><span>Órdenes de Compra</span><span class="kv-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></button></div>
     <div class="page-sub">Seguimiento de importaciones, desde la compra hasta que llega a Perú</div>
   </div>
 
@@ -2692,7 +2745,7 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
 ══════════════════════════════════ -->
 <div id="view-reservas" class="view">
   <div class="page-hd">
-    <div class="page-title"><div class="dot"></div> Reservas</div>
+    <div class="page-title"><button type="button" class="kv-title-btn" onclick="kvToggleSectionMenu(this)" aria-haspopup="menu" aria-expanded="false"><span>Reservas</span><span class="kv-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></button></div>
     <div class="page-sub">Pedidos y reservas con abonos parciales de clientes</div>
   </div>
 
@@ -2752,7 +2805,7 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
 ══════════════════════════════════ -->
 <div id="view-analisis" class="view">
   <div class="page-hd">
-    <div class="page-title"><div class="dot"></div> Análisis</div>
+    <div class="page-title"><button type="button" class="kv-title-btn" onclick="kvToggleSectionMenu(this)" aria-haspopup="menu" aria-expanded="false"><span>Análisis</span><span class="kv-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></button></div>
     <div class="page-sub">Cómo va el negocio en el tiempo, últimos 12 meses</div>
   </div>
 
@@ -4576,24 +4629,60 @@ document.addEventListener('mousedown',function(e){
   }
 });
 
-function toggleNavExpand(){
-  const nav=document.querySelector('nav');
-  const expanded=nav.classList.toggle('nav-expanded');
-  const chev=document.getElementById('navExpandChevron');
-  if(chev)chev.textContent=expanded?'⌄':'⌃';
+/* ---------- Menu de secciones (movil) ----------
+   Los items se clonan de los botones de .kv-topbar, asi los 8 iconos SVG
+   viven en un solo lugar del HTML. */
+let _kvMenuBtn=null;
+function kvRenderSectionMenu(){
+  const menu=document.getElementById('kvSectionMenu');
+  if(!menu||menu.childElementCount)return;
+  document.querySelectorAll('.kv-topbar .nav-tab').forEach(tab=>{
+    const sec=tab.dataset.sec;
+    const it=document.createElement('button');
+    it.type='button';it.className='kv-section-item';it.dataset.sec=sec;it.setAttribute('role','menuitem');
+    it.innerHTML='<span class="kv-ico">'+tab.querySelector('svg').outerHTML+'</span>'
+                +'<span>'+tab.querySelector('.tab-label').textContent+'</span>';
+    it.onclick=()=>showView(sec);
+    menu.appendChild(it);
+  });
+}
+function kvCerrarSectionMenu(){
+  const menu=document.getElementById('kvSectionMenu');
+  if(menu)menu.classList.remove('open');
+  if(_kvMenuBtn){_kvMenuBtn.setAttribute('aria-expanded','false');_kvMenuBtn=null;}
+}
+function kvToggleSectionMenu(btn){
+  const menu=document.getElementById('kvSectionMenu');
+  if(!menu)return;
+  kvRenderSectionMenu();
+  const act=document.querySelector('.view.active');
+  if(act)kvSyncNav(act.id.replace('view-',''));
+  if(menu.classList.contains('open')&&_kvMenuBtn===btn){kvCerrarSectionMenu();return;}
+  kvCerrarSectionMenu();
+  menu.classList.add('open');
+  btn.setAttribute('aria-expanded','true');
+  _kvMenuBtn=btn;
+}
+document.addEventListener('click',function(e){
+  if(!document.getElementById('kvSectionMenu')?.classList.contains('open'))return;
+  if(e.target.closest('#kvSectionMenu')||e.target.closest('.kv-title-btn'))return;
+  kvCerrarSectionMenu();
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape')kvCerrarSectionMenu();
+});
+
+// Marca la seccion activa en las 3 navegaciones a la vez (topbar, tabbar, menu)
+function kvSyncNav(sec){
+  document.querySelectorAll('.nav-tab,.kv-tab,.kv-tab-add,.kv-section-item')
+    .forEach(b=>b.classList.toggle('active',b.dataset.sec===sec));
 }
 
-function showView(n,btn){
+function showView(n){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
   document.getElementById('view-'+n).classList.add('active');
-  if(btn)btn.classList.add('active');
-  const nav=document.querySelector('nav');
-  if(nav&&nav.classList.contains('nav-expanded')){
-    nav.classList.remove('nav-expanded');
-    const chev=document.getElementById('navExpandChevron');
-    if(chev)chev.textContent='⌃';
-  }
+  kvSyncNav(n);
+  kvCerrarSectionMenu();
   _clearSel();
   if(n==='inventario') loadInventario();
   if(n==='flujo') loadFlujo();
