@@ -494,7 +494,7 @@ td.right{font-weight:600;color:var(--text)}
 .sg-divider{border-top:1px solid var(--separator);margin:10px 0}
 .sg-h{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted2);text-align:right;padding-bottom:3px}
 .sg-h:first-child{text-align:left}
-.sg-mc{font-size:12px;color:var(--muted);font-family:var(--font-sans)}
+.sg-mc{font-size:13px;line-height:18px;font-weight:500;color:var(--muted);font-family:var(--font-sans)}
 .sg-mc-tot{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .sg-mn{font-family:var(--font-sans);font-weight:600;font-size:14px;line-height:20px;color:var(--text);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 .sg-mn.accent{color:var(--accent)}.sg-mn.green{color:var(--green)}.sg-mn.red{color:var(--red)}
@@ -506,13 +506,15 @@ td.right{font-weight:600;color:var(--text)}
    color ya vive en la cifra. */
 .sc-chip{font-size:13px;line-height:18px;font-weight:600;color:var(--text-secondary);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:8px}
 /* Tabla "Por pagar" — identica en Inventario y Flujo de Caja */
-.deu-grid{display:grid;grid-template-columns:1fr auto auto auto;gap:4px 10px;align-items:center;font-size:11px;font-variant-numeric:tabular-nums}
+/* gap mas chico que antes para compensar que la letra crecio de 11 a 14:
+   son 4 columnas y la tarjeta puede quedar angosta. */
+.deu-grid{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:5px 8px;align-items:center;font-size:14px;line-height:20px;font-weight:600;font-variant-numeric:tabular-nums}
 .deu-h{font-size:11px;line-height:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted2);text-align:right}
-.deu-lbl{font-size:12px;color:var(--muted);font-family:var(--font-sans)}
+.deu-lbl{font-size:13px;line-height:18px;font-weight:500;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--font-sans)}
 .deu-n{text-align:right;color:var(--muted2)}
 .deu-u{text-align:right;color:var(--yellow)}
-.deu-s{text-align:right;color:var(--yellow);font-family:var(--font-sans);font-weight:800}
-.deu-tot{border-top:1px solid var(--separator);padding-top:5px;font-weight:700}
+.deu-s{text-align:right;color:var(--yellow);font-family:var(--font-sans);font-weight:600}
+.deu-tot{border-top:1px solid var(--separator);padding-top:7px;margin-top:2px;font-weight:600}
 .deu-acc{color:var(--warning)}
 .sc-grid{display:grid;align-items:center;row-gap:6px}
 .sc-grid.g2{grid-template-columns:1fr auto;column-gap:16px}
@@ -570,14 +572,17 @@ input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6;cursor:pointer}
 /* El campo con el desplegable abierto se eleva sobre los de abajo. Hace falta
    porque .card crea contexto de apilamiento (tiene backdrop-filter) y ahi el
    z-index del menu solo ordena dentro de la tarjeta. */
-.field:focus-within,.combo-wrap:focus-within,.cl-search-wrap:focus-within{z-index:var(--z-dropdown)}
+.field:focus-within,.combo-wrap:focus-within,.cl-search-wrap:focus-within{z-index:4}
 /* Y la tarjeta entera se eleva sobre las siguientes: cada .card es su propio
    contexto de apilamiento (tiene backdrop-filter), asi que el menu no puede
    salir de ella por mas z-index que se le ponga adentro. */
+/* OJO con el valor: alcanza con ganarle a las tarjetas hermanas (que estan
+   en z-index auto), NO con --z-dropdown. Ese token vale 250 y la barra de
+   navegacion vale 200, asi que la tarjeta entera se montaba sobre la nav. */
 .card:has(.combo-list.open),
 .card:has(.cl-search-drop.open),
 .form-panel:has(.combo-list.open),
-.form-panel:has(.cl-search-drop.open){position:relative;z-index:var(--z-dropdown)}
+.form-panel:has(.cl-search-drop.open){position:relative;z-index:5}
 .combo-wrap input,.cl-search-input {
   width: 100%;
   background: var(--field);
