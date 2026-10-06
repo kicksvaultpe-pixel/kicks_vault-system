@@ -442,13 +442,15 @@ td.right{font-weight:600;color:var(--text)}
 }
 
 /* BADGES */
-.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:var(--radius-pill);font-size:11px;font-family:var(--font-sans);font-weight:700;letter-spacing:.5px;white-space:nowrap}
-.badge-green{background:rgba(22,163,74,.1);color:var(--green);border:1px solid rgba(22,163,74,.15)}
-.badge-red{background:rgba(220,38,38,.1);color:var(--red);border:1px solid rgba(220,38,38,.15)}
-.badge-yellow{background:rgba(180,83,9,.1);color:var(--yellow);border:1px solid rgba(180,83,9,.15)}
-.badge-accent{background:rgba(37,99,235,.08);color:var(--accent);border:1px solid rgba(37,99,235,.15)}
-.badge-muted{background:var(--surface);color:var(--muted2);border:1px solid var(--border)}
-.badge-purple{background:rgba(109,40,217,.1);color:var(--purple);border:1px solid rgba(109,40,217,.15)}
+.badge{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 10px;border:0;border-radius:var(--radius-pill);font-size:12px;line-height:16px;font-weight:600;letter-spacing:0;white-space:nowrap;font-family:var(--font-sans)}
+/* Las tintas salen de los tokens -soft: antes eran rgba fijos derivados de
+   la paleta clara, asi que en oscuro la pastilla no acompanaba al texto. */
+.badge-green{background:var(--positive-soft);color:var(--positive)}
+.badge-red{background:var(--negative-soft);color:var(--negative)}
+.badge-yellow{background:var(--warning-soft);color:var(--warning)}
+.badge-accent{background:var(--accent-soft);color:var(--accent-ink)}
+.badge-muted{background:var(--tile);color:var(--text-secondary)}
+.badge-purple{background:var(--reserve-soft);color:var(--reserve)}
 
 /* STATS */
 /* auto-fit: las tarjetas se reparten solas segun el ancho, sin saltos de
@@ -820,15 +822,17 @@ input[list] { cursor: text; }
 .fc-tabla .td-pend{font-family:inherit;font-size:14px;font-weight:600;color:var(--yellow);text-align:right;font-variant-numeric:tabular-nums}
 .fc-tabla .td-reserva{color:var(--purple);font-size:14px;font-weight:600}
 .fc-tabla .td-muted{color:var(--text-tertiary);text-align:right}
-.fc-accion-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:var(--radius-pill);font-size:11px;font-weight:700;letter-spacing:.5px;white-space:nowrap}
-.fc-accion-COMPRA{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.18)}
-.fc-accion-VENTA{background:rgba(22,163,74,.08);color:var(--green);border:1px solid rgba(22,163,74,.18)}
-.fc-accion-RESERVA{background:rgba(109,40,217,.1);color:var(--purple);border:1px solid rgba(109,40,217,.18)}
-.fc-accion-PAGO{background:rgba(194,65,12,.1);color:var(--orange);border:1px solid rgba(194,65,12,.18)}
-.fc-accion-COSTO{background:rgba(96,165,250,.1);color:var(--blue);border:1px solid rgba(96,165,250,.18)}
-.fc-accion-CANCELACION{background:rgba(156,163,175,.08);color:var(--muted2);border:1px solid rgba(156,163,175,.18)}
-.fc-accion-PENDIENTE{background:rgba(180,83,9,.08);color:var(--yellow);border:1px solid rgba(180,83,9,.18)}
-.fc-accion-INVERSION{background:rgba(37,99,235,.08);color:var(--blue);border:1px solid rgba(37,99,235,.18)}
+.fc-accion-badge{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 10px;border:0;border-radius:var(--radius-pill);font-size:12px;line-height:16px;font-weight:600;letter-spacing:0;white-space:nowrap}
+.fc-accion-COMPRA{background:var(--negative-soft);color:var(--negative)}
+.fc-accion-VENTA{background:var(--positive-soft);color:var(--positive)}
+.fc-accion-RESERVA{background:var(--reserve-soft);color:var(--reserve)}
+.fc-accion-PAGO{background:var(--warning-soft);color:var(--warning)}
+/* COSTO e INVERSION tienen tokens propios (--cost cian, --invest gris): antes
+   los dos eran azules y se confundian entre si y con COMPRA. */
+.fc-accion-COSTO{background:var(--cost-soft);color:var(--cost)}
+.fc-accion-INVERSION{background:var(--invest-soft);color:var(--invest)}
+.fc-accion-CANCELACION{background:var(--tile);color:var(--text-secondary)}
+.fc-accion-PENDIENTE{background:var(--warning-soft);color:var(--warning)}
 
 
 /* ANÁLISIS */
@@ -917,10 +921,13 @@ input[list] { cursor: text; }
 #toast.warn{border-color:color-mix(in srgb,var(--warning) 45%,transparent);color:var(--warning)}
 
 /* TABLA INVENTARIO UNIFICADA */
-.cat-zap{display:inline-flex;align-items:center;padding:3px 9px;border-radius:var(--radius-pill);font-size:11px;font-family:var(--font-sans);font-weight:700;letter-spacing:.5px;background:rgba(37,99,235,.08);color:var(--accent);border:1px solid rgba(37,99,235,.15)}
-.cat-ropa{display:inline-flex;align-items:center;padding:3px 9px;border-radius:var(--radius-pill);font-size:11px;font-family:var(--font-sans);font-weight:700;letter-spacing:.5px;background:rgba(96,165,250,.08);color:var(--blue);border:1px solid rgba(96,165,250,.15)}
-.cat-acc{display:inline-flex;align-items:center;padding:3px 9px;border-radius:var(--radius-pill);font-size:11px;font-family:var(--font-sans);font-weight:700;letter-spacing:.5px;background:rgba(109,40,217,.08);color:var(--purple);border:1px solid rgba(109,40,217,.15)}
-.cat-otros{display:inline-flex;align-items:center;padding:3px 9px;border-radius:var(--radius-pill);font-size:11px;font-family:var(--font-sans);font-weight:700;letter-spacing:.5px;background:var(--surface);color:var(--muted2);border:1px solid var(--border)}
+/* Categoria es una etiqueta neutra, no un estado: las 4 comparten el mismo
+   contorno sin color. Antes azul/celeste/violeta competian con los badges
+   de estado de la misma fila. */
+.cat-zap,.cat-ropa,.cat-acc,.cat-otros{
+  display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:var(--radius-pill);
+  font-family:var(--font-sans);font-size:12px;line-height:16px;font-weight:600;letter-spacing:0;white-space:nowrap;
+  background:transparent;color:var(--text-secondary);border:1px solid var(--separator)}
 .inv-fecha{font-size:11px;font-weight:600;color:var(--muted2);font-family:inherit;font-variant-numeric:tabular-nums}
 .inv-cod{font-size:11px;font-weight:700;color:var(--accent);font-family:inherit;letter-spacing:.3px;font-variant-numeric:tabular-nums}
 .inv-txt{font-size:12px;font-weight:600;color:var(--text);font-family:inherit}
@@ -1127,7 +1134,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
 .cl-panel-foot{padding:14px 20px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--separator);display:flex;gap:8px;flex-shrink:0}
 .cl-panel-foot .btn{flex:1}
 /* Type badges */
-.badge-vip{background:rgba(180,83,9,.1);color:var(--yellow);border:1px solid rgba(180,83,9,.2)}
+.badge-vip{background:var(--warning-soft);color:var(--warning)}
 
 /* ══ TC WIDGET ══ */
 .tc-widget{display:inline-flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 14px;margin-bottom:16px;box-shadow:var(--shadow)}
@@ -1175,8 +1182,8 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
    una receta visual duplicada de .badge+.badge-accent/green/red que ya existe
    en el resto de la app (mismo color, pero radio 6px en vez de la pildora 20px
    del sistema real). Unificado -- ver renderReservas() y el detalle de reserva. */
-.rsv-tipo-stock{background:rgba(180,83,9,.12);color:var(--yellow);border:1px solid rgba(180,83,9,.25);border-radius:var(--radius-sm);padding:2px 7px;font-size:11px;font-weight:700;white-space:nowrap}
-.rsv-tipo-pedido{background:rgba(109,40,217,.1);color:var(--purple);border:1px solid rgba(109,40,217,.25);border-radius:var(--radius-sm);padding:2px 7px;font-size:11px;font-weight:700;white-space:nowrap}
+.rsv-tipo-stock{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 10px;border:0;border-radius:var(--radius-pill);font-size:12px;line-height:16px;font-weight:600;letter-spacing:0;white-space:nowrap;background:var(--warning-soft);color:var(--warning)}
+.rsv-tipo-pedido{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 10px;border:0;border-radius:var(--radius-pill);font-size:12px;line-height:16px;font-weight:600;letter-spacing:0;white-space:nowrap;background:var(--reserve-soft);color:var(--reserve)}
 .rsv-filter-btn.active{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
 .oc-filter-btn.active{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
 .oc-filter-btn-pago.active{background:var(--orange);color:var(--on-warning);border-color:var(--orange)}
