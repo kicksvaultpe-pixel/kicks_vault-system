@@ -197,14 +197,19 @@ nav.kv-topbar{
   -webkit-mask-image:linear-gradient(90deg,#000 92%,transparent);mask-image:linear-gradient(90deg,#000 92%,transparent)}
 .nav-tabs::-webkit-scrollbar{display:none}
 .nav-tab{
-  flex:none;height:40px;padding:0 14px;border:0;background:none;border-radius:var(--radius-pill);
-  font-family:var(--font-sans);font-size:14px;font-weight:600;
-  color:var(--text-secondary);cursor:pointer;white-space:nowrap;
-  display:inline-flex;align-items:center;gap:6px;transition:background .2s,color .2s;
+  flex:none;height:42px;padding:0 15px;border:0;background:none;border-radius:var(--radius-pill);
+  font-family:var(--font-sans);font-size:14px;line-height:20px;font-weight:600;
+  color:var(--text-tertiary);cursor:pointer;white-space:nowrap;
+  display:inline-flex;align-items:center;gap:8px;
+  transition:background .2s var(--ease-out),color .2s;
 }
-.nav-tab .tab-icon{display:none}
+/* Los iconos ya estaban en el marcado, solo ocultos. Son los mismos que
+   clona la barra de movil, asi que las dos navegaciones quedan iguales. */
+.nav-tab .tab-icon{display:block;flex:none;opacity:.7;transition:opacity .2s}
+.nav-tab.active .tab-icon{opacity:1}
 @media(hover:hover) and (pointer:fine){.nav-tab:not(.active):hover{color:var(--text);background:var(--tile)}}
-.nav-tab.active{color:var(--on-accent);background:var(--accent)}
+.nav-tab.active{color:var(--on-accent);background:var(--accent);
+  box-shadow:0 3px 10px color-mix(in srgb,var(--accent) 34%,transparent)}
 .nav-tab::after{display:none}
 
 /* Tab bar flotante de 5 espacios con "+" central, <768px.
@@ -1088,7 +1093,15 @@ input[list] { cursor: text; }
   z-index:calc(var(--z-sheet) + 1);overflow-y:auto;overscroll-behavior:contain;padding:24px 24px 40px;
   border-radius:var(--radius-xl);box-shadow:var(--shadow-sheet);transform:translateX(calc(100% + 12px));transition:transform .25s cubic-bezier(.4,0,.2,1)}
 #inv-edit-overlay.open #inv-edit-panel{transform:translateX(0)}
-.iep-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}
+.iep-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:12px}
+/* La pareja etiqueta + titulo del encabezado de una hoja. Los tres paneles
+   (Inventario, Reservas, Clientes) la repetian con estilos inline, cada uno
+   con valores distintos; de ahi que el de Reservas se viera chueco. */
+.iep-header>div:first-child{min-width:0}
+.iep-kicker{font-size:11px;line-height:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--text-tertiary);margin-bottom:4px}
+.iep-titulo{font-family:var(--font-sans);font-size:17px;line-height:22px;font-weight:700;color:var(--accent-ink);
+  word-break:break-word}
 .iep-close{background:none;border:1px solid var(--field-border);color:var(--muted2);width:32px;height:32px;border-radius:var(--radius-sm);cursor:pointer;font-size:15px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color .15s,color .15s}@media (hover:hover) and (pointer:fine){
 .iep-close:hover{border-color:var(--red);color:var(--red)}}
 .iep-section{border-top:1px solid var(--separator);padding-top:16px;margin-top:16px}
@@ -9172,8 +9185,8 @@ kvArrancar();
     <!-- Header -->
     <div class="iep-header">
       <div>
-        <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted2);margin-bottom:4px">Editar producto</div>
-        <div id="iep-codigo" style="font-size:17px;color:var(--accent);font-family:var(--font-sans);font-weight:800">—</div>
+        <div class="iep-kicker">Editar producto</div>
+        <div class="iep-titulo" id="iep-codigo">—</div>
       </div>
       <button class="iep-close" onclick="cerrarEditarItem()">✕</button>
     </div>
@@ -9270,12 +9283,12 @@ kvArrancar();
   <div id="rsv-panel">
 
     <!-- Header -->
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:12px">
-      <div style="min-width:0">
-        <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted2);margin-bottom:3px" id="rsv-p-codigo">RSV-001</div>
-        <div style="font-family:var(--font-sans);font-weight:800;font-size:15px;color:var(--text);line-height:1.3;word-break:break-word" id="rsv-p-producto">—</div>
+    <div class="iep-header">
+      <div>
+        <div class="iep-kicker" id="rsv-p-codigo">RSV-001</div>
+        <div class="iep-titulo" id="rsv-p-producto">—</div>
       </div>
-      <button class="iep-close" onclick="cerrarReservaDetalle()" style="font-size:18px;line-height:1">×</button>
+      <button class="iep-close" onclick="cerrarReservaDetalle()">✕</button>
     </div>
 
     <!-- Info grid -->
