@@ -258,7 +258,8 @@ nav.kv-tabbar{
 /* Los formularios NO se estiran con el resto: un campo de texto de 1700px
    de ancho es incomodo de leer y de completar. Las tablas y las tarjetas de
    indicadores si aprovechan todo el ancho. */
-#view-registro .card,#view-registro .info-box,#view-registro .tipo-selector{max-width:var(--form-max)}@media(max-width:600px){.view{padding:12px}}
+#view-registro .page-hd-row,#view-registro .card,#view-registro .info-box,
+#view-registro .tipo-selector,#view-registro .form-panel>.pago-toggle{max-width:var(--form-max)}@media(max-width:600px){.view{padding:12px}}
 .view.active{display:block;animation:fadeIn .25s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .page-title{font-family:var(--font-sans);font-weight:800;font-size:28px;line-height:34px;letter-spacing:-.015em;margin-bottom:24px;display:flex;align-items:center;gap:10px;color:var(--text)}
@@ -371,7 +372,10 @@ button:active,[role="button"]:active{
 .btn-cancel:hover{background:var(--red);color:var(--on-negative);box-shadow:0 2px 12px color-mix(in srgb,var(--negative) 45%,transparent)}}
 
 /* TABLE */
-.table-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.table-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+/* Los filtros en grilla en vez de una sola fila flex que se desborda: asi
+   quedan en columnas parejas y reflowean solos segun el ancho. */
+.filtros-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:8px;margin-bottom:14px}
 .oc-pago-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--warning-soft);border:1px solid var(--warning-soft);border-radius:var(--radius-sm);padding:10px 16px;margin-bottom:14px;font-size:12px;color:var(--text)}
 .oc-pago-bar b{color:var(--orange);font-family:var(--font-sans);font-weight:800}
 .ocpm-row{display:grid;grid-template-columns:1fr auto auto;gap:14px;align-items:baseline;padding:8px 4px;border-bottom:1px solid var(--separator);font-size:12px}
@@ -404,9 +408,9 @@ table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;font-f
 thead tr:first-child td{border-top:none}
 th{position:sticky;top:0;z-index:2;
   background:var(--glass-strong);-webkit-backdrop-filter:blur(var(--blur-bar));backdrop-filter:blur(var(--blur-bar));
-  padding:9px 10px;text-align:left;font-size:11px;line-height:14px;font-family:inherit;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary);white-space:nowrap;border-bottom:1px solid var(--separator)}@media (hover:hover) and (pointer:fine){
+  padding:8px 8px;text-align:left;font-size:11px;line-height:14px;font-family:inherit;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary);white-space:nowrap;border-bottom:1px solid var(--separator)}@media (hover:hover) and (pointer:fine){
 th[onclick]:hover{color:var(--accent-ink);cursor:pointer}}
-td{padding:9px 10px;border-top:1px solid var(--separator);vertical-align:middle;white-space:nowrap;color:var(--text-secondary);font-size:13px;line-height:18px;font-weight:500;font-family:inherit}
+td{padding:8px 8px;border-top:1px solid var(--separator);vertical-align:middle;white-space:nowrap;color:var(--text-secondary);font-size:13px;line-height:18px;font-weight:500;font-family:inherit}
 tbody tr:first-child td{border-top:0}
 @media (hover:hover) and (pointer:fine){tbody tr:hover td{background:var(--accent-soft)}}
 /* Pendiente de pago: franja lateral en vez de tinte + opacidad en toda la fila */
@@ -2304,9 +2308,18 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
     </div>
   </div>
 
+  <!-- Fila 1: busqueda libre a la izquierda, acciones a la derecha -->
   <div class="table-toolbar">
-    <input type="text" id="inv-codigo" class="search-box" placeholder="Buscar código, marca, modelo, colorway…" oninput="filterInventario()" style="max-width:260px">
-    <div class="combo-wrap" style="flex:1;min-width:130px">
+    <input type="text" id="inv-codigo" class="search-box" placeholder="Buscar código, marca, modelo, colorway…" oninput="filterInventario()" style="flex:1;min-width:280px" "max-width:260px">
+    <div style="flex:1 0 0;min-width:0"></div>
+    <button class="btn btn-ghost btn-sm" onclick="clearFiltros()">× Limpiar</button>
+    <button class="btn btn-ghost btn-sm" onclick="loadInventario()" title="Recargar">↺</button>
+    <button class="btn btn-ghost btn-sm" onclick="exportInventarioCSV()" title="Exportar a Excel">↓ Excel</button>
+  </div>
+  <!-- Fila 2: los filtros en grilla, para que queden en columnas y no
+       se desborden en una sola linea larga -->
+  <div class="filtros-grid">
+    <div class="combo-wrap">
       <input type="text" id="inv-marca" placeholder="Marca…" autocomplete="off"
         oninput="comboFilter('inv-marca','cl-inv-marca');filterInventario()"
         onfocus="comboOpen('inv-marca','cl-inv-marca')"
@@ -2315,7 +2328,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
       <span class="combo-arrow">▼</span>
       <div class="combo-list" id="cl-inv-marca"></div>
     </div>
-    <div class="combo-wrap" style="flex:1;min-width:130px">
+    <div class="combo-wrap">
       <input type="text" id="inv-modelo" placeholder="Modelo…" autocomplete="off"
         oninput="comboFilter('inv-modelo','cl-inv-modelo');filterInventario()"
         onfocus="comboOpen('inv-modelo','cl-inv-modelo')"
@@ -2324,7 +2337,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
       <span class="combo-arrow">▼</span>
       <div class="combo-list" id="cl-inv-modelo"></div>
     </div>
-    <div class="combo-wrap" style="flex:1;min-width:130px">
+    <div class="combo-wrap">
       <input type="text" id="inv-colorway" placeholder="Colorway…" autocomplete="off"
         oninput="comboFilter('inv-colorway','cl-inv-colorway');filterInventario()"
         onfocus="comboOpen('inv-colorway','cl-inv-colorway')"
@@ -2369,10 +2382,6 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
       <span class="combo-arrow">▼</span>
       <div class="combo-list" id="cl-inv-tpago"></div>
     </div>
-    <div style="flex:1"></div>
-    <button class="btn btn-ghost btn-sm" onclick="clearFiltros()">× Limpiar</button>
-    <button class="btn btn-ghost btn-sm" onclick="loadInventario()" title="Recargar">↺</button>
-    <button class="btn btn-ghost btn-sm" onclick="exportInventarioCSV()" title="Exportar a Excel">↓ Excel</button>
   </div>
 
   <div class="table-wrap kv-stack">
@@ -2389,8 +2398,8 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
         <th class="right" data-p="3" style="width:82px">Costos Adic.</th>
         <th class="right" onclick="sortTable('precio_final')" style="cursor:pointer;width:88px">Costo Total <span id="sort-precio_final"></span></th>
         <th class="right" onclick="sortTable('precio_venta_sugerido')" style="cursor:pointer;width:88px">P.V. Sug. <span id="sort-precio_venta_sugerido"></span></th>
-        <th style="width:110px">Estado</th>
-        <th style="width:105px">T.Pago</th>
+        <th style="width:96px">Estado</th>
+        <th style="width:92px">T.Pago</th>
         <th style="width:40px"></th>
       </tr></thead>
       <tbody id="inv-tbody">
