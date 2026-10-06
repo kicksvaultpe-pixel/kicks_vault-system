@@ -1006,7 +1006,6 @@ input[list] { cursor: text; }
 .an-toggle-btn.active{background:var(--accent);color:var(--on-accent)}
 .an-filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
 .an-filter-btn{border:1px solid var(--field-border);background:var(--tile);color:var(--text-secondary);font-family:var(--font-sans);font-size:13px;font-weight:600;padding:6px 14px;border-radius:var(--radius-pill);cursor:pointer;transition:background .15s,color .15s,border-color .15s}
-.an-filter-btn.active{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 @media (hover:hover) and (pointer:fine){.an-filter-btn:not(.active):hover{border-color:var(--accent);color:var(--accent-ink)}}
 .an-hist-bar{transition:opacity .15s}
 @media (hover:hover) and (pointer:fine){.an-hist-bar:hover{opacity:.85}}
@@ -1380,8 +1379,10 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
    del sistema real). Unificado -- ver renderReservas() y el detalle de reserva. */
 .rsv-tipo-stock{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 10px;border:0;border-radius:var(--radius-pill);font-size:12px;line-height:16px;font-weight:600;white-space:nowrap;background:var(--warning-soft);color:var(--warning)}
 .rsv-tipo-pedido{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 10px;border:0;border-radius:var(--radius-pill);font-size:12px;line-height:16px;font-weight:600;white-space:nowrap;background:var(--reserve-soft);color:var(--reserve)}
-.rsv-filter-btn.active{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
-.oc-filter-btn.active{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+/* Una sola regla: .rsv-filter-btn y .oc-filter-btn eran dos nombres para
+   exactamente la misma pastilla, declarados por separado. */
+.rsv-filter-btn.active,.oc-filter-btn.active,.an-filter-btn.active{
+  background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
 .oc-filter-btn-pago.active{background:var(--orange);color:var(--on-warning);border-color:var(--orange)}
 .oc-pill-group{display:flex;gap:6px;flex-wrap:wrap}
 /* La fila de filtros envuelve en varias lineas cuando no entra, con la
@@ -1685,6 +1686,22 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
       </div>
       <div id="oc-panel-nueva">
         <div class="form-grid g2" style="margin-bottom:10px">
+          <div class="field span2">
+            <label>Nombre de OC</label>
+            <input type="text" id="cp-oc-nombre" placeholder="Nike SNKRS Feb 2025...">
+          </div>
+        </div>
+        <div class="form-grid g2" style="margin-bottom:10px">
+          <div class="field">
+            <label>Tienda</label>
+            <input type="text" id="cp-oc-tienda" placeholder="StockX, GOAT, SNKRS…" autocomplete="off">
+          </div>
+          <div class="field">
+            <label>N&ordm; de orden de la tienda</label>
+            <input type="text" id="cp-oc-orden" placeholder="El que te da el proveedor" autocomplete="off">
+          </div>
+        </div>
+        <div class="form-grid g2" style="margin-bottom:10px">
           <div class="field">
             <label>Tipo</label>
             <div class="combo-wrap">
@@ -1698,29 +1715,15 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
             </div>
           </div>
           <div class="field">
-            <label>Código (auto)</label>
+            <label>C&oacute;digo (auto)</label>
             <input type="text" id="cp-oc-nueva" placeholder="OC-001" readonly
-              style="color:var(--accent);font-family:var(--font-sans);font-weight:800">
-          </div>
-        </div>
-        <div class="form-grid g2" style="margin-bottom:10px">
-          <div class="field">
-            <label>Tienda</label>
-            <input type="text" id="cp-oc-tienda" placeholder="StockX, GOAT, SNKRS…" autocomplete="off">
-          </div>
-          <div class="field">
-            <label>N&ordm; de orden de la tienda</label>
-            <input type="text" id="cp-oc-orden" placeholder="El que te da el proveedor" autocomplete="off">
+              style="color:var(--accent-ink);font-family:var(--font-sans);font-weight:700">
           </div>
         </div>
         <div class="form-grid g2">
-          <div class="field">
-            <label>Nombre de OC</label>
-            <input type="text" id="cp-oc-nombre" placeholder="Nike SNKRS Feb 2025...">
-          </div>
-          <div class="field">
-            <label>Notas (proveedor, URL...)</label>
-            <input type="text" id="cp-oc-notas" placeholder="goat.com/product/...">
+          <div class="field span2">
+            <label>Notas</label>
+            <input type="text" id="cp-oc-notas" placeholder="Apuntes…">
           </div>
         </div>
       </div>
@@ -1759,7 +1762,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
       <div class="form-grid g3">
         <div class="field"><label>Factura</label><input type="text" id="cp-factura" placeholder="Nro. factura..."></div>
         <div class="field span2"><label>Descripción del producto</label><input type="text" id="cp-desc-factura" placeholder="Descripción del producto..."></div>
-        <div class="field span3"><label>Observaciones</label><textarea id="cp-comentarios" placeholder="Condición, origen, notas..."></textarea></div>
+        <div class="field span3"><label>Notas</label><textarea id="cp-comentarios" placeholder="Apuntes…"></textarea></div>
       </div>
     </div>
         <!-- CRÉDITO: Factura & Notas -->
@@ -1768,7 +1771,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
       <div class="form-grid g3">
         <div class="field"><label>Factura</label><input type="text" id="cp-factura-credito" placeholder="Nro. factura..."></div>
         <div class="field span2"><label>Descripción del producto</label><input type="text" id="cp-desc-factura-credito" placeholder="Descripción del producto..."></div>
-        <div class="field span3"><label>Observaciones</label><textarea id="cp-comentarios-credito" placeholder="Proveedor, condiciones, notas..."></textarea></div>
+        <div class="field span3"><label>Notas</label><textarea id="cp-comentarios-credito" placeholder="Proveedor, condiciones, notas..."></textarea></div>
       </div>
     </div>
     <div class="kv-submit-bar"><button class="btn btn-primary" id="btn-compra" onclick="registrarCompra()">✓ Registrar Compra</button></div>
@@ -2876,7 +2879,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
       <span class="combo-arrow">▼</span>
       <div class="combo-list" id="cl-fc-accion"></div>
     </div>
-    <button onclick="document.getElementById('fc-buscar').value='';document.getElementById('fc-accion').value='';renderFlujoTabla()" style="flex-shrink:0;padding:0 14px;border:1px solid var(--field-border);border-radius:var(--radius-sm);background:var(--card);color:var(--muted2);font-size:11px;cursor:pointer;white-space:nowrap;font-family:inherit">× Limpiar</button>
+    <button class="btn btn-ghost btn-sm" onclick="document.getElementById('fc-buscar').value='';document.getElementById('fc-accion').value='';renderFlujoTabla()">× Limpiar</button>
   </div>
   <div class="fc-tabla-wrap">
     <table class="fc-tabla">
@@ -2993,8 +2996,8 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
     <div class="table-toolbar" style="margin-bottom:8px">
       <input type="text" id="oc-buscar" class="search-box" placeholder="Buscar orden, producto, tienda, tracking…"
         oninput="renderOCTab()" style="flex:1;min-width:180px">
-      <button onclick="ocLimpiarFiltros()" style="flex-shrink:0;padding:0 14px;border:1px solid var(--field-border);border-radius:var(--radius-sm);background:var(--card);color:var(--muted2);font-size:11px;cursor:pointer;white-space:nowrap;font-family:inherit">× Limpiar</button>
-      <button class="btn" onclick="ocAbrirModal()" style="flex-shrink:0;background:var(--accent);color:var(--on-accent);border:none;padding:7px 14px;font-size:12px">✦ Nueva OC</button>
+      <button class="btn btn-ghost btn-sm" onclick="ocLimpiarFiltros()">× Limpiar</button>
+      <button class="btn btn-primary btn-sm" onclick="ocAbrirModal()">✦ Nueva OC</button>
     </div>
     <!-- Mismo orden que Inventario: arriba buscar y acciones, abajo los filtros -->
     <div class="table-toolbar oc-fila-filtros">
@@ -9295,8 +9298,8 @@ kvArrancar();
 
     <!-- Observaciones -->
     <div class="iep-section">
-      <div class="iep-section-lbl">Observaciones</div>
-      <textarea id="iep-observaciones" rows="3" placeholder="Notas o detalles adicionales..." style="width:100%;background:var(--field);border:1px solid var(--field-border);border-radius:var(--radius-sm);padding:10px;color:var(--text);font-family:var(--font-sans);font-size:12px;resize:vertical;box-sizing:border-box;outline:none;transition:border-color .15s" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--field-border)'"></textarea>
+      <div class="iep-section-lbl">Notas</div>
+      <textarea id="iep-observaciones" rows="3" placeholder="Apuntes…" style="width:100%;background:var(--field);border:1px solid var(--field-border);border-radius:var(--radius-sm);padding:10px;color:var(--text);font-family:var(--font-sans);font-size:12px;resize:vertical;box-sizing:border-box;outline:none;transition:border-color .15s" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--field-border)'"></textarea>
     </div>
 
     <!-- Botones -->
