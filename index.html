@@ -226,11 +226,6 @@ nav.kv-tabbar{
 .kv-tab-add svg{width:26px;height:26px}
 
 /* Menu de secciones, se abre al tocar el titulo de la pagina (movil) */
-.kv-title-btn{border:0;background:none;padding:0;display:inline-flex;align-items:center;gap:6px;cursor:pointer;color:var(--text);font:inherit}
-.kv-title-btn .kv-chevron{width:28px;height:28px;border-radius:var(--radius-pill);background:var(--tile);border:1px solid var(--glass-border);
-  display:flex;align-items:center;justify-content:center;transition:transform .2s;flex-shrink:0}
-.kv-title-btn .kv-chevron svg{width:16px;height:16px}
-.kv-title-btn[aria-expanded="true"] .kv-chevron{transform:rotate(180deg)}
 .kv-section-menu{
   display:none;position:fixed;
   bottom:calc(var(--tabbar-h) + 22px + env(safe-area-inset-bottom,0px));left:16px;right:16px;
@@ -252,8 +247,6 @@ nav.kv-tabbar{
 @media(hover:hover) and (pointer:fine){.kv-section-item:not(.active):hover{background:var(--tile)}}
 @media(min-width:768px){
   nav.kv-tabbar{display:none}
-  .kv-title-btn{pointer-events:none}
-  .kv-title-btn .kv-chevron{display:none}
 }
 @media(max-width:767px){
   nav.kv-topbar{display:none}
@@ -322,7 +315,10 @@ nav.kv-tabbar{
 .field input,.field select,.field textarea{
   background:var(--field);border:1px solid var(--field-border);border-radius:var(--radius-md);
   min-height:44px;padding:10px 14px;color:var(--text);font-family:var(--font-sans);font-size:14px;line-height:20px;font-weight:500;
-  outline:none;transition:border-color .15s,box-shadow .15s;width:100%
+  outline:none;transition:border-color .15s,box-shadow .15s;width:100%;
+  /* min-width:0 explicito: los input[type=date] traen un ancho intrinseco
+     que no se encoge, y dentro de una grilla desbordan la tarjeta. */
+  min-width:0;max-width:100%
 }
 .field select option{background:var(--tile)}
 .field textarea{resize:vertical;min-height:88px}
@@ -444,8 +440,13 @@ thead .kv-sticky-col{z-index:3}
 td.right{font-weight:600;color:var(--text)}
 .td-trunc{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* Prioridad de columnas: p3 se oculta < 1280, p2 se oculta < 1100 */
-@media(max-width:1279px){.table-wrap [data-p="3"],.fc-tabla-wrap [data-p="3"]{display:none}}
-@media(max-width:1099px){.table-wrap [data-p="2"],.fc-tabla-wrap [data-p="2"]{display:none}}
+/* Prioridad de columnas: solo en la banda de escritorio angosto. En movil
+   se muestran TODAS, igual que en la web -- la tabla scrollea en
+   horizontal y la columna del codigo queda fija para no perderse.
+   Esconder columnas en el telefono obligaba a abrir la compu para ver un
+   dato que la tabla ya tenia. */
+@media(min-width:768px) and (max-width:1279px){.table-wrap [data-p="3"],.fc-tabla-wrap [data-p="3"]{display:none}}
+@media(min-width:768px) and (max-width:1099px){.table-wrap [data-p="2"],.fc-tabla-wrap [data-p="2"]{display:none}}
 
 /* ---------- Movil: sigue siendo TABLA ----------
    Se probo convertir cada fila en una tarjeta y no funciona para este caso:
@@ -477,6 +478,7 @@ td.right{font-weight:600;color:var(--text)}
   #inv-tbody td:nth-child(2),      table:has(#inv-tbody) thead th:nth-child(2),
   #rsv-tbody td:nth-child(2),      table:has(#rsv-tbody) thead th:nth-child(2),
   #vt-tbody  td:nth-child(2),      table:has(#vt-tbody)  thead th:nth-child(2),
+  #oc-tbody  td:nth-child(2),      table:has(#oc-tbody)  thead th:nth-child(2),
   #cl-tbody  tr:not(.pag-row) td:nth-child(1),      table:has(#cl-tbody)  thead th:nth-child(1),
   #fc-tabla-body tr:not(.pag-row) td:nth-child(1),  table:has(#fc-tabla-body) thead th:nth-child(1){
     /* El mismo fondo que la tabla, no el de un menu flotante: con --menu
@@ -595,7 +597,12 @@ td.right{font-weight:600;color:var(--text)}
 
 /* DATALIST native dropdown styling */
 /* calendar picker visible */
-input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6;cursor:pointer}
+/* WebKit le da al campo de fecha un ancho propio y un relleno interno que
+   ignoran el width del contenedor. Esto lo obliga a comportarse como
+   cualquier otro campo. */
+input[type="date"]{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%}
+input[type="date"]::-webkit-date-and-time-value{text-align:left;margin:0}
+input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6;cursor:pointer;margin-inline-start:auto}
 @media (hover:hover) and (pointer:fine){input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}}
 :root:not([data-theme="dark"]) input[type="date"]::-webkit-calendar-picker-indicator{filter:none}
 [data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightness(1.6)}
@@ -1127,13 +1134,18 @@ input[list] { cursor: text; }
 
   /* KPIs: carrusel horizontal con snap en vez de 5 tarjetas apiladas que
      obligan a hacer scroll vertical antes de llegar a la tabla */
+  /* Grilla de 2 columnas, no carrusel. Antes era un carrusel horizontal con
+     tarjetas al 82% del ancho: se veia UNA a la vez, no se podian comparar y
+     no habia forma de saber cuantas habia. Un KPI se lee de un vistazo junto
+     a los otros o no sirve de nada. */
   .stats-row,.ind-row,.an-kpi-row,.cl-stats{
-    display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px;
-    margin-inline:-16px;padding:2px 16px 6px;scroll-padding-inline:16px;
-    scrollbar-width:none;margin-bottom:14px}
-  .stats-row>*,.ind-row>*,.an-kpi-row>*,.cl-stats>*{flex:0 0 min(82%,300px);scroll-snap-align:start}
-  .stats-row::-webkit-scrollbar,.ind-row::-webkit-scrollbar,
-  .an-kpi-row::-webkit-scrollbar,.cl-stats::-webkit-scrollbar{display:none}
+    display:grid!important;
+    grid-template-columns:repeat(auto-fit,minmax(min(100%,158px),1fr))!important;
+    gap:10px;overflow:visible}
+  .stats-row>*,.ind-row>*,.an-kpi-row>*,.cl-stats>*{min-width:0}
+  /* Las que llevan una mini-tabla adentro no entran en media pantalla. */
+  .stats-row:has(.sc-grid),.stats-row:has(.sv-trio),.stats-row:has(.deu-grid),
+  .ind-row:has(.deu-grid),.ind-row:has(.sc-grid){grid-template-columns:1fr!important}
   .stat-card{padding:16px}
   .ind-card{padding:14px 16px}
   .fc-trio{gap:10px;margin-bottom:12px}
@@ -1337,7 +1349,12 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
 .oc-filter-btn.active{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
 .oc-filter-btn-pago.active{background:var(--orange);color:var(--on-warning);border-color:var(--orange)}
 .oc-pill-group{display:flex;gap:6px;flex-wrap:wrap}
-.oc-filtros-divider{width:1px;align-self:stretch;background:var(--separator);margin:2px 2px}
+/* La fila de filtros envuelve en varias lineas cuando no entra, con la
+   misma separacion entre grupos que adentro de cada grupo. Los
+   separadores verticales que habia entre grupos sobraban: cada grupo ya
+   se distingue por su propio fondo. */
+.oc-fila-filtros{row-gap:8px}
+.oc-fila-filtros .combo-wrap{flex:0 1 180px;min-width:150px}
 @media(max-width:900px){.oc-filtros-divider{display:none}}
 .oc-chk-pago{cursor:pointer;accent-color:var(--orange)}
 /* pointer:coarse = dedo, no mouse -- un checkbox nativo de 13px es facil de
@@ -1476,7 +1493,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
 <div id="view-registro" class="view active">
 <div class="page-hd-row">
   <div class="page-hd">
-    <div class="page-title"><button type="button" class="kv-title-btn" onclick="kvToggleSectionMenu(this)" aria-haspopup="menu" aria-expanded="false"><span>Registro</span><span class="kv-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></button></div>
+    <div class="page-title">Registro</div>
     <div class="page-sub">Compras, ventas, reservas, pagos y costos operativos</div>
   </div>
   <div class="tc-widget">
@@ -2210,7 +2227,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
      INVENTARIO
 ══════════════════════════════════ -->
 <div id="view-inventario" class="view">
-  <div class="page-title"><button type="button" class="kv-title-btn" onclick="kvToggleSectionMenu(this)" aria-haspopup="menu" aria-expanded="false"><span>Inventario</span><span class="kv-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></button></div>
+  <div class="page-title">Inventario</div>
 
   <!-- Navegación de mes para stats -->
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
@@ -2485,7 +2502,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
 <!-- Placeholders -->
 <div id="view-ventas" class="view">
   <div class="page-hd">
-    <div class="page-title"><button type="button" class="kv-title-btn" onclick="kvToggleSectionMenu(this)" aria-haspopup="menu" aria-expanded="false"><span>Resultados</span><span class="kv-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></button></div>
+    <div class="page-title">Resultados</div>
     <div class="page-sub">Ventas del mes, gastos del negocio y utilidad neta</div>
   </div>
 
@@ -2615,7 +2632,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
 </div>
 <div id="view-flujo" class="view">
   <div class="page-hd">
-    <div class="page-title"><button type="button" class="kv-title-btn" onclick="kvToggleSectionMenu(this)" aria-haspopup="menu" aria-expanded="false"><span>Flujo de Caja</span><span class="kv-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></button></div>
+    <div class="page-title">Flujo de Caja</div>
     <div class="page-sub">Balance mensual de ingresos, egresos y caja disponible</div>
   </div>
 
@@ -2855,7 +2872,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
 </div>
 <div id="view-clientes" class="view">
   <div class="page-hd">
-    <div class="page-title"><button type="button" class="kv-title-btn" onclick="kvToggleSectionMenu(this)" aria-haspopup="menu" aria-expanded="false"><span>Clientes</span><span class="kv-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></button></div>
+    <div class="page-title">Clientes</div>
     <div class="page-sub">Directorio de clientes y su historial de compras</div>
   </div>
 
@@ -2918,7 +2935,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
 ══════════════════════════════════ -->
 <div id="view-oc" class="view">
   <div class="page-hd">
-    <div class="page-title"><button type="button" class="kv-title-btn" onclick="kvToggleSectionMenu(this)" aria-haspopup="menu" aria-expanded="false"><span>Órdenes de Compra</span><span class="kv-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></button></div>
+    <div class="page-title">Órdenes de Compra</div>
     <div class="page-sub">Seguimiento de importaciones, desde la compra hasta que llega a Perú</div>
   </div>
 
@@ -2947,18 +2964,23 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
 
   <div class="oc-filtros" style="margin-bottom:12px">
     <div class="table-toolbar" style="margin-bottom:8px">
+      <input type="text" id="oc-buscar" class="search-box" placeholder="Buscar orden, producto, tienda, tracking…"
+        oninput="renderOCTab()" style="flex:1;min-width:180px">
+      <button onclick="ocLimpiarFiltros()" style="flex-shrink:0;padding:6px 12px;border:1px solid var(--field-border);border-radius:var(--radius-sm);background:var(--card);color:var(--muted2);font-size:11px;cursor:pointer;white-space:nowrap;font-family:inherit">× Limpiar</button>
+      <button class="btn" onclick="ocAbrirModal()" style="flex-shrink:0;background:var(--accent);color:var(--on-accent);border:none;padding:7px 14px;font-size:12px">✦ Nueva OC</button>
+    </div>
+    <!-- Mismo orden que Inventario: arriba buscar y acciones, abajo los filtros -->
+    <div class="table-toolbar oc-fila-filtros">
       <div class="oc-pill-group" id="oc-pill-estado">
         <button class="btn btn-ghost btn-sm oc-filter-btn" data-f="" onclick="setOcFiltroEstado('',this)">Todas</button>
         <button class="btn btn-ghost btn-sm oc-filter-btn active" data-f="ACTIVAS" onclick="setOcFiltroEstado('ACTIVAS',this)">Activas</button>
         <button class="btn btn-ghost btn-sm oc-filter-btn" data-f="ENTREGADAS" onclick="setOcFiltroEstado('ENTREGADAS',this)">Entregadas</button>
         <button class="btn btn-ghost btn-sm oc-filter-btn" data-f="CANCELADAS" onclick="setOcFiltroEstado('CANCELADAS',this)">Canceladas</button>
       </div>
-      <div class="oc-filtros-divider"></div>
       <div class="oc-pill-group" id="oc-pill-pago">
         <button class="btn btn-ghost btn-sm oc-filter-btn oc-filter-btn-pago active" data-f="" onclick="setOcFiltroPago('',this)">Todas</button>
         <button class="btn btn-ghost btn-sm oc-filter-btn oc-filter-btn-pago" data-f="PENDIENTE" onclick="setOcFiltroPago('PENDIENTE',this)">⏳ Pendientes de pago</button>
       </div>
-      <div class="oc-filtros-divider"></div>
       <div class="combo-wrap" style="min-width:150px">
         <input type="text" id="oc-f-tipo" placeholder="Tipo…" autocomplete="off" readonly
           oninput="comboFilter('oc-f-tipo','cl-oc-f-tipo');renderOCTab()"
@@ -2968,12 +2990,6 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
         <span class="combo-arrow">▼</span>
         <div class="combo-list" id="cl-oc-f-tipo"></div>
       </div>
-    </div>
-    <div class="table-toolbar">
-      <input type="text" id="oc-buscar" class="search-box" placeholder="Buscar orden, producto, tienda, tracking…"
-        oninput="renderOCTab()" style="flex:1;min-width:180px">
-      <button onclick="ocLimpiarFiltros()" style="flex-shrink:0;padding:6px 12px;border:1px solid var(--field-border);border-radius:var(--radius-sm);background:var(--card);color:var(--muted2);font-size:11px;cursor:pointer;white-space:nowrap;font-family:inherit">× Limpiar</button>
-      <button class="btn" onclick="ocAbrirModal()" style="flex-shrink:0;background:var(--accent);color:var(--on-accent);border:none;padding:7px 14px;font-size:12px">✦ Nueva OC</button>
     </div>
   </div>
 
@@ -3019,7 +3035,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
 ══════════════════════════════════ -->
 <div id="view-reservas" class="view">
   <div class="page-hd">
-    <div class="page-title"><button type="button" class="kv-title-btn" onclick="kvToggleSectionMenu(this)" aria-haspopup="menu" aria-expanded="false"><span>Reservas</span><span class="kv-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></button></div>
+    <div class="page-title">Reservas</div>
     <div class="page-sub">Pedidos y reservas con abonos parciales de clientes</div>
   </div>
 
@@ -3079,7 +3095,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
 ══════════════════════════════════ -->
 <div id="view-analisis" class="view">
   <div class="page-hd">
-    <div class="page-title"><button type="button" class="kv-title-btn" onclick="kvToggleSectionMenu(this)" aria-haspopup="menu" aria-expanded="false"><span>Análisis</span><span class="kv-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></button></div>
+    <div class="page-title">Análisis</div>
     <div class="page-sub">Cómo va el negocio en el tiempo, últimos 12 meses</div>
   </div>
 
@@ -5023,7 +5039,7 @@ function kvToggleSectionMenu(btn){
 }
 document.addEventListener('click',function(e){
   if(!document.getElementById('kvSectionMenu')?.classList.contains('open'))return;
-  if(e.target.closest('#kvSectionMenu')||e.target.closest('.kv-title-btn'))return;
+  if(e.target.closest('#kvSectionMenu')||e.target.closest('#kvTabMenu'))return;
   kvCerrarSectionMenu();
 });
 document.addEventListener('keydown',function(e){
