@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Inventario — Kicks Vault</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/kicksvault/tokens.css">
+<link rel="stylesheet" href="ds/kicksvault/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&amp;family=Archivo+Black&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1d4ed8}a:hover{color:#1e40af}
+</style>
+</helmet>
+<div data-theme="{{theme}}" class="kv-canvas" style="min-height: 1180px; font-family: Archivo, system-ui, sans-serif; color: var(--text)">
+  <header class="kv-topbar kv-glass-strong">
+    <div class="nav-logo"><span class="kv-kicks">KICKS</span><span class="kv-vault">VAULT</span></div>
+    <nav class="nav-tabs" aria-label="Secciones">
+      <a class="nav-tab" href="Web-Registro.dc.html" style="text-decoration: none">Registro</a>
+      <a class="nav-tab active" href="Main.dc.html" style="text-decoration: none">Inventario</a>
+      <button class="nav-tab">Reservas</button>
+      <button class="nav-tab">Resultados</button>
+      <button class="nav-tab">Clientes</button>
+      <a class="nav-tab" href="Web-Flujo.dc.html" style="text-decoration: none">Flujo</a>
+      <button class="nav-tab">OCs</button>
+      <button class="nav-tab">Análisis</button>
+    </nav>
+    <button class="kv-icon-btn" aria-label="Cambiar tema" onClick="{{toggleTheme}}">
+      <sc-if value="{{isDark}}" hint-placeholder-val="{{false}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg></sc-if>
+      <sc-if value="{{isLight}}" hint-placeholder-val="{{true}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"></path></svg></sc-if>
+    </button>
+  </header>
+
+  <main class="view" style="display: block">
+    <div class="page-hd-row">
+      <div>
+        <div class="page-title">Inventario</div>
+        <div class="page-sub">142 pares y 38 prendas · actualizado hoy 10:42</div>
+      </div>
+      <div style="display: flex; gap: 8px; align-items: center">
+        <div class="tc-widget" style="display: flex; align-items: center; gap: 10px; border-radius: 999px; padding: 6px 6px 6px 16px">
+          <span class="kv-overline">TC S/ por USD</span>
+          <span style="font-size: 17px; font-weight: 700; color: var(--accent-ink); font-variant-numeric: tabular-nums">3.70</span>
+          <button class="btn btn-ghost btn-sm" style="border-radius: 999px">Editar</button>
+        </div>
+        <button class="btn btn-ghost">Exportar</button>
+        <a class="btn btn-primary" href="Web-Registro.dc.html" style="text-decoration: none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>Registrar compra</a>
+      </div>
+    </div>
+
+    <section class="stats-row" style="grid-template-columns: 1.5fr 1fr 1fr 1fr">
+      <div class="stat-card">
+        <div class="kv-stat-hd">Valor de stock <span class="kv-trend up">↑ 8% vs. sep</span></div>
+        <div class="kv-display">S/ 86,300.00</div>
+        <div class="kv-tiles">
+          <div class="kv-tile"><div class="l">Disponible</div><div class="v">S/ 63,860</div></div>
+          <div class="kv-tile"><div class="l">Reservado</div><div class="v purple">S/ 22,440</div></div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="kv-stat-hd">Unidades</div>
+        <div class="stat-val">180</div>
+        <div class="stat-sub">142 zapatillas · 38 prendas</div>
+        <div class="kv-bar" style="margin-top: 14px"><span style="width: 79%; background: var(--accent)"></span><span style="flex: 1; background: var(--cost)"></span></div>
+      </div>
+      <div class="stat-card">
+        <div class="kv-stat-hd">Por pagar</div>
+        <div class="stat-val yellow">S/ 9,480.00</div>
+        <div class="stat-sub">6 compras a crédito</div>
+        <button class="btn-pay" style="margin-top: 14px">Ver pendientes</button>
+      </div>
+      <div class="stat-card">
+        <div class="kv-stat-hd">Margen promedio</div>
+        <div class="stat-val green">38.4%</div>
+        <div class="stat-sub">Sobre precio sugerido</div>
+      </div>
+    </section>
+
+    <div class="table-toolbar">
+      <input class="search-box" placeholder="Buscar código, modelo, colorway…" aria-label="Buscar en inventario">
+      <div class="kv-chips">
+        <sc-for list="{{chips}}" as="c" hint-placeholder-count="5">
+          <button class="{{c.cls}}" onClick="{{c.pick}}">{{c.label}}</button>
+        </sc-for>
+      </div>
+      <select class="filter-select" style="width: 180px" aria-label="Categoría"><option>Todas las categorías</option><option>Zapatillas</option><option>Ropa</option></select>
+    </div>
+
+    <div class="table-wrap kv-stack" style="max-height: 560px">
+      <table>
+        <thead>
+          <tr>
+            <th class="kv-sticky-col">Código</th><th>Producto</th><th data-p="3">Categoría</th><th>Talla</th><th data-p="2">Compra</th><th>Estado</th>
+            <th class="right">Costo S/</th><th class="right" data-p="3">Costo US$</th><th class="right">Precio S/</th><th class="right" data-p="2">Margen</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <sc-for list="{{rows}}" as="r" hint-placeholder-count="8">
+            <tr class="{{r.rowCls}}">
+              <td class="td-code kv-sticky-col" data-role="meta">{{r.code}}</td>
+              <td class="td-main" data-role="title">{{r.name}}</td>
+              <td data-p="3" data-role="hide-m"><span class="cat-zap">{{r.cat}}</span></td>
+              <td data-role="hide-m">{{r.size}}</td>
+              <td data-p="2" data-role="hide-m">{{r.date}}</td>
+              <td data-role="badge"><span class="{{r.badgeCls}}">{{r.status}}</span></td>
+              <td class="right" data-role="hide-m">{{r.cost}}</td>
+              <td class="right" data-p="3" data-role="hide-m">{{r.usd}}</td>
+              <td class="right td-amt" data-role="amount">{{r.price}}</td>
+              <td class="right green" data-p="2" data-role="hide-m">{{r.margin}}</td>
+              <td data-role="actions"><sc-if value="{{r.pend}}" hint-placeholder-val="{{false}}"><button class="btn-pay">Pagar</button></sc-if><sc-if value="{{r.notPend}}" hint-placeholder-val="{{true}}"><button class="oc-edit-btn">Editar</button></sc-if></td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+      <div class="pag-bar"><span>Mostrando 1–8 de 180</span><span style="display: flex; gap: 8px; align-items: center"><button class="btn btn-ghost btn-sm">Anterior</button><span style="color: var(--text); font-weight: 600">1 / 23</span><button class="btn btn-ghost btn-sm">Siguiente</button></span></div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"tema":{"editor":"enum","options":["Claro","Oscuro"],"default":"Claro"},"$preview":{"width":1440,"height":1180}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { theme: null, chip: 'Todos' }; }
+  renderVals() {
+    const dark = (this.state.theme ?? this.props.tema ?? 'Claro') === 'Oscuro';
+    const chips = ['Todos', 'Disponible', 'Reservado', 'Pendiente', 'Vendido'].map((l) => ({
+      label: l, cls: 'kv-chip' + (this.state.chip === l ? ' active' : ''), pick: () => this.setState({ chip: l })
+    }));
+    const B = { Disponible: 'badge badge-green', Reservado: 'badge badge-purple', Pendiente: 'badge badge-yellow', Vendido: 'badge badge-muted' };
+    const data = [
+      ['P01020', 'Jordan 1 Low Travis Scott Reverse Mocha', 'Zapatillas', '42', '12 sep', 'Disponible', '1,480.00', '400.00', '2,350.00', '37.0%'],
+      ['P01021', 'Nike Dunk Low Panda', 'Zapatillas', '40', '18 sep', 'Pendiente', '390.00', '105.40', '620.00', '37.1%'],
+      ['P01022', 'New Balance 550 White Green', 'Zapatillas', '43', '21 sep', 'Reservado', '510.00', '137.80', '790.00', '35.4%'],
+      ['P01023', 'Adidas Samba OG Cloud White', 'Zapatillas', '41', '22 sep', 'Disponible', '420.00', '113.50', '690.00', '39.1%'],
+      ['R00311', 'Fear of God Essentials Hoodie Oat', 'Ropa', 'M', '24 sep', 'Disponible', '280.00', '75.70', '450.00', '37.8%'],
+      ['P01024', 'Jordan 4 Retro Black Cat', 'Zapatillas', '42', '26 sep', 'Reservado', '1,150.00', '310.80', '1,950.00', '41.0%'],
+      ['P01025', 'Nike Air Force 1 Low White', 'Zapatillas', '44', '28 sep', 'Pendiente', '330.00', '89.20', '520.00', '36.5%'],
+      ['P01026', 'Asics Gel-Kayano 14 Cream', 'Zapatillas', '42', '30 sep', 'Disponible', '560.00', '151.40', '890.00', '37.1%']
+    ];
+    let rows = data.map((r) => ({ code: r[0], name: r[1], cat: r[2], size: r[3], date: r[4], status: r[5], badgeCls: B[r[5]],
+      cost: r[6], usd: r[7], price: r[8], margin: r[9], pend: r[5] === 'Pendiente', notPend: r[5] !== 'Pendiente', rowCls: r[5] === 'Pendiente' ? 'row-pend' : '' }));
+    if (this.state.chip !== 'Todos') rows = rows.filter((r) => r.status === this.state.chip);
+    return {
+      theme: dark ? 'dark' : 'light', isDark: dark, isLight: !dark,
+      toggleTheme: () => this.setState({ theme: dark ? 'Claro' : 'Oscuro' }),
+      chips, rows
+    };
+  }
+}
+</script>
+</body>
+</html>

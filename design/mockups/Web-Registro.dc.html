@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Registro — Kicks Vault</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/kicksvault/tokens.css">
+<link rel="stylesheet" href="ds/kicksvault/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&amp;family=Archivo+Black&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1d4ed8}a:hover{color:#1e40af}
+</style>
+</helmet>
+<div data-theme="{{theme}}" class="kv-canvas" style="min-height: 1180px; font-family: Archivo, system-ui, sans-serif; color: var(--text)">
+  <header class="kv-topbar kv-glass-strong">
+    <div class="nav-logo"><span class="kv-kicks">KICKS</span><span class="kv-vault">VAULT</span></div>
+    <nav class="nav-tabs" aria-label="Secciones">
+      <a class="nav-tab active" href="Web-Registro.dc.html" style="text-decoration: none">Registro</a>
+      <a class="nav-tab" href="Main.dc.html" style="text-decoration: none">Inventario</a>
+      <button class="nav-tab">Reservas</button>
+      <button class="nav-tab">Resultados</button>
+      <button class="nav-tab">Clientes</button>
+      <a class="nav-tab" href="Web-Flujo.dc.html" style="text-decoration: none">Flujo</a>
+      <button class="nav-tab">OCs</button>
+      <button class="nav-tab">Análisis</button>
+    </nav>
+    <button class="kv-icon-btn" aria-label="Cambiar tema" onClick="{{toggleTheme}}">
+      <sc-if value="{{isDark}}" hint-placeholder-val="{{false}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg></sc-if>
+      <sc-if value="{{isLight}}" hint-placeholder-val="{{true}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"></path></svg></sc-if>
+    </button>
+  </header>
+
+  <main class="view" style="display: block">
+    <div class="page-hd-row">
+      <div>
+        <div class="page-title">Registro</div>
+        <div class="page-sub">Compras, ventas, reservas, gastos, costos e inversiones</div>
+      </div>
+      <div class="tc-widget" style="display: flex; align-items: center; gap: 10px; border-radius: 999px; padding: 6px 6px 6px 16px">
+        <span class="kv-overline">TC S/ por USD</span>
+        <span style="font-size: 17px; font-weight: 700; color: var(--accent-ink); font-variant-numeric: tabular-nums">3.70</span>
+        <button class="btn btn-primary btn-sm" style="border-radius: 999px">Fijar TC</button>
+      </div>
+    </div>
+
+    <div class="tipo-selector" role="tablist" aria-label="Tipo de movimiento">
+      <sc-for list="{{tipos}}" as="t" hint-placeholder-count="6">
+        <button class="{{t.cls}}" role="tab" aria-selected="{{t.sel}}" onClick="{{t.pick}}">{{t.label}}</button>
+      </sc-for>
+    </div>
+
+    <div class="kv-split">
+      <div>
+        <div class="pago-toggle" style="max-width: 420px">
+          <button class="{{contadoCls}}" onClick="{{setContado}}">Contado</button>
+          <button class="{{creditoCls}}" onClick="{{setCredito}}">Crédito</button>
+        </div>
+        <sc-if value="{{isCredito}}" hint-placeholder-val="{{false}}">
+          <div class="info-box info-orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M4 11h16"></path></svg><span><b>Crédito:</b> entra al inventario como <b>Pendiente</b> sin afectar la caja. Cuando pagues, usa <b>Pagar</b> en Inventario.</span></div>
+        </sc-if>
+        <sc-if value="{{isContado}}" hint-placeholder-val="{{true}}">
+          <div class="info-box info-accent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2.5"></circle></svg><span><b>Contado:</b> sale dinero hoy y se registra en el flujo de caja de inmediato.</span></div>
+        </sc-if>
+
+        <div class="card">
+          <div class="card-label">Identificación del producto</div>
+          <div class="form-grid g4">
+            <div class="field"><label for="f-marca">Marca</label><select id="f-marca"><option>Nike</option><option>Jordan</option><option>Adidas</option></select></div>
+            <div class="field"><label for="f-modelo">Modelo</label><input id="f-modelo" value="Dunk Low"></div>
+            <div class="field"><label for="f-color">Colorway</label><input id="f-color" placeholder="Ej. Panda, Reverse Mocha"></div>
+            <div class="field"><label for="f-talla">Talla</label><select id="f-talla"><option>40</option><option>41</option><option>42</option></select></div>
+            <div class="field"><label for="f-cat">Categoría</label><select id="f-cat"><option>Zapatillas</option><option>Ropa</option><option>Accesorios</option></select></div>
+            <div class="field"><label for="f-fecha">Fecha de compra</label><input id="f-fecha" type="date" value="2026-10-05"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-label">Precio de compra</div>
+          <div class="form-grid g2">
+            <div class="field"><label for="f-monto">Monto S/</label><input id="f-monto" value="390.00" inputmode="decimal"><span class="kv-help">US$ 105.41 al TC 3.70</span></div>
+            <div class="field"><label for="f-sug">Precio de venta sugerido S/</label><input id="f-sug" value="620.00" inputmode="decimal"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-label">Factura y notas <span class="kv-hint">· opcional</span></div>
+          <div class="form-grid g2">
+            <div class="field"><label for="f-fac">Factura</label><input id="f-fac" placeholder="Nro. de factura"></div>
+            <div class="field"><label for="f-desc">Descripción</label><input id="f-desc" placeholder="Descripción del producto"></div>
+            <div class="field span2"><label for="f-obs">Observaciones</label><textarea id="f-obs" placeholder="Condición, origen, notas…"></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <aside>
+        <div class="card" style="margin: 0">
+          <div class="kv-stat-hd">Resumen del movimiento <span class="{{badgeCls}}">{{tipoLabel}}</span></div>
+          <div style="font-size: 16px; line-height: 22px; font-weight: 700; margin-top: 4px">Nike Dunk Low · T40</div>
+          <div class="stat-sub">Zapatillas · 05 oct 2026</div>
+          <div class="kv-tiles">
+            <div class="kv-tile"><div class="l">Costo</div><div class="v">S/ 390.00</div></div>
+            <div class="kv-tile"><div class="l">Precio sugerido</div><div class="v">S/ 620.00</div></div>
+          </div>
+          <div class="fc-row" style="margin-top: 12px"><span class="fc-row-lbl">Margen esperado</span><span class="fc-row-val green">S/ 230.00 · 37.1%</span></div>
+          <div class="fc-row"><span class="fc-row-lbl">Efecto en caja hoy</span><span class="{{effectCls}}">{{effect}}</span></div>
+          <div class="fc-row"><span class="fc-row-lbl">Código asignado</span><span class="fc-row-val accent">P01027</span></div>
+          <button class="{{submitCls}}" style="width: 100%; margin-top: 18px">{{submitLabel}}</button>
+          <button class="btn btn-ghost" style="width: 100%; margin-top: 8px">Limpiar formulario</button>
+        </div>
+      </aside>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"tema":{"editor":"enum","options":["Claro","Oscuro"],"default":"Claro"},"$preview":{"width":1440,"height":1180}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { theme: null, tipo: 'compra', pago: 'CREDITO' }; }
+  renderVals() {
+    const dark = (this.state.theme ?? this.props.tema ?? 'Claro') === 'Oscuro';
+    const T = [
+      ['compra', 'Compra', 'btn btn-primary', 'badge badge-accent'],
+      ['venta', 'Venta', 'btn btn-green', 'badge badge-green'],
+      ['reserva', 'Reserva', 'btn btn-purple', 'badge badge-purple'],
+      ['pago', 'Gasto', 'btn btn-red', 'badge badge-red'],
+      ['costo', 'Costo', 'btn btn-primary', 'fc-accion-badge fc-accion-COSTO'],
+      ['inversion', 'Inversión', 'btn btn-primary', 'fc-accion-badge fc-accion-INVERSION']
+    ];
+    const cur = T.find((t) => t[0] === this.state.tipo);
+    const tipos = T.map((t) => ({ label: t[1], sel: String(t[0] === this.state.tipo),
+      cls: 'tipo-btn ' + t[0] + (t[0] === this.state.tipo ? ' active' : ''), pick: () => this.setState({ tipo: t[0] }) }));
+    const credito = this.state.pago === 'CREDITO';
+    return {
+      theme: dark ? 'dark' : 'light', isDark: dark, isLight: !dark,
+      toggleTheme: () => this.setState({ theme: dark ? 'Claro' : 'Oscuro' }),
+      tipos, tipoLabel: cur[1], badgeCls: cur[3],
+      submitCls: cur[2], submitLabel: 'Registrar ' + cur[1].toLowerCase(),
+      isCredito: credito, isContado: !credito,
+      contadoCls: 'ptoggle-btn contado' + (credito ? '' : ' active'),
+      creditoCls: 'ptoggle-btn credito' + (credito ? ' active' : ''),
+      setContado: () => this.setState({ pago: 'CONTADO' }), setCredito: () => this.setState({ pago: 'CREDITO' }),
+      effect: credito ? 'S/ 0.00 · queda pendiente' : '− S/ 390.00',
+      effectCls: 'fc-row-val ' + (credito ? 'yellow' : 'red')
+    };
+  }
+}
+</script>
+</body>
+</html>

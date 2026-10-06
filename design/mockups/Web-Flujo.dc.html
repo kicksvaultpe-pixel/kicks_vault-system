@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Flujo de caja — Kicks Vault</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/kicksvault/tokens.css">
+<link rel="stylesheet" href="ds/kicksvault/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&amp;family=Archivo+Black&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1d4ed8}a:hover{color:#1e40af}
+</style>
+</helmet>
+<div data-theme="{{theme}}" class="kv-canvas" style="min-height: 1180px; font-family: Archivo, system-ui, sans-serif; color: var(--text)">
+  <header class="kv-topbar kv-glass-strong">
+    <div class="nav-logo"><span class="kv-kicks">KICKS</span><span class="kv-vault">VAULT</span></div>
+    <nav class="nav-tabs" aria-label="Secciones">
+      <a class="nav-tab" href="Web-Registro.dc.html" style="text-decoration: none">Registro</a>
+      <a class="nav-tab" href="Main.dc.html" style="text-decoration: none">Inventario</a>
+      <button class="nav-tab">Reservas</button>
+      <button class="nav-tab">Resultados</button>
+      <button class="nav-tab">Clientes</button>
+      <a class="nav-tab active" href="Web-Flujo.dc.html" style="text-decoration: none">Flujo</a>
+      <button class="nav-tab">OCs</button>
+      <button class="nav-tab">Análisis</button>
+    </nav>
+    <button class="kv-icon-btn" aria-label="Cambiar tema" onClick="{{toggleTheme}}">
+      <sc-if value="{{isDark}}" hint-placeholder-val="{{false}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg></sc-if>
+      <sc-if value="{{isLight}}" hint-placeholder-val="{{true}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"></path></svg></sc-if>
+    </button>
+  </header>
+
+  <main class="view" style="display: block">
+    <div class="page-hd-row">
+      <div>
+        <div class="page-title">Flujo de caja</div>
+        <div class="page-sub">Balance mensual de ingresos, egresos y caja disponible</div>
+      </div>
+      <div style="display: flex; gap: 8px; align-items: center">
+        <div class="kv-seg" style="margin: 0; display: flex; align-items: center">
+          <button aria-label="Mes anterior" style="flex: none; padding: 0 12px">‹</button>
+          <button class="active" style="min-width: 150px">Octubre 2026</button>
+          <button aria-label="Mes siguiente" style="flex: none; padding: 0 12px">›</button>
+        </div>
+        <button class="btn btn-ghost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>Cerrar mes</button>
+      </div>
+    </div>
+
+    <section class="fc-trio" style="grid-template-columns: 1fr 1.25fr 1fr">
+      <div class="fc-bubble">
+        <div class="kv-stat-hd">Apertura · 1 oct</div>
+        <div class="fc-main-num">S/ 41,215.00</div>
+        <div class="fc-main-lbl" style="margin-bottom: 12px">Caja al inicio del mes</div>
+        <div class="fc-row"><span class="fc-row-lbl">Valor de stock</span><span class="fc-row-val">S/ 79,900.00</span></div>
+        <div class="fc-row"><span class="fc-row-lbl">Activo fijo</span><span class="fc-row-val">S/ 4,200.00</span></div>
+        <div class="fc-row"><span class="fc-row-lbl" style="font-weight: 700; color: var(--text)">Patrimonio inicio</span><span class="fc-row-val">S/ 125,315.00</span></div>
+      </div>
+      <div class="fc-bubble">
+        <div class="kv-stat-hd">Caja actual <span class="kv-trend up">↑ S/ 7,705 en el mes</span></div>
+        <div class="kv-display" style="color: var(--accent-ink)">S/ 48,920.50</div>
+        <div class="kv-tiles">
+          <div class="kv-tile"><div class="l">Ventas cobradas</div><div class="v green">+ S/ 21,340.00</div></div>
+          <div class="kv-tile"><div class="l">Compras y costos</div><div class="v red">− S/ 12,410.00</div></div>
+          <div class="kv-tile"><div class="l">Gastos</div><div class="v red">− S/ 1,224.50</div></div>
+        </div>
+        <div class="info-box info-accent" style="margin: 14px 0 0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M4 11h16"></path></svg>
+          <span>Adelantos de reservas sin efecto en caja: <b class="purple">S/ 3,500.00</b></span>
+        </div>
+      </div>
+      <div class="fc-bubble">
+        <div class="kv-stat-hd">Por pagar</div>
+        <div class="fc-main-num yellow">S/ 9,480.00</div>
+        <div class="fc-main-lbl" style="margin-bottom: 12px">Compras a crédito sin pagar</div>
+        <div class="fc-row"><span class="fc-row-lbl">Stock · 4 und.</span><span class="fc-row-val">S/ 6,200.00</span></div>
+        <div class="fc-row"><span class="fc-row-lbl">Pedidos · 2 und.</span><span class="fc-row-val">S/ 3,280.00</span></div>
+        <div class="fc-row"><span class="fc-row-lbl">En dólares</span><span class="fc-row-val">US$ 2,562.16</span></div>
+      </div>
+    </section>
+
+    <div class="table-toolbar">
+      <input class="search-box" placeholder="Buscar código, descripción…" aria-label="Buscar movimientos">
+      <div class="kv-chips">
+        <sc-for list="{{chips}}" as="c" hint-placeholder-count="6">
+          <button class="{{c.cls}}" onClick="{{c.pick}}">{{c.label}}</button>
+        </sc-for>
+      </div>
+    </div>
+
+    <div class="fc-tabla-wrap kv-stack is-compact" style="max-height: 470px">
+      <table class="fc-tabla">
+        <thead>
+          <tr><th>Fecha</th><th>Tipo</th><th class="kv-sticky-col">Código</th><th>Descripción</th><th class="right">Ingreso S/</th><th class="right">Egreso S/</th><th class="right" data-p="2">Pendiente S/</th></tr>
+        </thead>
+        <tbody>
+          <sc-for list="{{rows}}" as="r" hint-placeholder-count="8">
+            <tr>
+              <td class="td-fecha" data-role="hide-m">{{r.date}}</td>
+              <td data-role="badge"><span class="{{r.badgeCls}}">{{r.type}}</span></td>
+              <td class="td-code" data-role="meta">{{r.code}} · {{r.date}}</td>
+              <td class="td-desc" data-role="title">{{r.desc}}</td>
+              <td class="right green" style="font-weight: 600" data-role="{{r.inRole}}">{{r.inc}}</td>
+              <td class="right red" style="font-weight: 600" data-role="{{r.outRole}}">{{r.out}}</td>
+              <td class="right yellow" style="font-weight: 600" data-p="2" data-role="hide-m">{{r.pend}}</td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"tema":{"editor":"enum","options":["Claro","Oscuro"],"default":"Claro"},"$preview":{"width":1440,"height":1180}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { theme: null, chip: 'Todos' }; }
+  renderVals() {
+    const dark = (this.state.theme ?? this.props.tema ?? 'Claro') === 'Oscuro';
+    const chips = ['Todos', 'Venta', 'Compra', 'Reserva', 'Gasto', 'Costo'].map((l) => ({
+      label: l, cls: 'kv-chip' + (this.state.chip === l ? ' active' : ''), pick: () => this.setState({ chip: l })
+    }));
+    const B = { Venta: 'fc-accion-badge fc-accion-VENTA', Compra: 'fc-accion-badge fc-accion-COMPRA', Reserva: 'fc-accion-badge fc-accion-RESERVA',
+      Gasto: 'fc-accion-badge fc-accion-PAGO', Costo: 'fc-accion-badge fc-accion-COSTO', Inversión: 'fc-accion-badge fc-accion-INVERSION' };
+    const data = [
+      ['05 oct', 'Venta', 'V00418', 'Jordan 1 Low Travis Scott · T42 · Yape', '2,350.00', '—', '—'],
+      ['04 oct', 'Compra', 'P01026', 'Asics Gel-Kayano 14 Cream · T42', '—', '560.00', '—'],
+      ['04 oct', 'Reserva', 'R-0142', 'Abono Jordan 4 Black Cat · T42', '—', '—', '—'],
+      ['03 oct', 'Gasto', 'G00093', 'Envíos Olva Courier (6 paquetes)', '—', '84.00', '—'],
+      ['03 oct', 'Venta', 'V00417', 'Adidas Samba OG · T41 · Efectivo', '690.00', '—', '—'],
+      ['02 oct', 'Costo', 'C00051', 'Limpieza y cajas · P01022', '—', '45.00', '—'],
+      ['02 oct', 'Compra', 'P01025', 'Nike Air Force 1 Low · T44 · Crédito', '—', '—', '330.00'],
+      ['01 oct', 'Inversión', 'I00007', 'Aporte de capital', '5,000.00', '—', '—']
+    ];
+    let rows = data.map((r) => ({ date: r[0], type: r[1], badgeCls: B[r[1]], code: r[2], desc: r[3], inc: r[4], out: r[5], pend: r[6],
+      inRole: r[4] !== '—' ? 'amount' : 'hide-m', outRole: r[5] !== '—' ? 'amount' : 'hide-m' }));
+    if (this.state.chip !== 'Todos') rows = rows.filter((r) => r.type === this.state.chip);
+    return { theme: dark ? 'dark' : 'light', isDark: dark, isLight: !dark,
+      toggleTheme: () => this.setState({ theme: dark ? 'Claro' : 'Oscuro' }), chips, rows };
+  }
+}
+</script>
+</body>
+</html>
