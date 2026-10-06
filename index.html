@@ -324,7 +324,7 @@ nav.kv-tabbar{
 .pp-val{font-family:var(--font-sans);font-weight:700;font-size:17px;line-height:22px}
 
 /* INFO BOX */
-.info-box{padding:10px 14px;border-radius:var(--radius-sm);font-size:11px;font-family:var(--font-sans);line-height:1.6;margin-bottom:14px}
+.info-box{padding:12px 14px;border-radius:var(--radius-sm);font-size:13px;line-height:18px;font-weight:500;font-family:var(--font-sans);margin-bottom:14px}
 .info-orange{background:var(--warning-soft);border:1px solid var(--warning-soft);color:var(--orange)}
 .info-purple{background:var(--reserve-soft);border:1px solid var(--reserve-soft);color:var(--purple)}
 .info-green{background:var(--positive-soft);border:1px solid var(--positive-soft);color:var(--green)}
@@ -391,8 +391,12 @@ button:active,[role="button"]:active{
 .search-box{flex:1;min-width:160px;background:var(--field);border:1px solid var(--field-border);border-radius:var(--radius-md);min-height:44px;padding:10px 14px;color:var(--text);font-family:var(--font-sans);font-size:14px;line-height:20px;font-weight:500;outline:none;transition:border-color .15s,box-shadow .15s}
 .search-box::placeholder{color:var(--placeholder);font-weight:400}
 .filter-select{background:var(--field);border:1px solid var(--field-border);border-radius:var(--radius-md);min-height:44px;padding:10px 14px;color:var(--text);font-family:var(--font-sans);font-size:14px;line-height:20px;font-weight:500;outline:none;cursor:pointer;transition:border-color .15s,box-shadow .15s}
-/* Alto acotado al viewport: la cabecera queda fija, el pie de paginacion
-   tambien, y la pagina ya no "salta" al cambiar de mes o de filtro.
+/* OJO: la cabecera NO queda fija. .table-wrap tiene overflow-x:auto para el
+   scroll horizontal, y eso lo convierte en contenedor de scroll; como ya no
+   tiene alto maximo, el th sticky no tiene recorrido y nunca se pega. Es un
+   o lo uno o lo otro: con scroll interno hay cabecera fija, sin scroll
+   interno no. Se eligio sin scroll interno (una sola barra, la de la pagina)
+   y paginacion de 50 filas para no scrollear tanto.
    El material vidrio lo pone la regla de .card,.table-wrap,... de arriba. */
 .table-wrap{
   /* Sin alto maximo: la paginacion ya decide cuantas filas entran, asi que
@@ -1287,7 +1291,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
   border-radius:var(--radius-xl);box-shadow:var(--shadow-sheet);transform:translateX(calc(100% + 12px));transition:transform .25s cubic-bezier(.4,0,.2,1)}
 #rsv-overlay.open #rsv-panel{transform:translateX(0)}
 .rsv-abono-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--separator)}
-.rsv-abono-fecha{font-size:11px;color:var(--muted2);width:54px;flex-shrink:0;font-variant-numeric:tabular-nums}
+.rsv-abono-fecha{font-size:13px;line-height:18px;font-weight:500;color:var(--muted2);min-width:66px;flex-shrink:0;font-variant-numeric:tabular-nums}
 .rsv-abono-nota{flex:1;font-size:12px;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rsv-abono-monto{font-size:14px;line-height:20px;font-weight:600;color:var(--green);font-variant-numeric:tabular-nums;white-space:nowrap}
 .rsv-abono-final{color:var(--accent)}
@@ -1299,7 +1303,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
 .rsv-saldo-val{font-size:17px;line-height:22px;color:var(--accent);font-family:var(--font-sans);font-weight:700;font-variant-numeric:tabular-nums}
 .rsv-saldo-val.pagado{color:var(--green)}
 /* ══ FOCUS RING GLOBAL ══ */
-:where(button,[role="button"],a,input,select,textarea,.nav-tab,.kv-tab,.kv-tab-add,.tipo-btn,.oc-pill,.an-filter-btn):focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
+:where(button,[role="button"],a,input,select,textarea,.nav-tab,.kv-tab,.kv-tab-add,.tipo-btn,.oc-pill,.an-filter-btn,th[onclick]):focus-visible{outline:2px solid var(--focus-ring);outline-offset:-2px}
 </style>
 </head>
 <body class="kv-canvas">
@@ -4837,6 +4841,7 @@ async function rsvVincularProducto(){
 
 // ── INIT ──
 async function init(){
+  kvTeclasEnCabeceras();
   setToday();
   await Promise.all([loadTCGlobal(), loadInventario(), loadClientes(), loadOCs(), loadReservas()]);
   initRowSel('inv-tbody');
@@ -4935,6 +4940,26 @@ document.addEventListener('click',function(e){
 });
 document.addEventListener('keydown',function(e){
   if(e.key==='Escape')kvCerrarSectionMenu();
+});
+
+/* Cabeceras que ordenan: son <th onclick>, asi que de fabrica no se pueden
+   enfocar con Tab ni activar con Enter. Se les agrega el rol y el foco una
+   sola vez en vez de tocar los 15 tags, y un unico listener traduce
+   Enter/Espacio en el click que ya tenian. */
+function kvTeclasEnCabeceras(){
+  document.querySelectorAll('th[onclick]').forEach(th=>{
+    if(th.tabIndex>=0) return;
+    th.tabIndex=0;
+    th.setAttribute('role','button');
+    if(!th.title) th.title='Ordenar por esta columna';
+  });
+}
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Enter'&&e.key!==' ') return;
+  const th=e.target.closest&&e.target.closest('th[onclick]');
+  if(!th) return;
+  e.preventDefault();
+  th.click();
 });
 
 // Marca la seccion activa en las 3 navegaciones a la vez (topbar, tabbar, menu)
@@ -9222,7 +9247,7 @@ kvArrancar();
     <!-- Completar reserva -->
     <div class="iep-section" id="rsv-p-completar-wrap">
       <div class="iep-section-lbl">Cerrar reserva</div>
-      <div id="rsv-p-aviso-vincular" class="info-box info-orange" style="display:none;margin-bottom:10px;font-size:11px">
+      <div id="rsv-p-aviso-vincular" class="info-box info-orange" style="display:none;margin-bottom:10px;">
         ⚠ Vincula primero el producto comprado para poder completar esta reserva.
       </div>
       <button class="btn btn-primary" style="width:100%;margin-bottom:8px" onclick="abrirModalCompletarRsv()">✓ Completar y generar venta</button>
@@ -9271,7 +9296,7 @@ kvArrancar();
       <button class="modal-close" onclick="cerrarModalCancelarRsv()">×</button>
     </div>
     <div id="mxrv-info" style="background:var(--tile);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px;font-size:12px"></div>
-    <div class="info-box info-red" style="margin-bottom:16px;font-size:11px">
+    <div class="info-box info-red" style="margin-bottom:16px;">
       Esta acción no se puede deshacer. Los abonos registrados quedan en historial. El producto (si aplica) volverá a estado <strong>DISPONIBLE</strong>.
     </div>
     <div style="display:flex;gap:8px">
@@ -9288,7 +9313,7 @@ kvArrancar();
       <button class="modal-close" onclick="fcCerrarModalCerrarMes()">&times;</button>
     </div>
     <div id="fc-cerrar-body" style="margin-bottom:16px"></div>
-    <div class="info-box" style="margin-bottom:16px;font-size:11px">
+    <div class="info-box" style="margin-bottom:16px;">
       Guardar el cierre es lo que permite que un mes viejo muestre lo que de verdad pas&oacute;.
       Sin esto la app intenta reconstruir el stock desde el inventario de hoy, y no puede:
       lo que se compr&oacute; y vendi&oacute; en el pasado ya no figura.
