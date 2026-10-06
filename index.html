@@ -1353,7 +1353,18 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
    misma separacion entre grupos que adentro de cada grupo. Los
    separadores verticales que habia entre grupos sobraban: cada grupo ya
    se distingue por su propio fondo. */
+/* Una sola altura para todo lo que vive en una barra de herramientas. Era
+   la causa de que los filtros salieran descuadrados: las pastillas son
+   .btn-sm (36px) y al lado tenian el combo y el buscador, que son 44px. El
+   36 sigue valiendo para los .btn-sm que van dentro de una celda de tabla. */
+.table-toolbar .btn,.table-toolbar .btn-sm,.table-toolbar .search-box,
+.table-toolbar .combo-wrap input,.table-toolbar .filter-select,
+.filtros-grid .combo-wrap input{min-height:44px}
+.table-toolbar .btn-sm{padding:0 14px}
 .oc-fila-filtros{row-gap:8px}
+/* Sin wrap adentro del grupo: o entra entero en la linea o baja entero. Con
+   wrap, un grupo se partia por la mitad y las pastillas quedaban sueltas. */
+.oc-pill-group{flex-wrap:nowrap}
 .oc-fila-filtros .combo-wrap{flex:0 1 180px;min-width:150px}
 @media(max-width:900px){.oc-filtros-divider{display:none}}
 .oc-chk-pago{cursor:pointer;accent-color:var(--orange)}
@@ -2849,7 +2860,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
       <span class="combo-arrow">▼</span>
       <div class="combo-list" id="cl-fc-accion"></div>
     </div>
-    <button onclick="document.getElementById('fc-buscar').value='';document.getElementById('fc-accion').value='';renderFlujoTabla()" style="flex-shrink:0;padding:6px 12px;border:1px solid var(--field-border);border-radius:var(--radius-sm);background:var(--card);color:var(--muted2);font-size:11px;cursor:pointer;white-space:nowrap;font-family:inherit">× Limpiar</button>
+    <button onclick="document.getElementById('fc-buscar').value='';document.getElementById('fc-accion').value='';renderFlujoTabla()" style="flex-shrink:0;padding:0 14px;border:1px solid var(--field-border);border-radius:var(--radius-sm);background:var(--card);color:var(--muted2);font-size:11px;cursor:pointer;white-space:nowrap;font-family:inherit">× Limpiar</button>
   </div>
   <div class="fc-tabla-wrap">
     <table class="fc-tabla">
@@ -2966,7 +2977,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
     <div class="table-toolbar" style="margin-bottom:8px">
       <input type="text" id="oc-buscar" class="search-box" placeholder="Buscar orden, producto, tienda, tracking…"
         oninput="renderOCTab()" style="flex:1;min-width:180px">
-      <button onclick="ocLimpiarFiltros()" style="flex-shrink:0;padding:6px 12px;border:1px solid var(--field-border);border-radius:var(--radius-sm);background:var(--card);color:var(--muted2);font-size:11px;cursor:pointer;white-space:nowrap;font-family:inherit">× Limpiar</button>
+      <button onclick="ocLimpiarFiltros()" style="flex-shrink:0;padding:0 14px;border:1px solid var(--field-border);border-radius:var(--radius-sm);background:var(--card);color:var(--muted2);font-size:11px;cursor:pointer;white-space:nowrap;font-family:inherit">× Limpiar</button>
       <button class="btn" onclick="ocAbrirModal()" style="flex-shrink:0;background:var(--accent);color:var(--on-accent);border:none;padding:7px 14px;font-size:12px">✦ Nueva OC</button>
     </div>
     <!-- Mismo orden que Inventario: arriba buscar y acciones, abajo los filtros -->
