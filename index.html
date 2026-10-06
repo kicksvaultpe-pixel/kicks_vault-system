@@ -213,43 +213,26 @@ nav.kv-topbar{
 nav.kv-tabbar{
   position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));
   z-index:var(--z-topbar);height:calc(var(--tabbar-h) + 4px);border-radius:var(--radius-pill);
-  display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;padding:0 6px;
-  border:1px solid var(--glass-border);box-shadow:var(--shadow-float);
+  display:flex;align-items:center;gap:2px;padding:0 6px;
+  /* Las 8 secciones en una sola fila deslizable. El desvanecido del borde
+     derecho es lo unico que avisa que la fila sigue, asi que no se saca. */
+  overflow-x:auto;overflow-y:hidden;scrollbar-width:none;overscroll-behavior-x:contain;
+  scroll-snap-type:x proximity;scroll-padding:0 6px;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 26px),transparent);
+          mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 26px),transparent);
 }
+nav.kv-tabbar::-webkit-scrollbar{display:none}
 .kv-tab{
-  justify-self:center;min-width:var(--tap-min);height:52px;padding:6px 10px;border:0;background:none;border-radius:var(--radius-pill);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
-  font-family:var(--font-sans);font-size:11px;line-height:13px;font-weight:600;color:var(--text-secondary);cursor:pointer;
+  flex:none;scroll-snap-align:center;
+  min-width:68px;height:52px;padding:6px 8px;border:0;background:none;border-radius:var(--radius-pill);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  font-family:var(--font-sans);font-size:11px;line-height:13px;font-weight:600;color:var(--text-secondary);
+  cursor:pointer;white-space:nowrap;transition:background .2s,color .2s;
 }
-.kv-tab svg{width:22px;height:22px}
+.kv-tab svg{width:21px;height:21px;flex:none}
 .kv-tab.active{color:var(--accent-ink);background:var(--accent-soft);font-weight:700}
-.kv-tab-add{
-  justify-self:center;width:56px;height:56px;border-radius:var(--radius-pill);border:0;
-  background:var(--accent);color:var(--on-accent);box-shadow:0 6px 16px color-mix(in srgb,var(--accent) 35%,transparent);
-  display:flex;align-items:center;justify-content:center;cursor:pointer;
-}
-.kv-tab-add svg{width:26px;height:26px}
 
 /* Menu de secciones, se abre al tocar el titulo de la pagina (movil) */
-.kv-section-menu{
-  display:none;position:fixed;
-  bottom:calc(var(--tabbar-h) + 22px + env(safe-area-inset-bottom,0px));left:16px;right:16px;
-  max-width:340px;
-  /* Misma formula que el bottom de arriba: antes el max-height no
-     descontaba el safe-area y el menu podia treparse al header. */
-  max-height:calc(100dvh - var(--tabbar-h) - 120px - env(safe-area-inset-bottom,0px));
-  overflow-y:auto;overscroll-behavior:contain;
-  z-index:var(--z-dropdown);padding:6px;border-radius:var(--radius-lg);
-  background:var(--menu);
-  border:1px solid var(--separator);box-shadow:var(--shadow-sheet);
-}
-.kv-section-menu.open{display:block}
-.kv-section-item{width:100%;min-height:48px;border:0;background:none;border-radius:16px;padding:6px 10px;
-  display:flex;align-items:center;gap:12px;font-family:var(--font-sans);font-size:15px;font-weight:600;color:var(--text);cursor:pointer;text-align:left}
-.kv-section-item .kv-ico{width:32px;height:32px;border-radius:10px;background:var(--tile);display:flex;align-items:center;justify-content:center;flex:none}
-.kv-section-item .kv-ico svg{width:18px;height:18px}
-.kv-section-item.active{background:var(--accent-soft);color:var(--accent-ink)}
-@media(hover:hover) and (pointer:fine){.kv-section-item:not(.active):hover{background:var(--tile)}}
 @media(min-width:768px){
   nav.kv-tabbar{display:none}
 }
@@ -1221,16 +1204,16 @@ input[list] { cursor: text; }
 /* Barra de scroll de los menus flotantes: el riel cuadrado se recortaba
    contra la esquina redondeada y se veia mal. Riel transparente y pulgar
    dibujado sobre su propio padding, asi flota adentro sin tocar el borde. */
-.combo-list,.kv-section-menu,.oc-cand-list,.oc-menu{
+.combo-list,.oc-cand-list,.oc-menu{
   scrollbar-width:thin;scrollbar-color:var(--field-border) transparent}
 .combo-list::-webkit-scrollbar,
-.kv-section-menu::-webkit-scrollbar,.oc-cand-list::-webkit-scrollbar,
+.oc-cand-list::-webkit-scrollbar,
 .oc-menu::-webkit-scrollbar{width:10px;background:transparent}
 .combo-list::-webkit-scrollbar-track,
-.kv-section-menu::-webkit-scrollbar-track,.oc-cand-list::-webkit-scrollbar-track,
+.oc-cand-list::-webkit-scrollbar-track,
 .oc-menu::-webkit-scrollbar-track{background:transparent}
 .combo-list::-webkit-scrollbar-thumb,
-.kv-section-menu::-webkit-scrollbar-thumb,.oc-cand-list::-webkit-scrollbar-thumb,
+.oc-cand-list::-webkit-scrollbar-thumb,
 .oc-menu::-webkit-scrollbar-thumb{
   background:var(--field-border);border-radius:var(--radius-pill);
   border:3px solid transparent;background-clip:padding-box}
@@ -1402,7 +1385,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
 .rsv-saldo-val{font-size:17px;line-height:22px;color:var(--accent);font-family:var(--font-sans);font-weight:700;font-variant-numeric:tabular-nums}
 .rsv-saldo-val.pagado{color:var(--green)}
 /* ══ FOCUS RING GLOBAL ══ */
-:where(button,[role="button"],a,input,select,textarea,.nav-tab,.kv-tab,.kv-tab-add,.tipo-btn,.oc-pill,.an-filter-btn,th[onclick]):focus-visible{outline:2px solid var(--focus-ring);outline-offset:-2px}
+:where(button,[role="button"],a,input,select,textarea,.nav-tab,.kv-tab,.tipo-btn,.oc-pill,.an-filter-btn,th[onclick]):focus-visible{outline:2px solid var(--focus-ring);outline-offset:-2px}
 </style>
 </head>
 <body class="kv-canvas">
@@ -1482,31 +1465,8 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
 
 <!-- Tab bar flotante movil (<768px): 5 espacios con "+" central.
      Clientes, OCs y Analisis se abren desde el titulo de la pagina. -->
-<nav class="kv-tabbar kv-glass-strong">
-  <button class="kv-tab" data-sec="inventario" onclick="showView('inventario')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="6" height="6" rx="1"/><rect x="9" y="3" width="6" height="6" rx="1"/><rect x="16" y="3" width="6" height="6" rx="1"/><rect x="2" y="12" width="6" height="6" rx="1"/><rect x="9" y="12" width="6" height="6" rx="1"/><rect x="16" y="12" width="6" height="6" rx="1"/></svg>
-    <span>Inventario</span>
-  </button>
-  <button class="kv-tab" data-sec="reservas" onclick="showView('reservas')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-    <span>Reservas</span>
-  </button>
-  <button class="kv-tab-add" data-sec="registro" onclick="showView('registro')" aria-label="Registrar movimiento">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-  </button>
-  <button class="kv-tab" data-sec="flujo" onclick="showView('flujo')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
-    <span>Flujo</span>
-  </button>
-  <button class="kv-tab kv-tab-menu" id="kvTabMenu" onclick="kvToggleSectionMenu(this)"
-          aria-haspopup="menu" aria-expanded="false" aria-label="Ver todas las secciones">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-    <span>Menú</span>
-  </button>
-</nav>
+<nav class="kv-tabbar kv-glass-strong" id="kvTabbar" aria-label="Secciones"></nav>
 
-<!-- Menu de secciones movil: se llena desde los botones de .kv-topbar -->
-<div class="kv-section-menu" id="kvSectionMenu" role="menu" aria-label="Secciones"></div>
 
 <!-- ══════════════════════════════════
      REGISTRO
@@ -4967,6 +4927,7 @@ async function rsvVincularProducto(){
 // ── INIT ──
 async function init(){
   kvTeclasEnCabeceras();
+  kvRenderTabbar();
   setToday();
   await Promise.all([loadTCGlobal(), loadInventario(), loadClientes(), loadOCs(), loadReservas()]);
   initRowSel('inv-tbody');
@@ -5024,87 +4985,49 @@ document.addEventListener('mousedown',function(e){
   }
 });
 
-/* ---------- Menu de secciones (movil) ----------
-   Los items se clonan de los botones de .kv-topbar, asi los 8 iconos SVG
-   viven en un solo lugar del HTML. */
-let _kvMenuBtn=null;
-function kvRenderSectionMenu(){
-  const menu=document.getElementById('kvSectionMenu');
-  if(!menu||menu.childElementCount)return;
+/* ---------- Barra inferior (movil) ----------
+   Se arma clonando los 8 botones de .kv-topbar, asi los iconos viven en un
+   solo lugar del HTML y no hay dos listas que mantener en sincronia. */
+function kvRenderTabbar(){
+  const bar=document.getElementById('kvTabbar');
+  if(!bar||bar.childElementCount)return;
   document.querySelectorAll('.kv-topbar .nav-tab').forEach(tab=>{
     const sec=tab.dataset.sec;
-    const it=document.createElement('button');
-    it.type='button';it.className='kv-section-item';it.dataset.sec=sec;it.setAttribute('role','menuitem');
-    it.innerHTML='<span class="kv-ico">'+tab.querySelector('svg').outerHTML+'</span>'
-                +'<span>'+tab.querySelector('.tab-label').textContent+'</span>';
-    it.onclick=()=>showView(sec);
-    menu.appendChild(it);
+    const b=document.createElement('button');
+    b.type='button'; b.className='kv-tab'; b.dataset.sec=sec;
+    b.innerHTML=tab.querySelector('svg').outerHTML
+               +'<span>'+kvTabCorto(tab.querySelector('.tab-label').textContent)+'</span>';
+    b.onclick=()=>showView(sec);
+    bar.appendChild(b);
   });
 }
-function kvCerrarSectionMenu(){
-  const menu=document.getElementById('kvSectionMenu');
-  if(menu)menu.classList.remove('open');
-  if(_kvMenuBtn){_kvMenuBtn.setAttribute('aria-expanded','false');_kvMenuBtn=null;}
-}
-function kvToggleSectionMenu(btn){
-  const menu=document.getElementById('kvSectionMenu');
-  if(!menu)return;
-  kvRenderSectionMenu();
-  const act=document.querySelector('.view.active');
-  if(act)kvSyncNav(act.id.replace('view-',''));
-  if(menu.classList.contains('open')&&_kvMenuBtn===btn){kvCerrarSectionMenu();return;}
-  kvCerrarSectionMenu();
-  menu.classList.add('open');
-  btn.setAttribute('aria-expanded','true');
-  _kvMenuBtn=btn;
-}
-document.addEventListener('click',function(e){
-  if(!document.getElementById('kvSectionMenu')?.classList.contains('open'))return;
-  if(e.target.closest('#kvSectionMenu')||e.target.closest('#kvTabMenu'))return;
-  kvCerrarSectionMenu();
-});
-document.addEventListener('keydown',function(e){
-  if(e.key==='Escape')kvCerrarSectionMenu();
-});
+// En una ranura de 68px no entran "Órdenes de Compra" ni "Flujo de Caja".
+// Solo se acortan los dos nombres largos de verdad: la ranura crece con el
+// texto (min-width:68px, no width), asi que "Inventario" o "Resultados" se
+// acomodan solos sin abreviar.
+const KV_CORTO={'Órdenes de Compra':'OCs','Flujo de Caja':'Flujo'};
+function kvTabCorto(t){ return KV_CORTO[t.trim()]||t.trim(); }
 
-/* Cabeceras que ordenan: son <th onclick>, asi que de fabrica no se pueden
-   enfocar con Tab ni activar con Enter. Se les agrega el rol y el foco una
-   sola vez en vez de tocar los 15 tags, y un unico listener traduce
-   Enter/Espacio en el click que ya tenian. */
-function kvTeclasEnCabeceras(){
-  document.querySelectorAll('th[onclick]').forEach(th=>{
-    if(th.tabIndex>=0) return;
-    th.tabIndex=0;
-    th.setAttribute('role','button');
-    if(!th.title) th.title='Ordenar por esta columna';
-  });
+// La barra se desliza, asi que la seccion activa puede quedar fuera de vista:
+// se la trae sola al cambiar de tab.
+function kvTabbarVerActiva(){
+  const bar=document.getElementById('kvTabbar');
+  const act=bar&&bar.querySelector('.kv-tab.active');
+  if(act&&bar.scrollWidth>bar.clientWidth) act.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});
 }
-document.addEventListener('keydown',function(e){
-  if(e.key!=='Enter'&&e.key!==' ') return;
-  const th=e.target.closest&&e.target.closest('th[onclick]');
-  if(!th) return;
-  e.preventDefault();
-  th.click();
-});
 
-// Marca la seccion activa en las 3 navegaciones a la vez (topbar, tabbar, menu)
+// Marca la seccion activa en las dos navegaciones: la topbar de escritorio
+// y la barra de abajo de movil.
 function kvSyncNav(sec){
-  document.querySelectorAll('.nav-tab,.kv-tab,.kv-tab-add,.kv-section-item')
+  document.querySelectorAll('.nav-tab,.kv-tab')
     .forEach(b=>b.classList.toggle('active',b.dataset.sec===sec));
-  // El boton "Menu" de la tabbar no representa una seccion: se marca activo
-  // cuando la seccion actual es una de las que viven dentro del menu.
-  const m=document.getElementById('kvTabMenu');
-  if(m){
-    const enBarra=[...document.querySelectorAll('.kv-tabbar [data-sec]')].map(b=>b.dataset.sec);
-    m.classList.toggle('active',!enBarra.includes(sec));
-  }
+  kvTabbarVerActiva();
 }
 
 function showView(n){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('view-'+n).classList.add('active');
   kvSyncNav(n);
-  kvCerrarSectionMenu();
   _clearSel();
   if(n==='inventario') loadInventario();
   if(n==='flujo') loadFlujo();
