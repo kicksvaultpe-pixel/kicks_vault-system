@@ -4985,6 +4985,26 @@ document.addEventListener('mousedown',function(e){
   }
 });
 
+/* Cabeceras que ordenan: son <th onclick>, asi que de fabrica no se pueden
+   enfocar con Tab ni activar con Enter. Se les agrega el rol y el foco una
+   sola vez en vez de tocar los 15 tags, y un unico listener traduce
+   Enter/Espacio en el click que ya tenian. */
+function kvTeclasEnCabeceras(){
+  document.querySelectorAll('th[onclick]').forEach(th=>{
+    if(th.tabIndex>=0) return;
+    th.tabIndex=0;
+    th.setAttribute('role','button');
+    if(!th.title) th.title='Ordenar por esta columna';
+  });
+}
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Enter'&&e.key!==' ') return;
+  const th=e.target.closest&&e.target.closest('th[onclick]');
+  if(!th) return;
+  e.preventDefault();
+  th.click();
+});
+
 /* ---------- Barra inferior (movil) ----------
    Se arma clonando los 8 botones de .kv-topbar, asi los iconos viven en un
    solo lugar del HTML y no hay dos listas que mantener en sincronia. */
