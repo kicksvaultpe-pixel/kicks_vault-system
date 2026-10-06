@@ -135,7 +135,11 @@
    en varios lugares -- retocar cada uno de esos por separado queda para
    despues. overscroll-behavior:none evita el pull-to-refresh accidental
    mientras se esta a mitad de un formulario o editando una tabla larga. */
-html{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;overscroll-behavior:none}
+/* scroll-padding-bottom: cuando el navegador scrollea hasta el campo que
+   se acaba de enfocar, sin esto lo puede dejar justo debajo de la tabbar
+   o de la barra del boton de registrar. */
+html{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;overscroll-behavior:none;
+  scroll-padding-bottom:calc(var(--tabbar-h) + 100px + env(safe-area-inset-bottom,0px))}
 button,a,[role="button"],input,select,textarea{touch-action:manipulation}
 /* El campo se queda en 12px en mouse (la densidad que ya tenia la app) y solo
    sube a 16px con touch: abajo de eso, iOS hace zoom al tocar un input y no
@@ -230,7 +234,11 @@ nav.kv-tabbar{
 .kv-section-menu{
   display:none;position:fixed;
   bottom:calc(var(--tabbar-h) + 22px + env(safe-area-inset-bottom,0px));left:16px;right:16px;
-  max-width:340px;max-height:calc(100dvh - var(--tabbar-h) - 120px);overflow-y:auto;overscroll-behavior:contain;
+  max-width:340px;
+  /* Misma formula que el bottom de arriba: antes el max-height no
+     descontaba el safe-area y el menu podia treparse al header. */
+  max-height:calc(100dvh - var(--tabbar-h) - 120px - env(safe-area-inset-bottom,0px));
+  overflow-y:auto;overscroll-behavior:contain;
   z-index:var(--z-dropdown);padding:6px;border-radius:var(--radius-lg);
   background:var(--menu);
   border:1px solid var(--separator);box-shadow:var(--shadow-sheet);
@@ -471,7 +479,9 @@ td.right{font-weight:600;color:var(--text)}
   #vt-tbody  td:nth-child(2),      table:has(#vt-tbody)  thead th:nth-child(2),
   #cl-tbody  tr:not(.pag-row) td:nth-child(1),      table:has(#cl-tbody)  thead th:nth-child(1),
   #fc-tabla-body tr:not(.pag-row) td:nth-child(1),  table:has(#fc-tabla-body) thead th:nth-child(1){
-    position:sticky;left:0;z-index:1;background:var(--menu)}
+    /* El mismo fondo que la tabla, no el de un menu flotante: con --menu
+       la celda fija se veia como un parche de otro color sobre la fila. */
+    position:sticky;left:0;z-index:1;background:var(--glass-strong)}
   table:has(#inv-tbody) thead th:nth-child(2),
   table:has(#rsv-tbody) thead th:nth-child(2),
   table:has(#vt-tbody)  thead th:nth-child(2),
@@ -1127,7 +1137,9 @@ input[list] { cursor: text; }
   .fc-bubble{padding:16px}
 
   /* Botón de envío siempre al alcance en formularios largos */
-  .kv-submit-bar{position:sticky;bottom:calc(var(--tabbar-h) + 20px + env(safe-area-inset-bottom,0px));z-index:5;
+  /* 34px de aire y no 20: con 20 quedaban 4px entre esta barra y la tabbar,
+   y como las dos llevan sombra de 40px se leian como un solo bloque. */
+  .kv-submit-bar{position:sticky;bottom:calc(var(--tabbar-h) + 34px + env(safe-area-inset-bottom,0px));z-index:5;
     padding:10px;border-radius:var(--radius-lg);
     background:var(--glass-strong);-webkit-backdrop-filter:blur(var(--blur-bar)) saturate(180%);backdrop-filter:blur(var(--blur-bar)) saturate(180%);
     border:1px solid var(--glass-border);box-shadow:var(--shadow-float)}
@@ -1216,6 +1228,11 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
 /* Profile panel */
 .cl-backdrop{position:fixed;inset:0;z-index:var(--z-sheet);display:none;opacity:0;transition:opacity .2s;pointer-events:none}
 .cl-backdrop.open{display:block;opacity:1;pointer-events:all}
+/* La hoja esta siempre montada y solo se corre con transform, asi que
+   cerrada sus botones seguian siendo alcanzables con Tab. El retraso de
+   300ms deja que termine el deslizamiento antes de ocultarla: sin eso la
+   animacion de salida se corta de golpe. */
+.cl-panel:not(.open){visibility:hidden;transition:transform .3s cubic-bezier(.4,0,.2,1),visibility 0s linear .3s}
 .cl-panel{position:fixed;top:12px;right:12px;bottom:12px;width:min(var(--sheet-w),calc(100vw - 24px));
   z-index:calc(var(--z-sheet) + 1);display:flex;flex-direction:column;overflow:hidden;
   border-radius:var(--radius-xl);box-shadow:var(--shadow-sheet);transform:translateX(calc(105% + 12px));transition:transform .3s cubic-bezier(.4,0,.2,1)}
@@ -1248,7 +1265,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
 .cl-hist td:first-child{border-top:none}
 .cl-hist .td-green{color:var(--green);font-weight:600}
 .cl-hist .td-accent{color:var(--accent-ink);font-size:13px;line-height:18px;font-weight:600}
-.cl-panel-foot{padding:14px 20px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--separator);display:flex;gap:8px;flex-shrink:0}
+.cl-panel-foot{padding:14px 20px;border-top:1px solid var(--separator);display:flex;gap:8px;flex-shrink:0}
 .cl-panel-foot .btn{flex:1}
 /* Type badges */
 .badge-vip{background:var(--warning-soft);color:var(--warning)}
@@ -1271,10 +1288,24 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
   .btn-sm{min-height:40px;padding:9px 16px}
   .btn-pay,.btn-cancel{min-height:36px;padding:7px 13px;font-size:11px}
   /* Las 3 hojas laterales suben desde abajo, mismo patron */
+  /* Con una hoja o un modal abierto, la tabbar no se puede usar y ademas se
+     transparenta a traves del vidrio de la hoja como un manchon azul, justo
+     detras de los botones de guardar. Se esconde mientras tanto. */
+  body:has(#inv-edit-overlay.open) nav.kv-tabbar,
+  body:has(#rsv-overlay.open) nav.kv-tabbar,
+  body:has(.cl-panel.open) nav.kv-tabbar,
+  body:has(.modal-overlay.open) nav.kv-tabbar{opacity:0;pointer-events:none;transition:opacity .2s}
   #inv-edit-panel,#rsv-panel,.cl-panel{
     top:auto;left:0;right:0;bottom:0;width:100%;max-height:92dvh;
+    /* El relleno de abajo tiene que despejar el indicador de inicio: con
+       bottom:0 los botones de guardar quedaban a 6px de el. */
+    padding-bottom:calc(40px + env(safe-area-inset-bottom,0px));
     overflow-y:auto;-webkit-overflow-scrolling:touch;
-    border-radius:var(--radius-xl) var(--radius-xl) 0 0;transform:translateY(100%)}
+    border-radius:var(--radius-xl) var(--radius-xl) 0 0;
+    /* 105% y no 100%: la hoja tiene una sombra de 40px de desenfoque
+       hacia arriba y con 100% exacto se asoma dentro de la pantalla.
+       Es el mismo truco que ya usaba la version de escritorio. */
+    transform:translateY(105%)}
   #inv-edit-overlay.open #inv-edit-panel,#rsv-overlay.open #rsv-panel{transform:translateY(0)}
   .cl-panel.open{transform:translateY(0)}
   .iep-section .form-grid.g2>.field{grid-column:span 12}
