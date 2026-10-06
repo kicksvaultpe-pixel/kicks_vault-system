@@ -382,9 +382,11 @@ button:active,[role="button"]:active{
    tambien, y la pagina ya no "salta" al cambiar de mes o de filtro.
    El material vidrio lo pone la regla de .card,.table-wrap,... de arriba. */
 .table-wrap{
-  overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+  /* Sin alto maximo: la paginacion ya decide cuantas filas entran, asi que
+     la hoja se ve entera y scrollea la pagina. Antes habia un scroll
+     vertical DENTRO de la tabla, ademas del de la pagina. */
+  overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;
   border-radius:var(--radius-lg);
-  max-height:calc(100dvh - var(--topbar-h) - 190px);
 }
 table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;font-family:inherit}
 /* min-width:100% en vez de 1200px fijo: la tabla ocupa el ancho disponible
@@ -425,10 +427,7 @@ td.right{font-weight:600;color:var(--text)}
    perdes de vista que fila estas leyendo) y las columnas de baja prioridad
    se esconden para que las importantes entren sin scrollear. */
 @media(max-width:767px){
-  .table-wrap,.fc-tabla-wrap{
-    max-height:calc(100dvh - 240px);
-    border-radius:var(--radius-md);
-  }
+  .table-wrap,.fc-tabla-wrap{border-radius:var(--radius-md)}
   /* En movil tambien se esconden las columnas p2 y p3: quedan las esenciales
      y el resto sigue disponible scrolleando. */
   .table-wrap [data-p="2"],.table-wrap [data-p="3"],
@@ -579,7 +578,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6;cursor:pointer}
 .card:has(.cl-search-drop.open),
 .form-panel:has(.combo-list.open),
 .form-panel:has(.cl-search-drop.open){position:relative;z-index:var(--z-dropdown)}
-.combo-wrap input {
+.combo-wrap input,.cl-search-input {
   width: 100%;
   background: var(--field);
   border: 1px solid var(--field-border);
@@ -589,25 +588,25 @@ input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6;cursor:pointer}
   font-family: var(--font-sans); font-size: 14px; line-height: 20px; font-weight: 500;
   outline: none; transition: border-color .15s, box-shadow .15s;
 }
-.combo-wrap input::placeholder { color: var(--placeholder); font-weight: 400; }
+.combo-wrap input::placeholder,.cl-search-input::placeholder { color: var(--placeholder); font-weight: 400; }
 .combo-wrap input[readonly] { cursor: pointer; }
-.combo-arrow {
+.combo-arrow,.cl-search-arrow {
   position: absolute; right: 11px; top: 50%;
   transform: translateY(-50%);
   pointer-events: all; color: var(--muted2); font-size: 10px;
   cursor: pointer; padding: 4px; user-select: none; transition: color .15s;
 }
-@media (hover:hover) and (pointer:fine){.combo-arrow:hover{color:var(--text)}}
-.combo-list {
+@media (hover:hover) and (pointer:fine){.combo-arrow:hover,.cl-search-arrow:hover{color:var(--text)}}
+.combo-list,.cl-search-drop {
   position: absolute; top: calc(100% + 4px); left: 0; right: 0;
   background: var(--menu);
   border: 1px solid var(--separator); border-radius: var(--radius-md);
   z-index: var(--z-dropdown); max-height: min(320px,50dvh); overflow-y: auto; overscroll-behavior: contain;
   display: none; box-shadow: var(--shadow-float); padding: 4px;
 }
-.combo-list.open { display: block; }
+.combo-list.open,.cl-search-drop.open { display: block; }
 /* Sin lineas divisorias entre opciones: el resaltado del foco ya separa */
-.combo-opt {
+.combo-opt,.cl-si,.cl-si-empty,.cl-si-new {
   padding: 10px 12px; font-size: 14px; line-height: 20px; cursor: pointer;
   border-radius: var(--radius-sm); color: var(--text);
   transition: background .1s;
@@ -851,8 +850,10 @@ input[list] { cursor: text; }
 
 
 /* Tabla movimientos */
-.fc-tabla-wrap{border-radius:var(--radius-lg);overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
-  max-height:calc(100dvh - var(--topbar-h) - 190px)}
+.fc-tabla-wrap{border-radius:var(--radius-lg);
+  /* Sin alto maximo, igual que .table-wrap: una sola barra de scroll, la de
+     la pagina, en vez de una adentro de la tabla y otra afuera. */
+  overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
 .fc-tabla{width:100%;border-collapse:separate;border-spacing:0;font-size:14px;font-family:inherit;min-width:820px}
 .fc-tabla thead th{position:sticky;top:0;z-index:2;
   background:var(--glass-strong);-webkit-backdrop-filter:blur(var(--blur-bar));backdrop-filter:blur(var(--blur-bar));
@@ -1103,11 +1104,27 @@ input[list] { cursor: text; }
 /* ═══════════════════════════════════════════════════════
    VISUAL REFINEMENTS
 ═══════════════════════════════════════════════════════ */
-.field input:focus,.field select:focus,.field textarea:focus,.search-box:focus,.filter-select:focus,.combo-wrap input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.field input:focus,.field select:focus,.field textarea:focus,.search-box:focus,.filter-select:focus,.combo-wrap input:focus,.cl-search-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
 .btn:active:not(:disabled){transform:translateY(0) scale(.97)!important;transition:transform 120ms var(--ease-out)}
 .modal-overlay.open{animation:modalIn .2s cubic-bezier(.34,1.56,.64,1)}
 @keyframes modalIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
 .table-wrap,.fc-tabla-wrap{scrollbar-width:thin;scrollbar-color:var(--field-border) transparent}
+/* Barra de scroll de los menus flotantes: el riel cuadrado se recortaba
+   contra la esquina redondeada y se veia mal. Riel transparente y pulgar
+   dibujado sobre su propio padding, asi flota adentro sin tocar el borde. */
+.combo-list,.cl-search-drop,.kv-section-menu,.oc-cand-list,.oc-menu{
+  scrollbar-width:thin;scrollbar-color:var(--field-border) transparent}
+.combo-list::-webkit-scrollbar,.cl-search-drop::-webkit-scrollbar,
+.kv-section-menu::-webkit-scrollbar,.oc-cand-list::-webkit-scrollbar,
+.oc-menu::-webkit-scrollbar{width:10px;background:transparent}
+.combo-list::-webkit-scrollbar-track,.cl-search-drop::-webkit-scrollbar-track,
+.kv-section-menu::-webkit-scrollbar-track,.oc-cand-list::-webkit-scrollbar-track,
+.oc-menu::-webkit-scrollbar-track{background:transparent}
+.combo-list::-webkit-scrollbar-thumb,.cl-search-drop::-webkit-scrollbar-thumb,
+.kv-section-menu::-webkit-scrollbar-thumb,.oc-cand-list::-webkit-scrollbar-thumb,
+.oc-menu::-webkit-scrollbar-thumb{
+  background:var(--field-border);border-radius:var(--radius-pill);
+  border:3px solid transparent;background-clip:padding-box}
 @media(max-width:768px){#toast{bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom,0px) + 28px)}}
 tbody tr{cursor:pointer;user-select:none}
 tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid var(--accent);outline-offset:-2px}
@@ -1117,21 +1134,15 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
 @media(max-width:600px){.cl-stats{grid-template-columns:1fr 1fr}}
 /* Client search */
 .cl-search-wrap{position:relative}
-.cl-search-input{width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-md);padding:10px 14px;color:var(--text);font-family:var(--font-sans);font-size:14px;line-height:20px;font-weight:500;outline:none;transition:border .15s,box-shadow .15s}
-.cl-search-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
-.cl-search-drop{position:absolute;top:calc(100% + 4px);left:0;right:0;
-  background:var(--menu);
-  border:1px solid var(--separator);border-radius:var(--radius-md);box-shadow:var(--shadow-float);
-  z-index:var(--z-dropdown);display:none;max-height:min(320px,50dvh);overflow-y:auto;overscroll-behavior:contain;padding:4px}
-.cl-search-drop.open{display:block}
-.cl-si{padding:10px 12px;border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .1s}@media (hover:hover) and (pointer:fine){
-.cl-si:hover{background:var(--accent-soft)}}
-.cl-si-code{font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.5px;flex-shrink:0;font-family:var(--font-sans)}
-.cl-si-name{font-size:12px;color:var(--text);flex:1;font-family:var(--font-sans)}
-.cl-si-talla{font-size:11px;color:var(--muted2);flex-shrink:0}
-.cl-si-empty{padding:9px 12px;font-size:12px;color:var(--muted2);text-align:center;font-family:var(--font-sans)}
-.cl-si-new{padding:8px 12px;font-size:11px;font-weight:700;color:var(--accent);cursor:pointer;border-top:1px solid var(--separator);display:flex;align-items:center;gap:5px;transition:background .1s;font-family:var(--font-sans)}@media (hover:hover) and (pointer:fine){
-.cl-si-new:hover{background:var(--accent-soft)}}
+.cl-si{display:flex;align-items:center;gap:8px}
+.cl-si.focused{background:var(--accent-soft);color:var(--accent-ink)}
+@media (hover:hover) and (pointer:fine){.cl-si:hover{background:var(--accent-soft);color:var(--accent-ink)}}
+.cl-si-code{font-size:13px;line-height:18px;font-weight:600;color:var(--accent-ink);flex-shrink:0;font-family:var(--font-sans);font-variant-numeric:tabular-nums}
+.cl-si-name{font-size:14px;line-height:20px;font-weight:500;color:inherit;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--font-sans)}
+.cl-si-talla{font-size:13px;line-height:18px;font-weight:500;color:var(--muted2);flex-shrink:0}
+.cl-si-empty{font-size:14px;line-height:20px;font-weight:500;color:var(--muted2);text-align:center;font-family:var(--font-sans)}
+.cl-si-new{font-size:14px;line-height:20px;font-weight:600;color:var(--accent-ink);cursor:pointer;margin-top:4px;border-top:1px solid var(--separator);border-radius:0 0 var(--radius-sm) var(--radius-sm);display:flex;align-items:center;gap:6px;font-family:var(--font-sans)}
+@media (hover:hover) and (pointer:fine){.cl-si-new:hover{background:var(--accent-soft)}}
 /* Selected badge */
 .cl-sel{display:none;align-items:center;gap:8px;background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);border-radius:var(--radius-sm);padding:8px 12px;margin-top:6px}
 .cl-sel.show{display:flex}
@@ -1796,6 +1807,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
           <div class="cl-search-wrap" id="rv-cl-wrap">
             <input class="cl-search-input" id="rv-cl-input" placeholder="Buscar por nombre o código…" autocomplete="off"
               oninput="clSearch('rv')" onfocus="clSearchFocus('rv')" onblur="clSearchBlur('rv')" onkeydown="clSearchKey(event,'rv')">
+            <span class="cl-search-arrow" onmousedown="event.preventDefault();document.getElementById('rv-cl-input').focus()">▼</span>
             <div class="cl-search-drop" id="rv-cl-drop"></div>
           </div>
           <div class="cl-sel" id="rv-cl-sel">
@@ -5014,6 +5026,19 @@ async function loadInventario(){
 }
 
 const noEmoji=s=>s.replace(/^[^A-Za-z0-9À-ɏ]*/,'').trim();
+// Puente entre lo que el combobox MUESTRA y lo que se guarda en la base.
+// El combo trabaja con etiquetas ("👟 ZAPATILLAS"); la base guarda el codigo
+// ("ZAPATILLAS"). Mismo criterio que ya usa Registro con cp-cat.
+function iepValor(inputId){
+  const v=(document.getElementById(inputId)||{}).value||'';
+  const cod=noEmoji(v).toUpperCase();
+  return (cod==='—'||cod==='')?'':cod;
+}
+function iepEtiqueta(listId,codigo){
+  if(!codigo)return '';
+  const op=(COMBO_DATA[listId]||[]).find(x=>noEmoji(x).toUpperCase()===String(codigo).toUpperCase());
+  return op||codigo;
+}
 // noEmoji saca el icono pero deja la tilde, y los combos muestran
 // "IMPORTACION" acentuado mientras las tablas guardan la version sin tilde.
 // Varias columnas tienen un CHECK sobre ese valor, asi que la tilde reventaba
@@ -5057,6 +5082,10 @@ function fillDataLists(){
   comboSetData('cl-fc-accion', ['— Todos —','VENTA','COMPRA','COSTO','GASTO','INVERSIÓN','PENDIENTE','RESERVA','CANCELACIÓN']);
   // Opciones fijas — formularios registro
   comboSetData('cl-cp-cat', ['👟 ZAPATILLAS','👕 ROPA','🧢 ACCESORIOS','📦 OTROS']);
+  // El panel de editar de Inventario usa las mismas etiquetas que Registro.
+  comboSetData('cl-iep-cat', ['—','👟 ZAPATILLAS','👕 ROPA','🧢 ACCESORIOS','📦 OTROS']);
+  comboSetData('cl-iep-estado', ['DISPONIBLE','RESERVADO','VENDIDO','CANCELADO']);
+  comboSetData('cl-iep-pago', ['CONTADO','CREDITO']);
   comboSetData('cl-cp-moneda', ['💵 USD','🪙 SOLES']);
   comboSetData('cl-cp-oc-tipo', ['✈️ IMPORTACIÓN','🏪 LOCAL']);
   comboSetData('cl-vt-canal', ['📸 INSTAGRAM','💬 WHATSAPP','👥 FACEBOOK','🏪 PRESENCIAL','🔹 OTRO']);
@@ -5913,7 +5942,29 @@ function clSearch(ctx){
 }
 function clSearchFocus(ctx){clSearch(ctx);}
 function clSearchBlur(ctx){setTimeout(()=>document.getElementById(`${ctx}-cl-drop`)?.classList.remove('open'),200);}
-function clSearchKey(e,ctx){if(e.key==='Escape')document.getElementById(`${ctx}-cl-drop`)?.classList.remove('open');}
+function clSearchKey(e,ctx){
+  const drop=document.getElementById(`${ctx}-cl-drop`);
+  if(!drop)return;
+  const items=drop.querySelectorAll('.cl-si');
+  const foco=drop.querySelector('.cl-si.focused');
+  if(e.key==='ArrowDown'){
+    e.preventDefault();
+    if(!drop.classList.contains('open')){clSearch(ctx);return;}
+    const sig=foco?foco.nextElementSibling:items[0];
+    if(foco)foco.classList.remove('focused');
+    if(sig&&sig.classList.contains('cl-si')){sig.classList.add('focused');sig.scrollIntoView({block:'nearest'});}
+  }else if(e.key==='ArrowUp'){
+    e.preventDefault();
+    const ant=foco?foco.previousElementSibling:items[items.length-1];
+    if(foco)foco.classList.remove('focused');
+    if(ant&&ant.classList.contains('cl-si')){ant.classList.add('focused');ant.scrollIntoView({block:'nearest'});}
+  }else if(e.key==='Enter'&&foco){
+    e.preventDefault();
+    foco.dispatchEvent(new MouseEvent('mousedown',{bubbles:true}));
+  }else if(e.key==='Escape'){
+    drop.classList.remove('open');
+  }
+}
 
 function clSelect(ctx,id){
   clSelectedId[ctx]=id;
@@ -7931,9 +7982,12 @@ function abrirEditarItem(codigo){
   document.getElementById('iep-modelo').value=p.modelo||'';
   document.getElementById('iep-colorway').value=p.colorway||'';
   document.getElementById('iep-talla').value=p.talla||'';
-  document.getElementById('iep-cat').value=p.categoria||'';
-  document.getElementById('iep-estado').value=p.estado||'DISPONIBLE';
-  document.getElementById('iep-pago').value=p.tipo_pago||'CONTADO';
+  // iepEtiqueta() busca en la lista del combo la opcion cuyo texto, ya sin
+  // emoji, coincide con el valor guardado. Si no hay ninguna (un valor viejo
+  // que ya no esta en la lista) se muestra el valor crudo en vez de vaciarlo.
+  document.getElementById('iep-cat').value=iepEtiqueta('cl-iep-cat',p.categoria);
+  document.getElementById('iep-estado').value=iepEtiqueta('cl-iep-estado',p.estado||'DISPONIBLE');
+  document.getElementById('iep-pago').value=iepEtiqueta('cl-iep-pago',p.tipo_pago||'CONTADO');
   document.getElementById('iep-oc').value=p.orden_compra||'';
   document.getElementById('iep-factura').value=p.factura||'';
   document.getElementById('iep-precio-compra').value=p.precio_compra_soles||'';
@@ -8010,7 +8064,7 @@ async function iepGuardar(){
     const precioFinal=pc+tc;
     // pago_estado debe seguir a tipo_pago: si pasa a CONTADO queda PAGADO;
     // si pasa a CREDITO conserva el estado previo (o arranca PENDIENTE).
-    const tipoPago=document.getElementById('iep-pago').value||null;
+    const tipoPago=iepValor('iep-pago')||null;
     const prevProd=inventarioCache.find(p=>p.codigo_producto===invEditCodigo);
     const pagoEstado=tipoPago==='CREDITO'?(prevProd?.pago_estado||'PENDIENTE'):'PAGADO';
 
@@ -8019,8 +8073,8 @@ async function iepGuardar(){
       modelo:document.getElementById('iep-modelo').value.trim().toUpperCase()||null,
       colorway:document.getElementById('iep-colorway').value.trim().toUpperCase()||null,
       talla:document.getElementById('iep-talla').value.trim()||null,
-      categoria:document.getElementById('iep-cat').value||null,
-      estado:document.getElementById('iep-estado').value||null,
+      categoria:iepValor('iep-cat')||null,
+      estado:iepValor('iep-estado')||null,
       tipo_pago:tipoPago,
       pago_estado:pagoEstado,
       orden_compra:document.getElementById('iep-oc').value.trim()||null,
@@ -8944,13 +8998,7 @@ kvArrancar();
         <div class="field"><label>Colorway</label><input type="text" id="iep-colorway" autocomplete="off"></div>
         <div class="field"><label>Talla</label><input type="text" id="iep-talla" autocomplete="off"></div>
         <div class="field"><label>Categoría</label>
-          <select id="iep-cat" class="iep-select">
-            <option value="">—</option>
-            <option value="ZAPATILLAS">Zapatillas</option>
-            <option value="ROPA">Ropa</option>
-            <option value="ACCESORIOS">Accesorios</option>
-            <option value="OTROS">Otros</option>
-          </select>
+          <div class="combo-wrap"><input type="text" id="iep-cat" class="iep-select" placeholder="Categoria..." autocomplete="off" readonly oninput="comboFilter('iep-cat','cl-iep-cat')" onfocus="comboOpen('iep-cat','cl-iep-cat')" onblur="comboBlurStrict('iep-cat','cl-iep-cat')" onkeydown="comboKey(event,'iep-cat','cl-iep-cat')"><span class="combo-arrow">▼</span><div class="combo-list" id="cl-iep-cat"></div></div>
         </div>
         <div class="field"><label>Fecha compra</label><input type="date" id="iep-fecha-compra"></div>
       </div>
@@ -8961,18 +9009,10 @@ kvArrancar();
       <div class="iep-section-lbl">Estado y referencia</div>
       <div class="form-grid g2">
         <div class="field"><label>Estado</label>
-          <select id="iep-estado" class="iep-select">
-            <option value="DISPONIBLE">Disponible</option>
-            <option value="RESERVADO">Reservado</option>
-            <option value="VENDIDO">Vendido</option>
-            <option value="CANCELADO">Cancelado</option>
-          </select>
+          <div class="combo-wrap"><input type="text" id="iep-estado" class="iep-select" placeholder="Estado..." autocomplete="off" readonly oninput="comboFilter('iep-estado','cl-iep-estado')" onfocus="comboOpen('iep-estado','cl-iep-estado')" onblur="comboBlurStrict('iep-estado','cl-iep-estado')" onkeydown="comboKey(event,'iep-estado','cl-iep-estado')"><span class="combo-arrow">▼</span><div class="combo-list" id="cl-iep-estado"></div></div>
         </div>
         <div class="field"><label>Tipo Pago</label>
-          <select id="iep-pago" class="iep-select">
-            <option value="CONTADO">Contado</option>
-            <option value="CREDITO">Crédito</option>
-          </select>
+          <div class="combo-wrap"><input type="text" id="iep-pago" class="iep-select" placeholder="Tipo de pago..." autocomplete="off" readonly oninput="comboFilter('iep-pago','cl-iep-pago')" onfocus="comboOpen('iep-pago','cl-iep-pago')" onblur="comboBlurStrict('iep-pago','cl-iep-pago')" onkeydown="comboKey(event,'iep-pago','cl-iep-pago')"><span class="combo-arrow">▼</span><div class="combo-list" id="cl-iep-pago"></div></div>
         </div>
         <div class="field"><label>OC</label><input type="text" id="iep-oc" autocomplete="off" placeholder="OC-001"></div>
         <div class="field"><label>Factura</label><input type="text" id="iep-factura" autocomplete="off" placeholder="N° factura"></div>
