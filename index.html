@@ -492,6 +492,9 @@ td.right{font-weight:600;color:var(--text)}
   #inv-tbody tr.row-pend td:nth-child(2){box-shadow:inset 3px 0 0 var(--warning)}
   #inv-tbody tr.row-rsv  td:nth-child(2){box-shadow:inset 3px 0 0 var(--reserve)}
   #rsv-tbody tr.row-pend td:nth-child(2){box-shadow:inset 3px 0 0 var(--warning)}
+  /* Los data-role de las celdas son descriptivos: describen que es cada
+     celda (title, amount, meta, badge...) y quedaron del formato de
+     tarjetas que se revirtio. El unico que tiene comportamiento es este. */
   /* Botones de accion: 40px de alto minimo para el dedo */
   td[data-role="actions"] .btn,td[data-role="actions"] .oc-edit-btn{min-height:40px}
 }
@@ -2446,7 +2449,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
     </div>
   </div>
 
-  <div class="table-wrap kv-stack">
+  <div class="table-wrap">
     <table>
       <thead><tr>
         <th data-p="2" onclick="sortTable('fecha_compra')" style="cursor:pointer;width:65px">Fecha <span id="sort-fecha_compra"></span></th>
@@ -2554,7 +2557,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
     <div style="flex:1"></div>
     <button class="btn btn-ghost btn-sm" onclick="exportVentasCSV()">↓ Excel</button>
   </div>
-  <div class="table-wrap kv-stack">
+  <div class="table-wrap">
     <table id="vt-table" style="min-width:1020px">
       <thead><tr>
         <th data-p="2" style="width:75px">Fecha</th>
@@ -2594,7 +2597,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
     </div>
     <button class="btn btn-ghost btn-sm" onclick="pgLimpiarFiltros()">× Limpiar</button>
   </div>
-  <div class="table-wrap kv-stack">
+  <div class="table-wrap">
     <table id="pg-table" style="min-width:580px">
       <thead><tr>
         <th data-p="2" style="width:80px">Fecha</th>
@@ -2831,7 +2834,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
     </div>
     <button onclick="document.getElementById('fc-buscar').value='';document.getElementById('fc-accion').value='';renderFlujoTabla()" style="flex-shrink:0;padding:6px 12px;border:1px solid var(--field-border);border-radius:var(--radius-sm);background:var(--card);color:var(--muted2);font-size:11px;cursor:pointer;white-space:nowrap;font-family:inherit">× Limpiar</button>
   </div>
-  <div class="fc-tabla-wrap kv-stack">
+  <div class="fc-tabla-wrap">
     <table class="fc-tabla">
       <thead><tr>
         <th style="width:85px">Fecha</th>
@@ -2890,7 +2893,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
   </div>
 
   <!-- Tabla -->
-  <div class="table-wrap kv-stack">
+  <div class="table-wrap">
     <table style="min-width:850px">
       <thead><tr>
         <th onclick="clSort('codigo')"    style="cursor:pointer">Código <span id="clsort-codigo"></span></th>
@@ -2983,7 +2986,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
     </div>
   </div>
 
-  <div class="table-wrap kv-stack">
+  <div class="table-wrap">
     <table style="min-width:1400px">
       <thead>
         <tr>
@@ -3046,7 +3049,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
     <button class="btn btn-ghost btn-sm" onclick="rsvLimpiarFiltros()">× Limpiar</button>
   </div>
 
-  <div class="table-wrap kv-stack">
+  <div class="table-wrap">
     <table style="min-width:1000px">
       <thead>
         <tr>
@@ -4119,12 +4122,12 @@ function renderOCTab(){
       <td class="td-main" data-role="title">${esc(oc.descripcion||oc.nombre||'—')}</td>
       <td data-role="badge"><span class="badge ${cls} oc-badge-edit"
             onclick="ocMenu(event,'${oc.codigo}','estado')">${txt}<i>▾</i></span></td>
-      <td data-role="hide-m" data-p="3">${uni(oc.tienda)}</td>
-      <td data-role="hide-m" data-p="3">${oc.orden_tienda?`<span class="td-code td-trunc" title="${esc(oc.orden_tienda)}">${esc(oc.orden_tienda)}</span>`:'<span class="td-muted">—</span>'}</td>
-      <td data-role="hide-m" data-p="2">${uni(oc.courier)}</td>
-      <td data-role="hide-m" data-p="2">${trk}</td>
-      <td data-role="hide-m" data-p="3">${uni(oc.grupo)}</td>
-      <td data-role="hide-m" data-p="2">${(()=>{const[c,t]=OC_QC_BADGE[oc.qc||'']||['badge-muted',esc(oc.qc)];
+      <td data-p="3">${uni(oc.tienda)}</td>
+      <td data-p="3">${oc.orden_tienda?`<span class="td-code td-trunc" title="${esc(oc.orden_tienda)}">${esc(oc.orden_tienda)}</span>`:'<span class="td-muted">—</span>'}</td>
+      <td data-p="2">${uni(oc.courier)}</td>
+      <td data-p="2">${trk}</td>
+      <td data-p="3">${uni(oc.grupo)}</td>
+      <td data-p="2">${(()=>{const[c,t]=OC_QC_BADGE[oc.qc||'']||['badge-muted',esc(oc.qc)];
         return `<span class="badge ${c} oc-badge-edit" onclick="ocMenu(event,'${oc.codigo}','qc')">${t}<i>▾</i></span>`;})()}</td>
       <td class="td-amt right" data-role="amount">${(()=>{
         if(!val.usd) return '<span class="td-muted">—</span>';
@@ -4138,7 +4141,7 @@ function renderOCTab(){
               : 'Escrito a mano — esta orden todavía no tiene artículos registrados');
         return `<span title="${tip}">${fmtUsd(val.usd)}${val.calc&&val.sinUsd?'<span class="oc-mas"> *</span>':''}</span>`;
       })()}</td>
-      <td class="td-unit td-trunc" data-role="hide-m" data-p="3" title="${esc(oc.notas||'')}">${esc(oc.notas||'—')}</td>
+      <td class="td-unit td-trunc" data-p="3" title="${esc(oc.notas||'')}">${esc(oc.notas||'—')}</td>
       <td class="right" data-role="actions" style="cursor:pointer;padding:0" onclick="ocVerArticulos('${oc.codigo}')" title="Ver artículos de esta orden">
         <div style="padding:10px 14px">${arts.length
           ? `<span class="badge badge-muted">${arts.length}</span>`
@@ -4603,20 +4606,20 @@ function renderReservas(){
       `<span class="badge badge-red">CANCELADA</span>`;
     const tipoBadge=r.tipo==='STOCK'?`<span class="rsv-tipo-stock">Stock</span>`:`<span class="rsv-tipo-pedido">Pedido</span>`;
     return`<tr class="${r.estado==='COMPLETADA'?'row-dim':''}" onclick="abrirReservaDetalle('${r.codigo_reserva}')" style="cursor:pointer">
-      <td data-role="hide-m" data-p="2"><span class="td-code" style="color:var(--muted2)">${fecha}</span></td>
+      <td data-p="2"><span class="td-code" style="color:var(--muted2)">${fecha}</span></td>
       <td data-role="meta"><span class="td-code">${r.codigo_reserva}</span></td>
-      <td data-role="hide-m" data-p="3">${tipoBadge}</td>
-      <td data-role="hide-m" data-p="3"><span class="td-code">${r.id_cliente?clCodigo(r.id_cliente):'—'}</span></td>
+      <td data-p="3">${tipoBadge}</td>
+      <td data-p="3"><span class="td-code">${r.id_cliente?clCodigo(r.id_cliente):'—'}</span></td>
       <td class="td-main" data-role="title">${r.nombre_cliente||'—'}</td>
-      <td data-role="hide-m" data-p="2">${r.codigo_producto?`<span class="td-code" style="color:var(--purple)">${r.codigo_producto}</span>`:r.tipo==='PEDIDO'&&r.estado==='ACTIVA'?`<span style="display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;color:var(--yellow);background:var(--warning-soft);border:1px solid var(--warning-soft);border-radius:var(--radius-sm);padding:2px 6px">⚠ Vincular</span>`:`<span style="font-size:11px;color:var(--muted2);font-style:italic">—</span>`}</td>
+      <td data-p="2">${r.codigo_producto?`<span class="td-code" style="color:var(--purple)">${r.codigo_producto}</span>`:r.tipo==='PEDIDO'&&r.estado==='ACTIVA'?`<span style="display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;color:var(--yellow);background:var(--warning-soft);border:1px solid var(--warning-soft);border-radius:var(--radius-sm);padding:2px 6px">⚠ Vincular</span>`:`<span style="font-size:11px;color:var(--muted2);font-style:italic">—</span>`}</td>
       <td class="td-trunc" data-role="meta2" style="color:var(--text)">${productoFull}</td>
       <td class="right td-amt" data-role="amount">${fmt(acordado)}</td>
-      <td class="right td-amt" data-role="hide-m">${fmt(r.total_abonado)}</td>
+      <td class="right td-amt">${fmt(r.total_abonado)}</td>
       <td class="right td-amt" data-role="badge2">${rsvPagada(saldo)
         ?`<span class="rsv-saldo-ok">✓ ${fmt(saldo)}</span>`
         :`<span class="rsv-saldo-pend">⏳ ${fmt(saldo)}</span>`}</td>
       <td data-role="badge">${estadoBadge}</td>
-      <td style="text-align:center" data-role="hide-m"><button class="btn-edit-inv" onclick="event.stopPropagation();abrirReservaDetalle('${r.codigo_reserva}')" title="Ver detalle">›</button></td>
+      <td style="text-align:center"><button class="btn-edit-inv" onclick="event.stopPropagation();abrirReservaDetalle('${r.codigo_reserva}')" title="Ver detalle">›</button></td>
     </tr>`;
   });
   pagRender('reservas', _filasReservas, 'rsv-tbody', 12, '<tr><td colspan="12" style="text-align:center;padding:30px;color:var(--muted2)">Sin registros</td></tr>');
@@ -5432,17 +5435,17 @@ function _renderInvPage(){
 
     const rowCls=isCancelado||p.estado==='VENDIDO'?'row-dim':p.estado==='RESERVADO'?'row-rsv':isPendiente?'row-pend':'';
     return`<tr class="${rowCls}">
-      <td class="inv-fecha" data-role="hide-m" data-p="2">${fecha}</td>
+      <td class="inv-fecha" data-p="2">${fecha}</td>
       <td data-role="meta"><span class="inv-cod">${p.codigo_producto}</span></td>
-      <td class="inv-txt" data-role="hide-m">${p.marca||'—'}</td>
+      <td class="inv-txt">${p.marca||'—'}</td>
       <td class="inv-txt" data-role="title">${p.modelo||'—'}</td>
-      <td class="inv-txt" data-role="hide-m" data-p="3">${p.colorway||'—'}</td>
+      <td class="inv-txt" data-p="3">${p.colorway||'—'}</td>
       <td class="inv-talla" data-role="meta2">${p.talla||'—'}</td>
-      <td data-role="hide-m" data-p="2"><span class="${catCls}">${catLabel}</span></td>
-      <td class="right" data-role="hide-m" data-p="3">${pcHtml}</td>
-      <td class="right" data-role="hide-m" data-p="3">${costoHtml}</td>
+      <td data-p="2"><span class="${catCls}">${catLabel}</span></td>
+      <td class="right" data-p="3">${pcHtml}</td>
+      <td class="right" data-p="3">${costoHtml}</td>
       <td class="right" data-role="amount">${finalHtml}</td>
-      <td class="right" data-role="hide-m">${ventaHtml}</td>
+      <td class="right">${ventaHtml}</td>
       <td data-role="badge">${estadoBadge}</td>
       <td data-role="badge2">${pagoBadge}</td>
       <td style="text-align:center" data-role="actions"><button class="btn-edit-inv" onclick="abrirEditarItem('${p.codigo_producto}')" title="Editar">✏</button></td>
@@ -5921,9 +5924,9 @@ function renderClientes(data){
       <td data-role="meta"><span class="td-code">${cod}</span></td>
       <td class="td-main" data-role="title">${nombre}</td>
       <td class="td-unit" data-role="meta2">${c.telefono||'—'}</td>
-      <td data-role="hide-m" data-p="2">${ig}</td>
-      <td class="td-unit" data-role="hide-m" data-p="3">${c.talla_frecuente||'—'}</td>
-      <td class="td-unit" data-role="hide-m" data-p="3">${c.canal_preferido||'—'}</td>
+      <td data-p="2">${ig}</td>
+      <td class="td-unit" data-p="3">${c.talla_frecuente||'—'}</td>
+      <td class="td-unit" data-p="3">${c.canal_preferido||'—'}</td>
       <td data-role="badge" data-p="2">${tipoBadgeHTML(c.tipo)}</td>
       <td class="td-amt right" data-role="amount" style="color:${monto>0?'var(--text)':'var(--muted2)'}">${monto>0?fmt(monto):'—'}</td>
       <td data-role="actions"><button class="btn-edit-inv" title="Editar cliente" onclick="event.stopPropagation();abrirModalCliente(${c.id_cliente})">✏</button></td>
@@ -7636,12 +7639,12 @@ function renderFlujoTabla() {
       <td class="td-fecha" data-role="meta2">${fmtFecha(f.fecha)}</td>
       <td data-role="badge"><span class="fc-accion-badge fc-accion-${accion}">${accion==='PAGO'?'GASTO':accion==='INVERSION'?'INVERSIÓN':accion==='CANCELACION'?'CANCELACIÓN':accion}</span></td>
       <td data-role="meta">${tdCodOp}</td>
-      <td data-role="hide-m">${tdCodRef}</td>
+      <td>${tdCodRef}</td>
       <td class="td-desc" data-role="title">${desc}</td>
       <td class="right" data-role="amount">${ingHtml}</td>
       <td class="right" data-role="badge2">${egrHtml}</td>
-      <td class="right" data-role="hide-m">${pendS}</td>
-      <td class="right" data-role="hide-m">${pendU}</td>
+      <td class="right">${pendS}</td>
+      <td class="right">${pendU}</td>
     </tr>`;
   });
 
@@ -7655,10 +7658,10 @@ function renderFlujoTabla() {
       <td class="td-fecha" data-role="meta2">${fmtFecha(p.fecha_compra)}</td>
       <td data-role="badge"><span class="fc-accion-badge fc-accion-PENDIENTE">PENDIENTE</span></td>
       <td data-role="meta"><span class="td-code">${p.codigo_producto}</span></td>
-      <td class="td-muted" data-role="hide-m">—</td>
+      <td class="td-muted">—</td>
       <td class="td-desc" data-role="title">${desc}</td>
-      <td class="right" data-role="hide-m">—</td>
-      <td class="td-muted" data-role="hide-m">—</td>
+      <td class="right">—</td>
+      <td class="td-muted">—</td>
       <td class="right" data-role="amount">${pendS}</td>
       <td class="right" data-role="badge2">${pendU}</td>
     </tr>`;
@@ -7674,12 +7677,12 @@ function renderFlujoTabla() {
       <td class="td-fecha" data-role="meta2">${fmtFecha(r.fecha)}</td>
       <td data-role="badge"><span class="fc-accion-badge fc-accion-RESERVA">RESERVA</span></td>
       <td data-role="meta"><span class="td-code">${r.codigo_reserva}</span></td>
-      <td data-role="hide-m">${r.codigo_producto?`<span class="td-code">${r.codigo_producto}</span>`:'<span class="td-muted">—</span>'}</td>
+      <td>${r.codigo_producto?`<span class="td-code">${r.codigo_producto}</span>`:'<span class="td-muted">—</span>'}</td>
       <td class="td-desc" data-role="title">${desc}</td>
-      <td class="right" data-role="hide-m"><span class="td-muted">—</span></td>
-      <td class="right" data-role="hide-m"><span class="td-muted">—</span></td>
+      <td class="right"><span class="td-muted">—</span></td>
+      <td class="right"><span class="td-muted">—</span></td>
       <td class="right" data-role="amount"><span class="td-pend">🔒 ${fmt(abonadoHasta(r, fechaFinStr))}</span></td>
-      <td class="right" data-role="hide-m"><span class="td-muted">—</span></td>
+      <td class="right"><span class="td-muted">—</span></td>
     </tr>`;
   });
 
@@ -7915,15 +7918,15 @@ function renderVentas(rows){
     const clId=v.id_cliente?'C-'+String(v.id_cliente).padStart(3,'0'):'—';
     const clNombre=[cl.nombre,cl.apellido].filter(Boolean).join(' ')||'—';
     return`<tr>
-      <td class="td-code" data-role="hide-m" data-p="2">${fecha}</td>
+      <td class="td-code" data-p="2">${fecha}</td>
       <td class="td-code" data-role="meta">${v.codigo_venta}</td>
-      <td class="td-code" data-role="hide-m" data-p="3">${v.codigo_producto||'—'}</td>
+      <td class="td-code" data-p="3">${v.codigo_producto||'—'}</td>
       <td class="td-main td-trunc" data-role="title">${nombre}</td>
       <td class="td-unit" data-role="meta2">${inv.talla||'—'}</td>
-      <td class="td-code" data-role="hide-m" data-p="3">${v.id_cliente?`<span style="color:var(--accent)">${clId}</span>`:'—'}</td>
-      <td class="td-unit" data-role="hide-m" data-p="2">${clNombre}</td>
-      <td data-role="hide-m" data-p="2"><span class="badge ${badge}">${v.canal||'—'}</span></td>
-      <td class="td-amt right" data-role="hide-m" data-p="3">${costoFinal>0?fmt(costoFinal):'—'}</td>
+      <td class="td-code" data-p="3">${v.id_cliente?`<span style="color:var(--accent)">${clId}</span>`:'—'}</td>
+      <td class="td-unit" data-p="2">${clNombre}</td>
+      <td data-p="2"><span class="badge ${badge}">${v.canal||'—'}</span></td>
+      <td class="td-amt right" data-p="3">${costoFinal>0?fmt(costoFinal):'—'}</td>
       <td class="td-amt right" data-role="amount">${fmt(v.precio_venta_soles)}</td>
       <td class="td-amt right" data-role="badge2" style="color:${gc}">${gan>=0?'+':''}${fmt(gan)}</td>
       <td class="right" data-role="badge"><span class="badge ${roi>=0?'badge-green':'badge-red'}">${(roi*100).toFixed(0)}%</span></td>
