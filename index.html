@@ -139,7 +139,7 @@
    se acaba de enfocar, sin esto lo puede dejar justo debajo de la tabbar
    o de la barra del boton de registrar. */
 html{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;overscroll-behavior:none;
-  scroll-padding-bottom:calc(var(--tabbar-h) + 100px + env(safe-area-inset-bottom,0px))}
+  scroll-padding-bottom:calc(var(--tabbar-h) + 40px + env(safe-area-inset-bottom,0px))}
 button,a,[role="button"],input,select,textarea{touch-action:manipulation}
 /* El campo se queda en 12px en mouse (la densidad que ya tenia la app) y solo
    sube a 16px con touch: abajo de eso, iOS hace zoom al tocar un input y no
@@ -212,8 +212,11 @@ nav.kv-topbar{
    de secciones (Clientes, OCs, Analisis) se abre desde el titulo. */
 nav.kv-tabbar{
   position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));
-  z-index:var(--z-topbar);height:calc(var(--tabbar-h) + 4px);border-radius:var(--radius-pill);
+  z-index:var(--z-topbar);height:calc(var(--tabbar-h) + 8px);border-radius:var(--radius-pill);
   display:flex;align-items:center;gap:2px;padding:0 6px;
+  /* El filo iluminado de arriba es lo que da la sensacion de vidrio en todo
+     el design system; a esta barra le faltaba y por eso se veia plana. */
+  box-shadow:var(--shadow-float),inset 0 1px 0 var(--glass-highlight);
   /* Las 8 secciones en una sola fila deslizable. El desvanecido del borde
      derecho es lo unico que avisa que la fila sigue, asi que no se saca. */
   overflow-x:auto;overflow-y:hidden;scrollbar-width:none;overscroll-behavior-x:contain;
@@ -224,13 +227,23 @@ nav.kv-tabbar{
 nav.kv-tabbar::-webkit-scrollbar{display:none}
 .kv-tab{
   flex:none;scroll-snap-align:center;
-  min-width:68px;height:52px;padding:6px 8px;border:0;background:none;border-radius:var(--radius-pill);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
-  font-family:var(--font-sans);font-size:11px;line-height:13px;font-weight:600;color:var(--text-secondary);
-  cursor:pointer;white-space:nowrap;transition:background .2s,color .2s;
+  min-width:70px;height:56px;padding:7px 10px;border:0;background:none;border-radius:var(--radius-pill);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  font-family:var(--font-sans);font-size:11px;line-height:13px;font-weight:600;color:var(--text-tertiary);
+  cursor:pointer;white-space:nowrap;
+  transition:background .22s var(--ease-out),color .22s,box-shadow .22s;
 }
-.kv-tab svg{width:21px;height:21px;flex:none}
-.kv-tab.active{color:var(--accent-ink);background:var(--accent-soft);font-weight:700}
+.kv-tab svg{width:21px;height:21px;flex:none;transition:transform .22s var(--ease-out)}
+/* La seccion activa es una pastilla llena, igual que en la barra de
+   escritorio. Antes era un tinte suave que apenas se despegaba del vidrio. */
+.kv-tab.active{
+  color:var(--on-accent);background:var(--accent);font-weight:700;
+  box-shadow:0 4px 12px color-mix(in srgb,var(--accent) 38%,transparent);
+}
+.kv-tab.active svg{transform:translateY(-1px) scale(1.06)}
+@media(hover:hover) and (pointer:fine){
+  .kv-tab:not(.active):hover{background:var(--tile);color:var(--text)}
+}
 
 /* Menu de secciones, se abre al tocar el titulo de la pagina (movil) */
 @media(min-width:768px){
@@ -1147,10 +1160,11 @@ input[list] { cursor: text; }
   /* Botón de envío siempre al alcance en formularios largos */
   /* 34px de aire y no 20: con 20 quedaban 4px entre esta barra y la tabbar,
    y como las dos llevan sombra de 40px se leian como un solo bloque. */
-  .kv-submit-bar{position:sticky;bottom:calc(var(--tabbar-h) + 34px + env(safe-area-inset-bottom,0px));z-index:5;
-    padding:10px;border-radius:var(--radius-lg);
-    background:var(--glass-strong);-webkit-backdrop-filter:blur(var(--blur-bar)) saturate(180%);backdrop-filter:blur(var(--blur-bar)) saturate(180%);
-    border:1px solid var(--glass-border);box-shadow:var(--shadow-float)}
+  /* El boton de registrar va al final del formulario, no flotando. Antes era
+     una barra sticky pegada encima de la tabbar: dos barras de vidrio
+     superpuestas al pie, y el boton tapando el formulario mientras se
+     completaba. */
+  .kv-submit-bar{padding:0;margin-top:4px;background:none;border:0;box-shadow:none;backdrop-filter:none}
   .kv-submit-bar .btn{width:100%}
   /* Arriba de la tabbar: en movil la barra esta ABAJO y los menus abren
      hacia abajo, asi que con z-index:5 quedaban tapados por ella y el
