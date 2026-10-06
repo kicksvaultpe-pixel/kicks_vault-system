@@ -78,7 +78,12 @@
   --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-10:40px;
   --radius-sm:10px;--radius-md:14px;--radius-lg:22px;--radius-xl:30px;--radius-pill:999px;
   --blur-glass:28px;--blur-bar:24px;--blur-overlay:4px;
-  --bp-tablet:768px;--bp-desktop:1100px;--content-max:1440px;
+  --bp-tablet:768px;--bp-desktop:1100px;
+  /* 1440 dejaba aire a los costados en monitores anchos mientras la tabla
+     de Inventario (14 columnas, ~1630px) scrolleaba. Se sube el tope para
+     que las tablas usen ese espacio. En pantallas mas angostas no cambia
+     nada: manda el ancho de la ventana. */
+  --content-max:1760px;--form-max:1180px;
   --topbar-h:60px;--tabbar-h:64px;--sheet-w:460px;--tap-min:44px;
   --z-topbar:200;--z-dropdown:250;--z-sheet:300;--z-modal:400;--z-toast:500;--z-gate:900;
   --font-sans:Archivo, system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -249,7 +254,11 @@ nav.kv-tabbar{
 
 /* LAYOUT */
 /* max-width y padding alineados con .kv-topbar (content-max + 24px de aire) */
-.view{display:none;padding:20px 24px;max-width:var(--content-max);margin:0 auto}@media(max-width:600px){.view{padding:12px}}
+.view{display:none;padding:20px 24px;max-width:var(--content-max);margin:0 auto}
+/* Los formularios NO se estiran con el resto: un campo de texto de 1700px
+   de ancho es incomodo de leer y de completar. Las tablas y las tarjetas de
+   indicadores si aprovechan todo el ancho. */
+#view-registro .card,#view-registro .info-box,#view-registro .tipo-selector{max-width:var(--form-max)}@media(max-width:600px){.view{padding:12px}}
 .view.active{display:block;animation:fadeIn .25s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .page-title{font-family:var(--font-sans);font-weight:800;font-size:28px;line-height:34px;letter-spacing:-.015em;margin-bottom:24px;display:flex;align-items:center;gap:10px;color:var(--text)}
@@ -432,9 +441,9 @@ td.right{font-weight:600;color:var(--text)}
      y el resto sigue disponible scrolleando. */
   .table-wrap [data-p="2"],.table-wrap [data-p="3"],
   .fc-tabla-wrap [data-p="2"],.fc-tabla-wrap [data-p="3"]{display:none}
-  /* Celdas mas compactas para que entren mas columnas sin scroll */
-  th{padding:10px 10px;font-size:11px}
-  td{padding:11px 10px;font-size:13px;line-height:18px}
+  /* Solo mas compactas: el tamano de letra ya es el mismo que en escritorio */
+  th{padding:10px 8px}
+  td{padding:11px 8px}
   .table-wrap table,.fc-tabla table{min-width:0}
   .td-trunc{max-width:150px}
   /* La columna que identifica la fila queda fija mientras el resto scrollea.
@@ -666,12 +675,12 @@ input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6;cursor:pointer}
 input[list] { cursor: text; }
 
 /* COSTO TABLA BUSQUEDA */
-.cs-tabla-wrap{max-height:220px;overflow-y:auto;overflow-x:auto;border:1px solid var(--border2);border-radius:var(--radius-sm)}
+.cs-tabla-wrap{max-height:280px;overflow-y:auto;overflow-x:auto;border:1px solid var(--border2);border-radius:var(--radius-sm)}
 .cs-tabla{width:100%;border-collapse:collapse}
-.cs-tabla thead th{padding:7px 10px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary);background:var(--glass-strong);-webkit-backdrop-filter:blur(var(--blur-bar));backdrop-filter:blur(var(--blur-bar));position:sticky;top:0}
+.cs-tabla thead th{padding:7px 10px;font-size:11px;line-height:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary);background:var(--glass-strong);-webkit-backdrop-filter:blur(var(--blur-bar));backdrop-filter:blur(var(--blur-bar));position:sticky;top:0}
 .cs-tabla tbody tr{border-top:1px solid var(--separator);cursor:pointer;transition:background .1s}@media (hover:hover) and (pointer:fine){
 .cs-tabla tbody tr:hover{background:var(--accent-soft)}}
-.cs-tabla tbody td{padding:8px 10px;font-size:11px;color:var(--text)}
+.cs-tabla tbody td{padding:8px 10px;font-size:13px;line-height:18px;font-weight:500;color:var(--text)}
 .cs-item{display:grid;grid-template-columns:1fr 180px 110px 32px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--separator)}
 .cs-item:last-child{border-bottom:none}
 .cs-item-info{font-size:12px}
@@ -722,9 +731,9 @@ input[list] { cursor: text; }
 .oc-arts-wrap::-webkit-scrollbar-thumb:hover{background:var(--muted2)}}
 .oc-arts-wrap thead th{position:sticky;top:0;z-index:2;background:var(--glass-strong);-webkit-backdrop-filter:blur(var(--blur-bar));backdrop-filter:blur(var(--blur-bar));
   box-shadow:inset 0 -1px 0 var(--separator)}
-.oc-arts-tabla{width:100%;min-width:560px;table-layout:fixed;background:transparent}
-.oc-arts-tabla th{padding:7px 9px;font-size:11px;letter-spacing:.08em}
-.oc-arts-tabla td{padding:8px 9px;font-size:11px;overflow:hidden}
+.oc-arts-tabla{width:100%;min-width:680px;table-layout:fixed;font-size:13px;line-height:18px;font-weight:500;background:transparent}
+.oc-arts-tabla th{padding:7px 9px;font-size:11px;line-height:14px;font-weight:700;letter-spacing:.08em}
+.oc-arts-tabla td{padding:8px 9px;font-size:13px;line-height:18px;font-weight:500;overflow:hidden}
 .oc-arts-tabla .badge{max-width:100%;overflow:hidden;text-overflow:ellipsis}
 .oc-arts-tabla tr:first-child td{border-top:none}
 .oc-arts-nom{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:0;padding-right:18px}
@@ -882,23 +891,23 @@ input[list] { cursor: text; }
   /* Sin alto maximo, igual que .table-wrap: una sola barra de scroll, la de
      la pagina, en vez de una adentro de la tabla y otra afuera. */
   overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
-.fc-tabla{width:100%;border-collapse:separate;border-spacing:0;font-size:14px;font-family:inherit;min-width:820px}
+.fc-tabla{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;font-family:inherit;min-width:820px}
 .fc-tabla thead th{position:sticky;top:0;z-index:2;
   background:var(--glass-strong);-webkit-backdrop-filter:blur(var(--blur-bar));backdrop-filter:blur(var(--blur-bar));
   padding:12px 14px;font-size:11px;line-height:14px;font-family:inherit;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary);white-space:nowrap;border-bottom:1px solid var(--separator);text-align:left}
 .fc-tabla thead th.right{text-align:right}
-.fc-tabla tbody td{border-top:1px solid var(--separator);transition:background .15s;padding:12px 14px;color:var(--text-secondary);vertical-align:middle;white-space:nowrap;font-size:14px;line-height:20px;font-family:inherit}
+.fc-tabla tbody td{border-top:1px solid var(--separator);transition:background .15s;padding:9px 10px;color:var(--text-secondary);vertical-align:middle;white-space:nowrap;font-size:13px;line-height:18px;font-family:inherit}
 .fc-tabla tbody tr:first-child td{border-top:0}@media (hover:hover) and (pointer:fine){
 .fc-tabla tbody tr:hover td{background:var(--accent-soft)}}
 .fc-tabla tbody tr.row-pend td:first-child{box-shadow:inset 3px 0 0 var(--warning)}
-.fc-tabla .td-fecha{color:var(--text-tertiary);font-size:13px;font-weight:600;font-family:inherit;font-variant-numeric:tabular-nums}
-.fc-tabla .td-desc{max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;font-weight:600;color:var(--text);font-family:inherit}
-.fc-tabla .td-code{color:var(--accent-ink);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
-.fc-tabla .td-ing{font-family:inherit;font-size:14px;font-weight:600;color:var(--green);text-align:right;font-variant-numeric:tabular-nums}
-.fc-tabla .td-egr{font-family:inherit;font-size:14px;font-weight:600;color:var(--red);text-align:right;font-variant-numeric:tabular-nums}
-.fc-tabla .td-egr-usd{font-family:inherit;font-size:14px;font-weight:600;color:var(--orange);text-align:right;font-variant-numeric:tabular-nums}
-.fc-tabla .td-pend{font-family:inherit;font-size:14px;font-weight:600;color:var(--yellow);text-align:right;font-variant-numeric:tabular-nums}
-.fc-tabla .td-reserva{color:var(--purple);font-size:14px;font-weight:600}
+.fc-tabla .td-fecha{color:var(--text-tertiary);font-size:13px;line-height:18px;font-weight:600;font-family:inherit;font-variant-numeric:tabular-nums}
+.fc-tabla .td-desc{max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;line-height:18px;font-weight:500;color:var(--text);font-family:inherit}
+.fc-tabla .td-code{color:var(--accent-ink);font-size:13px;line-height:18px;font-weight:600;font-variant-numeric:tabular-nums}
+.fc-tabla .td-ing{font-family:inherit;font-size:13px;line-height:18px;font-weight:600;color:var(--green);text-align:right;font-variant-numeric:tabular-nums}
+.fc-tabla .td-egr{font-family:inherit;font-size:13px;line-height:18px;font-weight:600;color:var(--red);text-align:right;font-variant-numeric:tabular-nums}
+.fc-tabla .td-egr-usd{font-family:inherit;font-size:13px;line-height:18px;font-weight:600;color:var(--orange);text-align:right;font-variant-numeric:tabular-nums}
+.fc-tabla .td-pend{font-family:inherit;font-size:13px;line-height:18px;font-weight:600;color:var(--yellow);text-align:right;font-variant-numeric:tabular-nums}
+.fc-tabla .td-reserva{color:var(--purple);font-size:13px;line-height:18px;font-weight:600}
 .fc-tabla .td-muted{color:var(--text-tertiary);text-align:right}
 .fc-accion-badge{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 10px;border:0;border-radius:var(--radius-pill);font-size:12px;line-height:16px;font-weight:600;white-space:nowrap}
 .fc-accion-COMPRA{background:var(--negative-soft);color:var(--negative)}
@@ -1012,7 +1021,7 @@ input[list] { cursor: text; }
 .inv-monto.accent{color:var(--accent)}
 .inv-monto.orange{color:var(--orange)}
 .inv-monto.purple{color:var(--purple)}
-.inv-dash{color:var(--muted2);font-size:11px;font-family:inherit}
+.inv-dash{color:var(--muted2);font-size:13px;line-height:18px;font-weight:500;font-family:inherit}
 
 /* ── Inventario Edit Panel ── */
 .btn-edit-inv{background:none;border:1px solid var(--field-border);color:var(--muted2);width:28px;height:28px;border-radius:var(--radius-sm);cursor:pointer;font-size:13px;display:inline-flex;align-items:center;justify-content:center;transition:border-color .15s,color .15s,background .15s;padding:0}@media (hover:hover) and (pointer:fine){
@@ -1195,11 +1204,15 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
 .cl-ms-lbl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted2);margin-bottom:3px;font-family:var(--font-sans)}
 .cl-ms-val{font-family:var(--font-sans);font-weight:700;font-size:17px;line-height:22px;color:var(--text)}
 .cl-ms-val.green{color:var(--green)}.cl-ms-val.accent{color:var(--accent)}
-.cl-hist{width:100%;border-collapse:collapse;font-size:11px;font-family:var(--font-sans),inherit}
-.cl-hist th{padding:6px 8px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted2);border-bottom:1px solid var(--separator)}
+/* El panel mide 460px: a 13px la tabla puede no entrar. Su contenedor en el
+   marcado ya trae overflow-x:auto, asi que scrollea en vez de apretar las
+   columnas; el min-width evita que se compriman hasta romperse. */
+.cl-hist{width:100%;border-collapse:collapse;font-size:13px;line-height:18px;font-weight:500;font-family:var(--font-sans),inherit;min-width:340px}
+.cl-hist th{padding:6px 8px;text-align:left;font-size:11px;line-height:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted2);border-bottom:1px solid var(--separator)}
 .cl-hist td{padding:7px 8px;border-top:1px solid var(--separator);color:var(--text);font-family:var(--font-sans),inherit}
 .cl-hist td:first-child{border-top:none}
-.cl-hist .td-green{color:var(--green);font-weight:700}.cl-hist .td-accent{color:var(--accent);font-size:11px;font-weight:600}
+.cl-hist .td-green{color:var(--green);font-weight:600}
+.cl-hist .td-accent{color:var(--accent-ink);font-size:13px;line-height:18px;font-weight:600}
 .cl-panel-foot{padding:14px 20px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--separator);display:flex;gap:8px;flex-shrink:0}
 .cl-panel-foot .btn{flex:1}
 /* Type badges */
