@@ -9,29 +9,113 @@
      (barra inferior, toast) resuelven siempre a su valor de respaldo (0), aunque
      el codigo este bien escrito -- el navegador nunca deja pintar bajo el notch. -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
-<!-- Coincide con var(--card), el fondo real del nav -- no con el azul de marca. -->
-<meta name="theme-color" media="(prefers-color-scheme: light)" content="#FFFFFF">
-<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0E1525">
+<!-- Coincide con var(--bg), el lienzo detras del vidrio -- no con el azul de marca.
+     theme-color no admite alpha, por eso usa el fondo solido y no --glass/--card. -->
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#EEF2F8">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#070B14">
 <meta name="color-scheme" content="light dark">
 <title>KICKS VAULT</title>
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{
-  --bg:#EEF2F8;--surface:#F5F7FB;--card:#FFFFFF;--border:#D5DFEE;--border2:#C0CEDF;
-  --accent:#2563EB;--accent2:var(--neg);--green:#16A34A;--red:#DC2626;--neg:#DC2626;
-  --yellow:#B45309;--orange:#C2410C;--purple:#6D28D9;
-  --text:#1A1D2E;--muted:#3D4B6A;--muted2:#5E6E94;--blue:#2563EB;--radius:8px;
+/* ══════════════════════════════════════════════════════════════
+   KICKS VAULT v2 — tokens (vidrio estilo iOS 26)
+   Ver design/tokens.css y design/README.md para la referencia completa.
+   ══════════════════════════════════════════════════════════════ */
+:root,[data-theme="light"]{
+  --bg:#eef2f8;--blob-a:#2563eb;--blob-b:#38bdf8;--blob-c:#fdba74;
+  --glass:#ffffff9e;--glass-strong:#ffffffc7;--glass-border:#ffffffbf;--glass-highlight:#fffffff2;
+  --tile:#ffffff99;--field:#ffffffd9;--field-border:#7a8aab;--separator:#1a1d2e14;
+  --text:#1a1d2e;--text-secondary:#3d4b6a;--text-tertiary:#56668c;--placeholder:#6e7da0;
+  --accent:#2563eb;--accent-pressed:#1d4ed8;--accent-ink:#1d4ed8;--accent-soft:#2563eb1f;--on-accent:#ffffff;
+  --positive:#15703a;--positive-soft:#15703a1f;--on-positive:#ffffff;
+  --negative:#b91c1c;--negative-soft:#b91c1c1a;--on-negative:#ffffff;
+  --warning:#a04a07;--warning-soft:#a04a071f;--on-warning:#ffffff;
+  --reserve:#6d28d9;--reserve-soft:#6d28d91a;--on-reserve:#ffffff;
+  --cost:#0e6e88;--cost-soft:#0e6e881a;--on-cost:#ffffff;
+  --invest:#475569;--invest-soft:#4755691a;--on-invest:#ffffff;
+  --overlay:#0f172a59;--focus-ring:var(--accent);
+  --shadow-glass:0 10px 30px rgba(26,40,80,0.08), inset 0 1px 0 rgba(255,255,255,0.95);
+  --shadow-float:0 16px 40px rgba(26,40,80,0.16), inset 0 1px 0 rgba(255,255,255,0.95);
+  --shadow-sheet:0 -8px 40px rgba(26,40,80,0.18);
+
+  /* Compatibilidad -- nombres viejos de index.html apuntando a los tokens v2,
+     para que el HTML/JS que todavia arma estilos con var(--card), var(--muted),
+     etc. siga funcionando igual mientras se migra componente por componente
+     en las siguientes fases. Se va retirando a medida que cada uso se
+     reemplaza por el nombre nuevo directamente. */
+  --surface:var(--tile);--card:var(--glass);--border:var(--glass-border);--border2:var(--field-border);
+  --muted:var(--text-secondary);--muted2:var(--text-tertiary);
+  --green:var(--positive);--red:var(--negative);--neg:var(--negative);--accent2:var(--negative);
+  --yellow:var(--warning);--orange:var(--warning);--purple:var(--reserve);--blue:var(--accent);
+  --shadow:var(--shadow-glass);
   --ease-out:cubic-bezier(0.23,1,0.32,1); /* skill emil-design-eng: mas potencia que el ease-out por defecto del navegador */
-  --shadow:0 2px 8px rgba(37,99,235,.07);
 }
 [data-theme="dark"]{
-  --bg:#070B14;--surface:#0A0F1E;--card:#0E1525;--border:rgba(79,134,247,.18);--border2:rgba(79,134,247,.3);
-  --accent:#4F86F7;--neg:#F87171;--green:#22C55E;--red:#F87171;
-  --yellow:#FBBF24;--orange:#FB923C;--purple:#A78BFA;
-  --text:#EEF2FF;--muted:#7090C0;--muted2:#677FAF;--blue:#4F86F7;--radius:8px;
-  --shadow:0 2px 14px rgba(0,0,0,.4);
+  --bg:#070b14;--blob-a:#2f5fd0;--blob-b:#0e7490;--blob-c:#7c2d12;
+  --glass:#121a2c9e;--glass-strong:#0e1525d1;--glass-border:#ffffff1f;--glass-highlight:#ffffff14;
+  --tile:#ffffff0f;--field:#ffffff0d;--field-border:#5a74a6;--separator:#ffffff14;
+  --text:#eef2ff;--text-secondary:#a3b3d1;--text-tertiary:#7b92c0;--placeholder:#6a80ad;
+  --accent:#4f86f7;--accent-pressed:#3b74ec;--accent-ink:#7aa4fa;--accent-soft:#4f86f729;--on-accent:#050a14;
+  --positive:#34d399;--positive-soft:#34d39929;--on-positive:#04140c;
+  --negative:#f87171;--negative-soft:#f8717129;--on-negative:#1a0505;
+  --warning:#fbbf24;--warning-soft:#fbbf2424;--on-warning:#1a1000;
+  --reserve:#b39dfb;--reserve-soft:#b39dfb26;--on-reserve:#0e0624;
+  --cost:#22d3ee;--cost-soft:#22d3ee24;--on-cost:#03161b;
+  --invest:#cbd5e1;--invest-soft:#cbd5e11f;--on-invest:#0b1222;
+  --overlay:#000000a6;--focus-ring:var(--accent);
+  --shadow-glass:0 10px 30px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.08);
+  --shadow-float:0 16px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
+  --shadow-sheet:0 -8px 40px rgba(0,0,0,0.7);
+  --shadow:var(--shadow-glass);
 }
+:root{
+  --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-10:40px;
+  --radius-sm:10px;--radius-md:14px;--radius-lg:22px;--radius-xl:30px;--radius-pill:999px;
+  --blur-glass:28px;--blur-bar:24px;--blur-overlay:4px;
+  --bp-tablet:768px;--bp-desktop:1100px;--content-max:1440px;
+  --topbar-h:60px;--tabbar-h:64px;--sheet-w:460px;--tap-min:44px;
+  --z-topbar:200;--z-dropdown:250;--z-sheet:300;--z-modal:400;--z-toast:500;--z-gate:900;
+  --font-sans:Archivo, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-brand:"Archivo Black", Archivo, system-ui, sans-serif;
+}
+
+/* Lienzo: 3 manchas difusas fijas detras de todo, una sola vez en <body
+   class="kv-canvas">. Mismo criterio que .kv-stage de los previews de
+   componentes, pero fixed en vez de absolute porque cubre toda la app. */
+.kv-canvas{position:relative;isolation:isolate}
+.kv-canvas::before{
+  content:"";position:fixed;inset:-10%;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(38% 34% at 8% 4%,  color-mix(in srgb,var(--blob-a) 38%,transparent),transparent 70%),
+    radial-gradient(34% 30% at 96% 46%,color-mix(in srgb,var(--blob-b) 32%,transparent),transparent 70%),
+    radial-gradient(32% 30% at 6% 98%, color-mix(in srgb,var(--blob-c) 34%,transparent),transparent 70%);
+}
+
+/* Material vidrio -- mismos selectores que ya usa index.html (.card,
+   .stat-card, .ind-card, .fc-bubble, .table-wrap, .fc-tabla-wrap,
+   .tc-widget, .an-urgente-card), asi el cambio de superficie solida a
+   vidrio no necesita tocar el HTML/JS que las genera. */
+.card,.stat-card,.ind-card,.fc-bubble,.table-wrap,.fc-tabla-wrap,.tc-widget,.an-urgente-card{
+  background:var(--glass);
+  -webkit-backdrop-filter:blur(var(--blur-glass)) saturate(180%);
+          backdrop-filter:blur(var(--blur-glass)) saturate(180%);
+  border:1px solid var(--glass-border);
+  box-shadow:var(--shadow-glass);
+}
+.kv-glass-strong,nav,.modal,.combo-list,#toast{
+  background:var(--glass-strong);
+  -webkit-backdrop-filter:blur(var(--blur-bar)) saturate(180%);
+          backdrop-filter:blur(var(--blur-bar)) saturate(180%);
+}
+/* Sin soporte de backdrop-filter: vidrio solido legible en vez de transparente */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .card,.stat-card,.ind-card,.fc-bubble,.table-wrap,.fc-tabla-wrap,.tc-widget,.an-urgente-card,
+  .kv-glass-strong,nav,.modal,.combo-list,#toast{
+    background:color-mix(in srgb,var(--glass-strong) 100%,var(--bg));
+  }
+}
+
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 /* Base tactil movil (skill mobile-native). html, no body: asi cubre TODO,
    incluidos los <span onclick=...> sueltos que usa la app en vez de <button>
@@ -994,7 +1078,7 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
 .nav-tab:focus-visible,.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 </style>
 </head>
-<body>
+<body class="kv-canvas">
 
 <!-- Puerta de entrada. Viene visible desde el HTML a proposito, no la muestra el
      JS: si esperara a que el script decida, se alcanzaria a ver el tablero con
@@ -4471,9 +4555,9 @@ function updateThemeBtn(){
   // que las dos etiquetas <meta theme-color media="prefers-color-scheme:..">
   // no alcanzan solas -- si el celular esta en claro y el usuario forzo oscuro
   // aca adentro, la barra de estado se quedaria mostrando el color equivocado.
-  // Se pisan las dos con el color real, coincidiendo con var(--card) del nav.
+  // Se pisan las dos con el color real, coincidiendo con var(--bg) del lienzo.
   document.querySelectorAll('meta[name="theme-color"]')
-    .forEach(m=>m.setAttribute('content',isDark?'#0E1525':'#FFFFFF'));
+    .forEach(m=>m.setAttribute('content',isDark?'#070B14':'#EEF2F8'));
 }
 document.addEventListener('DOMContentLoaded',updateThemeBtn);
 
