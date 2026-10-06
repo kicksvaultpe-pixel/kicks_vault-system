@@ -572,7 +572,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6;cursor:pointer}
 /* El campo con el desplegable abierto se eleva sobre los de abajo. Hace falta
    porque .card crea contexto de apilamiento (tiene backdrop-filter) y ahi el
    z-index del menu solo ordena dentro de la tarjeta. */
-.field:focus-within,.combo-wrap:focus-within,.cl-search-wrap:focus-within{z-index:4}
+.field:focus-within,.combo-wrap:focus-within{z-index:4}
 /* Y la tarjeta entera se eleva sobre las siguientes: cada .card es su propio
    contexto de apilamiento (tiene backdrop-filter), asi que el menu no puede
    salir de ella por mas z-index que se le ponga adentro. */
@@ -580,10 +580,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6;cursor:pointer}
    en z-index auto), NO con --z-dropdown. Ese token vale 250 y la barra de
    navegacion vale 200, asi que la tarjeta entera se montaba sobre la nav. */
 .card:has(.combo-list.open),
-.card:has(.cl-search-drop.open),
-.form-panel:has(.combo-list.open),
-.form-panel:has(.cl-search-drop.open){position:relative;z-index:5}
-.combo-wrap input,.cl-search-input {
+.form-panel:has(.combo-list.open){position:relative;z-index:5}
+.combo-wrap input {
   width: 100%;
   background: var(--field);
   border: 1px solid var(--field-border);
@@ -593,23 +591,23 @@ input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6;cursor:pointer}
   font-family: var(--font-sans); font-size: 14px; line-height: 20px; font-weight: 500;
   outline: none; transition: border-color .15s, box-shadow .15s;
 }
-.combo-wrap input::placeholder,.cl-search-input::placeholder { color: var(--placeholder); font-weight: 400; }
+.combo-wrap input::placeholder { color: var(--placeholder); font-weight: 400; }
 .combo-wrap input[readonly] { cursor: pointer; }
-.combo-arrow,.cl-search-arrow {
+.combo-arrow {
   position: absolute; right: 11px; top: 50%;
   transform: translateY(-50%);
   pointer-events: all; color: var(--muted2); font-size: 10px;
   cursor: pointer; padding: 4px; user-select: none; transition: color .15s;
 }
-@media (hover:hover) and (pointer:fine){.combo-arrow:hover,.cl-search-arrow:hover{color:var(--text)}}
-.combo-list,.cl-search-drop {
+@media (hover:hover) and (pointer:fine){.combo-arrow:hover{color:var(--text)}}
+.combo-list {
   position: absolute; top: calc(100% + 4px); left: 0; right: 0;
   background: var(--menu);
   border: 1px solid var(--separator); border-radius: var(--radius-md);
   z-index: var(--z-dropdown); max-height: min(320px,50dvh); overflow-y: auto; overscroll-behavior: contain;
   display: none; box-shadow: var(--shadow-float); padding: 4px;
 }
-.combo-list.open,.cl-search-drop.open { display: block; }
+.combo-list.open { display: block; }
 /* Sin lineas divisorias entre opciones: el resaltado del foco ya separa */
 /* Opcion de ENTIDAD (producto, cliente, OC): tres zonas.
      codigo        nombre                      dato de apoyo
@@ -621,10 +619,13 @@ input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6;cursor:pointer}
 .combo-opt-ent{display:flex;align-items:center;gap:10px}
 .combo-cod{flex:none;min-width:72px;font-size:13px;line-height:18px;font-weight:600;
   color:var(--accent-ink);font-variant-numeric:tabular-nums}
-.combo-nom{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+.combo-nom{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   font-size:14px;line-height:20px;font-weight:500;color:inherit}
-.combo-extra{flex:none;font-size:13px;line-height:18px;font-weight:500;color:var(--text-tertiary);
-  text-align:right;white-space:nowrap}
+/* margin-right:auto -> el dato de apoyo queda PEGADO al nombre y el espacio
+   sobrante se va a la derecha. Antes iba al final de la fila y la talla
+   quedaba lejisimos del producto al que pertenece. */
+.combo-extra{flex:none;margin-right:auto;font-size:13px;line-height:18px;font-weight:500;
+  color:var(--text-tertiary);white-space:nowrap}
 .combo-opt.focused .combo-cod,.combo-opt.focused .combo-extra{color:inherit}
 @media (hover:hover) and (pointer:fine){
   .combo-opt:hover .combo-cod,.combo-opt:hover .combo-extra{color:inherit}
@@ -633,7 +634,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6;cursor:pointer}
    nada cuando no habia coincidencias. */
 .combo-vacio{padding:12px;text-align:center;font-size:13px;line-height:18px;
   font-weight:500;color:var(--text-tertiary)}
-.combo-opt,.cl-si,.cl-si-empty,.cl-si-new {
+.combo-opt {
   padding: 10px 12px; font-size: 14px; line-height: 20px; cursor: pointer;
   border-radius: var(--radius-sm); color: var(--text);
   transition: background .1s;
@@ -1131,7 +1132,7 @@ input[list] { cursor: text; }
 /* ═══════════════════════════════════════════════════════
    VISUAL REFINEMENTS
 ═══════════════════════════════════════════════════════ */
-.field input:focus,.field select:focus,.field textarea:focus,.search-box:focus,.filter-select:focus,.combo-wrap input:focus,.cl-search-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.field input:focus,.field select:focus,.field textarea:focus,.search-box:focus,.filter-select:focus,.combo-wrap input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
 .btn:active:not(:disabled){transform:translateY(0) scale(.97)!important;transition:transform 120ms var(--ease-out)}
 .modal-overlay.open{animation:modalIn .2s cubic-bezier(.34,1.56,.64,1)}
 @keyframes modalIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
@@ -1139,15 +1140,15 @@ input[list] { cursor: text; }
 /* Barra de scroll de los menus flotantes: el riel cuadrado se recortaba
    contra la esquina redondeada y se veia mal. Riel transparente y pulgar
    dibujado sobre su propio padding, asi flota adentro sin tocar el borde. */
-.combo-list,.cl-search-drop,.kv-section-menu,.oc-cand-list,.oc-menu{
+.combo-list,.kv-section-menu,.oc-cand-list,.oc-menu{
   scrollbar-width:thin;scrollbar-color:var(--field-border) transparent}
-.combo-list::-webkit-scrollbar,.cl-search-drop::-webkit-scrollbar,
+.combo-list::-webkit-scrollbar,
 .kv-section-menu::-webkit-scrollbar,.oc-cand-list::-webkit-scrollbar,
 .oc-menu::-webkit-scrollbar{width:10px;background:transparent}
-.combo-list::-webkit-scrollbar-track,.cl-search-drop::-webkit-scrollbar-track,
+.combo-list::-webkit-scrollbar-track,
 .kv-section-menu::-webkit-scrollbar-track,.oc-cand-list::-webkit-scrollbar-track,
 .oc-menu::-webkit-scrollbar-track{background:transparent}
-.combo-list::-webkit-scrollbar-thumb,.cl-search-drop::-webkit-scrollbar-thumb,
+.combo-list::-webkit-scrollbar-thumb,
 .kv-section-menu::-webkit-scrollbar-thumb,.oc-cand-list::-webkit-scrollbar-thumb,
 .oc-menu::-webkit-scrollbar-thumb{
   background:var(--field-border);border-radius:var(--radius-pill);
@@ -1160,16 +1161,6 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
 .cl-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:16px;margin-bottom:20px}
 @media(max-width:600px){.cl-stats{grid-template-columns:1fr 1fr}}
 /* Client search */
-.cl-search-wrap{position:relative}
-.cl-si{display:flex;align-items:center;gap:8px}
-.cl-si.focused{background:var(--accent-soft);color:var(--accent-ink)}
-@media (hover:hover) and (pointer:fine){.cl-si:hover{background:var(--accent-soft);color:var(--accent-ink)}}
-.cl-si-code{font-size:13px;line-height:18px;font-weight:600;color:var(--accent-ink);flex-shrink:0;font-family:var(--font-sans);font-variant-numeric:tabular-nums}
-.cl-si-name{font-size:14px;line-height:20px;font-weight:500;color:inherit;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--font-sans)}
-.cl-si-talla{font-size:13px;line-height:18px;font-weight:500;color:var(--muted2);flex-shrink:0}
-.cl-si-empty{font-size:14px;line-height:20px;font-weight:500;color:var(--muted2);text-align:center;font-family:var(--font-sans)}
-.cl-si-new{font-size:14px;line-height:20px;font-weight:600;color:var(--accent-ink);cursor:pointer;margin-top:4px;border-top:1px solid var(--separator);border-radius:0 0 var(--radius-sm) var(--radius-sm);display:flex;align-items:center;gap:6px;font-family:var(--font-sans)}
-@media (hover:hover) and (pointer:fine){.cl-si-new:hover{background:var(--accent-soft)}}
 /* Selected badge */
 .cl-sel{display:none;align-items:center;gap:8px;background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);border-radius:var(--radius-sm);padding:8px 12px;margin-top:6px}
 .cl-sel.show{display:flex}
@@ -1831,11 +1822,14 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
           <label>Cliente *
             <button type="button" onclick="abrirClRapido('rv')" style="margin-left:8px;border:none;background:none;color:var(--accent);font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font-sans);padding:0">+ Nuevo</button>
           </label>
-          <div class="cl-search-wrap" id="rv-cl-wrap">
-            <input class="cl-search-input" id="rv-cl-input" placeholder="Buscar por nombre o código…" autocomplete="off"
-              oninput="clSearch('rv')" onfocus="clSearchFocus('rv')" onblur="clSearchBlur('rv')" onkeydown="clSearchKey(event,'rv')">
-            <span class="cl-search-arrow" onmousedown="event.preventDefault();document.getElementById('rv-cl-input').focus()">▼</span>
-            <div class="cl-search-drop" id="rv-cl-drop"></div>
+          <div class="combo-wrap">
+            <input type="text" id="rv-cl-input" placeholder="Buscar cliente por nombre o código…" autocomplete="off"
+              oninput="comboFilter('rv-cl-input','cl-rv-cl')"
+              onfocus="comboOpen('rv-cl-input','cl-rv-cl')"
+              onblur="comboBlur('cl-rv-cl')"
+              onkeydown="comboKey(event,'rv-cl-input','cl-rv-cl')">
+            <span class="combo-arrow">▼</span>
+            <div class="combo-list" id="cl-rv-cl"></div>
           </div>
           <div class="cl-sel" id="rv-cl-sel">
             <div class="cl-sel-info">
@@ -3562,6 +3556,7 @@ function comboPick(inputId, listId, val) {
   if (inputId === 'cp-oc-select') ocExistenteChange();
   if (inputId === 'vt-producto') onPickVtProducto();
   if (inputId === 'vt-cl-input') onPickVtCliente();
+  if (inputId === 'rv-cl-input') onPickRvCliente();
   if (inputId === 'vt-f-canal') loadVentas();
   if (inputId === 'clf-tipo') filterClientes();
   if (inputId === 'oc-f-tipo') renderOCTab();
@@ -5758,9 +5753,11 @@ function fillClienteCombos(){
   const items=sorted.map(c=>{
     const nombre=[c.nombre,c.apellido].filter(Boolean).join(' ');
     const cod=clCodigo(c.id_cliente);
-    return {cod, nom:nombre, extra:c.talla_frecuente||'', v:`${cod} · ${nombre}`};
+    return {cod, nom:nombre, v:`${cod} · ${nombre}`};
   });
+  // Venta y Reserva comparten la misma lista.
   comboSetData('cl-vt-cl', items);
+  comboSetData('cl-rv-cl', items);
 }
 
 function tipoBadgeHTML(tipo){
@@ -5996,64 +5993,23 @@ async function guardarCliente(){
 // reinicia al borrar, asi que C-021 tiene id 37. Tomar el numero del codigo
 // como id elegia a otro cliente —C-021 traia a C-005— o a ninguno cuando ese
 // id ni existia. Hay que buscar por codigo_cliente.
-function onPickVtCliente(){
-  const raw=document.getElementById('vt-cl-input').value;
+function onPickCliente(ctx){
+  const raw=(document.getElementById(ctx+'-cl-input')||{}).value||'';
   const code=(raw.match(/(C-\d+)/)||[])[1]||'';
   if(!code)return;
-  const c=(clientesCache||[]).find(x=>x.codigo_cliente===code);
+  // Por clCodigo() y no por el campo crudo: un cliente sin codigo_cliente
+  // guardado usa el derivado del id, y buscando por el campo no aparecia.
+  const c=(clientesCache||[]).find(x=>clCodigo(x.id_cliente)===code);
   if(!c){ toast('No encuentro el cliente '+code,'warn'); return; }
-  clSelect('vt',c.id_cliente);
+  clSelect(ctx,c.id_cliente);
 }
+function onPickVtCliente(){ onPickCliente('vt'); }
+function onPickRvCliente(){ onPickCliente('rv'); }
 
-function clSearch(ctx){
-  const q=document.getElementById(`${ctx}-cl-input`).value.toLowerCase().trim();
-  const drop=document.getElementById(`${ctx}-cl-drop`);
-  // Sin texto se muestran los ultimos clientes, no una lista vacia: asi se
-  // comporta igual que los combos de Registro, que abren con todo al tocarlos.
-  const matches=(q
-    ? clientesCache.filter(c=>{
-        const txt=[c.nombre,c.apellido,c.instagram,c.telefono,clCodigo(c.id_cliente)].filter(Boolean).join(' ').toLowerCase();
-        return txt.includes(q);
-      })
-    : clientesCache.slice()
-  ).slice(0,7);
-  const items=matches.map(c=>{
-    const nombre=[c.nombre,c.apellido].filter(Boolean).join(' ');
-    return`<div class="cl-si" onmousedown="clSelect('${ctx}',${c.id_cliente})">
-      <span class="cl-si-code">${clCodigo(c.id_cliente)}</span>
-      <span class="cl-si-name">${nombre}</span>
-      ${c.talla_frecuente?`<span class="cl-si-talla">${c.talla_frecuente}</span>`:''}
-    </div>`;
-  }).join('');
-  drop.innerHTML=(matches.length?items:`<div class="cl-si-empty">${q?`Sin resultados para "${q}"`:'Todavia no hay clientes'}</div>`)+
-    `<div class="cl-si-new" onmousedown="abrirClRapido('${ctx}')">＋ Nuevo cliente</div>`;
-  drop.classList.add('open');
-}
-function clSearchFocus(ctx){clSearch(ctx);}
-function clSearchBlur(ctx){setTimeout(()=>document.getElementById(`${ctx}-cl-drop`)?.classList.remove('open'),200);}
-function clSearchKey(e,ctx){
-  const drop=document.getElementById(`${ctx}-cl-drop`);
-  if(!drop)return;
-  const items=drop.querySelectorAll('.cl-si');
-  const foco=drop.querySelector('.cl-si.focused');
-  if(e.key==='ArrowDown'){
-    e.preventDefault();
-    if(!drop.classList.contains('open')){clSearch(ctx);return;}
-    const sig=foco?foco.nextElementSibling:items[0];
-    if(foco)foco.classList.remove('focused');
-    if(sig&&sig.classList.contains('cl-si')){sig.classList.add('focused');sig.scrollIntoView({block:'nearest'});}
-  }else if(e.key==='ArrowUp'){
-    e.preventDefault();
-    const ant=foco?foco.previousElementSibling:items[items.length-1];
-    if(foco)foco.classList.remove('focused');
-    if(ant&&ant.classList.contains('cl-si')){ant.classList.add('focused');ant.scrollIntoView({block:'nearest'});}
-  }else if(e.key==='Enter'&&foco){
-    e.preventDefault();
-    foco.dispatchEvent(new MouseEvent('mousedown',{bubbles:true}));
-  }else if(e.key==='Escape'){
-    drop.classList.remove('open');
-  }
-}
+// El buscador propio de clientes (clSearch/clSearchFocus/clSearchBlur/
+// clSearchKey + las clases .cl-search-* y .cl-si*) se retiro: Reserva era su
+// unico usuario y ahora usa el mismo combobox que Venta. Eran dos
+// implementaciones de lo mismo, que es justo lo que las volvia a separar.
 
 function clSelect(ctx,id){
   clSelectedId[ctx]=id;
