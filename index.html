@@ -259,7 +259,8 @@ nav.kv-tabbar{
    de ancho es incomodo de leer y de completar. Las tablas y las tarjetas de
    indicadores si aprovechan todo el ancho. */
 #view-registro .page-hd-row,#view-registro .card,#view-registro .info-box,
-#view-registro .tipo-selector,#view-registro .form-panel>.pago-toggle{max-width:var(--form-max)}@media(max-width:600px){.view{padding:12px}}
+#view-registro .tipo-selector,#view-registro .form-panel>.pago-toggle{
+  max-width:var(--form-max);margin-inline:auto}@media(max-width:600px){.view{padding:12px}}
 .view.active{display:block;animation:fadeIn .25s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .page-title{font-family:var(--font-sans);font-weight:800;font-size:28px;line-height:34px;letter-spacing:-.015em;margin-bottom:24px;display:flex;align-items:center;gap:10px;color:var(--text)}
@@ -1020,7 +1021,14 @@ input[list] { cursor: text; }
 .cat-zap,.cat-ropa,.cat-acc,.cat-otros{
   display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:var(--radius-pill);
   font-family:var(--font-sans);font-size:12px;line-height:16px;font-weight:600;white-space:nowrap;
-  background:transparent;color:var(--text-secondary);border:1px solid var(--separator)}
+  border:0}
+/* Un tinte por categoria: antes las 4 se veian identicas y la columna no
+   decia nada de un vistazo. Se usan tokens de rol distintos, no colores
+   nuevos, asi acompanan al tema solos. */
+.cat-zap  {background:var(--accent-soft);  color:var(--accent-ink)}
+.cat-ropa {background:var(--reserve-soft); color:var(--reserve)}
+.cat-acc  {background:var(--cost-soft);    color:var(--cost)}
+.cat-otros{background:var(--tile);         color:var(--text-tertiary)}
 .inv-fecha{font-size:13px;line-height:18px;font-weight:600;color:var(--muted2);font-family:inherit;font-variant-numeric:tabular-nums}
 .inv-cod{font-size:13px;line-height:18px;font-weight:600;color:var(--accent-ink);font-family:inherit;font-variant-numeric:tabular-nums}
 .inv-txt{font-size:13px;line-height:18px;font-weight:500;color:var(--text);font-family:inherit}
@@ -5841,7 +5849,7 @@ function renderClientes(data){
       <td class="td-unit" data-role="hide-m" data-p="3">${c.canal_preferido||'—'}</td>
       <td data-role="badge" data-p="2">${tipoBadgeHTML(c.tipo)}</td>
       <td class="td-amt right" data-role="amount" style="color:${monto>0?'var(--accent)':'var(--muted2)'}">${monto>0?fmt(monto):'—'}</td>
-      <td data-role="actions"><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();abrirModalCliente(${c.id_cliente})" style="padding:4px 10px">✏</button></td>
+      <td data-role="actions"><button class="btn-edit-inv" title="Editar cliente" onclick="event.stopPropagation();abrirModalCliente(${c.id_cliente})">✏</button></td>
     </tr>`;
   });
   pagRender('clientes', _filasClientes, 'cl-tbody', 9, '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--muted2)">Sin registros</td></tr>');
