@@ -3795,7 +3795,8 @@ function ocValorUsd(oc, arts){
 // sentido marcarla para pagar.
 function ocPendienteUsd(oc){
   return (inventarioCache||[])
-    .filter(p=>p.orden_compra===oc.codigo && p.pago_estado==='PENDIENTE' && p.moneda==='USD')
+    .filter(p=>p.orden_compra===oc.codigo && p.pago_estado==='PENDIENTE' && p.moneda==='USD'
+             && p.estado!=='CANCELADO')
     .reduce((t,p)=>t+parseFloat(p.precio_compra_usd||0),0);
 }
 
@@ -3879,7 +3880,8 @@ function ocProrratear(items,montoSolesTotal){
 function ocProductosPendientesDe(codigosOC){
   const set=new Set(codigosOC);
   return (inventarioCache||[])
-    .filter(p=>set.has(p.orden_compra) && p.pago_estado==='PENDIENTE' && p.moneda==='USD' && parseFloat(p.precio_compra_usd||0)>0)
+    .filter(p=>set.has(p.orden_compra) && p.pago_estado==='PENDIENTE' && p.moneda==='USD'
+             && p.estado!=='CANCELADO' && parseFloat(p.precio_compra_usd||0)>0)
     .map(p=>({
       codigo:p.codigo_producto, oc:p.orden_compra,
       usd:parseFloat(p.precio_compra_usd||0),
@@ -7361,7 +7363,8 @@ async function loadFlujo() {
   const ganancias = gananciaVentas + resultadoCancel - egrGastos;
 
   // PENDIENTES — créditos sin pagar (todos los meses)
-  const pendMes = inventarioCache.filter(p => p.pago_estado === 'PENDIENTE');
+  // Un producto cancelado deja de ser deuda, igual que en deudaCreditos().
+  const pendMes = inventarioCache.filter(p => p.pago_estado === 'PENDIENTE' && p.estado !== 'CANCELADO');
 
   // El split stock/pedido y los montos por moneda los calcula deudaCreditos(),
   // compartida con el tab Inventario (ver mas abajo, bloque "POR PAGAR").
@@ -7581,6 +7584,7 @@ function renderFlujoTabla() {
   const codigosEnFlujo = new Set(flujoCache.filter(f=>(f.tipo||'').toUpperCase()==='PENDIENTE').map(f=>f.referencia_id));
   const pendRows = (!accionActiva||accionActiva==='PENDIENTE') ? inventarioCache.filter(p =>
     p.pago_estado === 'PENDIENTE' &&
+    p.estado !== 'CANCELADO' &&
     !codigosEnFlujo.has(p.codigo_producto)
   ) : [];
 
