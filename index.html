@@ -428,10 +428,10 @@ tbody tr.row-dim{opacity:.5}
 /* Primera columna fija al hacer scroll horizontal (se activa con la clase) */
 .kv-sticky-col{position:sticky;left:0;z-index:1;background:var(--glass-strong)}
 thead .kv-sticky-col{z-index:3}
-.td-main{font-size:13px;line-height:18px;font-weight:600;color:var(--text);font-family:inherit}
-.td-code{font-size:13px;line-height:18px;font-weight:600;color:var(--accent-ink);font-family:inherit;font-variant-numeric:tabular-nums}
+.td-main,.inv-txt{font-size:13px;line-height:18px;font-weight:600;color:var(--text);font-family:inherit}
+.td-code,.inv-cod{font-size:13px;line-height:18px;font-weight:600;color:var(--accent-ink);font-family:inherit;font-variant-numeric:tabular-nums}
 .td-amt{font-size:13px;line-height:18px;font-weight:600;color:var(--text);text-align:right;font-family:inherit;font-variant-numeric:tabular-nums}
-.td-unit{font-size:13px;line-height:18px;font-weight:500;color:var(--text-tertiary);font-family:inherit}
+.td-unit,.inv-talla{font-size:13px;line-height:18px;font-weight:500;color:var(--text-tertiary);font-family:inherit}
 .right{text-align:right}
 td.right{font-weight:600;color:var(--text)}
 .td-trunc{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -921,7 +921,11 @@ input[list] { cursor: text; }
 .fc-tabla .td-egr-usd{font-family:inherit;font-size:13px;line-height:18px;font-weight:600;color:var(--orange);text-align:right;font-variant-numeric:tabular-nums}
 .fc-tabla .td-pend{font-family:inherit;font-size:13px;line-height:18px;font-weight:600;color:var(--yellow);text-align:right;font-variant-numeric:tabular-nums}
 .fc-tabla .td-reserva{color:var(--purple);font-size:13px;line-height:18px;font-weight:600}
-.fc-tabla .td-muted{color:var(--text-tertiary);text-align:right}
+.fc-tabla /* Sin text-align fijo: el guion de una celda vacia se alinea como su
+   columna. Antes se iba a la derecha tambien en las de texto, asi que en
+   la columna de codigo quedaba desalineado de los codigos. */
+.td-muted{color:var(--text-tertiary)}
+.right .td-muted,td.right>.td-muted{text-align:right}
 .fc-accion-badge{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 10px;border:0;border-radius:var(--radius-pill);font-size:12px;line-height:16px;font-weight:600;white-space:nowrap}
 .fc-accion-COMPRA{background:var(--negative-soft);color:var(--negative)}
 .fc-accion-VENTA{background:var(--positive-soft);color:var(--positive)}
@@ -1036,7 +1040,7 @@ input[list] { cursor: text; }
 .inv-fecha{font-size:13px;line-height:18px;font-weight:600;color:var(--muted2);font-family:inherit;font-variant-numeric:tabular-nums}
 .inv-cod{font-size:13px;line-height:18px;font-weight:600;color:var(--accent-ink);font-family:inherit;font-variant-numeric:tabular-nums}
 .inv-txt{font-size:13px;line-height:18px;font-weight:500;color:var(--text);font-family:inherit}
-.inv-talla{font-size:13px;line-height:18px;font-weight:600;color:var(--text);font-family:inherit;text-align:center}
+.inv-talla{font-size:13px;line-height:18px;font-weight:500;color:var(--text-tertiary);font-family:inherit;text-align:center}
 .inv-monto{font-size:13px;line-height:18px;font-weight:600;font-family:inherit;font-variant-numeric:tabular-nums}
 .inv-monto.accent{color:var(--accent)}
 .inv-monto.orange{color:var(--orange)}
@@ -4066,7 +4070,7 @@ function renderOCTab(){
       <td style="text-align:center" data-role="badge2">${pendUsd>0
         ?`<input type="checkbox" class="oc-chk-pago" ${ocPagoSel.has(oc.codigo)?'checked':''} onchange="ocToggleSelPago('${oc.codigo}',this.checked)" title="Pendiente: ${fmtUsd(pendUsd)}">`
         :'<span class="td-muted">—</span>'}</td>
-      <td data-role="meta"><span class="td-code oc-cod" style="color:var(--accent)"
+      <td data-role="meta"><span class="td-code oc-cod"
             title="Ver los productos de esta orden"
             onclick="ocVerArticulos('${oc.codigo}')">${oc.codigo}</span></td>
       <td class="td-fecha" data-role="meta2" data-p="2">${fmtFecha(oc.fecha)}</td>
@@ -4548,14 +4552,14 @@ function renderReservas(){
     const tipoBadge=r.tipo==='STOCK'?`<span class="rsv-tipo-stock">Stock</span>`:`<span class="rsv-tipo-pedido">Pedido</span>`;
     return`<tr class="${r.estado==='COMPLETADA'?'row-dim':''}" onclick="abrirReservaDetalle('${r.codigo_reserva}')" style="cursor:pointer">
       <td data-role="hide-m" data-p="2"><span class="td-code" style="color:var(--muted2)">${fecha}</span></td>
-      <td data-role="meta"><span class="td-code" style="color:var(--accent)">${r.codigo_reserva}</span></td>
+      <td data-role="meta"><span class="td-code">${r.codigo_reserva}</span></td>
       <td data-role="hide-m" data-p="3">${tipoBadge}</td>
       <td data-role="hide-m" data-p="3"><span class="td-code">${r.id_cliente?clCodigo(r.id_cliente):'—'}</span></td>
       <td class="td-main" data-role="title">${r.nombre_cliente||'—'}</td>
       <td data-role="hide-m" data-p="2">${r.codigo_producto?`<span class="td-code" style="color:var(--purple)">${r.codigo_producto}</span>`:r.tipo==='PEDIDO'&&r.estado==='ACTIVA'?`<span style="display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;color:var(--yellow);background:var(--warning-soft);border:1px solid var(--warning-soft);border-radius:var(--radius-sm);padding:2px 6px">⚠ Vincular</span>`:`<span style="font-size:11px;color:var(--muted2);font-style:italic">—</span>`}</td>
       <td class="td-trunc" data-role="meta2" style="color:var(--text)">${productoFull}</td>
       <td class="right td-amt" data-role="amount">${fmt(acordado)}</td>
-      <td class="right td-amt" data-role="hide-m" style="color:var(--green)">${fmt(r.total_abonado)}</td>
+      <td class="right td-amt" data-role="hide-m">${fmt(r.total_abonado)}</td>
       <td class="right td-amt" data-role="badge2">${saldo<=0
         ?`<span class="rsv-saldo-ok">✓ ${fmt(saldo)}</span>`
         :`<span class="rsv-saldo-pend">⏳ ${fmt(saldo)}</span>`}</td>
@@ -4685,7 +4689,7 @@ function abrirModalCompletarRsv(){
     <div style="display:flex;flex-direction:column;gap:7px">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <span style="color:var(--muted2)">Reserva</span>
-        <span class="td-code" style="color:var(--accent)">${r.codigo_reserva}</span>
+        <span class="td-code">${r.codigo_reserva}</span>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center">
         <span style="color:var(--muted2)">Producto</span>
@@ -4792,7 +4796,7 @@ function abrirModalCancelarRsv(){
     <div style="display:flex;flex-direction:column;gap:6px">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <span style="color:var(--muted2)">Reserva</span>
-        <span class="td-code" style="color:var(--accent)">${r.codigo_reserva}</span>
+        <span class="td-code">${r.codigo_reserva}</span>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center">
         <span style="color:var(--muted2)">Producto</span>
@@ -5845,14 +5849,14 @@ function renderClientes(data){
     const ig=c.instagram?`<span style="color:var(--accent)">${c.instagram}</span>`:'—';
     const monto=clMontoMap[c.id_cliente]||0;
     return`<tr onclick="abrirPerfil(${c.id_cliente})">
-      <td data-role="meta"><span class="td-code" style="color:var(--accent)">${cod}</span></td>
+      <td data-role="meta"><span class="td-code">${cod}</span></td>
       <td class="td-main" data-role="title">${nombre}</td>
       <td class="td-unit" data-role="meta2">${c.telefono||'—'}</td>
       <td data-role="hide-m" data-p="2">${ig}</td>
       <td class="td-unit" data-role="hide-m" data-p="3">${c.talla_frecuente||'—'}</td>
       <td class="td-unit" data-role="hide-m" data-p="3">${c.canal_preferido||'—'}</td>
       <td data-role="badge" data-p="2">${tipoBadgeHTML(c.tipo)}</td>
-      <td class="td-amt right" data-role="amount" style="color:${monto>0?'var(--accent)':'var(--muted2)'}">${monto>0?fmt(monto):'—'}</td>
+      <td class="td-amt right" data-role="amount" style="color:${monto>0?'var(--text)':'var(--muted2)'}">${monto>0?fmt(monto):'—'}</td>
       <td data-role="actions"><button class="btn-edit-inv" title="Editar cliente" onclick="event.stopPropagation();abrirModalCliente(${c.id_cliente})">✏</button></td>
     </tr>`;
   });
@@ -7550,7 +7554,7 @@ function renderFlujoTabla() {
     const tdCodRef=codRef!=='—'?`<span class="td-code">${codRef}</span>`:'<span class="td-muted">—</span>';
     return `<tr class="${trClass}">
       <td class="td-fecha" data-role="meta2">${fmtFecha(f.fecha)}</td>
-      <td data-role="badge"><span class="fc-accion-badge fc-accion-${accion}">${accion==='PAGO'?'GASTO':accion==='INVERSION'?'INVERSIÓN':accion}</span></td>
+      <td data-role="badge"><span class="fc-accion-badge fc-accion-${accion}">${accion==='PAGO'?'GASTO':accion==='INVERSION'?'INVERSIÓN':accion==='CANCELACION'?'CANCELACIÓN':accion}</span></td>
       <td data-role="meta">${tdCodOp}</td>
       <td data-role="hide-m">${tdCodRef}</td>
       <td class="td-desc" data-role="title">${desc}</td>
@@ -7830,15 +7834,15 @@ function renderVentas(rows){
     const clNombre=[cl.nombre,cl.apellido].filter(Boolean).join(' ')||'—';
     return`<tr>
       <td class="td-code" data-role="hide-m" data-p="2">${fecha}</td>
-      <td class="td-code" data-role="meta" style="color:var(--accent)">${v.codigo_venta}</td>
+      <td class="td-code" data-role="meta">${v.codigo_venta}</td>
       <td class="td-code" data-role="hide-m" data-p="3">${v.codigo_producto||'—'}</td>
       <td class="td-main td-trunc" data-role="title">${nombre}</td>
       <td class="td-unit" data-role="meta2">${inv.talla||'—'}</td>
       <td class="td-code" data-role="hide-m" data-p="3">${v.id_cliente?`<span style="color:var(--accent)">${clId}</span>`:'—'}</td>
       <td class="td-unit" data-role="hide-m" data-p="2">${clNombre}</td>
       <td data-role="hide-m" data-p="2"><span class="badge ${badge}">${v.canal||'—'}</span></td>
-      <td class="td-amt right" data-role="hide-m" data-p="3" style="color:var(--muted2)">${costoFinal>0?fmt(costoFinal):'—'}</td>
-      <td class="td-amt right" data-role="amount" style="color:var(--accent)">${fmt(v.precio_venta_soles)}</td>
+      <td class="td-amt right" data-role="hide-m" data-p="3">${costoFinal>0?fmt(costoFinal):'—'}</td>
+      <td class="td-amt right" data-role="amount">${fmt(v.precio_venta_soles)}</td>
       <td class="td-amt right" data-role="badge2" style="color:${gc}">${gan>=0?'+':''}${fmt(gan)}</td>
       <td class="right" data-role="badge"><span class="badge ${roi>=0?'badge-green':'badge-red'}">${(roi*100).toFixed(0)}%</span></td>
     </tr>`;
@@ -7907,7 +7911,7 @@ function renderPagos(rows){
     const fecha=p.fecha?p.fecha.slice(8,10)+'/'+p.fecha.slice(5,7)+'/'+p.fecha.slice(2,4):'—';
     return`<tr>
       <td class="td-code" data-role="meta2" data-p="2">${fecha}</td>
-      <td class="td-code" data-role="meta" style="color:var(--accent)">${p.codigo_pago||'—'}</td>
+      <td class="td-code" data-role="meta">${p.codigo_pago||'—'}</td>
       <td class="td-main td-trunc" data-role="title">${p.concepto||'—'}</td>
       <td data-role="badge"><span class="badge ${badge}">${cat}</span></td>
       <td class="td-amt right" data-role="amount" style="color:var(--${esAjuste?'green':'red'})">${esAjuste?'+':'−'} ${fmt(Math.abs(raw))}</td>
