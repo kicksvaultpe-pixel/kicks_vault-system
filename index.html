@@ -258,8 +258,12 @@ nav.kv-tabbar{
 /* Los formularios NO se estiran con el resto: un campo de texto de 1700px
    de ancho es incomodo de leer y de completar. Las tablas y las tarjetas de
    indicadores si aprovechan todo el ancho. */
+/* .kv-submit-bar solo tenia reglas en movil, asi que en escritorio era un
+   div suelto a todo el ancho y el boton quedaba pegado a la izquierda,
+   desalineado de las tarjetas centradas. */
 #view-registro .page-hd-row,#view-registro .card,#view-registro .info-box,
-#view-registro .tipo-selector,#view-registro .form-panel>.pago-toggle{
+#view-registro .tipo-selector,#view-registro .form-panel>.pago-toggle,
+#view-registro .kv-submit-bar{
   max-width:var(--form-max);margin-inline:auto}@media(max-width:600px){.view{padding:12px}}
 .view.active{display:block;animation:fadeIn .25s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
