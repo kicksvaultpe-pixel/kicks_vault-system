@@ -1703,6 +1703,16 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
               style="color:var(--accent);font-family:var(--font-sans);font-weight:800">
           </div>
         </div>
+        <div class="form-grid g2" style="margin-bottom:10px">
+          <div class="field">
+            <label>Tienda</label>
+            <input type="text" id="cp-oc-tienda" placeholder="StockX, GOAT, SNKRS…" autocomplete="off">
+          </div>
+          <div class="field">
+            <label>N&ordm; de orden de la tienda</label>
+            <input type="text" id="cp-oc-orden" placeholder="El que te da el proveedor" autocomplete="off">
+          </div>
+        </div>
         <div class="form-grid g2">
           <div class="field">
             <label>Nombre de OC</label>
@@ -6466,12 +6476,21 @@ async function registrarCompra(){
         // no viaja. Antes mandaba 'PENDIENTE', un estado que dejo de existir al
         // pasar las OC al seguimiento de importacion, y el insert moria con
         // "violates check constraint ordenes_compra_estado_check".
-        const{error:eOC}=await db.from('ordenes_compra').upsert({
-          codigo:ocCod, tipo:ocTipo, nombre:ocNombre,
-          descripcion:ocNombre,
-          fecha:document.getElementById('cp-fecha').value,
-          estado:'COMPRADO', notas:ocNotas
-        },{onConflict:'codigo'});
+        const ocTienda=document.getElementById('cp-oc-tienda')?.value.trim()||null;
+        const ocOrden =document.getElementById('cp-oc-orden')?.value.trim()||null;
+        // Solo se manda lo que trae valor. Este upsert corre una vez POR
+        // PRODUCTO: mandar los campos vacios le borraba la descripcion a la
+        // OC al cargar el segundo producto con el nombre ya limpio.
+        const ocPayload={codigo:ocCod, tipo:ocTipo,
+          fecha:document.getElementById('cp-fecha').value};
+        if(ocNombre){ ocPayload.nombre=ocNombre; ocPayload.descripcion=ocNombre; }
+        if(ocNotas)  ocPayload.notas=ocNotas;
+        if(ocTienda) ocPayload.tienda=ocTienda;
+        if(ocOrden)  ocPayload.orden_tienda=ocOrden;
+        // El estado SOLO al crearla. Si la OC ya existe y la moviste a "En
+        // transito", cargarle otro producto la devolvia a "Comprado".
+        if(!(ocCache||[]).some(o=>o.codigo===ocCod)) ocPayload.estado='COMPRADO';
+        const{error:eOC}=await db.from('ordenes_compra').upsert(ocPayload,{onConflict:'codigo'});
         if(eOC) throw eOC;
         ordenCompra=ocCod;
         // Switch to existente mode so next product joins same OC
@@ -6496,7 +6515,7 @@ async function registrarCompra(){
       precio_compra_soles:pc||0,
       precio_final:pc||0,
       precio_venta_sugerido:pventa,
-      factura:document.getElementById('cp-factura').value.trim()||null,
+      factura:(esCredito?document.getElementById('cp-factura-credito'):document.getElementById('cp-factura')).value.trim()||null,
       descripcion_factura:esCredito?document.getElementById('cp-desc-factura-credito').value.trim()||null:document.getElementById('cp-desc-factura').value.trim()||null,
       observaciones:(esCredito?document.getElementById('cp-comentarios-credito'):document.getElementById('cp-comentarios')).value.trim()||null,
       estado:'DISPONIBLE',
@@ -6508,7 +6527,7 @@ async function registrarCompra(){
     if(error)throw error;
     // flujo_caja lo maneja trigger after_compra en Supabase
     toast(`✓ ${cod} registrado${esCredito?' — ● PENDIENTE':''}`, 'ok');
-    ['cp-marca','cp-modelo','cp-colorway','cp-talla','cp-usd','cp-soles','cp-pventa','cp-factura','cp-desc-factura','cp-comentarios','cp-soles-contado','cp-pventa-credito','cp-factura-credito','cp-desc-factura-credito','cp-comentarios-credito','cp-oc-nombre','cp-oc-notas'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    ['cp-marca','cp-modelo','cp-colorway','cp-talla','cp-usd','cp-soles','cp-pventa','cp-factura','cp-desc-factura','cp-comentarios','cp-soles-contado','cp-pventa-credito','cp-factura-credito','cp-desc-factura-credito','cp-comentarios-credito','cp-oc-nombre','cp-oc-tienda','cp-oc-orden','cp-oc-notas'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     document.getElementById('cp-tc').value=document.getElementById('tc-global').value||'3.70';
     await loadOCs();
     if(ocModo==='nueva'){ pregenOC(); }
