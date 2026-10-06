@@ -301,8 +301,8 @@ nav.kv-tabbar{
 .info-purple{background:rgba(109,40,217,.08);border:1px solid rgba(109,40,217,.25);color:var(--purple)}
 .info-green{background:rgba(22,163,74,.08);border:1px solid rgba(22,163,74,.25);color:var(--green)}
 .info-red{background:rgba(220,38,38,.07);border:1px solid rgba(220,38,38,.22);color:var(--red)}
-tbody tr.row-rsv{background:rgba(109,40,217,.03)}
-tbody tr.row-rsv:hover td{background:rgba(109,40,217,.06)}
+/* Reservado: misma franja lateral que row-pend, en color reserva */
+tbody tr.row-rsv td:first-child{box-shadow:inset 3px 0 0 var(--reserve)}
 
 /* BUTTONS */
 .btn{min-height:44px;padding:11px 24px;border:none;border-radius:var(--radius-md);font-family:var(--font-sans);font-size:15px;font-weight:700;letter-spacing:0;cursor:pointer;transition:filter .2s,transform .2s,background .2s,color .2s;display:inline-flex;align-items:center;justify-content:center;gap:7px}
@@ -354,25 +354,81 @@ button:active,[role="button"]:active{
 .search-box:focus{border-color:var(--accent)}
 .filter-select{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-md);padding:10px 14px;color:var(--text);font-family:var(--font-sans);font-size:14px;outline:none;cursor:pointer;transition:border .15s}
 .filter-select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.07)}
-.table-wrap{overflow-x:auto;border-radius:var(--radius-lg);border:1px solid var(--border);box-shadow:var(--shadow);background:var(--card)}
-table{width:100%;border-collapse:collapse;font-size:11px;font-family:inherit}
+/* Alto acotado al viewport: la cabecera queda fija, el pie de paginacion
+   tambien, y la pagina ya no "salta" al cambiar de mes o de filtro.
+   El material vidrio lo pone la regla de .card,.table-wrap,... de arriba. */
+.table-wrap{
+  overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+  border-radius:var(--radius-lg);
+  max-height:calc(100dvh - var(--topbar-h) - 190px);
+}
+table{width:100%;border-collapse:separate;border-spacing:0;font-size:14px;font-family:inherit}
 .table-wrap table{min-width:1200px}
-thead tr{background:var(--surface)}
 thead tr:first-child td{border-top:none}
-th{padding:9px 14px;text-align:left;font-size:11px;line-height:14px;font-family:inherit;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted2);white-space:nowrap;border-bottom:1px solid var(--border)}@media (hover:hover) and (pointer:fine){
-th[onclick]:hover{color:var(--accent);background:rgba(37,99,235,.04);cursor:pointer}}
-td{padding:10px 14px;border-top:1px solid var(--border);vertical-align:middle;white-space:nowrap;color:var(--text);font-size:14px;line-height:20px;font-family:inherit}
-tbody tr:last-child td{border-bottom:none}
-tbody tr:hover td{background:rgba(37,99,235,.06)}
-tbody tr.row-pend{opacity:.9;background:rgba(180,83,9,.04)}
-tbody tr.row-pend:hover td{background:rgba(180,83,9,.07)}
-tbody tr.row-dim{opacity:.45}
-.td-main{font-size:12px;font-weight:600;color:var(--text);font-family:inherit}
-.td-code{font-size:11px;font-weight:600;color:var(--muted2);font-family:inherit;font-variant-numeric:tabular-nums}
-.td-amt{font-size:11px;font-weight:700;font-family:inherit;font-variant-numeric:tabular-nums}
-.td-unit{font-size:11px;color:var(--muted2);font-family:inherit}
+th{position:sticky;top:0;z-index:2;
+  background:var(--glass-strong);-webkit-backdrop-filter:blur(var(--blur-bar));backdrop-filter:blur(var(--blur-bar));
+  padding:12px 14px;text-align:left;font-size:11px;line-height:14px;font-family:inherit;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary);white-space:nowrap;border-bottom:1px solid var(--separator)}@media (hover:hover) and (pointer:fine){
+th[onclick]:hover{color:var(--accent-ink);cursor:pointer}}
+td{padding:12px 14px;border-top:1px solid var(--separator);vertical-align:middle;white-space:nowrap;color:var(--text-secondary);font-size:14px;line-height:20px;font-family:inherit}
+tbody tr:first-child td{border-top:0}
+tbody tr:hover td{background:var(--accent-soft)}
+/* Pendiente de pago: franja lateral en vez de tinte + opacidad en toda la fila */
+tbody tr.row-pend td:first-child{box-shadow:inset 3px 0 0 var(--warning)}
+tbody tr.row-dim{opacity:.5}
+/* Primera columna fija al hacer scroll horizontal (se activa con la clase) */
+.kv-sticky-col{position:sticky;left:0;z-index:1;background:var(--glass-strong)}
+thead .kv-sticky-col{z-index:3}
+.td-main{font-size:14px;line-height:20px;font-weight:600;color:var(--text);font-family:inherit}
+.td-code{font-size:13px;font-weight:600;color:var(--accent-ink);font-family:inherit;font-variant-numeric:tabular-nums}
+.td-amt{font-size:14px;font-weight:600;color:var(--text);text-align:right;font-family:inherit;font-variant-numeric:tabular-nums}
+.td-unit{font-size:13px;color:var(--text-tertiary);font-family:inherit}
 .right{text-align:right}
-.td-trunc{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+td.right{font-weight:600;color:var(--text)}
+.td-trunc{max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Prioridad de columnas: p3 se oculta < 1280, p2 se oculta < 1100 */
+@media(max-width:1279px){.table-wrap [data-p="3"]{display:none}}
+@media(max-width:1099px){.table-wrap [data-p="2"]{display:none}}
+
+/* ---------- Movil: cada fila pasa a ser una tarjeta ----------
+   Requiere data-role en cada celda. El grid tiene 4 filas:
+     1  title           | amount
+     2  meta            | badge
+     3  meta2           | badge2
+     4  actions (ancho completo)
+   Todo lo que no entra en la tarjeta va con data-role="hide-m". */
+@media(max-width:767px){
+  .table-wrap.kv-stack,.fc-tabla-wrap.kv-stack{
+    max-height:none!important;overflow:visible;background:transparent;border:0;box-shadow:none;
+    -webkit-backdrop-filter:none;backdrop-filter:none}
+  .kv-stack table,.kv-stack thead,.kv-stack tbody,.kv-stack tr,.kv-stack td{display:block}
+  .kv-stack table{min-width:0!important}
+  .kv-stack thead{display:none}
+  .kv-stack tbody{display:flex;flex-direction:column;gap:10px}
+  .kv-stack tbody tr{
+    display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:14px 16px;border-radius:var(--radius-lg);
+    background:var(--glass);-webkit-backdrop-filter:blur(var(--blur-glass)) saturate(180%);backdrop-filter:blur(var(--blur-glass)) saturate(180%);
+    border:1px solid var(--glass-border);box-shadow:var(--shadow-glass)}
+  .kv-stack td{padding:0;border:0;white-space:normal;background:none!important;max-width:none}
+  .kv-stack td[data-role="title"]{grid-column:1;grid-row:1;font-size:15px;line-height:20px;font-weight:700;color:var(--text)}
+  .kv-stack td[data-role="amount"]{grid-column:2;grid-row:1;text-align:right;font-size:15px;font-weight:700}
+  .kv-stack td[data-role="meta"]{grid-column:1;grid-row:2;font-size:13px;line-height:18px;color:var(--text-tertiary)}
+  .kv-stack td[data-role="badge"]{grid-column:2;grid-row:2;justify-self:end}
+  .kv-stack td[data-role="meta2"]{grid-column:1;grid-row:3;font-size:13px;line-height:18px;color:var(--text-tertiary)}
+  .kv-stack td[data-role="badge2"]{grid-column:2;grid-row:3;justify-self:end;margin-top:4px}
+  /* Sin grid-column fijo: si la fila trae una sola celda de acciones ocupa
+     la primera columna, y si trae dos se reparten en las dos columnas. */
+  .kv-stack td[data-role="actions"]{grid-row:4;display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:10px}
+  .kv-stack td[data-role="actions"] .btn,.kv-stack td[data-role="actions"] .oc-edit-btn{min-height:40px}
+  .kv-stack td[data-role="hide-m"]{display:none}
+  /* Filas de servicio: paginacion, vacio, spinner y colspan -> ancho completo */
+  .kv-stack tbody tr:has(td[colspan]){display:block;padding:0;background:none;border:0;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+  .kv-stack tbody tr:has(td[colspan]) td{display:block;padding:14px 0}
+  .kv-stack tr.row-pend,.kv-stack tr.row-rsv{box-shadow:var(--shadow-glass),inset 3px 0 0 var(--warning)}
+  .kv-stack tr.row-rsv{box-shadow:var(--shadow-glass),inset 3px 0 0 var(--reserve)}
+  .kv-stack tr.row-pend td:first-child,.kv-stack tr.row-rsv td:first-child{box-shadow:none}
+  .kv-stack .pag-row td{position:static;padding:0!important}
+  .kv-stack .pag-bar{border-radius:var(--radius-pill);border:1px solid var(--glass-border);margin-top:10px}
+}
 
 /* BADGES */
 .badge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:var(--radius-pill);font-size:11px;font-family:'Archivo',sans-serif;font-weight:700;letter-spacing:.5px;white-space:nowrap}
@@ -592,12 +648,14 @@ input[list] { cursor: text; }
   background:var(--card);color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;
   font-family:inherit;transition:border-color .15s,color .15s}@media (hover:hover) and (pointer:fine){
 .oc-edit-btn:hover{border-color:var(--accent);color:var(--accent)}}
-.pag-row td{padding:0 !important;border-bottom:none !important}
+/* Pie de paginacion pegado al borde inferior del contenedor acotado */
+.pag-row td{padding:0 !important;border-bottom:none !important;position:sticky;bottom:0;z-index:2}
 .pag-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;
-  border-top:1px solid var(--border);background:var(--bg)}
-.pag-info{font-size:11px;color:var(--muted2);letter-spacing:.3px}
+  border-top:1px solid var(--separator);background:var(--glass-strong);
+  -webkit-backdrop-filter:blur(var(--blur-bar));backdrop-filter:blur(var(--blur-bar))}
+.pag-info{font-size:13px;color:var(--text-tertiary)}
 .pag-ctrl{display:flex;align-items:center;gap:6px}
-.pag-page{font-size:11px;font-weight:600;color:var(--text);min-width:70px;text-align:center}
+.pag-page{font-size:13px;font-weight:600;color:var(--text);min-width:70px;text-align:center}
 .pat-bar-wrap{height:4px;background:var(--border2);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:8px;display:flex}
 .pat-legend{display:flex;justify-content:space-between;align-items:flex-end}
 .pat-leg-item{display:flex;flex-direction:column;gap:3px}
@@ -647,8 +705,10 @@ input[list] { cursor: text; }
 .fc-nav-btn{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);width:34px;height:34px;color:var(--muted2);cursor:pointer;font-size:16px;font-weight:700;transition:border-color .2s,color .2s,background .2s;display:flex;align-items:center;justify-content:center}@media (hover:hover) and (pointer:fine){
 .fc-nav-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(37,99,235,.05)}}
 .fc-nav-btn:disabled{opacity:.35;cursor:default;pointer-events:none}
-.inv-pag{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;margin-top:10px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow)}
-.inv-pag-info{font-size:11px;color:var(--muted2)}
+.inv-pag{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;margin-top:10px;
+  background:var(--glass-strong);-webkit-backdrop-filter:blur(var(--blur-bar));backdrop-filter:blur(var(--blur-bar));
+  border:1px solid var(--glass-border);border-radius:var(--radius-pill);box-shadow:var(--shadow-glass)}
+.inv-pag-info{font-size:13px;color:var(--text-tertiary)}
 .fc-mes-label{font-family:var(--font-sans);font-weight:800;font-size:20px;color:var(--text);letter-spacing:.5px}
 .fc-cerrar-btn{margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:7px 14px;
   border-radius:var(--radius-sm);border:1px solid rgba(96,165,250,.28);background:rgba(96,165,250,.10);
@@ -724,25 +784,27 @@ input[list] { cursor: text; }
 
 
 /* Tabla movimientos */
-.fc-tabla-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow-x:auto;-webkit-overflow-scrolling:touch;box-shadow:var(--shadow)}
-.fc-tabla{width:100%;border-collapse:collapse;font-size:11px;font-family:inherit;min-width:820px}
-.fc-tabla thead{background:var(--surface)}
-.fc-tabla thead th{padding:9px 14px;font-size:11px;font-family:inherit;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);white-space:nowrap;border-bottom:1px solid var(--border);text-align:left}
+.fc-tabla-wrap{border-radius:var(--radius-lg);overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+  max-height:calc(100dvh - var(--topbar-h) - 190px)}
+.fc-tabla{width:100%;border-collapse:separate;border-spacing:0;font-size:14px;font-family:inherit;min-width:820px}
+.fc-tabla thead th{position:sticky;top:0;z-index:2;
+  background:var(--glass-strong);-webkit-backdrop-filter:blur(var(--blur-bar));backdrop-filter:blur(var(--blur-bar));
+  padding:12px 14px;font-size:11px;line-height:14px;font-family:inherit;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary);white-space:nowrap;border-bottom:1px solid var(--separator);text-align:left}
 .fc-tabla thead th.right{text-align:right}
-.fc-tabla tbody tr{border-top:1px solid var(--border);transition:background .15s}@media (hover:hover) and (pointer:fine){
-.fc-tabla tbody tr:hover{background:rgba(37,99,235,.06)}}
-.fc-tabla tbody tr.row-pend{opacity:.75;background:rgba(180,83,9,.02)}@media (hover:hover) and (pointer:fine){
-.fc-tabla tbody tr.row-pend:hover{background:rgba(180,83,9,.04)}}
-.fc-tabla tbody td{padding:10px 14px;color:var(--text);vertical-align:middle;white-space:nowrap;font-size:11px;font-family:inherit}
-.fc-tabla .td-fecha{color:var(--muted2);font-size:11px;font-weight:600;font-family:inherit;font-variant-numeric:tabular-nums}
-.fc-tabla .td-desc{max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:600;color:var(--text);font-family:inherit}
-.fc-tabla .td-code{color:var(--accent);font-size:11px;font-weight:600;font-variant-numeric:tabular-nums}
-.fc-tabla .td-ing{font-family:inherit;font-size:11px;font-weight:700;color:var(--green);text-align:right;font-variant-numeric:tabular-nums}
-.fc-tabla .td-egr{font-family:inherit;font-size:11px;font-weight:700;color:var(--red);text-align:right;font-variant-numeric:tabular-nums}
-.fc-tabla .td-egr-usd{font-family:inherit;font-size:11px;font-weight:700;color:var(--orange);text-align:right;font-variant-numeric:tabular-nums}
-.fc-tabla .td-pend{font-family:inherit;font-size:11px;font-weight:700;color:var(--yellow);text-align:right;font-variant-numeric:tabular-nums}
-.fc-tabla .td-reserva{color:var(--purple);font-size:11px;font-weight:700}
-.fc-tabla .td-muted{color:var(--muted2);text-align:right}
+.fc-tabla tbody td{border-top:1px solid var(--separator);transition:background .15s}
+.fc-tabla tbody tr:first-child td{border-top:0}@media (hover:hover) and (pointer:fine){
+.fc-tabla tbody tr:hover td{background:var(--accent-soft)}}
+.fc-tabla tbody tr.row-pend td:first-child{box-shadow:inset 3px 0 0 var(--warning)}
+.fc-tabla tbody td{padding:12px 14px;color:var(--text-secondary);vertical-align:middle;white-space:nowrap;font-size:14px;line-height:20px;font-family:inherit}
+.fc-tabla .td-fecha{color:var(--text-tertiary);font-size:13px;font-weight:600;font-family:inherit;font-variant-numeric:tabular-nums}
+.fc-tabla .td-desc{max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;font-weight:600;color:var(--text);font-family:inherit}
+.fc-tabla .td-code{color:var(--accent-ink);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+.fc-tabla .td-ing{font-family:inherit;font-size:14px;font-weight:600;color:var(--green);text-align:right;font-variant-numeric:tabular-nums}
+.fc-tabla .td-egr{font-family:inherit;font-size:14px;font-weight:600;color:var(--red);text-align:right;font-variant-numeric:tabular-nums}
+.fc-tabla .td-egr-usd{font-family:inherit;font-size:14px;font-weight:600;color:var(--orange);text-align:right;font-variant-numeric:tabular-nums}
+.fc-tabla .td-pend{font-family:inherit;font-size:14px;font-weight:600;color:var(--yellow);text-align:right;font-variant-numeric:tabular-nums}
+.fc-tabla .td-reserva{color:var(--purple);font-size:14px;font-weight:600}
+.fc-tabla .td-muted{color:var(--text-tertiary);text-align:right}
 .fc-accion-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:var(--radius-pill);font-size:11px;font-weight:700;letter-spacing:.5px;white-space:nowrap}
 .fc-accion-COMPRA{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.18)}
 .fc-accion-VENTA{background:rgba(22,163,74,.08);color:var(--green);border:1px solid rgba(22,163,74,.18)}
@@ -965,11 +1027,10 @@ input[list] { cursor: text; }
 .btn:active:not(:disabled){transform:translateY(0) scale(.97)!important;transition:transform .08s}
 .modal-overlay.open{animation:modalIn .2s cubic-bezier(.34,1.56,.64,1)}
 @keyframes modalIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
-.table-wrap{scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
-@media(max-width:768px){#toast{bottom:calc(94px + env(safe-area-inset-bottom,0px) + 12px)}}
+.table-wrap,.fc-tabla-wrap{scrollbar-width:thin;scrollbar-color:var(--field-border) transparent}
+@media(max-width:768px){#toast{bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom,0px) + 28px)}}
 tbody tr{cursor:pointer;user-select:none}
-tbody td.cell-selected{background:rgba(37,99,235,.1)!important;outline:1.5px solid rgba(37,99,235,.35);outline-offset:-1.5px}
-tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
+tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid var(--accent);outline-offset:-2px}
 
 /* ── CRM CLIENTES ── */
 .cl-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
@@ -2175,18 +2236,18 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
     <button class="btn btn-ghost btn-sm" onclick="exportInventarioCSV()" title="Exportar a Excel">↓ Excel</button>
   </div>
 
-  <div class="table-wrap">
+  <div class="table-wrap kv-stack">
     <table>
       <thead><tr>
-        <th onclick="sortTable('fecha_compra')" style="cursor:pointer;width:65px">Fecha <span id="sort-fecha_compra"></span></th>
+        <th data-p="2" onclick="sortTable('fecha_compra')" style="cursor:pointer;width:65px">Fecha <span id="sort-fecha_compra"></span></th>
         <th style="width:88px">Código</th>
         <th onclick="sortTable('marca')" style="cursor:pointer">Marca <span id="sort-marca"></span></th>
         <th onclick="sortTable('modelo')" style="cursor:pointer">Modelo <span id="sort-modelo"></span></th>
-        <th>Colorway</th>
+        <th data-p="3">Colorway</th>
         <th onclick="sortTable('talla')" style="cursor:pointer;width:52px;text-align:center">Talla <span id="sort-talla"></span></th>
-        <th>Categoría</th>
-        <th class="right" onclick="sortTable('precio_compra_soles')" style="cursor:pointer;width:88px">P. Compra <span id="sort-precio_compra_soles"></span></th>
-        <th class="right" style="width:82px">Costos Adic.</th>
+        <th data-p="2">Categoría</th>
+        <th class="right" data-p="3" onclick="sortTable('precio_compra_soles')" style="cursor:pointer;width:88px">P. Compra <span id="sort-precio_compra_soles"></span></th>
+        <th class="right" data-p="3" style="width:82px">Costos Adic.</th>
         <th class="right" onclick="sortTable('precio_final')" style="cursor:pointer;width:88px">Costo Total <span id="sort-precio_final"></span></th>
         <th class="right" onclick="sortTable('precio_venta_sugerido')" style="cursor:pointer;width:88px">P.V. Sug. <span id="sort-precio_venta_sugerido"></span></th>
         <th style="width:110px">Estado</th>
@@ -2283,18 +2344,18 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
     <div style="flex:1"></div>
     <button class="btn btn-ghost btn-sm" onclick="exportVentasCSV()">↓ Excel</button>
   </div>
-  <div class="table-wrap">
+  <div class="table-wrap kv-stack">
     <table id="vt-table" style="min-width:1020px">
       <thead><tr>
-        <th style="width:75px">Fecha</th>
+        <th data-p="2" style="width:75px">Fecha</th>
         <th style="width:85px">Cód. Venta</th>
-        <th style="width:85px">Cód. Prod.</th>
+        <th data-p="3" style="width:85px">Cód. Prod.</th>
         <th>Producto</th>
         <th style="width:55px">Talla</th>
-        <th style="width:85px">Cód. Cliente</th>
-        <th style="width:130px">Cliente</th>
-        <th style="width:100px">Canal</th>
-        <th class="right" style="width:100px">Costo Total</th>
+        <th data-p="3" style="width:85px">Cód. Cliente</th>
+        <th data-p="2" style="width:130px">Cliente</th>
+        <th data-p="2" style="width:100px">Canal</th>
+        <th class="right" data-p="3" style="width:100px">Costo Total</th>
         <th class="right" style="width:100px">Venta S/.</th>
         <th class="right" style="width:100px">Ganancia</th>
         <th class="right" style="width:60px">ROI</th>
@@ -2323,10 +2384,10 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
     </div>
     <button class="btn btn-ghost btn-sm" onclick="pgLimpiarFiltros()">× Limpiar</button>
   </div>
-  <div class="table-wrap">
+  <div class="table-wrap kv-stack">
     <table id="pg-table" style="min-width:580px">
       <thead><tr>
-        <th style="width:80px">Fecha</th>
+        <th data-p="2" style="width:80px">Fecha</th>
         <th style="width:90px">Cód. Gasto</th>
         <th>Concepto</th>
         <th style="width:140px">Categoría</th>
@@ -2560,7 +2621,7 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
     </div>
     <button onclick="document.getElementById('fc-buscar').value='';document.getElementById('fc-accion').value='';renderFlujoTabla()" style="flex-shrink:0;padding:6px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);color:var(--muted2);font-size:11px;cursor:pointer;white-space:nowrap;font-family:inherit">× Limpiar</button>
   </div>
-  <div class="fc-tabla-wrap">
+  <div class="fc-tabla-wrap kv-stack">
     <table class="fc-tabla">
       <thead><tr>
         <th style="width:85px">Fecha</th>
@@ -2619,16 +2680,16 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
   </div>
 
   <!-- Tabla -->
-  <div class="table-wrap">
+  <div class="table-wrap kv-stack">
     <table style="min-width:850px">
       <thead><tr>
         <th onclick="clSort('codigo')"    style="cursor:pointer">Código <span id="clsort-codigo"></span></th>
         <th onclick="clSort('nombre')"    style="cursor:pointer">Nombre <span id="clsort-nombre"></span></th>
         <th onclick="clSort('telefono')"  style="cursor:pointer">Teléfono <span id="clsort-telefono"></span></th>
-        <th onclick="clSort('instagram')" style="cursor:pointer">Instagram <span id="clsort-instagram"></span></th>
-        <th onclick="clSort('talla')"     style="cursor:pointer">Talla <span id="clsort-talla"></span></th>
-        <th onclick="clSort('canal')"     style="cursor:pointer">Canal <span id="clsort-canal"></span></th>
-        <th onclick="clSort('tipo')"      style="cursor:pointer">Tipo <span id="clsort-tipo"></span></th>
+        <th data-p="2" onclick="clSort('instagram')" style="cursor:pointer">Instagram <span id="clsort-instagram"></span></th>
+        <th data-p="3" onclick="clSort('talla')"     style="cursor:pointer">Talla <span id="clsort-talla"></span></th>
+        <th data-p="3" onclick="clSort('canal')"     style="cursor:pointer">Canal <span id="clsort-canal"></span></th>
+        <th data-p="2" onclick="clSort('tipo')"      style="cursor:pointer">Tipo <span id="clsort-tipo"></span></th>
         <th class="right" onclick="clSort('monto')" style="cursor:pointer">Total Comprado <span id="clsort-monto"></span></th>
         <th></th>
       </tr></thead>
@@ -2712,23 +2773,23 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
     </div>
   </div>
 
-  <div class="table-wrap">
+  <div class="table-wrap kv-stack">
     <table style="min-width:1400px">
       <thead>
         <tr>
           <th style="width:30px"><input type="checkbox" class="oc-chk-pago" id="oc-pago-sel-all" onchange="ocToggleSelAll(this.checked)" title="Seleccionar todas las que tienen crédito pendiente"></th>
           <th style="width:70px">Código</th>
-          <th style="width:74px">Fecha</th>
+          <th data-p="2" style="width:74px">Fecha</th>
           <th style="min-width:170px">Descripción</th>
           <th style="width:165px">Estado</th>
-          <th style="width:82px">Tienda</th>
-          <th style="width:90px">Order</th>
-          <th style="width:70px">Courier</th>
-          <th style="width:100px">Tracking</th>
-          <th style="width:54px">Grupo</th>
-          <th style="width:120px">QC</th>
+          <th data-p="3" style="width:82px">Tienda</th>
+          <th data-p="3" style="width:90px">Order</th>
+          <th data-p="2" style="width:70px">Courier</th>
+          <th data-p="2" style="width:100px">Tracking</th>
+          <th data-p="3" style="width:54px">Grupo</th>
+          <th data-p="2" style="width:120px">QC</th>
           <th class="right" style="width:82px">Valor $</th>
-          <th style="min-width:90px">Información</th>
+          <th data-p="3" style="min-width:90px">Información</th>
           <th class="right" style="width:56px">Arts.</th>
           <th style="width:56px"></th>
         </tr>
@@ -2775,16 +2836,16 @@ tbody tr:hover td.cell-selected{background:rgba(37,99,235,.15)!important}
     <button class="btn btn-ghost btn-sm" onclick="rsvLimpiarFiltros()">× Limpiar</button>
   </div>
 
-  <div class="table-wrap">
+  <div class="table-wrap kv-stack">
     <table style="min-width:1000px">
       <thead>
         <tr>
-          <th style="width:65px">Fecha</th>
+          <th data-p="2" style="width:65px">Fecha</th>
           <th style="width:82px">Código</th>
-          <th style="width:66px">Tipo</th>
-          <th style="width:62px">Cód.Cl.</th>
+          <th data-p="3" style="width:66px">Tipo</th>
+          <th data-p="3" style="width:62px">Cód.Cl.</th>
           <th style="min-width:120px">Cliente</th>
-          <th style="width:82px">Cód.Prod.</th>
+          <th data-p="2" style="width:82px">Cód.Prod.</th>
           <th>Producto</th>
           <th class="right" style="width:100px">Acordado</th>
           <th class="right" style="width:90px">Abonado</th>
@@ -3785,24 +3846,24 @@ function renderOCTab(){
       : '<span class="td-muted">—</span>';
     const uni=v=>v?`<span class="td-unit">${esc(v)}</span>`:'<span class="td-muted">—</span>';
     return `<tr class="${cerrado?'row-dim':''}">
-      <td style="text-align:center">${pendUsd>0
+      <td style="text-align:center" data-role="badge2">${pendUsd>0
         ?`<input type="checkbox" class="oc-chk-pago" ${ocPagoSel.has(oc.codigo)?'checked':''} onchange="ocToggleSelPago('${oc.codigo}',this.checked)" title="Pendiente: ${fmtUsd(pendUsd)}">`
         :'<span class="td-muted">—</span>'}</td>
-      <td><span class="td-code oc-cod" style="color:var(--accent)"
+      <td data-role="meta"><span class="td-code oc-cod" style="color:var(--accent)"
             title="Ver los productos de esta orden"
             onclick="ocVerArticulos('${oc.codigo}')">${oc.codigo}</span></td>
-      <td class="td-fecha">${fmtFecha(oc.fecha)}</td>
-      <td class="td-main">${esc(oc.descripcion||oc.nombre||'—')}</td>
-      <td><span class="badge ${cls} oc-badge-edit"
+      <td class="td-fecha" data-role="meta2" data-p="2">${fmtFecha(oc.fecha)}</td>
+      <td class="td-main" data-role="title">${esc(oc.descripcion||oc.nombre||'—')}</td>
+      <td data-role="badge"><span class="badge ${cls} oc-badge-edit"
             onclick="ocMenu(event,'${oc.codigo}','estado')">${txt}<i>▾</i></span></td>
-      <td>${uni(oc.tienda)}</td>
-      <td>${oc.orden_tienda?`<span class="td-code td-trunc" title="${esc(oc.orden_tienda)}">${esc(oc.orden_tienda)}</span>`:'<span class="td-muted">—</span>'}</td>
-      <td>${uni(oc.courier)}</td>
-      <td>${trk}</td>
-      <td>${uni(oc.grupo)}</td>
-      <td>${(()=>{const[c,t]=OC_QC_BADGE[oc.qc||'']||['badge-muted',esc(oc.qc)];
+      <td data-role="hide-m" data-p="3">${uni(oc.tienda)}</td>
+      <td data-role="hide-m" data-p="3">${oc.orden_tienda?`<span class="td-code td-trunc" title="${esc(oc.orden_tienda)}">${esc(oc.orden_tienda)}</span>`:'<span class="td-muted">—</span>'}</td>
+      <td data-role="hide-m" data-p="2">${uni(oc.courier)}</td>
+      <td data-role="hide-m" data-p="2">${trk}</td>
+      <td data-role="hide-m" data-p="3">${uni(oc.grupo)}</td>
+      <td data-role="hide-m" data-p="2">${(()=>{const[c,t]=OC_QC_BADGE[oc.qc||'']||['badge-muted',esc(oc.qc)];
         return `<span class="badge ${c} oc-badge-edit" onclick="ocMenu(event,'${oc.codigo}','qc')">${t}<i>▾</i></span>`;})()}</td>
-      <td class="td-amt right">${(()=>{
+      <td class="td-amt right" data-role="amount">${(()=>{
         if(!val.usd) return '<span class="td-muted">—</span>';
         const pl=k=>k===1?'artículo':'artículos';
         const tip=val.calc
@@ -3814,13 +3875,13 @@ function renderOCTab(){
               : 'Escrito a mano — esta orden todavía no tiene artículos registrados');
         return `<span title="${tip}">${fmtUsd(val.usd)}${val.calc&&val.sinUsd?'<span class="oc-mas"> *</span>':''}</span>`;
       })()}</td>
-      <td class="td-unit td-trunc" title="${esc(oc.notas||'')}">${esc(oc.notas||'—')}</td>
-      <td class="right" style="cursor:pointer;padding:0" onclick="ocVerArticulos('${oc.codigo}')" title="Ver artículos de esta orden">
+      <td class="td-unit td-trunc" data-role="hide-m" data-p="3" title="${esc(oc.notas||'')}">${esc(oc.notas||'—')}</td>
+      <td class="right" data-role="actions" style="cursor:pointer;padding:0" onclick="ocVerArticulos('${oc.codigo}')" title="Ver artículos de esta orden">
         <div style="padding:10px 14px">${arts.length
           ? `<span class="badge badge-muted">${arts.length}</span>`
           : `<span class="td-muted">— <i style="font-style:normal;opacity:.6">＋</i></span>`}</div>
       </td>
-      <td class="right"><button class="oc-edit-btn" onclick="ocAbrirModal('${oc.codigo}')">Editar</button></td>
+      <td class="right" data-role="actions"><button class="oc-edit-btn" onclick="ocAbrirModal('${oc.codigo}')">Editar</button></td>
     </tr>`;
   });
   pagRender('ocs', _filasOcs, 'oc-tbody', 15,
@@ -4266,20 +4327,20 @@ function renderReservas(){
       `<span class="badge badge-red">CANCELADA</span>`;
     const tipoBadge=r.tipo==='STOCK'?`<span class="rsv-tipo-stock">Stock</span>`:`<span class="rsv-tipo-pedido">Pedido</span>`;
     return`<tr class="${r.estado==='COMPLETADA'?'row-dim':''}" onclick="abrirReservaDetalle('${r.codigo_reserva}')" style="cursor:pointer">
-      <td><span class="td-code" style="color:var(--muted2)">${fecha}</span></td>
-      <td><span class="td-code" style="color:var(--accent)">${r.codigo_reserva}</span></td>
-      <td>${tipoBadge}</td>
-      <td><span class="td-code">${r.id_cliente?clCodigo(r.id_cliente):'—'}</span></td>
-      <td class="td-main" style="font-size:11px">${r.nombre_cliente||'—'}</td>
-      <td>${r.codigo_producto?`<span class="td-code" style="color:var(--purple)">${r.codigo_producto}</span>`:r.tipo==='PEDIDO'&&r.estado==='ACTIVA'?`<span style="display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;color:var(--yellow);background:rgba(180,83,9,.1);border:1px solid rgba(180,83,9,.25);border-radius:var(--radius-sm);padding:2px 6px">⚠ Vincular</span>`:`<span style="font-size:11px;color:var(--muted2);font-style:italic">—</span>`}</td>
-      <td class="td-trunc" style="font-size:11px;color:var(--text)">${productoFull}</td>
-      <td class="right td-amt">${fmt(acordado)}</td>
-      <td class="right td-amt" style="color:var(--green)">${fmt(r.total_abonado)}</td>
-      <td class="right td-amt">${saldo<=0
+      <td data-role="hide-m" data-p="2"><span class="td-code" style="color:var(--muted2)">${fecha}</span></td>
+      <td data-role="meta"><span class="td-code" style="color:var(--accent)">${r.codigo_reserva}</span></td>
+      <td data-role="hide-m" data-p="3">${tipoBadge}</td>
+      <td data-role="hide-m" data-p="3"><span class="td-code">${r.id_cliente?clCodigo(r.id_cliente):'—'}</span></td>
+      <td class="td-main" data-role="title">${r.nombre_cliente||'—'}</td>
+      <td data-role="hide-m" data-p="2">${r.codigo_producto?`<span class="td-code" style="color:var(--purple)">${r.codigo_producto}</span>`:r.tipo==='PEDIDO'&&r.estado==='ACTIVA'?`<span style="display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;color:var(--yellow);background:rgba(180,83,9,.1);border:1px solid rgba(180,83,9,.25);border-radius:var(--radius-sm);padding:2px 6px">⚠ Vincular</span>`:`<span style="font-size:11px;color:var(--muted2);font-style:italic">—</span>`}</td>
+      <td class="td-trunc" data-role="meta2" style="color:var(--text)">${productoFull}</td>
+      <td class="right td-amt" data-role="amount">${fmt(acordado)}</td>
+      <td class="right td-amt" data-role="hide-m" style="color:var(--green)">${fmt(r.total_abonado)}</td>
+      <td class="right td-amt" data-role="badge2">${saldo<=0
         ?`<span class="rsv-saldo-ok">✓ ${fmt(saldo)}</span>`
         :`<span class="rsv-saldo-pend">⏳ ${fmt(saldo)}</span>`}</td>
-      <td>${estadoBadge}</td>
-      <td style="text-align:center"><button class="btn-edit-inv" onclick="event.stopPropagation();abrirReservaDetalle('${r.codigo_reserva}')" title="Ver detalle">›</button></td>
+      <td data-role="badge">${estadoBadge}</td>
+      <td style="text-align:center" data-role="hide-m"><button class="btn-edit-inv" onclick="event.stopPropagation();abrirReservaDetalle('${r.codigo_reserva}')" title="Ver detalle">›</button></td>
     </tr>`;
   });
   pagRender('reservas', _filasReservas, 'rsv-tbody', 12, '<tr><td colspan="12" style="text-align:center;padding:30px;color:var(--muted2)">Sin registros</td></tr>');
@@ -5033,20 +5094,20 @@ function _renderInvPage(){
 
     const rowCls=isCancelado||p.estado==='VENDIDO'?'row-dim':p.estado==='RESERVADO'?'row-rsv':isPendiente?'row-pend':'';
     return`<tr class="${rowCls}">
-      <td class="inv-fecha">${fecha}</td>
-      <td><span class="inv-cod">${p.codigo_producto}</span></td>
-      <td class="inv-txt">${p.marca||'—'}</td>
-      <td class="inv-txt">${p.modelo||'—'}</td>
-      <td class="inv-txt">${p.colorway||'—'}</td>
-      <td class="inv-talla">${p.talla||'—'}</td>
-      <td><span class="${catCls}">${catLabel}</span></td>
-      <td class="right">${pcHtml}</td>
-      <td class="right">${costoHtml}</td>
-      <td class="right">${finalHtml}</td>
-      <td class="right">${ventaHtml}</td>
-      <td>${estadoBadge}</td>
-      <td>${pagoBadge}</td>
-      <td style="text-align:center"><button class="btn-edit-inv" onclick="abrirEditarItem('${p.codigo_producto}')" title="Editar">✏</button></td>
+      <td class="inv-fecha" data-role="hide-m" data-p="2">${fecha}</td>
+      <td data-role="meta"><span class="inv-cod">${p.codigo_producto}</span></td>
+      <td class="inv-txt" data-role="hide-m">${p.marca||'—'}</td>
+      <td class="inv-txt" data-role="title">${p.modelo||'—'}</td>
+      <td class="inv-txt" data-role="hide-m" data-p="3">${p.colorway||'—'}</td>
+      <td class="inv-talla" data-role="meta2">${p.talla||'—'}</td>
+      <td data-role="hide-m" data-p="2"><span class="${catCls}">${catLabel}</span></td>
+      <td class="right" data-role="hide-m" data-p="3">${pcHtml}</td>
+      <td class="right" data-role="hide-m" data-p="3">${costoHtml}</td>
+      <td class="right" data-role="amount">${finalHtml}</td>
+      <td class="right" data-role="hide-m">${ventaHtml}</td>
+      <td data-role="badge">${estadoBadge}</td>
+      <td data-role="badge2">${pagoBadge}</td>
+      <td style="text-align:center" data-role="actions"><button class="btn-edit-inv" onclick="abrirEditarItem('${p.codigo_producto}')" title="Editar">✏</button></td>
     </tr>`;
   }).join('');
 }
@@ -5510,15 +5571,15 @@ function renderClientes(data){
     const ig=c.instagram?`<span style="color:var(--accent)">${c.instagram}</span>`:'—';
     const monto=clMontoMap[c.id_cliente]||0;
     return`<tr onclick="abrirPerfil(${c.id_cliente})">
-      <td><span class="td-code" style="color:var(--accent)">${cod}</span></td>
-      <td class="td-main">${nombre}</td>
-      <td class="td-unit">${c.telefono||'—'}</td>
-      <td>${ig}</td>
-      <td class="td-unit">${c.talla_frecuente||'—'}</td>
-      <td class="td-unit">${c.canal_preferido||'—'}</td>
-      <td>${tipoBadgeHTML(c.tipo)}</td>
-      <td class="td-amt right" style="color:${monto>0?'var(--accent)':'var(--muted2)'}">${monto>0?fmt(monto):'—'}</td>
-      <td><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();abrirModalCliente(${c.id_cliente})" style="padding:4px 10px">✏</button></td>
+      <td data-role="meta"><span class="td-code" style="color:var(--accent)">${cod}</span></td>
+      <td class="td-main" data-role="title">${nombre}</td>
+      <td class="td-unit" data-role="meta2">${c.telefono||'—'}</td>
+      <td data-role="hide-m" data-p="2">${ig}</td>
+      <td class="td-unit" data-role="hide-m" data-p="3">${c.talla_frecuente||'—'}</td>
+      <td class="td-unit" data-role="hide-m" data-p="3">${c.canal_preferido||'—'}</td>
+      <td data-role="badge" data-p="2">${tipoBadgeHTML(c.tipo)}</td>
+      <td class="td-amt right" data-role="amount" style="color:${monto>0?'var(--accent)':'var(--muted2)'}">${monto>0?fmt(monto):'—'}</td>
+      <td data-role="actions"><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();abrirModalCliente(${c.id_cliente})" style="padding:4px 10px">✏</button></td>
     </tr>`;
   });
   pagRender('clientes', _filasClientes, 'cl-tbody', 9, '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--muted2)">Sin registros</td></tr>');
@@ -7229,15 +7290,15 @@ function renderFlujoTabla() {
     const tdCodOp=codOp!=='—'?`<span class="td-code">${codOp}</span>`:'<span class="td-muted">—</span>';
     const tdCodRef=codRef!=='—'?`<span class="td-code">${codRef}</span>`:'<span class="td-muted">—</span>';
     return `<tr class="${trClass}">
-      <td class="td-fecha">${fmtFecha(f.fecha)}</td>
-      <td><span class="fc-accion-badge fc-accion-${accion}">${accion==='PAGO'?'GASTO':accion==='INVERSION'?'INVERSIÓN':accion}</span></td>
-      <td>${tdCodOp}</td>
-      <td>${tdCodRef}</td>
-      <td class="td-desc">${desc}</td>
-      <td class="right">${ingHtml}</td>
-      <td class="right">${egrHtml}</td>
-      <td class="right">${pendS}</td>
-      <td class="right">${pendU}</td>
+      <td class="td-fecha" data-role="meta2">${fmtFecha(f.fecha)}</td>
+      <td data-role="badge"><span class="fc-accion-badge fc-accion-${accion}">${accion==='PAGO'?'GASTO':accion==='INVERSION'?'INVERSIÓN':accion}</span></td>
+      <td data-role="meta">${tdCodOp}</td>
+      <td data-role="hide-m">${tdCodRef}</td>
+      <td class="td-desc" data-role="title">${desc}</td>
+      <td class="right" data-role="amount">${ingHtml}</td>
+      <td class="right" data-role="badge2">${egrHtml}</td>
+      <td class="right" data-role="hide-m">${pendS}</td>
+      <td class="right" data-role="hide-m">${pendU}</td>
     </tr>`;
   });
 
@@ -7248,15 +7309,15 @@ function renderFlujoTabla() {
     const pendS = !esUsd ? `<span class="td-pend">⏳ ${fmt(p.precio_compra_soles||0)}</span>` : '<span class="td-muted">—</span>';
     const pendU = esUsd  ? `<span class="td-egr-usd">⏳ ${fmtUsdAmt(p.precio_compra_usd)}</span>` : '<span class="td-muted">—</span>';
     return `<tr class="row-pend">
-      <td class="td-fecha">${fmtFecha(p.fecha_compra)}</td>
-      <td><span class="fc-accion-badge fc-accion-PENDIENTE">PENDIENTE</span></td>
-      <td><span class="td-code">${p.codigo_producto}</span></td>
-      <td class="td-muted">—</td>
-      <td class="td-desc">${desc}</td>
-      <td class="right">—</td>
-      <td class="td-muted">—</td>
-      <td class="right">${pendS}</td>
-      <td class="right">${pendU}</td>
+      <td class="td-fecha" data-role="meta2">${fmtFecha(p.fecha_compra)}</td>
+      <td data-role="badge"><span class="fc-accion-badge fc-accion-PENDIENTE">PENDIENTE</span></td>
+      <td data-role="meta"><span class="td-code">${p.codigo_producto}</span></td>
+      <td class="td-muted" data-role="hide-m">—</td>
+      <td class="td-desc" data-role="title">${desc}</td>
+      <td class="right" data-role="hide-m">—</td>
+      <td class="td-muted" data-role="hide-m">—</td>
+      <td class="right" data-role="amount">${pendS}</td>
+      <td class="right" data-role="badge2">${pendU}</td>
     </tr>`;
   });
 
@@ -7267,15 +7328,15 @@ function renderFlujoTabla() {
     const prod=[r.marca,r.modelo,r.colorway,r.talla].filter(Boolean).join(' ');
     const desc=[prod, r.nombre_cliente].filter(Boolean).join(' · ')||'—';
     return `<tr class="row-rsv">
-      <td class="td-fecha">${fmtFecha(r.fecha)}</td>
-      <td><span class="fc-accion-badge fc-accion-RESERVA">RESERVA</span></td>
-      <td><span class="td-code">${r.codigo_reserva}</span></td>
-      <td>${r.codigo_producto?`<span class="td-code">${r.codigo_producto}</span>`:'<span class="td-muted">—</span>'}</td>
-      <td class="td-desc">${desc}</td>
-      <td class="right"><span class="td-muted">—</span></td>
-      <td class="right"><span class="td-muted">—</span></td>
-      <td class="right"><span class="td-pend">🔒 ${fmt(abonadoHasta(r, fechaFinStr))}</span></td>
-      <td class="right"><span class="td-muted">—</span></td>
+      <td class="td-fecha" data-role="meta2">${fmtFecha(r.fecha)}</td>
+      <td data-role="badge"><span class="fc-accion-badge fc-accion-RESERVA">RESERVA</span></td>
+      <td data-role="meta"><span class="td-code">${r.codigo_reserva}</span></td>
+      <td data-role="hide-m">${r.codigo_producto?`<span class="td-code">${r.codigo_producto}</span>`:'<span class="td-muted">—</span>'}</td>
+      <td class="td-desc" data-role="title">${desc}</td>
+      <td class="right" data-role="hide-m"><span class="td-muted">—</span></td>
+      <td class="right" data-role="hide-m"><span class="td-muted">—</span></td>
+      <td class="right" data-role="amount"><span class="td-pend">🔒 ${fmt(abonadoHasta(r, fechaFinStr))}</span></td>
+      <td class="right" data-role="hide-m"><span class="td-muted">—</span></td>
     </tr>`;
   });
 
@@ -7509,18 +7570,18 @@ function renderVentas(rows){
     const clId=v.id_cliente?'C-'+String(v.id_cliente).padStart(3,'0'):'—';
     const clNombre=[cl.nombre,cl.apellido].filter(Boolean).join(' ')||'—';
     return`<tr>
-      <td class="td-code">${fecha}</td>
-      <td class="td-code" style="color:var(--accent)">${v.codigo_venta}</td>
-      <td class="td-code">${v.codigo_producto||'—'}</td>
-      <td class="td-main td-trunc">${nombre}</td>
-      <td class="td-unit">${inv.talla||'—'}</td>
-      <td class="td-code">${v.id_cliente?`<span style="color:var(--accent)">${clId}</span>`:'—'}</td>
-      <td class="td-unit">${clNombre}</td>
-      <td><span class="badge ${badge}">${v.canal||'—'}</span></td>
-      <td class="td-amt right" style="color:var(--muted2)">${costoFinal>0?fmt(costoFinal):'—'}</td>
-      <td class="td-amt right" style="color:var(--accent)">${fmt(v.precio_venta_soles)}</td>
-      <td class="td-amt right" style="color:${gc}">${gan>=0?'+':''}${fmt(gan)}</td>
-      <td class="right"><span class="badge ${roi>=0?'badge-green':'badge-red'}">${(roi*100).toFixed(0)}%</span></td>
+      <td class="td-code" data-role="hide-m" data-p="2">${fecha}</td>
+      <td class="td-code" data-role="meta" style="color:var(--accent)">${v.codigo_venta}</td>
+      <td class="td-code" data-role="hide-m" data-p="3">${v.codigo_producto||'—'}</td>
+      <td class="td-main td-trunc" data-role="title">${nombre}</td>
+      <td class="td-unit" data-role="meta2">${inv.talla||'—'}</td>
+      <td class="td-code" data-role="hide-m" data-p="3">${v.id_cliente?`<span style="color:var(--accent)">${clId}</span>`:'—'}</td>
+      <td class="td-unit" data-role="hide-m" data-p="2">${clNombre}</td>
+      <td data-role="hide-m" data-p="2"><span class="badge ${badge}">${v.canal||'—'}</span></td>
+      <td class="td-amt right" data-role="hide-m" data-p="3" style="color:var(--muted2)">${costoFinal>0?fmt(costoFinal):'—'}</td>
+      <td class="td-amt right" data-role="amount" style="color:var(--accent)">${fmt(v.precio_venta_soles)}</td>
+      <td class="td-amt right" data-role="badge2" style="color:${gc}">${gan>=0?'+':''}${fmt(gan)}</td>
+      <td class="right" data-role="badge"><span class="badge ${roi>=0?'badge-green':'badge-red'}">${(roi*100).toFixed(0)}%</span></td>
     </tr>`;
   });
   pagRender('ventas', _filasVentas, 'vt-tbody', 12, '<tr><td colspan="12" style="text-align:center;padding:30px;color:var(--muted2)">Sin registros</td></tr>');
@@ -7586,11 +7647,11 @@ function renderPagos(rows){
     const badge=catBadge[cat]||'badge-muted';
     const fecha=p.fecha?p.fecha.slice(8,10)+'/'+p.fecha.slice(5,7)+'/'+p.fecha.slice(2,4):'—';
     return`<tr>
-      <td class="td-code">${fecha}</td>
-      <td class="td-code" style="color:var(--accent)">${p.codigo_pago||'—'}</td>
-      <td class="td-main td-trunc">${p.concepto||'—'}</td>
-      <td><span class="badge ${badge}">${cat}</span></td>
-      <td class="td-amt right" style="color:var(--${esAjuste?'green':'red'})">${esAjuste?'+':'−'} ${fmt(Math.abs(raw))}</td>
+      <td class="td-code" data-role="meta2" data-p="2">${fecha}</td>
+      <td class="td-code" data-role="meta" style="color:var(--accent)">${p.codigo_pago||'—'}</td>
+      <td class="td-main td-trunc" data-role="title">${p.concepto||'—'}</td>
+      <td data-role="badge"><span class="badge ${badge}">${cat}</span></td>
+      <td class="td-amt right" data-role="amount" style="color:var(--${esAjuste?'green':'red'})">${esAjuste?'+':'−'} ${fmt(Math.abs(raw))}</td>
     </tr>`;
   });
   pagRender('gastos', _filasGastos, 'pg-tbody', 5, '<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--muted2)">Sin registros</td></tr>');
