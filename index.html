@@ -450,14 +450,15 @@ td.right{font-weight:600;color:var(--text)}
    se esconden para que las importantes entren sin scrollear. */
 @media(max-width:767px){
   .table-wrap,.fc-tabla-wrap{border-radius:var(--radius-md)}
-  /* En movil tambien se esconden las columnas p2 y p3: quedan las esenciales
-     y el resto sigue disponible scrolleando. */
-  .table-wrap [data-p="2"],.table-wrap [data-p="3"],
-  .fc-tabla-wrap [data-p="2"],.fc-tabla-wrap [data-p="3"]{display:none}
   /* Solo mas compactas: el tamano de letra ya es el mismo que en escritorio */
   th{padding:10px 8px}
   td{padding:11px 8px}
-  .table-wrap table,.fc-tabla table{min-width:0}
+  /* !important para ganarle a los min-width inline del marcado (hay de
+     700, 850, 1000 y 1400px): un style inline le gana a cualquier
+     selector normal. Y .fc-tabla ES la tabla, no su contenedor: el
+     selector anterior (".fc-tabla table") no existia, asi que la tabla
+     de Flujo se quedaba en sus 820px sobre una pantalla de 375. */
+  .table-wrap table,.fc-tabla{min-width:0!important}
   .td-trunc{max-width:150px}
   /* La columna que identifica la fila queda fija mientras el resto scrollea.
      NO se puede usar :first-child: en Inventario, Reservas y Ventas la
@@ -468,8 +469,8 @@ td.right{font-weight:600;color:var(--text)}
   #inv-tbody td:nth-child(2),      table:has(#inv-tbody) thead th:nth-child(2),
   #rsv-tbody td:nth-child(2),      table:has(#rsv-tbody) thead th:nth-child(2),
   #vt-tbody  td:nth-child(2),      table:has(#vt-tbody)  thead th:nth-child(2),
-  #cl-tbody  td:nth-child(1),      table:has(#cl-tbody)  thead th:nth-child(1),
-  #fc-tabla-body td:nth-child(1),  table:has(#fc-tabla-body) thead th:nth-child(1){
+  #cl-tbody  tr:not(.pag-row) td:nth-child(1),      table:has(#cl-tbody)  thead th:nth-child(1),
+  #fc-tabla-body tr:not(.pag-row) td:nth-child(1),  table:has(#fc-tabla-body) thead th:nth-child(1){
     position:sticky;left:0;z-index:1;background:var(--menu)}
   table:has(#inv-tbody) thead th:nth-child(2),
   table:has(#rsv-tbody) thead th:nth-child(2),
@@ -711,7 +712,7 @@ input[list] { cursor: text; }
 
 /* ── INDICADORES ── */
 .ind-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:16px;margin-bottom:20px}
-@media(max-width:1100px){.ind-row{grid-template-columns:1fr 1fr}}
+@media(max-width:1099px){.ind-row{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.ind-row{grid-template-columns:1fr}}
 
 /* Mismo lenguaje que .stat-card (radio, sombra, hover-lift) -- el padding
@@ -764,7 +765,11 @@ input[list] { cursor: text; }
   font-family:inherit;transition:border-color .15s,color .15s}@media (hover:hover) and (pointer:fine){
 .oc-edit-btn:hover{border-color:var(--accent);color:var(--accent)}}
 /* Pie de paginacion pegado al borde inferior del contenedor acotado */
-.pag-row td{padding:0 !important;border-bottom:none !important;position:sticky;bottom:0;z-index:2}
+/* left:0 ademas de bottom:0: sin eso la barra se va con el scroll
+   horizontal y en un telefono queda fuera de pantalla, sin forma de
+   cambiar de hoja. El ancho se ata al del contenedor, no al de la tabla. */
+.pag-row td{padding:0 !important;border-bottom:none !important;position:sticky;left:0;bottom:0;z-index:4}
+.pag-row .pag-bar{position:sticky;left:0}
 .pag-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;
   border-top:1px solid var(--separator);background:var(--glass-strong);
   -webkit-backdrop-filter:blur(var(--blur-bar));backdrop-filter:blur(var(--blur-bar))}
@@ -941,7 +946,7 @@ input[list] { cursor: text; }
 
 /* ANÁLISIS */
 .an-kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:16px;margin-bottom:20px}
-@media(max-width:1100px){.an-kpi-row{grid-template-columns:1fr 1fr}}
+@media(max-width:1099px){.an-kpi-row{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.an-kpi-row{grid-template-columns:1fr}}
 /* El dato principal del tab no puede pesar menos que un stat-val secundario */
 .an-note{font-size:13px;line-height:18px;color:var(--text-tertiary);margin:-4px 0 12px}
@@ -957,7 +962,7 @@ input[list] { cursor: text; }
 .an-row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
 @media(max-width:900px){.an-row2{grid-template-columns:1fr}}
 .an-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px}
-@media(max-width:1100px){.an-row3{grid-template-columns:1fr 1fr}}
+@media(max-width:1099px){.an-row3{grid-template-columns:1fr 1fr}}
 @media(max-width:650px){.an-row3{grid-template-columns:1fr}}
 .an-rsv-stats{grid-template-columns:repeat(2,1fr)}
 @media(min-width:700px){.an-rsv-stats{grid-template-columns:repeat(4,1fr)}}
@@ -994,7 +999,7 @@ input[list] { cursor: text; }
    celular esas mismas columnas fijas en % se aprietan hasta ilegibles --
    aca se revierte a ancho natural + scroll horizontal, igual que el resto
    de tablas de la app en movil. */
-@media(max-width:768px){
+@media(max-width:767px){
   .an-wide-table table{table-layout:auto!important}
   .an-wide-table th,.an-wide-table td{width:auto!important}
 }
@@ -1017,7 +1022,8 @@ input[list] { cursor: text; }
   border:1px solid var(--glass-border);box-shadow:var(--shadow-float);
   z-index:var(--z-toast);transition:transform .3s cubic-bezier(.34,1.56,.64,1);
   max-width:min(92vw,420px);text-align:center;pointer-events:none}
-#toast.show{transform:translateX(-50%) translateY(0)}
+#toast{opacity:0;visibility:hidden}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1;visibility:visible}
 #toast.ok{border-color:color-mix(in srgb,var(--positive) 45%,transparent);color:var(--positive)}
 #toast.err{border-color:color-mix(in srgb,var(--negative) 45%,transparent);color:var(--negative)}
 #toast.warn{border-color:color-mix(in srgb,var(--warning) 45%,transparent);color:var(--warning)}
@@ -1089,7 +1095,7 @@ input[list] { cursor: text; }
 .tab-icon{display:none}
 .tab-label{transition:color .2s}
 
-@media(max-width:768px){
+@media(max-width:767px){
   /* Mostrar header de logo arriba */
   .mobile-header{display:flex}
 
@@ -1126,6 +1132,12 @@ input[list] { cursor: text; }
     background:var(--glass-strong);-webkit-backdrop-filter:blur(var(--blur-bar)) saturate(180%);backdrop-filter:blur(var(--blur-bar)) saturate(180%);
     border:1px solid var(--glass-border);box-shadow:var(--shadow-float)}
   .kv-submit-bar .btn{width:100%}
+  /* Arriba de la tabbar: en movil la barra esta ABAJO y los menus abren
+     hacia abajo, asi que con z-index:5 quedaban tapados por ella y el
+     toque caia en la barra, cambiando de seccion. La topbar aca no
+     existe, asi que no hay nada que pisar. */
+  .card:has(.combo-list.open),
+  .form-panel:has(.combo-list.open){z-index:calc(var(--z-topbar) + 1)}
 
   .table-toolbar{gap:6px}
 
@@ -1134,8 +1146,7 @@ input[list] { cursor: text; }
   .table-toolbar .search-box { flex-shrink: 0; }
   /* Cards más compactas */
   /* Tabla min-width más chica para scroll */
-  .table-wrap table { min-width: 800px !important; }
-  #pg-table { min-width: 480px !important; }
+
   /* cl-sel bubble en mobile */
   .cl-sel { flex-wrap: nowrap; }
   /* Quitar min-width inline de los cols internos de stat cards */
@@ -1186,7 +1197,7 @@ input[list] { cursor: text; }
 .oc-menu::-webkit-scrollbar-thumb{
   background:var(--field-border);border-radius:var(--radius-pill);
   border:3px solid transparent;background-clip:padding-box}
-@media(max-width:768px){#toast{bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom,0px) + 28px)}}
+@media(max-width:767px){#toast{bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom,0px) + 28px)}}
 tbody tr{cursor:pointer;user-select:none}
 tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid var(--accent);outline-offset:-2px}
 
@@ -1253,7 +1264,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
 .tc-save-btn.saved{background:var(--green)}
 
 /* ══ MOBILE MEJORAS ══ */
-@media(max-width:768px){
+@media(max-width:767px){
   /* Botones de submit full-width */
   .form-panel>.btn{width:100%;justify-content:center}
   /* Touch targets adecuados */
