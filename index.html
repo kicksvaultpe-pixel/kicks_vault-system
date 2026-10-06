@@ -8226,6 +8226,7 @@ function abrirEditarItem(codigo){
   document.getElementById('iep-precio-compra').value=p.precio_compra_soles||'';
   document.getElementById('iep-precio-venta').value=p.precio_venta_sugerido||'';
   document.getElementById('iep-fecha-compra').value=p.fecha_compra||'';
+  document.getElementById('iep-desc-factura').value=p.descripcion_factura||'';
   document.getElementById('iep-observaciones').value=p.observaciones||'';
   iepRenderCostos();
   iepActualizarTotal();
@@ -8318,6 +8319,7 @@ async function iepGuardar(){
       precio_venta_sugerido:pv||null,
       precio_final:precioFinal||null,
       fecha_compra:document.getElementById('iep-fecha-compra').value||null,
+      descripcion_factura:document.getElementById('iep-desc-factura').value.trim()||null,
       observaciones:document.getElementById('iep-observaciones').value.trim()||null
     }).eq('codigo_producto',invEditCodigo);
     if(e1)throw e1;
@@ -9258,7 +9260,8 @@ kvArrancar();
     <div class="iep-section">
       <div class="iep-section-lbl">Factura y notas</div>
       <div class="form-grid g2" style="margin-bottom:12px">
-        <div class="field span2"><label>Factura</label><input type="text" id="iep-factura" autocomplete="off" placeholder="N° factura"></div>
+        <div class="field"><label>Factura</label><input type="text" id="iep-factura" autocomplete="off" placeholder="N° factura"></div>
+        <div class="field"><label>Descripción del producto</label><input type="text" id="iep-desc-factura" autocomplete="off" placeholder="La que figura en la factura"></div>
       </div>
       <textarea id="iep-observaciones" rows="3" placeholder="Apuntes…" style="width:100%;background:var(--field);border:1px solid var(--field-border);border-radius:var(--radius-sm);padding:10px;color:var(--text);font-family:var(--font-sans);font-size:12px;resize:vertical;box-sizing:border-box;outline:none;transition:border-color .15s" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--field-border)'"></textarea>
     </div>
