@@ -26,6 +26,9 @@
   --bg:#eef2f8;--blob-a:#2563eb;--blob-b:#38bdf8;--blob-c:#fdba74;
   --glass:#ffffff9e;--glass-strong:#ffffffc7;--glass-border:#ffffffbf;--glass-highlight:#fffffff2;
   --tile:#ffffff99;--field:#ffffffd9;--field-border:#7a8aab;--separator:#1a1d2e14;
+  /* Superficie OPACA para menus flotantes (desplegables, menu de secciones).
+     No puede ser vidrio: se lee encima de campos con texto. */
+  --menu:#ffffff;
   --text:#1a1d2e;--text-secondary:#3d4b6a;--text-tertiary:#56668c;--placeholder:#6e7da0;
   --accent:#2563eb;--accent-pressed:#1d4ed8;--accent-ink:#1d4ed8;--accent-soft:#2563eb1f;--on-accent:#ffffff;
   --positive:#15703a;--positive-soft:#15703a1f;--on-positive:#ffffff;
@@ -56,6 +59,7 @@
   --bg:#070b14;--blob-a:#2f5fd0;--blob-b:#0e7490;--blob-c:#7c2d12;
   --glass:#121a2c9e;--glass-strong:#0e1525d1;--glass-border:#ffffff1f;--glass-highlight:#ffffff14;
   --tile:#ffffff0f;--field:#ffffff0d;--field-border:#5a74a6;--separator:#ffffff14;
+  --menu:#141c2f;
   --text:#eef2ff;--text-secondary:#a3b3d1;--text-tertiary:#7b92c0;--placeholder:#6a80ad;
   --accent:#4f86f7;--accent-pressed:#3b74ec;--accent-ink:#7aa4fa;--accent-soft:#4f86f729;--on-accent:#050a14;
   --positive:#34d399;--positive-soft:#34d39929;--on-positive:#04140c;
@@ -104,7 +108,7 @@
   border:1px solid var(--glass-border);
   box-shadow:var(--shadow-glass);
 }
-.kv-glass-strong,nav,.modal,.combo-list,#toast,
+.kv-glass-strong,nav,.modal,#toast,
 #inv-edit-panel,#rsv-panel,.cl-panel{
   background:var(--glass-strong);
   -webkit-backdrop-filter:blur(var(--blur-bar)) saturate(180%);
@@ -114,7 +118,7 @@
 /* Sin soporte de backdrop-filter: vidrio solido legible en vez de transparente */
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
   .card,.stat-card,.ind-card,.fc-bubble,.table-wrap,.fc-tabla-wrap,.tc-widget,.an-urgente-card,
-  .kv-glass-strong,nav,.modal,.combo-list,#toast,
+  .kv-glass-strong,nav,.modal,#toast,
   #inv-edit-panel,#rsv-panel,.cl-panel{
     background:color-mix(in srgb,var(--glass-strong) 100%,var(--bg));
   }
@@ -219,10 +223,12 @@ nav.kv-tabbar{
 .kv-title-btn .kv-chevron svg{width:16px;height:16px}
 .kv-title-btn[aria-expanded="true"] .kv-chevron{transform:rotate(180deg)}
 .kv-section-menu{
-  display:none;position:fixed;top:calc(48px + 8px + env(safe-area-inset-top,0px));left:16px;right:16px;
-  max-width:340px;z-index:var(--z-dropdown);padding:6px;border-radius:var(--radius-lg);
-  background:var(--glass-strong);-webkit-backdrop-filter:blur(var(--blur-bar)) saturate(180%);backdrop-filter:blur(var(--blur-bar)) saturate(180%);
-  border:1px solid var(--glass-border);box-shadow:var(--shadow-float);
+  display:none;position:fixed;
+  bottom:calc(var(--tabbar-h) + 22px + env(safe-area-inset-bottom,0px));left:16px;right:16px;
+  max-width:340px;max-height:calc(100dvh - var(--tabbar-h) - 120px);overflow-y:auto;overscroll-behavior:contain;
+  z-index:var(--z-dropdown);padding:6px;border-radius:var(--radius-lg);
+  background:var(--menu);
+  border:1px solid var(--separator);box-shadow:var(--shadow-sheet);
 }
 .kv-section-menu.open{display:block}
 .kv-section-item{width:100%;min-height:48px;border:0;background:none;border-radius:16px;padding:6px 10px;
@@ -404,48 +410,40 @@ thead .kv-sticky-col{z-index:3}
 td.right{font-weight:600;color:var(--text)}
 .td-trunc{max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* Prioridad de columnas: p3 se oculta < 1280, p2 se oculta < 1100 */
-@media(max-width:1279px){.table-wrap [data-p="3"]{display:none}}
-@media(max-width:1099px){.table-wrap [data-p="2"]{display:none}}
+@media(max-width:1279px){.table-wrap [data-p="3"],.fc-tabla-wrap [data-p="3"]{display:none}}
+@media(max-width:1099px){.table-wrap [data-p="2"],.fc-tabla-wrap [data-p="2"]{display:none}}
 
-/* ---------- Movil: cada fila pasa a ser una tarjeta ----------
-   Requiere data-role en cada celda. El grid tiene 4 filas:
-     1  title           | amount
-     2  meta            | badge
-     3  meta2           | badge2
-     4  actions (ancho completo)
-   Todo lo que no entra en la tarjeta va con data-role="hide-m". */
+/* ---------- Movil: sigue siendo TABLA ----------
+   Se probo convertir cada fila en una tarjeta y no funciona para este caso:
+   el usuario compara filas entre si (precios, saldos, estados) y para eso
+   necesita columnas alineadas. Una tarjeta por fila sirve para un feed, no
+   para un libro de inventario.
+   Lo que si se conserva de la idea: la tabla scrollea horizontal, la cabecera
+   queda fija arriba, la primera columna queda fija a la izquierda (asi no
+   perdes de vista que fila estas leyendo) y las columnas de baja prioridad
+   se esconden para que las importantes entren sin scrollear. */
 @media(max-width:767px){
-  .table-wrap.kv-stack,.fc-tabla-wrap.kv-stack{
-    max-height:none!important;overflow:visible;background:transparent;border:0;box-shadow:none;
-    -webkit-backdrop-filter:none;backdrop-filter:none}
-  .kv-stack table,.kv-stack thead,.kv-stack tbody,.kv-stack tr,.kv-stack td{display:block}
-  .kv-stack table{min-width:0!important}
-  .kv-stack thead{display:none}
-  .kv-stack tbody{display:flex;flex-direction:column;gap:10px}
-  .kv-stack tbody tr{
-    display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:14px 16px;border-radius:var(--radius-lg);
-    background:var(--glass);-webkit-backdrop-filter:blur(var(--blur-glass)) saturate(180%);backdrop-filter:blur(var(--blur-glass)) saturate(180%);
-    border:1px solid var(--glass-border);box-shadow:var(--shadow-glass)}
-  .kv-stack td{padding:0;border:0;white-space:normal;background:none!important;max-width:none}
-  .kv-stack td[data-role="title"]{grid-column:1;grid-row:1;font-size:15px;line-height:20px;font-weight:700;color:var(--text)}
-  .kv-stack td[data-role="amount"]{grid-column:2;grid-row:1;text-align:right;font-size:15px;font-weight:700}
-  .kv-stack td[data-role="meta"]{grid-column:1;grid-row:2;font-size:13px;line-height:18px;color:var(--text-tertiary)}
-  .kv-stack td[data-role="badge"]{grid-column:2;grid-row:2;justify-self:end}
-  .kv-stack td[data-role="meta2"]{grid-column:1;grid-row:3;font-size:13px;line-height:18px;color:var(--text-tertiary)}
-  .kv-stack td[data-role="badge2"]{grid-column:2;grid-row:3;justify-self:end;margin-top:4px}
-  /* Sin grid-column fijo: si la fila trae una sola celda de acciones ocupa
-     la primera columna, y si trae dos se reparten en las dos columnas. */
-  .kv-stack td[data-role="actions"]{grid-row:4;display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:10px}
-  .kv-stack td[data-role="actions"] .btn,.kv-stack td[data-role="actions"] .oc-edit-btn{min-height:40px}
-  .kv-stack td[data-role="hide-m"]{display:none}
-  /* Filas de servicio: paginacion, vacio, spinner y colspan -> ancho completo */
-  .kv-stack tbody tr:has(td[colspan]){display:block;padding:0;background:none;border:0;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
-  .kv-stack tbody tr:has(td[colspan]) td{display:block;padding:14px 0}
-  .kv-stack tr.row-pend,.kv-stack tr.row-rsv{box-shadow:var(--shadow-glass),inset 3px 0 0 var(--warning)}
-  .kv-stack tr.row-rsv{box-shadow:var(--shadow-glass),inset 3px 0 0 var(--reserve)}
-  .kv-stack tr.row-pend td:first-child,.kv-stack tr.row-rsv td:first-child{box-shadow:none}
-  .kv-stack .pag-row td{position:static;padding:0!important}
-  .kv-stack .pag-bar{border-radius:var(--radius-pill);border:1px solid var(--glass-border);margin-top:10px}
+  .table-wrap,.fc-tabla-wrap{
+    max-height:calc(100dvh - 240px);
+    border-radius:var(--radius-md);
+  }
+  /* En movil tambien se esconden las columnas p2 y p3: quedan las esenciales
+     y el resto sigue disponible scrolleando. */
+  .table-wrap [data-p="2"],.table-wrap [data-p="3"],
+  .fc-tabla-wrap [data-p="2"],.fc-tabla-wrap [data-p="3"]{display:none}
+  /* Celdas mas compactas para que entren mas columnas sin scroll */
+  th{padding:10px 10px;font-size:11px}
+  td{padding:11px 10px;font-size:13px;line-height:18px}
+  .table-wrap table,.fc-tabla table{min-width:0}
+  .td-trunc{max-width:150px}
+  /* La primera columna acompana el scroll horizontal */
+  .kv-stack tbody td:first-child,.kv-stack thead th:first-child{
+    position:sticky;left:0;z-index:1;background:var(--menu)}
+  .kv-stack thead th:first-child{z-index:3}
+  .kv-stack tbody tr.row-pend td:first-child{box-shadow:inset 3px 0 0 var(--warning)}
+  .kv-stack tbody tr.row-rsv td:first-child{box-shadow:inset 3px 0 0 var(--reserve)}
+  /* Botones de accion: 40px de alto minimo para el dedo */
+  td[data-role="actions"] .btn,td[data-role="actions"] .oc-edit-btn{min-height:40px}
 }
 
 /* BADGES */
@@ -546,6 +544,10 @@ input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6;cursor:pointer}
 
 /* COMBOBOX — write + dropdown */
 .combo-wrap { position: relative; }
+/* El campo con el desplegable abierto se eleva sobre los de abajo. Hace falta
+   porque .card crea contexto de apilamiento (tiene backdrop-filter) y ahi el
+   z-index del menu solo ordena dentro de la tarjeta. */
+.field:focus-within,.combo-wrap:focus-within,.cl-search-wrap:focus-within{z-index:var(--z-dropdown)}
 .combo-wrap input {
   width: 100%;
   background: var(--field);
@@ -567,7 +569,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6;cursor:pointer}
 @media (hover:hover) and (pointer:fine){.combo-arrow:hover{color:var(--text)}}
 .combo-list {
   position: absolute; top: calc(100% + 4px); left: 0; right: 0;
-  border: 1px solid var(--glass-border); border-radius: var(--radius-md);
+  background: var(--menu);
+  border: 1px solid var(--separator); border-radius: var(--radius-md);
   z-index: var(--z-dropdown); max-height: min(320px,50dvh); overflow-y: auto; overscroll-behavior: contain;
   display: none; box-shadow: var(--shadow-float); padding: 4px;
 }
@@ -1088,8 +1091,8 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
 .cl-search-input{width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-family:var(--font-sans);font-size:12px;outline:none;transition:border .15s,box-shadow .15s}
 .cl-search-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
 .cl-search-drop{position:absolute;top:calc(100% + 4px);left:0;right:0;
-  background:var(--glass-strong);-webkit-backdrop-filter:blur(var(--blur-bar)) saturate(180%);backdrop-filter:blur(var(--blur-bar)) saturate(180%);
-  border:1px solid var(--glass-border);border-radius:var(--radius-md);box-shadow:var(--shadow-float);
+  background:var(--menu);
+  border:1px solid var(--separator);border-radius:var(--radius-md);box-shadow:var(--shadow-float);
   z-index:var(--z-dropdown);display:none;max-height:min(320px,50dvh);overflow-y:auto;overscroll-behavior:contain;padding:4px}
 .cl-search-drop.open{display:block}
 .cl-si{padding:9px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .1s}@media (hover:hover) and (pointer:fine){
@@ -1317,9 +1320,10 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
     <span>Flujo</span>
   </button>
-  <button class="kv-tab" data-sec="ventas" onclick="showView('ventas')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-    <span>Resultados</span>
+  <button class="kv-tab kv-tab-menu" id="kvTabMenu" onclick="kvToggleSectionMenu(this)"
+          aria-haspopup="menu" aria-expanded="false" aria-label="Ver todas las secciones">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+    <span>Menú</span>
   </button>
 </nav>
 
@@ -4797,6 +4801,13 @@ document.addEventListener('keydown',function(e){
 function kvSyncNav(sec){
   document.querySelectorAll('.nav-tab,.kv-tab,.kv-tab-add,.kv-section-item')
     .forEach(b=>b.classList.toggle('active',b.dataset.sec===sec));
+  // El boton "Menu" de la tabbar no representa una seccion: se marca activo
+  // cuando la seccion actual es una de las que viven dentro del menu.
+  const m=document.getElementById('kvTabMenu');
+  if(m){
+    const enBarra=[...document.querySelectorAll('.kv-tabbar [data-sec]')].map(b=>b.dataset.sec);
+    m.classList.toggle('active',!enBarra.includes(sec));
+  }
 }
 
 function showView(n){
