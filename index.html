@@ -4362,7 +4362,10 @@ function rsvLimpiarFiltros(){
 // una barra de navegacion como ultima fila del tbody. Sirve para cualquier
 // tabla sin tocar su HTML. El inventario tiene la suya propia, mas vieja,
 // con la barra fuera de la tabla.
-const PAG_SIZE = 100;
+// 50 filas por hoja: con el scroll interno quitado, la tabla se lee de
+// corrido y es la pagina la que scrollea, asi que la hoja tiene que entrar
+// en un par de pantallas.
+const PAG_SIZE = 50;
 const _pag = {};
 
 function pagRender(key, rows, tbodyId, colspan, vacio, mantenerPag){
@@ -5132,7 +5135,7 @@ async function loadClientes(){
 
 // ── PAGINACIÓN INVENTARIO ──
 let invPage=0;
-const INV_PAGE_SIZE=100;
+const INV_PAGE_SIZE=50;  // igual que PAG_SIZE del resto de las tablas
 let _invAllRows=[];
 
 function renderInventario(rows){
