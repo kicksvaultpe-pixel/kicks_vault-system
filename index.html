@@ -791,6 +791,8 @@ input[list] { cursor: text; }
   color:var(--muted2);cursor:pointer;font-size:13px;line-height:1;font-family:inherit}@media (hover:hover) and (pointer:fine){
 .oc-quitar:hover{border-color:var(--red);color:var(--red)}}
 .oc-mas{font-size:12px;line-height:16px;font-weight:600;padding:1px 5px;border-radius:var(--radius-sm);background:var(--tile);color:var(--text-secondary)}
+/* Sin uso desde que OCs pasa a .btn-edit-inv como los otros 3 tabs. Se
+   deja la regla solo por los :active de mas arriba. */
 .oc-edit-btn{padding:4px 11px;font-size:12px;line-height:16px;font-weight:600;border-radius:var(--radius-sm);border:1px solid var(--field-border);
   background:var(--card);color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;
   font-family:inherit;transition:border-color .15s,color .15s}@media (hover:hover) and (pointer:fine){
@@ -4193,7 +4195,7 @@ function renderOCTab(){
           ? `<span class="badge badge-muted">${arts.length}</span>`
           : `<span class="td-muted">— <i style="font-style:normal;opacity:.6">＋</i></span>`}</div>
       </td>
-      <td class="right" data-role="actions"><button class="oc-edit-btn" onclick="ocAbrirModal('${oc.codigo}')">Editar</button></td>
+      <td class="right" data-role="actions"><button class="btn-edit-inv" onclick="event.stopPropagation();ocAbrirModal('${oc.codigo}')" title="Editar la orden">✏</button></td>
     </tr>`;
   });
   pagRender('ocs', _filasOcs, 'oc-tbody', 15,
@@ -4665,7 +4667,7 @@ function renderReservas(){
         ?`<span class="rsv-saldo-ok">✓ ${fmt(saldo)}</span>`
         :`<span class="rsv-saldo-pend">⏳ ${fmt(saldo)}</span>`}</td>
       <td data-role="badge">${estadoBadge}</td>
-      <td style="text-align:center"><button class="btn-edit-inv" onclick="event.stopPropagation();abrirReservaDetalle('${r.codigo_reserva}')" title="Ver detalle">›</button></td>
+      <td style="text-align:center"><button class="btn-edit-inv" onclick="event.stopPropagation();abrirReservaDetalle('${r.codigo_reserva}')" title="Ver detalle de la reserva">✏</button></td>
     </tr>`;
   });
   pagRender('reservas', _filasReservas, 'rsv-tbody', 12, '<tr><td colspan="12" style="text-align:center;padding:30px;color:var(--muted2)">Sin registros</td></tr>');
@@ -5477,7 +5479,7 @@ function _renderInvPage(){
       <td class="right">${ventaHtml}</td>
       <td data-role="badge">${estadoBadge}</td>
       <td data-role="badge2">${pagoBadge}</td>
-      <td style="text-align:center" data-role="actions"><button class="btn-edit-inv" onclick="abrirEditarItem('${p.codigo_producto}')" title="Editar">✏</button></td>
+      <td style="text-align:center" data-role="actions"><button class="btn-edit-inv" onclick="event.stopPropagation();abrirEditarItem('${p.codigo_producto}')" title="Editar el producto">✏</button></td>
     </tr>`;
   }).join('');
 }
@@ -5958,7 +5960,7 @@ function renderClientes(data){
       <td class="td-unit" data-p="3">${c.canal_preferido||'—'}</td>
       <td data-role="badge" data-p="2">${tipoBadgeHTML(c.tipo)}</td>
       <td class="td-amt right" data-role="amount" style="color:${monto>0?'var(--text)':'var(--muted2)'}">${monto>0?fmt(monto):'—'}</td>
-      <td data-role="actions"><button class="btn-edit-inv" title="Editar cliente" onclick="event.stopPropagation();abrirModalCliente(${c.id_cliente})">✏</button></td>
+      <td data-role="actions"><button class="btn-edit-inv" onclick="event.stopPropagation();abrirModalCliente(${c.id_cliente})" title="Editar el cliente">✏</button></td>
     </tr>`;
   });
   pagRender('clientes', _filasClientes, 'cl-tbody', 9, '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--muted2)">Sin registros</td></tr>');
@@ -9248,11 +9250,19 @@ kvArrancar();
           <div class="combo-wrap"><input type="text" id="iep-pago" class="iep-select" placeholder="Tipo de pago..." autocomplete="off" readonly oninput="comboFilter('iep-pago','cl-iep-pago')" onfocus="comboOpen('iep-pago','cl-iep-pago')" onblur="comboBlurStrict('iep-pago','cl-iep-pago')" onkeydown="comboKey(event,'iep-pago','cl-iep-pago')"><span class="combo-arrow">▼</span><div class="combo-list" id="cl-iep-pago"></div></div>
         </div>
         <div class="field"><label>OC</label><input type="text" id="iep-oc" autocomplete="off" placeholder="OC-001"></div>
-        <div class="field"><label>Factura</label><input type="text" id="iep-factura" autocomplete="off" placeholder="N° factura"></div>
+
       </div>
     </div>
 
     <!-- Financiero -->
+    <div class="iep-section">
+      <div class="iep-section-lbl">Factura y notas</div>
+      <div class="form-grid g2" style="margin-bottom:12px">
+        <div class="field span2"><label>Factura</label><input type="text" id="iep-factura" autocomplete="off" placeholder="N° factura"></div>
+      </div>
+      <textarea id="iep-observaciones" rows="3" placeholder="Apuntes…" style="width:100%;background:var(--field);border:1px solid var(--field-border);border-radius:var(--radius-sm);padding:10px;color:var(--text);font-family:var(--font-sans);font-size:12px;resize:vertical;box-sizing:border-box;outline:none;transition:border-color .15s" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--field-border)'"></textarea>
+    </div>
+
     <div class="iep-section">
       <div class="iep-section-lbl">Precios</div>
       <div class="form-grid g2">
@@ -9298,8 +9308,6 @@ kvArrancar();
 
     <!-- Observaciones -->
     <div class="iep-section">
-      <div class="iep-section-lbl">Notas</div>
-      <textarea id="iep-observaciones" rows="3" placeholder="Apuntes…" style="width:100%;background:var(--field);border:1px solid var(--field-border);border-radius:var(--radius-sm);padding:10px;color:var(--text);font-family:var(--font-sans);font-size:12px;resize:vertical;box-sizing:border-box;outline:none;transition:border-color .15s" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--field-border)'"></textarea>
     </div>
 
     <!-- Botones -->
