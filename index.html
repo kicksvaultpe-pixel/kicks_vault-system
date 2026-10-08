@@ -146,6 +146,14 @@ html{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;overs
 /* Con una hoja o una ventana abierta el fondo NO se scrollea. Sin esto su
    barra quedaba al lado del panel, pareciendo que le cortaba la esquina
    redondeada, y el contenido de atras se movia detras del dialogo. */
+/* En html, NO en body: el que scrollea la pagina es el documentElement, asi
+   que overflow:hidden en body no detiene nada y la barra seguia visible.
+   Se deja en los dos por si algun navegador usa body como scroller. */
+html:has(#inv-edit-overlay.open),
+html:has(#rsv-overlay.open),
+html:has(.cl-backdrop.open),
+html:has(.cl-panel.open),
+html:has(.modal-overlay.open),
 body:has(#inv-edit-overlay.open),
 body:has(#rsv-overlay.open),
 body:has(.cl-backdrop.open),
@@ -1119,6 +1127,17 @@ input[list] { cursor: text; }
 .btn-edit-inv:hover{border-color:var(--accent);color:var(--accent-ink);background:var(--accent-soft)}}
 #inv-edit-overlay{position:fixed;inset:0;z-index:var(--z-sheet);display:none;opacity:0;transition:opacity .2s;pointer-events:none}
 #inv-edit-overlay.open{display:block;opacity:1;pointer-events:all}
+/* Las hojas recortan con su radio y NO scrollean: el scroll vive en
+   .sheet-body, un envoltorio interno sin radio. Asi la barra queda adentro
+   del relleno y no puede cruzar las esquinas redondeadas -- meterle margen
+   al riel no alcanzaba, porque la barra se pinta en el borde de la caja y un
+   radio de 30px se la come igual.
+   Es la estructura que .cl-panel ya usaba con .cl-panel-body. */
+#inv-edit-panel,#rsv-panel{display:flex;flex-direction:column;overflow:hidden!important;padding:0!important}
+.sheet-body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:24px 24px 40px}
+@media(max-width:767px){
+  .sheet-body{padding-bottom:calc(40px + env(safe-area-inset-bottom,0px))}
+}
 #inv-edit-panel{position:fixed;right:12px;top:12px;bottom:12px;width:min(var(--sheet-w),calc(100vw - 24px));
   z-index:calc(var(--z-sheet) + 1);overflow-y:auto;overscroll-behavior:contain;padding:24px 24px 40px;
   border-radius:var(--radius-xl);box-shadow:var(--shadow-sheet);transform:translateX(calc(100% + 12px));transition:transform .25s cubic-bezier(.4,0,.2,1)}
@@ -9281,6 +9300,7 @@ kvArrancar();
 <!-- ══ INVENTARIO EDIT PANEL ══ -->
 <div id="inv-edit-overlay" onclick="cerrarEditarItem()">
   <div id="inv-edit-panel" onclick="event.stopPropagation()">
+    <div class="sheet-body">
 
     <!-- Header -->
     <div class="iep-header">
@@ -9384,10 +9404,12 @@ kvArrancar();
       <button class="btn btn-ghost" onclick="cerrarEditarItem()">Cancelar</button>
     </div>
   </div>
+  </div>
 </div>
 <!-- ── RESERVAS DETAIL PANEL ── -->
 <div id="rsv-overlay" onclick="if(event.target===this)cerrarReservaDetalle()">
   <div id="rsv-panel">
+    <div class="sheet-body">
 
     <!-- Header -->
     <div class="iep-header">
@@ -9477,6 +9499,7 @@ kvArrancar();
       <div style="font-size:12px;color:var(--muted);line-height:1.6" id="rsv-p-notas">—</div>
     </div>
 
+  </div>
   </div>
 </div>
 
