@@ -180,7 +180,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-sans);min-hei
    scrollbar-width/scrollbar-color. */
 *{scrollbar-width:thin;scrollbar-color:var(--field-border) transparent}
 ::-webkit-scrollbar{width:10px;height:10px;background:transparent}
-::-webkit-scrollbar-track{background:transparent;border:0}
+/* margin-block: el riel se achica arriba y abajo para que el pulgar no
+   pueda llegar a las esquinas redondeadas. El inset horizontal lo da el
+   borde transparente del pulgar; este es el vertical. */
+::-webkit-scrollbar-track{background:transparent;border:0;margin-block:14px}
 ::-webkit-scrollbar-corner{background:transparent}
 ::-webkit-scrollbar-thumb{
   background:var(--field-border);border-radius:var(--radius-pill);
@@ -611,11 +614,28 @@ td.right{font-weight:600;color:var(--text)}
 .modal-overlay{position:fixed;inset:0;z-index:var(--z-modal);display:none;align-items:center;justify-content:center;padding:16px}
 .modal-overlay.open{display:flex}
 /* El vidrio y el blur los pone la regla de .kv-glass-strong,nav,.modal,... */
+/* El filo iluminado de arriba es lo que hace que el vidrio se lea como
+   vidrio; las ventanas emergentes eran lo unico que no lo tenia. */
 .modal{border:1px solid var(--glass-border);border-radius:var(--radius-xl);padding:24px;width:100%;max-width:440px;
-  max-height:calc(100dvh - 32px);overflow:auto;overscroll-behavior:contain;box-shadow:var(--shadow-sheet)}
-.modal-title{font-family:var(--font-sans);font-weight:700;font-size:20px;line-height:26px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
-.modal-close{background:none;border:none;color:var(--muted2);font-size:20px;cursor:pointer;line-height:1}@media (hover:hover) and (pointer:fine){
-.modal-close:hover{color:var(--text)}}
+  max-height:calc(100dvh - 32px);overflow:auto;overscroll-behavior:contain;
+  box-shadow:var(--shadow-sheet),inset 0 1px 0 var(--glass-highlight)}
+/* El titulo se separa del contenido con una linea, igual que las
+   secciones de las hojas laterales. */
+.modal-title{font-family:var(--font-sans);font-weight:700;font-size:20px;line-height:26px;
+  margin:-4px 0 16px;padding-bottom:14px;border-bottom:1px solid var(--separator);
+  display:flex;align-items:center;justify-content:space-between;gap:12px}
+/* Mismo boton de cerrar que las hojas laterales (.iep-close): antes era un
+   caracter suelto de 20px de alto, sin borde ni area tocable, mientras que
+   las hojas tenian un boton redondeado. Dos cierres distintos en la misma
+   app. */
+.modal-close{background:none;border:1px solid var(--field-border);color:var(--muted2);
+  width:32px;height:32px;flex:none;border-radius:var(--radius-sm);cursor:pointer;font-size:15px;
+  display:inline-flex;align-items:center;justify-content:center;line-height:1;
+  transition:border-color .15s,color .15s}
+@media (hover:hover) and (pointer:fine){
+  .modal-close:hover{border-color:var(--negative);color:var(--negative)}
+}
+@media(pointer:coarse){.modal-close{width:44px;height:44px}}
 
 
 /* DATALIST native dropdown styling */
