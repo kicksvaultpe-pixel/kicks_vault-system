@@ -180,10 +180,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-sans);min-hei
    scrollbar-width/scrollbar-color. */
 *{scrollbar-width:thin;scrollbar-color:var(--field-border) transparent}
 ::-webkit-scrollbar{width:10px;height:10px;background:transparent}
-/* margin-block: el riel se achica arriba y abajo para que el pulgar no
-   pueda llegar a las esquinas redondeadas. El inset horizontal lo da el
-   borde transparente del pulgar; este es el vertical. */
-::-webkit-scrollbar-track{background:transparent;border:0;margin-block:14px}
+/* El riel se achica arriba y abajo para que el pulgar no pueda llegar a las
+   esquinas redondeadas. OJO: tiene que ser `margin` fisico -- WebKit NO
+   aplica las propiedades logicas (margin-block) en los pseudo-elementos de
+   la barra, y por eso el primer intento no hizo nada. */
+::-webkit-scrollbar-track{background:transparent;border:0;margin:14px 0}
 ::-webkit-scrollbar-corner{background:transparent}
 ::-webkit-scrollbar-thumb{
   background:var(--field-border);border-radius:var(--radius-pill);
@@ -624,18 +625,6 @@ td.right{font-weight:600;color:var(--text)}
 .modal-title{font-family:var(--font-sans);font-weight:700;font-size:20px;line-height:26px;
   margin:-4px 0 16px;padding-bottom:14px;border-bottom:1px solid var(--separator);
   display:flex;align-items:center;justify-content:space-between;gap:12px}
-/* Mismo boton de cerrar que las hojas laterales (.iep-close): antes era un
-   caracter suelto de 20px de alto, sin borde ni area tocable, mientras que
-   las hojas tenian un boton redondeado. Dos cierres distintos en la misma
-   app. */
-.modal-close{background:none;border:1px solid var(--field-border);color:var(--muted2);
-  width:32px;height:32px;flex:none;border-radius:var(--radius-sm);cursor:pointer;font-size:15px;
-  display:inline-flex;align-items:center;justify-content:center;line-height:1;
-  transition:border-color .15s,color .15s}
-@media (hover:hover) and (pointer:fine){
-  .modal-close:hover{border-color:var(--negative);color:var(--negative)}
-}
-@media(pointer:coarse){.modal-close{width:44px;height:44px}}
 
 
 /* DATALIST native dropdown styling */
@@ -1143,8 +1132,27 @@ input[list] { cursor: text; }
   color:var(--text-tertiary);margin-bottom:4px}
 .iep-titulo{font-family:var(--font-sans);font-size:17px;line-height:22px;font-weight:700;color:var(--accent-ink);
   word-break:break-word}
-.iep-close{background:none;border:1px solid var(--field-border);color:var(--muted2);width:32px;height:32px;border-radius:var(--radius-sm);cursor:pointer;font-size:15px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color .15s,color .15s}@media (hover:hover) and (pointer:fine){
-.iep-close:hover{border-color:var(--red);color:var(--red)}}
+/* Un solo boton de cerrar para las 3 hojas laterales y las 9 ventanas
+   emergentes. Antes habia tres: este, una copia para .modal-close y, en la
+   hoja de Clientes, un caracter suelto de 22px sin borde ni area tocable. */
+.iep-close,.modal-close,.cl-panel-close{
+  background:none;border:1px solid var(--field-border);color:var(--muted2);
+  width:32px;height:32px;flex:none;border-radius:var(--radius-sm);cursor:pointer;
+  font-size:15px;line-height:1;padding:0;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:border-color .15s,color .15s}
+@media (hover:hover) and (pointer:fine){
+  .iep-close:hover,.modal-close:hover,.cl-panel-close:hover{
+    border-color:var(--negative);color:var(--negative)}
+}
+@media(pointer:coarse){.iep-close,.modal-close,.cl-panel-close{width:44px;height:44px}}
+/* Las hojas y las ventanas tienen un radio de 30px, asi que necesitan mas
+   margen de riel que el resto: con los 14 globales el pulgar todavia entraba
+   en la curva. */
+.modal::-webkit-scrollbar-track,
+#inv-edit-panel::-webkit-scrollbar-track,
+#rsv-panel::-webkit-scrollbar-track,
+.cl-panel-body::-webkit-scrollbar-track{margin:30px 0}
 .iep-section{border-top:1px solid var(--separator);padding-top:16px;margin-top:16px}
 .iep-section-lbl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted2);margin-bottom:12px}
 .iep-select{width:100%;background:var(--field);border:1px solid var(--field-border);border-radius:var(--radius-sm);padding:8px 10px;color:var(--text);font-family:var(--font-sans),inherit;font-size:14px;line-height:20px;font-weight:500;cursor:pointer;appearance:none;-webkit-appearance:none}
@@ -1303,8 +1311,6 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
 .cl-panel-head{padding:20px 20px 16px;border-bottom:1px solid var(--separator);flex-shrink:0}
 .cl-panel-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .cl-panel-code{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--muted2);text-transform:uppercase;font-family:var(--font-sans)}
-.cl-panel-close{background:none;border:none;color:var(--muted2);font-size:22px;cursor:pointer;line-height:1;padding:2px 4px;transition:color .15s}@media (hover:hover) and (pointer:fine){
-.cl-panel-close:hover{color:var(--text)}}
 .cl-panel-name{font-family:var(--font-sans);font-weight:700;font-size:20px;line-height:26px;letter-spacing:-.01em;color:var(--text);margin-bottom:8px}
 .cl-panel-body{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:20px}
 .cl-section{margin-bottom:22px}
