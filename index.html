@@ -139,7 +139,18 @@
    se acaba de enfocar, sin esto lo puede dejar justo debajo de la tabbar
    o de la barra del boton de registrar. */
 html{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;overscroll-behavior:none;
-  scroll-padding-bottom:calc(var(--tabbar-h) + 40px + env(safe-area-inset-bottom,0px))}
+  scroll-padding-bottom:calc(var(--tabbar-h) + 40px + env(safe-area-inset-bottom,0px));
+  /* Reserva el ancho de la barra siempre: cuando se bloquea el scroll del
+     fondo (ver abajo) la pagina no salta. */
+  scrollbar-gutter:stable}
+/* Con una hoja o una ventana abierta el fondo NO se scrollea. Sin esto su
+   barra quedaba al lado del panel, pareciendo que le cortaba la esquina
+   redondeada, y el contenido de atras se movia detras del dialogo. */
+body:has(#inv-edit-overlay.open),
+body:has(#rsv-overlay.open),
+body:has(.cl-backdrop.open),
+body:has(.cl-panel.open),
+body:has(.modal-overlay.open){overflow:hidden}
 button,a,[role="button"],input,select,textarea{touch-action:manipulation}
 /* El campo se queda en 12px en mouse (la densidad que ya tenia la app) y solo
    sube a 16px con touch: abajo de eso, iOS hace zoom al tocar un input y no
