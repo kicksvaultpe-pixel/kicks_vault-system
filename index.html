@@ -636,9 +636,14 @@ td.right{font-weight:600;color:var(--text)}
 /* El vidrio y el blur los pone la regla de .kv-glass-strong,nav,.modal,... */
 /* El filo iluminado de arriba es lo que hace que el vidrio se lea como
    vidrio; las ventanas emergentes eran lo unico que no lo tenia. */
-.modal{border:1px solid var(--glass-border);border-radius:var(--radius-xl);padding:24px;width:100%;max-width:440px;
-  max-height:calc(100dvh - 32px);overflow:auto;overscroll-behavior:contain;
+/* Misma estructura que las hojas: la ventana recorta con su radio y NO
+   scrollea; el scroll vive en .sheet-body. Con overflow:auto aca, la barra
+   se pintaba en el borde y el radio de 30px se la comia en las dos
+   esquinas. */
+.modal{border:1px solid var(--glass-border);border-radius:var(--radius-xl);padding:0;width:100%;max-width:440px;
+  max-height:calc(100dvh - 32px);overflow:hidden;display:flex;flex-direction:column;
   box-shadow:var(--shadow-sheet),inset 0 1px 0 var(--glass-highlight)}
+.modal>.sheet-body{padding:24px}
 /* El titulo se separa del contenido con una linea, igual que las
    secciones de las hojas laterales. */
 .modal-title{font-family:var(--font-sans);font-weight:700;font-size:20px;line-height:26px;
@@ -1133,13 +1138,13 @@ input[list] { cursor: text; }
    al riel no alcanzaba, porque la barra se pinta en el borde de la caja y un
    radio de 30px se la come igual.
    Es la estructura que .cl-panel ya usaba con .cl-panel-body. */
-#inv-edit-panel,#rsv-panel{display:flex;flex-direction:column;overflow:hidden!important;padding:0!important}
+#inv-edit-panel,#rsv-panel{display:flex;flex-direction:column;overflow:hidden;padding:0}
 .sheet-body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:24px 24px 40px}
 @media(max-width:767px){
-  .sheet-body{padding-bottom:calc(40px + env(safe-area-inset-bottom,0px))}
+  .sheet-body,.cl-panel-body{padding-bottom:calc(40px + env(safe-area-inset-bottom,0px))}
 }
 #inv-edit-panel{position:fixed;right:12px;top:12px;bottom:12px;width:min(var(--sheet-w),calc(100vw - 24px));
-  z-index:calc(var(--z-sheet) + 1);overflow-y:auto;overscroll-behavior:contain;padding:24px 24px 40px;
+  z-index:calc(var(--z-sheet) + 1);
   border-radius:var(--radius-xl);box-shadow:var(--shadow-sheet);transform:translateX(calc(100% + 12px));transition:transform .25s cubic-bezier(.4,0,.2,1)}
 #inv-edit-overlay.open #inv-edit-panel{transform:translateX(0)}
 /* El panel de Reservas es gemelo del de Inventario y va declarado junto a
@@ -1150,7 +1155,7 @@ input[list] { cursor: text; }
 #rsv-overlay{position:fixed;inset:0;z-index:var(--z-sheet);display:none;opacity:0;transition:opacity .2s;pointer-events:none}
 #rsv-overlay.open{display:block;opacity:1;pointer-events:all}
 #rsv-panel{position:fixed;right:12px;top:12px;bottom:12px;width:min(var(--sheet-w),calc(100vw - 24px));
-  z-index:calc(var(--z-sheet) + 1);overflow-y:auto;overscroll-behavior:contain;padding:24px 24px 40px;
+  z-index:calc(var(--z-sheet) + 1);
   border-radius:var(--radius-xl);box-shadow:var(--shadow-sheet);transform:translateX(calc(100% + 12px));transition:transform .25s cubic-bezier(.4,0,.2,1)}
 #rsv-overlay.open #rsv-panel{transform:translateX(0)}
 .iep-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:12px}
@@ -1398,8 +1403,10 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
     top:auto;left:0;right:0;bottom:0;width:100%;max-height:92dvh;
     /* El relleno de abajo tiene que despejar el indicador de inicio: con
        bottom:0 los botones de guardar quedaban a 6px de el. */
-    padding-bottom:calc(40px + env(safe-area-inset-bottom,0px));
-    overflow-y:auto;-webkit-overflow-scrolling:touch;
+    /* overflow:hidden y NO auto: las 3 hojas scrollean por dentro (.sheet-body
+       y .cl-panel-body). Si el panel scrollea el mismo, su barra cruza la
+       esquina redondeada. El relleno de abajo se lo queda el envoltorio. */
+    overflow:hidden;-webkit-overflow-scrolling:touch;
     border-radius:var(--radius-xl) var(--radius-xl) 0 0;
     /* 105% y no 100%: la hoja tiene una sombra de 40px de desenfoque
        hacia arriba y con 100% exacto se asoma dentro de la pantalla.
@@ -3426,6 +3433,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
 <!-- MODAL PAGAR CRÉDITO -->
 <div class="modal-overlay" id="modal-pagar">
   <div class="modal">
+      <div class="sheet-body">
     <div class="modal-title">
       <span>💳 Pagar Crédito</span>
       <button class="modal-close" onclick="closeModal()">×</button>
@@ -3446,11 +3454,13 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
       <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
     </div>
   </div>
+    </div>
 </div>
 
 <!-- MODAL NUEVO / EDITAR CLIENTE -->
 <div class="modal-overlay" id="modal-nuevo-cliente">
   <div class="modal" style="max-width:520px">
+      <div class="sheet-body">
     <div class="modal-title">
       <span id="modal-cl-title">+ Nuevo Cliente</span>
       <button class="modal-close" onclick="cancelarModalCliente()">×</button>
@@ -3501,11 +3511,13 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
       <button class="btn btn-ghost" onclick="cancelarModalCliente()">Cancelar</button>
     </div>
   </div>
+    </div>
 </div>
 
 <!-- MODAL CLIENTE RÁPIDO -->
 <div class="modal-overlay" id="modal-cl-rapido">
   <div class="modal" style="max-width:340px">
+      <div class="sheet-body">
     <div class="modal-title">
       <span>+ Cliente rápido</span>
       <button class="modal-close" onclick="cerrarClRapido()">×</button>
@@ -3530,6 +3542,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
       <button class="btn btn-ghost" onclick="cerrarClRapido()">Cancelar</button>
     </div>
   </div>
+    </div>
 </div>
 
 <!-- PANEL PERFIL CLIENTE -->
@@ -9506,6 +9519,7 @@ kvArrancar();
 <!-- ══ MODAL COMPLETAR RESERVA ══ -->
 <div class="modal-overlay" id="modal-completar-rsv">
   <div class="modal" style="max-width:440px">
+      <div class="sheet-body">
     <div class="modal-title">
       <span>✓ Completar Reserva</span>
       <button class="modal-close" onclick="cerrarModalCompletarRsv()">×</button>
@@ -9526,11 +9540,13 @@ kvArrancar();
       <button class="btn btn-ghost" onclick="cerrarModalCompletarRsv()">Cancelar</button>
     </div>
   </div>
+    </div>
 </div>
 
 <!-- ══ MODAL CANCELAR RESERVA ══ -->
 <div class="modal-overlay" id="modal-cancelar-rsv">
   <div class="modal" style="max-width:400px">
+      <div class="sheet-body">
     <div class="modal-title">
       <span>Cancelar Reserva</span>
       <button class="modal-close" onclick="cerrarModalCancelarRsv()">×</button>
@@ -9544,10 +9560,12 @@ kvArrancar();
       <button class="btn btn-ghost" onclick="cerrarModalCancelarRsv()">No, volver</button>
     </div>
   </div>
+    </div>
 </div>
 
 <div class="modal-overlay" id="modal-cerrar-mes">
   <div class="modal" style="max-width:420px">
+      <div class="sheet-body">
     <div class="modal-title">
       <span>Cerrar mes</span>
       <button class="modal-close" onclick="fcCerrarModalCerrarMes()">&times;</button>
@@ -9564,10 +9582,12 @@ kvArrancar();
       <button class="btn btn-ghost" onclick="fcCerrarModalCerrarMes()">Volver</button>
     </div>
   </div>
+    </div>
 </div>
 
 <div class="modal-overlay" id="modal-oc">
   <div class="modal" style="max-width:620px">
+      <div class="sheet-body">
     <div class="modal-title">
       <span id="oc-modal-title">Nueva orden de compra</span>
       <button class="modal-close" onclick="ocCerrarModal()">&times;</button>
@@ -9607,10 +9627,12 @@ kvArrancar();
       <button class="btn btn-ghost" onclick="ocCerrarModal()">Cancelar</button>
     </div>
   </div>
+    </div>
 </div>
 
 <div class="modal-overlay" id="modal-oc-arts">
   <div class="modal" style="max-width:880px">
+      <div class="sheet-body">
     <div class="modal-title">
       <span id="oc-arts-title">Artículos</span>
       <button class="modal-close" onclick="ocCerrarArticulos()">&times;</button>
@@ -9628,11 +9650,13 @@ kvArrancar();
       <button class="btn btn-ghost" onclick="ocCerrarArticulos()">Cerrar</button>
     </div>
   </div>
+    </div>
 </div>
 
 <!-- MODAL PAGO MULTIPLE DE OCS -->
 <div class="modal-overlay" id="modal-oc-pago-multiple">
   <div class="modal" style="max-width:560px">
+      <div class="sheet-body">
     <div class="modal-title">
       <span>Pago Múltiple de OCs</span>
       <button class="modal-close" onclick="ocCerrarPagoMultiple()">&times;</button>
@@ -9669,6 +9693,7 @@ kvArrancar();
       <button class="btn btn-ghost" onclick="ocCerrarPagoMultiple()">Cancelar</button>
     </div>
   </div>
+    </div>
 </div>
 
 </body>
