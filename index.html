@@ -172,10 +172,22 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-sans);min-hei
    de tabla ya marcadas .right -- evita que un "1" y un "0" salten de ancho
    en una columna de numeros. */
 .num,td.right,.td-amt,[class*="-val"],[class*="-num"]{font-variant-numeric:tabular-nums}
-::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:var(--radius-sm)}@media (hover:hover) and (pointer:fine){
-::-webkit-scrollbar-thumb:hover{background:var(--muted2)}}
+/* Una sola barra de scroll para toda la app. El pulgar se dibuja sobre su
+   propio padding (borde transparente + background-clip), asi flota con 3px
+   de aire y no toca el filo: antes el riel recto cruzaba la esquina
+   redondeada de los paneles y las ventanas y se veia como un tajo.
+   Firefox no tiene pseudo-elementos de barra; se le da el equivalente con
+   scrollbar-width/scrollbar-color. */
+*{scrollbar-width:thin;scrollbar-color:var(--field-border) transparent}
+::-webkit-scrollbar{width:10px;height:10px;background:transparent}
+::-webkit-scrollbar-track{background:transparent;border:0}
+::-webkit-scrollbar-corner{background:transparent}
+::-webkit-scrollbar-thumb{
+  background:var(--field-border);border-radius:var(--radius-pill);
+  border:3px solid transparent;background-clip:padding-box;min-height:28px}
+@media (hover:hover) and (pointer:fine){
+  ::-webkit-scrollbar-thumb:hover{background:var(--text-tertiary);background-clip:padding-box}
+}
 
 /* NAV */
 /* ---------- Navegacion v2: topbar flotante (PC/tablet) + tab bar de 5
@@ -771,9 +783,6 @@ input[list] { cursor: text; }
 .oc-arts-wrap{overflow:auto;max-height:min(46vh,340px);
   border:1px solid var(--border2);border-radius:var(--radius-md);background:var(--tile);
   scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
-.oc-arts-wrap::-webkit-scrollbar{width:6px;height:6px}
-.oc-arts-wrap::-webkit-scrollbar-thumb{background:var(--border2);border-radius:var(--radius-sm)}@media (hover:hover) and (pointer:fine){
-.oc-arts-wrap::-webkit-scrollbar-thumb:hover{background:var(--muted2)}}
 .oc-arts-wrap thead th{position:sticky;top:0;z-index:2;background:var(--glass-strong);-webkit-backdrop-filter:blur(var(--blur-bar));backdrop-filter:blur(var(--blur-bar));
   box-shadow:inset 0 -1px 0 var(--separator)}
 .oc-arts-tabla{width:100%;min-width:680px;table-layout:fixed;font-size:13px;line-height:18px;font-weight:500;background:transparent}
@@ -782,7 +791,7 @@ input[list] { cursor: text; }
 .oc-arts-tabla .badge{max-width:100%;overflow:hidden;text-overflow:ellipsis}
 .oc-arts-tabla tr:first-child td{border-top:none}
 .oc-arts-nom{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:0;padding-right:18px}
-.oc-cand-list{max-height:210px;overflow-y:auto;border:1px solid var(--border2);border-radius:var(--radius-md);padding:4px;background:var(--tile);scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
+.oc-cand-list{max-height:210px;overflow-y:auto;border:1px solid var(--border2);border-radius:var(--radius-md);padding:4px;background:var(--tile)}
 .oc-cand{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:var(--radius-sm);cursor:pointer;font-size:12px}@media (hover:hover) and (pointer:fine){
 .oc-cand:hover{background:var(--accent-soft)}}
 .oc-cand.sel{background:var(--accent-soft)}
@@ -1243,23 +1252,6 @@ input[list] { cursor: text; }
 .btn:active:not(:disabled){transform:translateY(0) scale(.97)!important;transition:transform 120ms var(--ease-out)}
 .modal-overlay.open{animation:modalIn .2s cubic-bezier(.34,1.56,.64,1)}
 @keyframes modalIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
-.table-wrap,.fc-tabla-wrap{scrollbar-width:thin;scrollbar-color:var(--field-border) transparent}
-/* Barra de scroll de los menus flotantes: el riel cuadrado se recortaba
-   contra la esquina redondeada y se veia mal. Riel transparente y pulgar
-   dibujado sobre su propio padding, asi flota adentro sin tocar el borde. */
-.combo-list,.oc-cand-list,.oc-menu{
-  scrollbar-width:thin;scrollbar-color:var(--field-border) transparent}
-.combo-list::-webkit-scrollbar,
-.oc-cand-list::-webkit-scrollbar,
-.oc-menu::-webkit-scrollbar{width:10px;background:transparent}
-.combo-list::-webkit-scrollbar-track,
-.oc-cand-list::-webkit-scrollbar-track,
-.oc-menu::-webkit-scrollbar-track{background:transparent}
-.combo-list::-webkit-scrollbar-thumb,
-.oc-cand-list::-webkit-scrollbar-thumb,
-.oc-menu::-webkit-scrollbar-thumb{
-  background:var(--field-border);border-radius:var(--radius-pill);
-  border:3px solid transparent;background-clip:padding-box}
 @media(max-width:767px){#toast{bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom,0px) + 28px)}}
 tbody tr{cursor:pointer;user-select:none}
 tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid var(--accent);outline-offset:-2px}
@@ -8084,9 +8076,25 @@ function initRowSel(tbodyId){
   const tb=document.getElementById(tbodyId);
   if(!tb||tb._selInit)return;
   tb._selInit=true;
+  // En captura: hay que decidir ANTES de que corra el onclick de la fila o
+  // de la celda, para poder frenarlo cuando el gesto es de seleccion.
   tb.addEventListener('click',function(e){
     const cell=e.target.closest('td');
-    if(!cell||['BUTTON','A','INPUT','SELECT'].includes(e.target.tagName))return;
+    if(!cell)return;
+    // Un control se queda con su clic: no selecciona nada.
+    if(e.target.closest('button,a,input,select,textarea,label'))return;
+    const gestoSel=e.ctrlKey||e.metaKey||e.shiftKey;
+    if(gestoSel){
+      // Con ctrl o shift el clic es para seleccionar: se frena la accion de
+      // la fila o de la celda para que no se abra un panel ni un menu.
+      e.preventDefault(); e.stopPropagation();
+    }else if(e.target.closest('[onclick]')&&e.target.closest('[onclick]')!==tb){
+      // Clic simple sobre algo que ya tiene su propia accion (la fila de
+      // Reservas, el "ver articulos" de OCs, los menus de estado): se deja
+      // pasar y no se selecciona, asi la seleccion no queda escondida
+      // debajo del panel que se acaba de abrir.
+      return;
+    }
     const row=cell.closest('tr');
     if(!row)return;
     if(e.shiftKey&&_selLast&&tb.contains(_selLast)){
@@ -8120,12 +8128,28 @@ function initRowSel(tbodyId){
       _selCells.add(cell);cell.classList.add('cell-selected');
     }
     _selLast=cell;
-  });
+  },true);
 }
 
 document.addEventListener('keydown',function(e){
-  if((e.ctrlKey||e.metaKey)&&e.key==='c'&&_selCells.size>0){
-    if(document.activeElement&&['INPUT','TEXTAREA'].includes(document.activeElement.tagName))return;
+  // e.key==='c' fallaba en dos casos reales: con Bloq Mayus activado el
+  // navegador manda 'C', y en teclados no latinos e.key trae la letra del
+  // layout. e.code mira la POSICION fisica de la tecla, que es siempre la
+  // misma. Se aceptan las dos formas.
+  const esCopiar=(e.ctrlKey||e.metaKey)&&
+    (e.code==='KeyC'||(typeof e.key==='string'&&e.key.toLowerCase()==='c'));
+  if(!esCopiar)return;
+  if(document.activeElement&&['INPUT','TEXTAREA'].includes(document.activeElement.tagName))return;
+  // Una tabla que se vuelve a dibujar (un filtro, el buscador) deja en el
+  // set celdas que ya no estan en la pagina. Se descartan antes de contar.
+  [..._selCells].forEach(c=>{ if(!c.isConnected) _selCells.delete(c); });
+  if(_selCells.size===0){
+    // Antes no pasaba absolutamente nada y no habia forma de saber si el
+    // atajo no funcionaba o si simplemente no habia nada seleccionado.
+    toast('Primero seleccioná celdas: click, y shift+click para un rango','warn');
+    return;
+  }
+  {
     e.preventDefault();
     // Agrupa por fila y ordena todo segun su posicion real en la tabla,
     // asi copiar casillas sueltas en cualquier orden de clic pega en el
