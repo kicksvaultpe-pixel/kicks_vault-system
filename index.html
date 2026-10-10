@@ -1828,7 +1828,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
       <div class="form-grid g3">
         <div class="field"><label>Factura</label><input type="text" id="cp-factura-credito" placeholder="Nro. factura..."></div>
         <div class="field span2"><label>Descripción del producto</label><input type="text" id="cp-desc-factura-credito" placeholder="Descripción del producto..."></div>
-        <div class="field span3"><label>Notas</label><textarea id="cp-comentarios-credito" placeholder="Proveedor, condiciones, notas..."></textarea></div>
+        <div class="field span3"><label>Notas</label><textarea id="cp-comentarios-credito" placeholder="Apuntes…"></textarea></div>
       </div>
     </div>
     <div class="kv-submit-bar"><button class="btn btn-primary" id="btn-compra" onclick="registrarCompra()">✓ Registrar Compra</button></div>
@@ -1910,7 +1910,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
         </div>
         <!-- Comentarios -->
         <div class="field span2"><label>Comentarios <span style="font-size:11px;opacity:.6;font-weight:400">(opcional)</span></label>
-          <input type="text" id="vt-comentarios" placeholder="Número de pedido, condiciones, notas…">
+          <input type="text" id="vt-comentarios" placeholder="Apuntes…">
         </div>
       </div>
     </div>
@@ -3105,13 +3105,12 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
           <th data-p="3" style="width:54px">Grupo</th>
           <th data-p="2" style="width:120px">QC</th>
           <th class="right" style="width:82px">Valor $</th>
-          <th data-p="3" style="min-width:90px">Información</th>
           <th class="right" style="width:56px">Arts.</th>
           <th style="width:56px"></th>
         </tr>
       </thead>
       <tbody id="oc-tbody">
-        <tr class="loading-row"><td colspan="15"><div class="spinner"></div></td></tr>
+        <tr class="loading-row"><td colspan="14"><div class="spinner"></div></td></tr>
       </tbody>
     </table>
   </div>
@@ -3504,7 +3503,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
           <div class="combo-list" id="cl-cl-tipo"></div>
         </div>
       </div>
-      <div class="field span2"><label>Notas</label><textarea id="cl-notas" placeholder="Observaciones…" style="min-height:60px"></textarea></div>
+      <div class="field span2"><label>Notas</label><textarea id="cl-notas" placeholder="Apuntes…" style="min-height:60px"></textarea></div>
     </div>
     <div style="margin-top:16px;display:flex;gap:8px">
       <button class="btn btn-primary" id="btn-guardar-cl" onclick="guardarCliente()">✓ Guardar</button>
@@ -4252,7 +4251,6 @@ function renderOCTab(){
               : 'Escrito a mano — esta orden todavía no tiene artículos registrados');
         return `<span title="${tip}">${fmtUsd(val.usd)}${val.calc&&val.sinUsd?'<span class="oc-mas"> *</span>':''}</span>`;
       })()}</td>
-      <td class="td-unit td-trunc" data-p="3" title="${esc(oc.notas||'')}">${esc(oc.notas||'—')}</td>
       <td class="right" data-role="actions" style="cursor:pointer;padding:0" onclick="ocVerArticulos('${oc.codigo}')" title="Ver artículos de esta orden">
         <div style="padding:10px 14px">${arts.length
           ? `<span class="badge badge-muted">${arts.length}</span>`
@@ -4261,8 +4259,8 @@ function renderOCTab(){
       <td class="right" data-role="actions"><button class="btn-edit-inv" onclick="event.stopPropagation();ocAbrirModal('${oc.codigo}')" title="Editar la orden">✏</button></td>
     </tr>`;
   });
-  pagRender('ocs', _filasOcs, 'oc-tbody', 15,
-    '<tr><td colspan="15" style="text-align:center;padding:32px;color:var(--muted2)">Sin órdenes de compra</td></tr>');
+  pagRender('ocs', _filasOcs, 'oc-tbody', 14,
+    '<tr><td colspan="14" style="text-align:center;padding:32px;color:var(--muted2)">Sin órdenes de compra</td></tr>');
   ocRenderBarraPago();
 }
 
