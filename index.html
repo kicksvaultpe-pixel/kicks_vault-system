@@ -583,15 +583,22 @@ td.right{font-weight:600;color:var(--text)}
 .lote-resumen{font-size:13px;line-height:18px;font-weight:500;color:var(--text-secondary)}
 .lote-resumen b{color:var(--text);font-weight:700;font-variant-numeric:tabular-nums}
 .lote-acc{display:flex;gap:8px;flex-wrap:wrap}
-.lote-modo-oc{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.lote-modo-oc{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}
 .lote-modo-lbl{font-size:11px;line-height:14px;font-weight:700;letter-spacing:.08em;
   text-transform:uppercase;color:var(--text-tertiary)}
+.lote-modo-btns{display:flex;gap:6px;flex-wrap:wrap}
+/* Las pildoras se adaptan al texto; partirlo en dos renglones las descuadra. */
+.lote-modo-btns .oc-toggle{white-space:nowrap}
 /* Marca los campos que estan en la cadena de Enter. Se pone y se saca por JS
    segun el modo de pago y la moneda, asi que lo que se ve es la cadena real.
    Sin esto la funcion es invisible: nadie prueba Enter en un formulario. */
 .lote-eslabon>label::after{content:"\21b5";margin-left:7px;color:var(--accent);
   font-weight:700;font-size:13px}
 @media(max-width:767px){
+  /* La etiqueta arriba y las pildoras a todo el ancho: de costado el texto
+     no entra y se parte. */
+  .lote-modo-oc{flex-direction:column;align-items:stretch;gap:8px}
+  .lote-modo-btns .oc-toggle{flex:1 1 auto;text-align:center}
   .lote-add .field,.lote-add .btn{flex:1 1 100%}
   .lote-pie{flex-direction:column;align-items:stretch}
   .lote-acc{display:flex}
@@ -829,6 +836,7 @@ input[list] { cursor: text; }
 .oc-toggle{background:var(--card);border:1px solid var(--border2);border-radius:var(--radius-pill);padding:7px 14px;font-size:14px;line-height:20px;font-weight:500;color:var(--muted2);cursor:pointer;transition:background .15s,border-color .15s,color .15s}
 .oc-toggle.active{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 55%,transparent);color:var(--accent)}
 @media (hover:hover) and (pointer:fine){.oc-toggle:hover:not(.active){border-color:var(--accent);color:var(--text)}}
+@media(pointer:coarse){.oc-toggle{min-height:44px;padding:9px 16px}}
 
 
 /* ── INDICADORES ── */
@@ -1793,10 +1801,12 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
            todas las lineas, o una por cada linea (el caso de comprar 5
            tallas donde cada una es un pedido aparte con su tracking). -->
       <div class="lote-modo-oc" id="lote-modo-oc">
-        <span class="lote-modo-lbl">Las OC nuevas del lote son</span>
-        <div class="pago-toggle" style="margin:0">
-          <button class="ptoggle-btn active" id="lmoc-unica" onclick="loteSetModoOC('unica')">Una para todo</button>
-          <button class="ptoggle-btn" id="lmoc-porprod" onclick="loteSetModoOC('porProd')">Una por producto</button>
+        <span class="lote-modo-lbl">Cada producto del lote</span>
+        <div class="lote-modo-btns">
+          <button type="button" class="oc-toggle active" id="lmoc-unica"
+            onclick="loteSetModoOC('unica')">Comparte la misma OC</button>
+          <button type="button" class="oc-toggle" id="lmoc-porprod"
+            onclick="loteSetModoOC('porProd')">Lleva su propia OC</button>
         </div>
       </div>
       <div id="oc-panel-nueva">
@@ -6699,8 +6709,8 @@ function loteRestaurarLS(){
 function loteSetModoOC(modo){
   loteModoOC=modo==='porProd'?'porProd':'unica';
   const a=document.getElementById('lmoc-unica'), b=document.getElementById('lmoc-porprod');
-  if(a) a.className='ptoggle-btn'+(loteModoOC==='unica'?' active':'');
-  if(b) b.className='ptoggle-btn'+(loteModoOC==='porProd'?' active':'');
+  if(a) a.className='oc-toggle'+(loteModoOC==='unica'?' active':'');
+  if(b) b.className='oc-toggle'+(loteModoOC==='porProd'?' active':'');
   loteGuardarLS(); loteRender();
 }
 
