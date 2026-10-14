@@ -711,17 +711,22 @@ td.right{font-weight:600;color:var(--text)}
 input[type="date"]{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%}
 input[type="date"]::-webkit-date-and-time-value{text-align:left;margin:0}
 input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6;cursor:pointer;margin-inline-start:auto}
-/* Los campos de monto y cantidad son para digitar y nada mas. Las flechitas
-   del spinner se tocan sin querer, y la rueda del mouse le cambiaba el valor
-   al campo enfocado mientras scrolleabas la pagina -- de eso se ocupa el
-   listener de 'wheel' que esta en el JS. Esta regla ya existia suelta en
-   .tc-input y a medias en .cs-item input[type=number]; aca vale para todos.
-   Se mantiene type="number" a proposito: es lo que abre el teclado numerico
-   en el celular y lo que hace andar step/min/max. */
+@media (hover:hover) and (pointer:fine){input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}}
+/* Los campos de monto y cantidad son para digitar y nada mas. Hay TRES formas
+   de moverles el valor sin escribir, y se tapan las tres: las flechitas del
+   spinner (esta regla), la rueda del mouse sobre el campo enfocado, y las
+   flechas Arriba/Abajo del teclado -- de las dos ultimas se ocupan los
+   listeners de 'wheel' y de 'keydown' que estan en el JS. Esconder el spinner
+   por CSS solo tapa el boton: no apaga ninguno de los otros dos.
+   La regla ya existia suelta en .tc-input y a medias en .cs-item
+   input[type=number] (tenia el -moz-appearance pero no la parte de webkit, asi
+   que en Chrome el spinner se seguia viendo); aca vale para todos y aquellas
+   se borraron para no dejar tres lugares donde tocar lo mismo.
+   Se mantiene type="number" a proposito: es lo que abre el teclado numerico en
+   el celular y lo que hace andar step/min/max. */
 input[type="number"]{-moz-appearance:textfield;appearance:textfield}
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;appearance:none;margin:0}
-@media (hover:hover) and (pointer:fine){input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}}
 :root:not([data-theme="dark"]) input[type="date"]::-webkit-calendar-picker-indicator{filter:none}
 [data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightness(1.6)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightness(1.6)}}
@@ -839,7 +844,7 @@ input[list] { cursor: text; }
 .cs-item-info strong{font-size:13px;color:var(--text)}
 .cs-item-info span{color:var(--muted2)}
 .cs-item input[type="text"]{background:var(--field);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:6px 10px;color:var(--text);font-size:12px;width:100%}
-.cs-item input[type="number"]{background:var(--field);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:6px 10px;color:var(--accent);font-family:var(--font-sans);font-weight:800;font-size:13px;width:100%;-moz-appearance:textfield}
+.cs-item input[type="number"]{background:var(--field);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:6px 10px;color:var(--accent);font-family:var(--font-sans);font-weight:800;font-size:13px;width:100%}
 .cs-item-remove{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:16px;text-align:center}@media (hover:hover) and (pointer:fine){
 .cs-item-remove:hover{color:var(--red)}}
 /* OC TOGGLE */
@@ -1440,8 +1445,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
 /* ══ TC WIDGET ══ */
 .tc-widget{display:inline-flex;align-items:center;gap:10px;border-radius:var(--radius-md);padding:7px 14px;margin-bottom:16px}
 .tc-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted2)}
-.tc-input{width:88px;background:transparent;border:none;border-bottom:2px solid var(--border2);color:var(--accent);font-family:var(--font-sans);font-weight:700;font-size:17px;line-height:22px;text-align:center;padding:2px 6px;outline:none;-moz-appearance:textfield;transition:border-color .15s}
-.tc-input::-webkit-inner-spin-button,.tc-input::-webkit-outer-spin-button{-webkit-appearance:none}
+.tc-input{width:88px;background:transparent;border:none;border-bottom:2px solid var(--border2);color:var(--accent);font-family:var(--font-sans);font-weight:700;font-size:17px;line-height:22px;text-align:center;padding:2px 6px;outline:none;transition:border-color .15s}
 .tc-input:focus{border-bottom-color:var(--accent)}
 .tc-save-btn{border:none;background:var(--accent);color:var(--on-accent);border-radius:var(--radius-sm);padding:7px 12px;font-family:var(--font-sans);font-size:14px;line-height:20px;font-weight:600;cursor:pointer;transition:filter .2s;white-space:nowrap}@media (hover:hover) and (pointer:fine){
 .tc-save-btn:hover{filter:brightness(1.12)}}
@@ -3914,6 +3918,10 @@ document.addEventListener('click', e => {
 
 // ── ORDENES DE COMPRA ──
 let ocCache=[], ocModo='nueva', ocSessionCodigo=null, ocSessionCount=0;
+// El siguiente codigo libre segun ordenes_compra. Se guarda aparte del campo
+// porque el campo MUESTRA base + lo que el lote ya comprometio: si se usara el
+// campo como base, cada linea apilada se contaria dos veces.
+let ocCodigoBase=null;
 
 async function loadOCs(){
   const{data}=await db.from('ordenes_compra').select('*').order('id',{ascending:false});
@@ -4190,6 +4198,31 @@ function ocUpdateSessionCounter(codigo){
   wrap.style.display='';
 }
 
+// Suma k al correlativo respetando el ancho: "OC-098" + 2 -> "OC-100". Es la
+// misma aritmetica de genCodigosLote, aparte para poder adelantar en pantalla
+// lo que el guardado va a hacer de verdad.
+function ocSumarCodigo(cod, k){
+  const m=String(cod==null?'':cod).match(/^(.*?)(\d+)$/);
+  if(!m) return cod==null?'':String(cod);
+  return m[1]+String(parseInt(m[2],10)+k).padStart(m[2].length,'0');
+}
+
+// Cuantos codigos de OC tiene ya comprometidos el lote. Con "comparte la misma
+// OC" todas las lineas caen en una sola, asi que no corre nada.
+function ocCodigosComprometidos(){
+  if(loteModoOC!=='porProd') return 0;
+  return loteLineas.filter(l=>l.oc&&l.oc.modo==='nueva').length;
+}
+
+// Deja en "Codigo (auto)" el codigo de la linea que se esta editando AHORA.
+function ocRefrescarCodigo(){
+  const el=document.getElementById('cp-oc-nueva');
+  if(!el||!ocCodigoBase) return;
+  // Con una OC pinchada manda esa: los productos se le siguen cargando encima.
+  if(loteModoOC!=='porProd'&&ocSessionCodigo) return;
+  el.value=ocSumarCodigo(ocCodigoBase, ocCodigosComprometidos());
+}
+
 async function pregenOC(){
   if(tipoPagoActual!=='CREDITO') return;
   const el=document.getElementById('cp-oc-nueva');
@@ -4217,11 +4250,12 @@ async function pregenOC(){
   // Es ademas el mismo criterio que usa genCodigosLote('oc',n) al guardar el
   // lote, asi que lo que se muestra y lo que se crea ya no pueden discrepar.
   try{
-    const cod=await genCodigo('oc');
-    if(el&&cod) el.value=cod;
+    ocCodigoBase=await genCodigo('oc');
+    ocRefrescarCodigo();
   }catch(e){
     // Mejor el campo vacio que un codigo inventado: vacio no deja registrar,
     // un codigo equivocado pisa una orden de verdad.
+    ocCodigoBase=null;
     if(el) el.value='';
     toast('No se pudo proponer el código de OC: '+e.message,'warn');
   }
@@ -5270,9 +5304,33 @@ function kvTeclasEnCabeceras(){
 // la pagina clavada cada vez que el puntero pase por encima de un campo, que
 // es peor que el problema que vino a arreglar.
 document.addEventListener('wheel', function(e){
+  // Solo la rueda vertical: con shift+rueda o un trackpad en horizontal el
+  // navegador NUNCA cambia el valor, asi que ahi sacarle el foco seria perder
+  // el foco a cambio de nada. Y las tablas de la app scrollean en horizontal.
+  if(!e.deltaY) return;
   const el=document.activeElement;
   if(el && el.type==='number' && el===e.target) el.blur();
 }, {passive:true, capture:true});
+
+// Las flechas Arriba/Abajo hacen lo mismo que la rueda: le aplican el step al
+// campo numerico enfocado. Esconder el spinner por CSS solo tapa el boton.
+// Aca no es un riesgo teorico: la cadena de Enter del lote (loteEnter) deja el
+// foco DENTRO del campo de monto, con las manos en el teclado, asi que una
+// flecha apretada por reflejo para moverse de campo le cambia la plata. En
+// tc-global, con step=0.001, ademas recalcula todos los precios.
+//
+// Se cancela el evento en vez de sacar el foco, al reves que con la rueda:
+// aca estas escribiendo, y quitarte el foco seria peor que el problema. No se
+// pierde nada, porque en un input[type=number] las flechas arriba/abajo no
+// mueven el cursor, solo hacen step; Inicio/Fin/izquierda/derecha siguen
+// intactas.
+//
+// El filtro por type==='number' es imprescindible: los comboboxes usan
+// Arriba/Abajo para recorrer sus sugerencias (comboKey) y son type="text".
+document.addEventListener('keydown', function(e){
+  const el=e.target;
+  if(el && el.type==='number' && (e.key==='ArrowUp'||e.key==='ArrowDown')) e.preventDefault();
+}, true);
 
 document.addEventListener('keydown',function(e){
   if(e.key!=='Enter'&&e.key!==' ') return;
@@ -6745,12 +6803,17 @@ function loteProductos(lineas, codigoPorLinea, codigosProd){
 function lotePreviewOC(){
   const plan=lotePlanOC(loteLineas,loteModoOC);
   if(!plan.nuevas) return plan.asignar([]);
-  const el=document.getElementById('cp-oc-nueva');
-  const m=(el&&el.value||'').match(/^(.*?)(\d+)$/);
+  // Sale de ocCodigoBase, no del campo: el campo ya viene corrido por las
+  // lineas apiladas y contarlas de nuevo saltearia codigos. Con una OC
+  // pinchada manda esa. Si todavia no hay base (la consulta no volvio o
+  // fallo), se cae al campo.
+  const base=(loteModoOC!=='porProd'&&ocSessionCodigo) ? ocSessionCodigo
+    : (ocCodigoBase || (document.getElementById('cp-oc-nueva')||{}).value || '');
+  const m=String(base).match(/^(.*?)(\d+)$/);
   if(!m) return plan.asignar([]);
-  const pre=m[1], ancho=m[2].length, base=parseInt(m[2],10);
+  const pre=m[1], ancho=m[2].length, desde=parseInt(m[2],10);
   return plan.asignar(Array.from({length:plan.nuevas},
-    (_,i)=>pre+String(base+i).padStart(ancho,'0')));
+    (_,i)=>pre+String(desde+i).padStart(ancho,'0')));
 }
 
 // El nro de orden de la tienda se escribe a veces con # y a veces sin el. Se
@@ -6985,10 +7048,13 @@ function loteRender(){
   ver('btn-compra',!hay);
   ver('lote-hint',!hay);
   ver('lote-tabla',hay); ver('lote-pie',hay); ver('lote-chip',hay);
-  if(!hay) return;
+  // Tambien con el lote vacio: si lo acabas de vaciar, el campo tiene que
+  // volver a la base en vez de quedarse corrido.
+  if(!hay){ ocRefrescarCodigo(); return; }
 
   const uds=loteUnidades(loteLineas);
   document.getElementById('lote-chip').textContent=uds+' uds';
+  ocRefrescarCodigo();
   const prev=lotePreviewOC();
   document.getElementById('lote-tbody').innerHTML=loteLineas.map(function(l,i){
     const nom=[l.marca,l.modelo,l.colorway].filter(Boolean).join(' ');
