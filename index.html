@@ -711,6 +711,16 @@ td.right{font-weight:600;color:var(--text)}
 input[type="date"]{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%}
 input[type="date"]::-webkit-date-and-time-value{text-align:left;margin:0}
 input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6;cursor:pointer;margin-inline-start:auto}
+/* Los campos de monto y cantidad son para digitar y nada mas. Las flechitas
+   del spinner se tocan sin querer, y la rueda del mouse le cambiaba el valor
+   al campo enfocado mientras scrolleabas la pagina -- de eso se ocupa el
+   listener de 'wheel' que esta en el JS. Esta regla ya existia suelta en
+   .tc-input y a medias en .cs-item input[type=number]; aca vale para todos.
+   Se mantiene type="number" a proposito: es lo que abre el teclado numerico
+   en el celular y lo que hace andar step/min/max. */
+input[type="number"]{-moz-appearance:textfield;appearance:textfield}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;appearance:none;margin:0}
 @media (hover:hover) and (pointer:fine){input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}}
 :root:not([data-theme="dark"]) input[type="date"]::-webkit-calendar-picker-indicator{filter:none}
 [data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightness(1.6)}
@@ -1801,7 +1811,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
            todas las lineas, o una por cada linea (el caso de comprar 5
            tallas donde cada una es un pedido aparte con su tracking). -->
       <div class="lote-modo-oc" id="lote-modo-oc">
-        <span class="lote-modo-lbl">Cada producto del lote</span>
+        <span class="lote-modo-lbl">Cada producto</span>
         <div class="lote-modo-btns">
           <button type="button" class="oc-toggle active" id="lmoc-unica"
             onclick="loteSetModoOC('unica')">Comparte la misma OC</button>
@@ -4182,17 +4192,39 @@ function ocUpdateSessionCounter(codigo){
 
 async function pregenOC(){
   if(tipoPagoActual!=='CREDITO') return;
-  if(ocSessionCodigo) {
-    // Ya hay una OC activa en sesión, mostrarla
-    const el=document.getElementById('cp-oc-nueva');
-    if(el&&ocSessionCodigo) el.value=ocSessionCodigo;
+  const el=document.getElementById('cp-oc-nueva');
+
+  if(loteModoOC==='porProd'){
+    // "Lleva su propia OC": cada producto estrena orden, asi que no hay
+    // ninguna OC activa que pinchar. Dejarla pinchada era lo que mantenia el
+    // campo clavado en la misma OC registro tras registro.
+    ocSessionCodigo=null; ocSessionCount=0;
+    ocUpdateBadge(null); ocUpdateSessionCounter(null);
+  }else if(ocSessionCodigo){
+    // "Comparte la misma OC": se queda en la orden abierta para seguirle
+    // cargando productos.
+    if(el) el.value=ocSessionCodigo;
     ocUpdateBadge(ocSessionCodigo);
     ocUpdateSessionCounter(ocSessionCodigo);
     return;
   }
-  const{data,error}=await db.rpc('gen_codigo_oc');
-  const el=document.getElementById('cp-oc-nueva');
-  if(el&&data) el.value=data;
+
+  // genCodigo('oc') pregunta por el MAYOR de ordenes_compra; el RPC
+  // gen_codigo_oc usa una secuencia que puede ir atrasada o adelantada
+  // respecto de las filas reales (ver el comentario de genCodigo). Y este
+  // campo no es decorativo: registrarCompra() crea la OC con el codigo que
+  // diga aca, asi que un codigo atrasado se metia DENTRO de una OC existente.
+  // Es ademas el mismo criterio que usa genCodigosLote('oc',n) al guardar el
+  // lote, asi que lo que se muestra y lo que se crea ya no pueden discrepar.
+  try{
+    const cod=await genCodigo('oc');
+    if(el&&cod) el.value=cod;
+  }catch(e){
+    // Mejor el campo vacio que un codigo inventado: vacio no deja registrar,
+    // un codigo equivocado pisa una orden de verdad.
+    if(el) el.value='';
+    toast('No se pudo proponer el código de OC: '+e.message,'warn');
+  }
 }
 
 function csOCChange(){
@@ -5221,6 +5253,27 @@ function kvTeclasEnCabeceras(){
     if(!th.title) th.title='Ordenar por esta columna';
   });
 }
+// La rueda del mouse le cambia el valor a un input[type=number] enfocado:
+// alcanzaba con pasar scrolleando por encima del monto para moverlo sin
+// enterarte. Se le saca el foco, que corta el comportamiento de raiz.
+//
+// Va en document y en captura para que alcance TAMBIEN a los campos que arma
+// el JS (los cs-soles-N de Costos) y a los que viven dentro de ventanas
+// emergentes con su propio scroll: un listener puesto campo por campo se
+// perderia esos. Pasivo porque no cancela nada.
+//
+// La condicion es activeElement === target: el navegador solo cambia el valor
+// cuando el campo esta enfocado Y el puntero esta encima. Si esta enfocado
+// pero scrolleas en otro lado, no hay por que robarle el foco.
+//
+// Se saca el foco en vez de cancelar el evento a proposito: cancelarlo dejaria
+// la pagina clavada cada vez que el puntero pase por encima de un campo, que
+// es peor que el problema que vino a arreglar.
+document.addEventListener('wheel', function(e){
+  const el=document.activeElement;
+  if(el && el.type==='number' && el===e.target) el.blur();
+}, {passive:true, capture:true});
+
 document.addEventListener('keydown',function(e){
   if(e.key!=='Enter'&&e.key!==' ') return;
   const th=e.target.closest&&e.target.closest('th[onclick]');
@@ -6684,6 +6737,30 @@ function loteProductos(lineas, codigoPorLinea, codigosProd){
   return filas;
 }
 
+// Adelanta el codigo de OC que le va a tocar a cada linea. Arranca del campo
+// "Codigo (auto)", que ya trae el siguiente de la tabla, y lo reparte con el
+// MISMO lotePlanOC que se usa al guardar: una sola OC compartida, o una por
+// producto numerada en orden. Es una PREVISION, no una reserva -- el codigo
+// definitivo se pide recien al registrar.
+function lotePreviewOC(){
+  const plan=lotePlanOC(loteLineas,loteModoOC);
+  if(!plan.nuevas) return plan.asignar([]);
+  const el=document.getElementById('cp-oc-nueva');
+  const m=(el&&el.value||'').match(/^(.*?)(\d+)$/);
+  if(!m) return plan.asignar([]);
+  const pre=m[1], ancho=m[2].length, base=parseInt(m[2],10);
+  return plan.asignar(Array.from({length:plan.nuevas},
+    (_,i)=>pre+String(base+i).padStart(ancho,'0')));
+}
+
+// El nro de orden de la tienda se escribe a veces con # y a veces sin el. Se
+// normaliza al mostrarlo para que siempre salga uno solo: concatenar '#' a
+// secas daba "##03-BV3LQQW5KY". No se toca lo que se guarda.
+function loteOrdenTxt(v){
+  const t=String(v==null?'':v).replace(/^#+\s*/,'').trim();
+  return t?'#'+t:'';
+}
+
 function loteUnidades(ls){ return ls.reduce((t,l)=>t+l.cantidad,0); }
 function loteTotal(ls){ return Math.round(ls.reduce((t,l)=>t+(l.pc||0)*l.cantidad,0)*100)/100; }
 function loteTotalUsd(ls){ return Math.round(ls.reduce((t,l)=>t+(l.usd||0)*l.cantidad,0)*100)/100; }
@@ -6712,6 +6789,9 @@ function loteSetModoOC(modo){
   if(a) a.className='oc-toggle'+(loteModoOC==='unica'?' active':'');
   if(b) b.className='oc-toggle'+(loteModoOC==='porProd'?' active':'');
   loteGuardarLS(); loteRender();
+  // Re-proponer el codigo en el acto: si no, el campo sigue mostrando la OC
+  // pinchada hasta el proximo registro y el interruptor parece no hacer nada.
+  if(tipoPagoActual==='CREDITO'&&ocModo==='nueva') pregenOC();
 }
 
 // El interruptor solo tiene sentido con compra a credito y OC nueva: con una
@@ -6909,18 +6989,32 @@ function loteRender(){
 
   const uds=loteUnidades(loteLineas);
   document.getElementById('lote-chip').textContent=uds+' uds';
+  const prev=lotePreviewOC();
   document.getElementById('lote-tbody').innerHTML=loteLineas.map(function(l,i){
     const nom=[l.marca,l.modelo,l.colorway].filter(Boolean).join(' ');
-    let oc;
-    if(!l.oc) oc='<span class="td-unit">Contado</span>';
-    else if(l.oc.modo==='existente') oc='<span class="td-code">'+esc(l.oc.codigo)+'</span>';
-    else oc='<span class="td-unit">'+(loteModoOC==='porProd'?'OC propia':'OC compartida')+'</span>'+
-            (l.oc.orden?' <span class="td-code">#'+esc(l.oc.orden)+'</span>':'');
+    // Codigo primero y nro de orden de la tienda despues: el codigo es el que
+    // usa la app, el de la tienda es para cruzar con el mail del proveedor.
+    let oc, ocTit='';
+    const orden=l.oc?loteOrdenTxt(l.oc.orden):'';
+    if(!l.oc){
+      oc='<span class="td-unit">—</span>';
+    }else if(l.oc.modo==='existente'){
+      oc='<span class="td-code">'+esc(l.oc.codigo)+'</span>'+
+         ' <span class="td-unit">ya existe</span>';
+      ocTit='El producto se suma a una orden que ya esta creada';
+    }else{
+      oc=(prev[i]?'<span class="td-code">'+esc(prev[i])+'</span>'
+                 :'<span class="td-unit">OC nueva</span>')+
+         (orden?' <span class="td-unit">'+esc(orden)+'</span>':'');
+      ocTit=(loteModoOC==='porProd'?'Orden propia de este producto. '
+                                   :'Orden compartida por todo el lote. ')+
+            'Código previsto: se crea al registrar.';
+    }
     return '<tr onclick="loteEditar('+i+')" title="Clic para corregir esta línea">'+
       '<td class="td-main">'+esc(nom)+'</td>'+
       '<td class="td-unit">'+esc(l.talla)+'</td>'+
       '<td class="td-unit">'+l.cantidad+'</td>'+
-      '<td>'+oc+'</td>'+
+      '<td title="'+esc(ocTit)+'">'+oc+'</td>'+
       '<td class="td-amt">'+fmt((l.pc||0)*l.cantidad)+'</td>'+
       '<td><button class="lote-quitar" onclick="event.stopPropagation();loteQuitar('+i+')"'+
         ' title="Quitar del lote" aria-label="Quitar del lote">×</button></td>'+
