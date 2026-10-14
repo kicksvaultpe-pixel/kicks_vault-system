@@ -553,6 +553,43 @@ td.right{font-weight:600;color:var(--text)}
 .an-wide-table{overflow-x:auto!important}
 .an-wide-table table{min-width:640px}
 
+/* ---------- Lote de compra ---------- */
+.lote-barra{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
+.lote-barra .btn{flex:1 1 auto}
+.lote-cant{display:flex;flex-direction:column;gap:6px;flex:0 0 96px}
+.lote-cant label{font-size:11px;line-height:14px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--text-tertiary)}
+.lote-cant input{width:100%;min-height:44px;padding:10px 12px;text-align:center;
+  background:var(--field);border:1px solid var(--field-border);border-radius:var(--radius-md);
+  color:var(--text);font-family:var(--font-sans);font-size:14px;font-weight:600;outline:none}
+.lote-modo-oc{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.lote-modo-lbl{font-size:11px;line-height:14px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--text-tertiary)}
+.lote-fila{display:grid;grid-template-columns:1fr auto auto 32px;gap:10px;align-items:center;
+  padding:9px 0;border-bottom:1px solid var(--separator)}
+.lote-fila:last-of-type{border-bottom:none}
+.lote-prod{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-size:13px;line-height:18px;font-weight:500;color:var(--text)}
+.lote-prod small{display:block;font-size:12px;line-height:16px;font-weight:500;color:var(--text-tertiary)}
+.lote-talla{font-size:13px;line-height:18px;font-weight:600;color:var(--text-tertiary);white-space:nowrap}
+.lote-monto{font-size:13px;line-height:18px;font-weight:600;color:var(--text);
+  font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+.lote-quitar{background:none;border:0;color:var(--text-tertiary);cursor:pointer;font-size:15px;
+  width:28px;height:28px;border-radius:var(--radius-sm);display:inline-flex;align-items:center;
+  justify-content:center;position:relative}
+.lote-quitar::after{content:"";position:absolute;inset:-8px}
+@media (hover:hover) and (pointer:fine){.lote-quitar:hover{color:var(--negative);background:var(--negative-soft)}}
+.lote-pie{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  margin-top:14px;padding-top:14px;border-top:1px solid var(--separator)}
+.lote-resumen{font-size:13px;line-height:18px;font-weight:500;color:var(--text-secondary)}
+.lote-resumen b{color:var(--text);font-weight:700;font-variant-numeric:tabular-nums}
+@media(max-width:767px){
+  .lote-barra .btn,.lote-pie .btn{width:100%}
+  .lote-cant{flex:1 1 100%}
+  .lote-fila{grid-template-columns:1fr auto 32px;gap:8px}
+  .lote-fila .lote-talla{grid-column:1;grid-row:2;font-size:12px}
+}
+
 /* BADGES */
 .badge{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 10px;border:0;border-radius:var(--radius-pill);font-size:12px;line-height:16px;font-weight:600;white-space:nowrap;font-family:var(--font-sans)}
 /* Las tintas salen de los tokens -soft: antes eran rgba fijos derivados de
@@ -1651,7 +1688,7 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
               oninput="comboFilter('cp-talla','cl-cp-talla')"
               onfocus="comboOpen('cp-talla','cl-cp-talla')"
               onblur="comboBlur('cl-cp-talla')"
-              onkeydown="comboKey(event,'cp-talla','cl-cp-talla')">
+              onkeydown="cpTallaKey(event)">
             <span class="combo-arrow">▼</span>
             <div class="combo-list" id="cl-cp-talla"></div>
           </div>
@@ -1739,6 +1776,16 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
         </div>
         <div id="cp-oc-badge" style="display:none;background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);border-radius:var(--radius-pill);padding:4px 12px;font-size:11px;font-weight:700;color:var(--accent);align-items:center;gap:6px">
           <span>⬤</span><span id="cp-oc-badge-txt"></span>
+        </div>
+      </div>
+      <!-- Decide como se reparten las OC NUEVAS del lote: una sola para
+           todas las lineas, o una por cada linea (el caso de comprar 5
+           tallas donde cada una es un pedido aparte con su tracking). -->
+      <div class="lote-modo-oc" id="lote-modo-oc">
+        <span class="lote-modo-lbl">Las OC nuevas del lote son</span>
+        <div class="pago-toggle" style="margin:0">
+          <button class="ptoggle-btn active" id="lmoc-unica" onclick="loteSetModoOC('unica')">Una para todo</button>
+          <button class="ptoggle-btn" id="lmoc-porprod" onclick="loteSetModoOC('porProd')">Una por producto</button>
         </div>
       </div>
       <div id="oc-panel-nueva">
@@ -1831,7 +1878,29 @@ tbody td.cell-selected{background:var(--accent-soft)!important;outline:2px solid
         <div class="field span3"><label>Notas</label><textarea id="cp-comentarios-credito" placeholder="Apuntes…"></textarea></div>
       </div>
     </div>
-    <div class="kv-submit-bar"><button class="btn btn-primary" id="btn-compra" onclick="registrarCompra()">✓ Registrar Compra</button></div>
+    <!-- Lote: el formulario de arriba hace de editor de linea. "Agregar al
+         lote" NO lo limpia, asi que la linea siguiente cuesta solo el campo
+         que cambia (la talla, el nro de orden, la OC). -->
+    <div class="kv-submit-bar lote-barra">
+      <div class="lote-cant">
+        <label for="cp-cantidad">Cantidad</label>
+        <input type="number" id="cp-cantidad" min="1" step="1" value="1">
+      </div>
+      <button class="btn btn-ghost" onclick="loteAgregar()">+ Agregar al lote</button>
+      <button class="btn btn-primary" id="btn-compra" onclick="registrarCompra()">✓ Registrar Compra</button>
+    </div>
+
+    <div class="card lote-card" id="lote-card" style="display:none">
+      <div class="card-label" id="lote-titulo">En el lote</div>
+      <div id="lote-lista"></div>
+      <div class="lote-pie">
+        <span class="lote-resumen" id="lote-resumen">—</span>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" onclick="loteVaciar()">Vaciar</button>
+          <button class="btn btn-primary" id="lote-btn" onclick="loteRegistrar()">✓ Registrar el lote</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ── VENTA ── -->
@@ -4032,6 +4101,7 @@ function ocSetMode(modo){
   document.getElementById('oc-btn-existente').className='oc-toggle'+(modo==='existente'?' active':'');
   document.getElementById('oc-panel-nueva').style.display=modo==='nueva'?'':'none';
   document.getElementById('oc-panel-existente').style.display=modo==='existente'?'':'none';
+  loteModoOCSync();
 }
 
 function ocExistenteChange(){
@@ -5039,6 +5109,8 @@ async function rsvVincularProducto(){
 // ── INIT ──
 async function init(){
   kvTeclasEnCabeceras();
+  loteRestaurarLS();
+  loteRender();
   kvRenderTabbar();
   setToday();
   await Promise.all([loadTCGlobal(), loadInventario(), loadClientes(), loadOCs(), loadReservas()]);
@@ -5205,6 +5277,7 @@ function setTipoPago(tipo){
   document.getElementById('cp-card-factura-contado').style.display=tipo==='CONTADO'?'block':'none';
   document.getElementById('cp-card-factura-credito').style.display=tipo==='CREDITO'?'block':'none';
   if(tipo==='CREDITO') pregenOC();
+  loteModoOCSync();
 }
 
 // ── MONEDA TOGGLE ──
@@ -6500,7 +6573,313 @@ async function confirmarPago(){
 }
 
 // ── REGISTRAR COMPRA ──
+// ── LOTE DE COMPRA ──────────────────────────────────────────────────────────
+// El formulario de arriba es el editor de UNA linea. "Agregar al lote" la
+// apila sin limpiar el formulario, asi que la linea siguiente cuesta solo el
+// campo que cambia. Los codigos (de OC y de producto) se piden recien al
+// guardar, en bloque: pedirlos al apilar los quema si despues quitas la linea.
+let loteLineas=[], loteModoOC='unica';
+const LOTE_LS='kv_lote_compra';
+
+// Cuantas OC nuevas necesita el lote y que codigo le toca a cada linea.
+//   'unica'   -> todas las lineas nuevas comparten UN codigo
+//   'porProd' -> cada linea nueva se lleva el suyo (5 tallas = 5 pedidos
+//                aparte, cada uno con su tracking)
+function lotePlanOC(lineas, modoOC){
+  const idx=[];
+  lineas.forEach((l,i)=>{ if(l.oc&&l.oc.modo==='nueva') idx.push(i); });
+  const nuevas=idx.length===0?0:(modoOC==='unica'?1:idx.length);
+  return {nuevas, asignar(codigos){
+    const mapa={};
+    idx.forEach((i,k)=>{ mapa[i]=modoOC==='unica'?codigos[0]:codigos[k]; });
+    return mapa;
+  }};
+}
+
+// Una fila de ordenes_compra por cada OC DISTINTA. Si dos lineas caen en la
+// misma OC se manda una sola vez: mandarla dos veces es lo que le borraba la
+// descripcion a la orden.
+function loteOCsAEscribir(lineas, codigoPorLinea, cache){
+  const vistas=new Map();
+  lineas.forEach((l,i)=>{
+    if(!l.oc) return;
+    const cod=l.oc.modo==='nueva'?codigoPorLinea[i]:l.oc.codigo;
+    if(!cod||vistas.has(cod)) return;
+    const p={codigo:cod, tipo:l.oc.tipo||'IMPORTACION', fecha:l.fecha};
+    if(l.oc.nombre){ p.nombre=l.oc.nombre; p.descripcion=l.oc.nombre; }
+    if(l.oc.notas)  p.notas=l.oc.notas;
+    if(l.oc.tienda) p.tienda=l.oc.tienda;
+    if(l.oc.orden)  p.orden_tienda=l.oc.orden;
+    // El estado SOLO al crearla (mismo motivo que en registrarCompra).
+    if(!(cache||[]).some(o=>o.codigo===cod)) p.estado='COMPRADO';
+    vistas.set(cod,p);
+  });
+  return [...vistas.values()];
+}
+
+// Una fila de inventario por UNIDAD. El precio del formulario es POR UNIDAD,
+// asi que cada unidad se guarda con ese precio tal cual, sin dividir.
+function loteProductos(lineas, codigoPorLinea, codigosProd){
+  const filas=[]; let k=0;
+  lineas.forEach((l,i)=>{
+    const oc=l.oc?(l.oc.modo==='nueva'?codigoPorLinea[i]:l.oc.codigo):null;
+    for(let u=0;u<l.cantidad;u++){
+      filas.push({
+        codigo_producto:codigosProd[k++], fecha_compra:l.fecha,
+        marca:l.marca, modelo:l.modelo, colorway:l.colorway,
+        categoria:l.categoria, talla:l.talla||'-',
+        precio_compra_usd:l.usd, tipo_cambio:l.tc,
+        precio_compra_soles:l.pc||0, precio_final:l.pc||0,
+        precio_venta_sugerido:l.pventa,
+        factura:l.factura, descripcion_factura:l.descFactura,
+        observaciones:l.observaciones,
+        estado:'DISPONIBLE', tipo_pago:l.tipoPago,
+        pago_estado:l.tipoPago==='CREDITO'?'PENDIENTE':'PAGADO',
+        moneda:l.tipoPago==='CONTADO'?'SOLES':l.moneda,
+        orden_compra:oc
+      });
+    }
+  });
+  return filas;
+}
+
+function loteUnidades(ls){ return ls.reduce((t,l)=>t+l.cantidad,0); }
+function loteTotal(ls){ return Math.round(ls.reduce((t,l)=>t+(l.pc||0)*l.cantidad,0)*100)/100; }
+function loteTotalUsd(ls){ return Math.round(ls.reduce((t,l)=>t+(l.usd||0)*l.cantidad,0)*100)/100; }
+
+// Sobrevive un F5: perder 5 lineas apiladas por recargar sin querer es barato
+// de evitar. Solo se guardan las lineas, no el estado del formulario.
+function loteGuardarLS(){
+  try{
+    if(loteLineas.length) localStorage.setItem(LOTE_LS,JSON.stringify({m:loteModoOC,l:loteLineas}));
+    else localStorage.removeItem(LOTE_LS);
+  }catch(e){}
+}
+function loteRestaurarLS(){
+  try{
+    const raw=localStorage.getItem(LOTE_LS); if(!raw) return;
+    const d=JSON.parse(raw);
+    if(!d||!Array.isArray(d.l)||!d.l.length) return;
+    loteLineas=d.l; loteModoOC=d.m==='porProd'?'porProd':'unica';
+    loteSetModoOC(loteModoOC);
+  }catch(e){}
+}
+
+function loteSetModoOC(modo){
+  loteModoOC=modo==='porProd'?'porProd':'unica';
+  const a=document.getElementById('lmoc-unica'), b=document.getElementById('lmoc-porprod');
+  if(a) a.className='ptoggle-btn'+(loteModoOC==='unica'?' active':'');
+  if(b) b.className='ptoggle-btn'+(loteModoOC==='porProd'?' active':'');
+  loteGuardarLS(); loteRender();
+}
+
+// El interruptor solo tiene sentido con compra a credito y OC nueva: con una
+// OC existente no hay codigos que repartir.
+function loteModoOCSync(){
+  const el=document.getElementById('lote-modo-oc'); if(!el) return;
+  el.style.display=(tipoPagoActual==='CREDITO'&&ocModo==='nueva')?'':'none';
+}
+
+// Lee el formulario con las mismas reglas que registrarCompra(). Devuelve
+// null y avisa si falta algo.
+function loteLeerForm(){
+  const esCredito=tipoPagoActual==='CREDITO';
+  const marca=document.getElementById('cp-marca').value.trim().toUpperCase();
+  if(!marca){toast('Ingresa la marca','warn');return null;}
+  const cantidad=parseInt(document.getElementById('cp-cantidad').value,10)||1;
+  if(cantidad<1||cantidad>99){toast('La cantidad va de 1 a 99','warn');return null;}
+
+  let usd=null,tc=null,pc=null,pventa=null,monedaVal='SOLES';
+  if(esCredito){
+    monedaVal=noEmoji(document.getElementById('cp-moneda').value);
+    usd=monedaVal==='USD'?(parseFloat(document.getElementById('cp-usd').value)||null):null;
+    tc =monedaVal==='USD'?(parseFloat(document.getElementById('cp-tc').value)||null):null;
+    const soles=parseFloat(document.getElementById('cp-soles').value)||null;
+    pventa=parseFloat(document.getElementById('cp-pventa-credito').value)||null;
+    pc=soles||(usd&&tc?Math.round(usd*tc*100)/100:null)||0;
+  }else{
+    pc=parseFloat(document.getElementById('cp-soles-contado').value)||null;
+    pventa=parseFloat(document.getElementById('cp-pventa').value)||null;
+    if(!pc){toast('Ingresa el precio de compra','warn');return null;}
+  }
+
+  // La OC solo existe en credito. Para una OC nueva NO se guarda codigo aca:
+  // se asigna al registrar, segun el modo elegido.
+  let oc=null;
+  if(esCredito){
+    if(ocModo==='nueva'){
+      oc={modo:'nueva',
+        tipo:noEmoji(document.getElementById('cp-oc-tipo').value).includes('LOCAL')?'LOCAL':'IMPORTACION',
+        nombre:document.getElementById('cp-oc-nombre')?document.getElementById('cp-oc-nombre').value.trim()||null:null,
+        tienda:document.getElementById('cp-oc-tienda')?document.getElementById('cp-oc-tienda').value.trim()||null:null,
+        orden :document.getElementById('cp-oc-orden')?document.getElementById('cp-oc-orden').value.trim()||null:null,
+        notas :document.getElementById('cp-oc-notas').value.trim()||null};
+    }else{
+      const cod=((document.getElementById('cp-oc-select').value||'').match(/^(OC-\d+)/)||[])[1]||null;
+      if(!cod){toast('Elegi la orden de compra','warn');return null;}
+      oc={modo:'existente',codigo:cod};
+    }
+  }
+
+  return {marca,
+    modelo:document.getElementById('cp-modelo').value.trim().toUpperCase(),
+    colorway:document.getElementById('cp-colorway').value.trim().toUpperCase(),
+    categoria:noEmoji(document.getElementById('cp-cat').value),
+    talla:document.getElementById('cp-talla').value.trim()||'-',
+    fecha:document.getElementById('cp-fecha').value,
+    cantidad, usd, tc, pc, pventa, moneda:monedaVal, tipoPago:tipoPagoActual,
+    factura:(esCredito?document.getElementById('cp-factura-credito'):document.getElementById('cp-factura')).value.trim()||null,
+    descFactura:(esCredito?document.getElementById('cp-desc-factura-credito'):document.getElementById('cp-desc-factura')).value.trim()||null,
+    observaciones:(esCredito?document.getElementById('cp-comentarios-credito'):document.getElementById('cp-comentarios')).value.trim()||null,
+    oc};
+}
+
+// Enter en Talla apila la linea. Si el combo tiene una sugerencia marcada con
+// las flechas, Enter es para elegirla: ahi no se apila nada.
+function cpTallaKey(e){
+  const foco=document.querySelector('#cl-cp-talla .combo-opt.focused');
+  comboKey(e,'cp-talla','cl-cp-talla');
+  if(e.key==='Enter'&&!foco){
+    e.preventDefault();
+    document.getElementById('cl-cp-talla').classList.remove('open');
+    loteAgregar();
+  }
+}
+
+function loteAgregar(){
+  const l=loteLeerForm(); if(!l) return false;
+
+  // Con "una OC por producto" cada linea es un pedido aparte: dos lineas con
+  // el mismo nro de orden de la tienda es el olvido tipico de este flujo.
+  if(l.oc&&l.oc.modo==='nueva'&&loteModoOC==='porProd'&&l.oc.orden&&
+     loteLineas.some(x=>x.oc&&x.oc.modo==='nueva'&&x.oc.orden===l.oc.orden)){
+    toast('El nro de orden '+l.oc.orden+' ya esta en el lote','warn'); return false;
+  }
+
+  loteLineas.push(l);
+  // El formulario NO se limpia; solo los campos que obligatoriamente cambian
+  // en la linea siguiente. El resto queda para reusarse.
+  document.getElementById('cp-talla').value='';
+  if(loteModoOC==='porProd'&&l.oc&&l.oc.modo==='nueva'){
+    const o=document.getElementById('cp-oc-orden'); if(o) o.value='';
+  }
+  loteGuardarLS(); loteRender();
+  document.getElementById('cp-talla').focus();
+  return true;
+}
+
+function loteQuitar(i){ loteLineas.splice(i,1); loteGuardarLS(); loteRender(); }
+
+function loteVaciar(){
+  if(loteLineas.length&&!confirm('¿Vaciar el lote? Se descartan '+loteLineas.length+' línea'+(loteLineas.length!==1?'s':''))) return;
+  loteLineas=[]; loteGuardarLS(); loteRender();
+}
+
+function loteRender(){
+  const card=document.getElementById('lote-card');
+  const btnUno=document.getElementById('btn-compra');
+  if(!card) return;
+  loteModoOCSync();
+  if(!loteLineas.length){
+    card.style.display='none';
+    if(btnUno) btnUno.style.display='';
+    return;
+  }
+  card.style.display='';
+  // Con lineas apiladas hay un solo camino para guardar: el del lote. Dejar
+  // los dos botones duplicaba la ultima linea, porque el formulario nunca se
+  // limpia al apilar.
+  if(btnUno) btnUno.style.display='none';
+
+  document.getElementById('lote-lista').innerHTML=loteLineas.map(function(l,i){
+    const nom=[l.marca,l.modelo,l.colorway].filter(Boolean).join(' ');
+    let sub;
+    if(!l.oc) sub='Contado';
+    else if(l.oc.modo==='existente') sub=esc(l.oc.codigo);
+    else sub='OC nueva '+(loteModoOC==='porProd'?'propia':'compartida')+(l.oc.orden?' · #'+esc(l.oc.orden):'');
+    return '<div class="lote-fila">'+
+      '<div class="lote-prod">'+esc(nom)+'<small>'+sub+'</small></div>'+
+      '<div class="lote-talla">'+esc(l.talla)+'</div>'+
+      '<div class="lote-monto">'+fmt((l.pc||0)*l.cantidad)+
+        (l.cantidad>1?' <span style="color:var(--text-tertiary)">×'+l.cantidad+'</span>':'')+'</div>'+
+      '<button class="lote-quitar" onclick="loteQuitar('+i+')" title="Quitar" aria-label="Quitar del lote">×</button>'+
+      '</div>';
+  }).join('');
+
+  const uds=loteUnidades(loteLineas), nuevas=lotePlanOC(loteLineas,loteModoOC).nuevas;
+  const usd=loteTotalUsd(loteLineas);
+  document.getElementById('lote-titulo').textContent=
+    'En el lote · '+loteLineas.length+' línea'+(loteLineas.length!==1?'s':'');
+  document.getElementById('lote-resumen').innerHTML=
+    '<b>'+uds+'</b> unidad'+(uds!==1?'es':'')+
+    (nuevas?' · <b>'+nuevas+'</b> OC nueva'+(nuevas!==1?'s':''):'')+
+    ' · <b>'+fmt(loteTotal(loteLineas))+'</b>'+
+    (usd?' <span style="color:var(--text-tertiary)">('+fmtUsd(usd)+')</span>':'');
+  document.getElementById('lote-btn').textContent='✓ Registrar '+uds+' producto'+(uds!==1?'s':'');
+}
+
+async function loteRegistrar(){
+  if(!loteLineas.length){toast('El lote esta vacio','warn');return;}
+  const btn=document.getElementById('lote-btn'); setLoading(btn,true);
+  let ocsCreadas=[];
+  try{
+    const plan=lotePlanOC(loteLineas,loteModoOC);
+    const codsOC=plan.nuevas?await genCodigosLote('oc',plan.nuevas):[];
+    const mapa=plan.asignar(codsOC);
+    const ocs=loteOCsAEscribir(loteLineas,mapa,ocCache);
+
+    // Las OC primero: inventario.orden_compra apunta a ellas. Un upsert con
+    // todo el array es UNA sentencia, asi que o entran todas o ninguna.
+    if(ocs.length){
+      const{error}=await db.from('ordenes_compra').upsert(ocs,{onConflict:'codigo'});
+      if(error) throw error;
+      ocsCreadas=ocs.filter(o=>o.estado==='COMPRADO').map(o=>o.codigo);
+    }
+
+    const uds=loteUnidades(loteLineas);
+    const codsProd=await genCodigosLote('producto',uds);
+    const{error:eProd}=await db.from('inventario').insert(loteProductos(loteLineas,mapa,codsProd));
+    if(eProd) throw eProd;
+    // flujo_caja lo maneja el trigger after_compra, una vez por fila.
+
+    toast('✓ '+uds+' producto'+(uds!==1?'s':'')+' registrado'+(uds!==1?'s':'')+
+      (codsOC.length?' · '+codsOC.join(', '):''),'ok');
+
+    loteLineas=[]; loteGuardarLS();
+    // Limpia igual que el registro de a uno.
+    ['cp-marca','cp-modelo','cp-colorway','cp-talla','cp-usd','cp-soles','cp-pventa','cp-factura','cp-desc-factura','cp-comentarios','cp-soles-contado','cp-pventa-credito','cp-factura-credito','cp-desc-factura-credito','cp-comentarios-credito','cp-oc-nombre','cp-oc-tienda','cp-oc-orden','cp-oc-notas'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    document.getElementById('cp-cantidad').value='1';
+    document.getElementById('cp-tc').value=document.getElementById('tc-global').value||'3.70';
+    // Con una sola OC queda pinchada para seguirle cargando productos de a
+    // uno. Con una por producto no hay "OC activa": se arranca de cero.
+    if(loteModoOC==='unica'&&codsOC.length===1){ ocSessionCodigo=codsOC[0]; ocSessionCount=uds; }
+    else if(codsOC.length>1){ ocSessionCodigo=null; ocSessionCount=0; }
+    await loadOCs();
+    if(ocModo==='nueva'){ await pregenOC(); } else { ocExistenteChange(); }
+    ocUpdateBadge(ocSessionCodigo); ocUpdateSessionCounter(ocSessionCodigo);
+    document.getElementById('cp-preview').classList.remove('show');
+    await loadInventario();
+  }catch(e){
+    // Si los productos no entraron, las OC recien creadas quedarian vacias y
+    // con codigos quemados: se borran para poder reintentar limpio. El lote
+    // queda intacto a proposito.
+    let extra='';
+    if(ocsCreadas.length){
+      const{error:eDel}=await db.from('ordenes_compra').delete().in('codigo',ocsCreadas);
+      extra=eDel?' — revisa las OC vacías '+ocsCreadas.join(', '):'';
+    }
+    toast('No se registró nada: '+e.message+extra+'. El lote sigue ahí.','err');
+  }
+  finally{ setLoading(btn,false,'✓ Registrar el lote'); loteRender(); }
+}
+
 async function registrarCompra(){
+  // Con cantidad > 1 este camino crearia UN solo producto sin avisar. Se
+  // delega al lote, que si sabe repetir unidades.
+  if((parseInt(document.getElementById('cp-cantidad').value,10)||1)>1){
+    if(loteAgregar()) await loteRegistrar();
+    return;
+  }
   const marca=document.getElementById('cp-marca').value.trim().toUpperCase();
   const modelo=document.getElementById('cp-modelo').value.trim().toUpperCase();
   const colorway=document.getElementById('cp-colorway').value.trim().toUpperCase();
